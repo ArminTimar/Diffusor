@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "diffusor"
+version = "0.1.0"
+description = "Unified diffusion chronometry: analytical and numerical 1-D diffusion modelling with literature diffusion coefficients and Monte Carlo error propagation."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Armin Timar", email = "timar.armin@gmail.com" }]
+dependencies = [
+    "numpy>=1.24",
+    "scipy>=1.10",
+    "pandas>=2.0",
+    "matplotlib>=3.7",
+    "openpyxl>=3.1",
+    "PySide6>=6.5",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7", "pypdf>=3"]
+
+[project.scripts]
+diffusor = "diffusor.gui.app:main"
+
+[tool.setuptools.packages.find]
+include = ["diffusor*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

@@ -26,24 +26,66 @@ openpyxl and PySide6.
 python -m diffusor
 ```
 
-The window has six control groups on the left, the plot in the middle and
-results, methods and a log on the right.
+The window walks through six steps and then opens a results view.
 
-1. **Data** loads a CSV, TSV or Excel table and asks which columns are the
-   distance, the two elements and their uncertainties.
-2. **Mineral and species** picks the phase, the diffusing species and the
-   traverse orientation, either a named axis or angles to *a*, *b* and *c*.
+1. **Data** loads your file, or one of the bundled example datasets. This step
+   also states the input format in full, so you never have to guess.
+2. **Mineral** picks the phase, the diffusing species and the traverse
+   orientation.
 3. **Conditions** takes temperature, pressure and oxygen fugacity with their
-   uncertainties. Oxygen fugacity is normally given as an offset from a buffer.
-4. **Model** sets the geometry, the boundary conditions, the initial condition
-   and the grid, and can switch to a linear cooling path.
-5. **Diffusion coefficients** lists everything published for that
-   mineral-species pair. Tick one to fit, several to compare.
-6. **Monte Carlo** chooses the number of draws, the seed and which sources of
-   uncertainty to sample.
+   uncertainties, plus the analytical resolution.
+4. **Model** sets the geometry, the boundaries and the initial condition.
+5. **Coefficient** lists everything published for that mineral and species,
+   tagged *recommended*, *unverified* or *superseded*.
+6. **Uncertainty** chooses the Monte Carlo draws, the seed and what to sample.
 
-Fitting is fast. A Monte Carlo of 500 draws takes a few minutes and runs on a
-background thread, so the window stays responsive and can be stopped.
+The results view puts the fitted time and its interval at the top of a narrow
+summary of every setting, with an *edit* link beside each group that jumps back
+to the relevant step. The plot takes the rest of the width. Methods, the Monte
+Carlo histogram and the log open on demand rather than occupying the window.
+
+## Input format
+
+One row per measurement point, one column of distance, one or two columns of
+composition, and optionally an uncertainty column for each. Column names are
+free: you map them after loading. CSV, TSV, plain text and Excel are accepted.
+
+```
+Distance_um,FeO_wt,MgO_wt,FeO_err,MgO_err
+0.0,20.9,22.4,0.15,0.20
+1.7,20.8,22.5,0.15,0.20
+```
+
+With two composition columns Diffusor forms the molar ratio A/(A+B), which is
+what the diffusion coefficients are calibrated against. Name the oxides when
+mapping and it converts weight per cent to cation moles first. With one column
+the values are modelled as they stand, which suits a trace element in ppm, a
+forsterite content in mol% or a calibrated grey value. Distances may run either
+way and need not be evenly spaced. Extra columns are ignored, so a plagioclase
+anorthite column can be carried along and used to drive the activity term.
+
+## Example datasets
+
+One per mineral, listed on the data step with their provenance. The catalogue
+lives in `diffusor/datasets.py`.
+
+| dataset | kind | source |
+| --- | --- | --- |
+| Plagioclase, Santorini Minoan | **measured** | Crystal S82-30A 12 from Supplementary Table 1 of Druitt et al. (2012), Nature 482:77-80 |
+| Orthopyroxene Fe-Mg | synthetic | forward model, conditions after Tomiya et al. (2013) and Sato et al. (2022) |
+| Clinopyroxene Fe-Mg | synthetic | forward model, conditions after Petrone et al. (2016, 2018) |
+| Olivine Fe-Mg | synthetic | forward model, conditions after Hartley et al. (2016) |
+| Titanomagnetite Ti | synthetic | forward model, exactly the conditions of Tomiya et al. (2013) at Shinmoedake |
+| Clinopyroxene BSE greyscale | synthetic | forward model plus a linear grey response, with microprobe anchors |
+
+Only the Santorini set is real measured data. The synthetic ones were generated
+by Diffusor's own forward model with a known time and are labelled as such in
+the catalogue, in the interface and in every exported methods block. The
+Santorini set is shipped as a worked example of loading real data and of how
+much the initial condition matters, **not** as a validation: Diffusor does not
+reproduce the published 47-year timescale, because Druitt et al. reconstructed
+their initial profile from the Sr-An correlation and a two-melt history, which
+Diffusor's built-in initial conditions cannot express. The catalogue says so.
 
 ## What it does
 
@@ -159,17 +201,44 @@ Thirty-four entries across five minerals. The best-constrained are:
 | Orthopyroxene | Fe-Mg | Dohmen, ter Heege, Becker & Chakraborty (2016) |
 | Clinopyroxene | Fe-Mg | Mueller et al. (2013) |
 | Plagioclase | Mg | Van Orman, Cherniak & Kita (2014) |
-| Plagioclase | Sr | Giletti & Casserly (1994) |
+| Plagioclase | Sr | none recommended, see below |
 | Magnetite | Ti, Fe | Van Orman & Crispin (2010), Table 12 |
-| Magnetite | Fe-Ti | Freer & Hauptman (1978) |
+| Magnetite | Fe-Ti | Aragon et al. (1984), or the Table 12 tracer entries |
 | Olivine | Fe-Mg | Dohmen & Chakraborty (2007), **unverified transcription** |
 
 Older calibrations are kept alongside them so published timescales can be
 reproduced and compared: Ganguly & Tazzoli (1994) for orthopyroxene, Dimanov &
 Sautter (2000) for clinopyroxene (the coefficient behind the published NIDIS
-results), Costa et al. (2003) for Mg in plagioclase, Aragon et al. (1984) for
-Fe-Ti in titanomagnetite. `REFERENCES.md` lists all of them with their
+results), Costa et al. (2003) for Mg in plagioclase, Freer & Hauptman (1978)
+for Fe-Ti in titanomagnetite. `REFERENCES.md` lists all of them with their
 verification status.
+
+### Superseded coefficients
+
+Entries known to be out of date are flagged in the registry, demoted from
+*recommended*, marked in the chooser and called out in every fit.
+
+**Sr in plagioclase.** Grocolas, Bloch, Bouvier & Müntener (2025), EPSL
+651:119141, measured Sr diffusion in oligoclase and labradorite between 900 and
+1200 °C with silica activity buffered, and found it **1.5 to 2 orders of
+magnitude slower** than Giletti & Casserly (1994) and Cherniak & Watson (1994),
+which they attribute to feldspar stability not having been controlled in the
+earlier experiments. Timescales from the 1990s calibrations are therefore
+likely too short by a factor of roughly 30 to 100. Their Arrhenius parameters
+are **not implemented**: the paper is open access but could not be retrieved
+offline here, so the numbers would have had to be invented. Add them to
+`diffusor/coefficients/plagioclase.py` from the PDF. Ba diffusion, by contrast,
+they found similar to the earlier work, so the Ba entry is not flagged.
+
+**Fe-Ti in magnetite.** No direct replacement for Freer & Hauptman (1978) or
+Aragon et al. (1984) has been published, but for Ti and Fe *tracer* diffusion
+the Aggarwal & Dieckmann (2002) data tabulated by Van Orman & Crispin (2010)
+Table 12 are far better constrained, explicitly dependent on both temperature
+and oxygen fugacity, and are what Tomiya et al. (2013) used at Shinmoedake.
+Those are now the recommended entries. Sievwright et al. (2020) add modern
+magnetite diffusivities for Ti and many other elements against fO2, but only at
+1150 °C, so they give no activation energy and cannot be extrapolated to
+magmatic temperatures on their own.
 
 ## Known limitations
 
@@ -178,9 +247,10 @@ verification status.
   2017). The application says so on every fit.
 - The olivine entries were transcribed from secondary sources and are flagged
   unverified. Check them against Dohmen & Chakraborty (2007) and its erratum.
-- The 2025 orthopyroxene recalibration of Dias, Dohmen & Behrens is recorded in
-  the reference list but not implemented; add it to
-  `diffusor/coefficients/opx.py` once the paper is to hand.
+- Two recent calibrations are recorded in the reference list but not
+  implemented, because their numbers could not be retrieved without the PDFs:
+  the orthopyroxene recalibration of Dias, Dohmen & Behrens (2025) and the
+  plagioclase Sr and Ba diffusivities of Grocolas et al. (2025).
 - Multi-component and isotopic diffusion are not implemented.
 
 ## Licence

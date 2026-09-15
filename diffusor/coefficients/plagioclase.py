@@ -186,10 +186,21 @@ _add(DiffusionCoefficient(
                    "8.3176e-5*exp(-276000/(temp*8.314))*10^(-4.1*an_conc); the -4.1 X_An form "
                    "is confirmed by secondary summaries of the paper"),
     secondary_citations=("dmg2025", "cherniak2010"),
-    recommended=True,
+    recommended=False,
+    superseded_by="grocolas2025",
+    superseded_note=(
+        "Grocolas et al. (2025) measured Sr diffusion in oligoclase and labradorite at "
+        "900-1200 C with the silica activity buffered, and found it to be 1.5-2 ORDERS OF "
+        "MAGNITUDE SLOWER than this calibration, which they attribute to feldspar stability "
+        "not having been controlled in the earlier experiments. Timescales from this entry "
+        "are therefore likely to be too short by a factor of roughly 30-100. Their Arrhenius "
+        "parameters are not yet implemented in Diffusor because the paper could not be "
+        "retrieved offline; add them to diffusor/coefficients/plagioclase.py from the PDF "
+        "(EPSL 651:119141, open access) before using Sr for new work."),
     notes=("Use together with the activity term (A_Sr = -17.4 kJ/mol): because A_Sr is "
            "negative, the equilibrium Sr distribution is inversely correlated with An "
-           "content (Dohmen et al. 2017 Appendix; Zellmer et al. 1999; Costa et al. 2003)."),
+           "content (Dohmen et al. 2017 Appendix; Zellmer et al. 1999; Costa et al. 2003). "
+           "Retained so that published timescales built on it can be reproduced."),
 ))
 
 
@@ -229,6 +240,9 @@ _add(DiffusionCoefficient(
     X_range=Range(0.23, 0.67, "X_An"),
     verified=False,
     verified_from="values from secondary summaries of the abstract; primary PDF not available offline",
+    superseded_by="grocolas2025",
+    superseded_note=("Grocolas et al. (2025) find Sr diffusion 1.5-2 orders of magnitude slower "
+                     "than the 1990s calibrations; see the note on the Giletti & Casserly entry."),
     notes=("Measured by Rutherford backscattering under anhydrous 1 atm conditions. "
            "Diffusor interpolates log D0 and Q linearly in X_An between the three published "
            "fits and holds them constant outside 0.23-0.67, so the composition dependence is "
@@ -260,7 +274,10 @@ _add(DiffusionCoefficient(
     T_range=Range(1073.15, 1423.15, "K"),
     verified=False,
     verified_from="values from secondary summaries of the abstract; primary PDF not available offline",
-    notes=("This is the relation quoted for alkali feldspar (sanidine). Cherniak (2002) also "
+    secondary_citations=("grocolas2025",),
+    notes=("Grocolas et al. (2025) report that Ba diffusion in plagioclase is SIMILAR to the "
+           "earlier determinations, unlike Sr, so this entry is not thought to be badly wrong. "
+           "This is the relation quoted for alkali feldspar (sanidine). Cherniak (2002) also "
            "reports plagioclase compositions; those were not recoverable offline, so use this "
            "entry with care for plagioclase and check the primary paper. Ba is much slower "
            "than Sr, which is why Ba zoning survives where Sr has relaxed "

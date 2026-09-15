@@ -308,6 +308,20 @@ REFERENCES: Dict[str, Reference] = {r.key: r for r in [
        title="The compressibility of silicate liquids containing Fe2O3 and the effect of composition, temperature, oxygen fugacity and pressure on their redox states",
        journal="Contributions to Mineralogy and Petrology", volume="108", pages="82-92",
        doi="10.1007/BF00307328"),
+    _r(key="grocolas2025", authors="Grocolas, T. and Bloch, E. M. and Bouvier, A.-S. and Muentener, O.", year=2025,
+       title="Diffusion of Sr and Ba in plagioclase: composition and silica activity dependencies, and application to volcanic rocks",
+       journal="Earth and Planetary Science Letters", volume="651", pages="119141",
+       doi="10.1016/j.epsl.2024.119141",
+       note="open access (CC-BY). Finds Sr diffusion in plagioclase 1.5-2 orders of magnitude SLOWER than Giletti & Casserly (1994); Ba diffusion similar to earlier work. Experiments on oligoclase and labradorite, 900-1200 C, 1 atm, with aSiO2 buffered; no resolvable dependence on aSiO2 or crystal orientation. NOT YET IMPLEMENTED in Diffusor -- the Arrhenius parameters could not be retrieved without the PDF."),
+    _r(key="grocolas2025cmp", authors="Grocolas, T. and Muentener, O. and Bloch, E. M. and Escrig, S. and Ulyanov, A. and Bouvier, A.-S.", year=2025,
+       title="Cooling rates and melt extraction timescales determined by diffusion chronometry on shallow crustal plutonic rocks",
+       journal="Contributions to Mineralogy and Petrology", volume="180", pages="45",
+       doi="10.1007/s00410-025-02238-0",
+       note="open access, PMC12254178; applies the Grocolas et al. (2025) Sr and Ba diffusivities to the Adamello batholith"),
+    _r(key="druitt2012", authors="Druitt, T. H. and Costa, F. and Deloule, E. and Dungan, M. and Scaillet, B.", year=2012,
+       title="Decadal to monthly timescales of magma transfer and reservoir growth at a caldera volcano",
+       journal="Nature", volume="482", pages="77-80", doi="10.1038/nature10706",
+       note="Supplementary Table 1 gives measured An, Mg, Sr, Ba, Ti, K, La and Ce profiles across Minoan plagioclase phenocrysts; Diffusor ships crystal S82-30A 12 as a worked example"),
 ]}
 
 

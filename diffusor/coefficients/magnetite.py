@@ -146,8 +146,19 @@ _add(DiffusionCoefficient(
     verified=True,
     verified_from=("transcribed from Van Orman & Crispin (2010) RiMG 72, Table 11 (p. 820); "
                    "not read from the 1978 primary paper"),
-    secondary_citations=("saunders2012", "costa2008"),
-    recommended=True,
+    secondary_citations=("saunders2012", "costa2008", "sievwright2020"),
+    recommended=False,
+    superseded_note=(
+        "This is a 1978 calibration under self-buffered conditions, so its oxygen fugacity is "
+        "poorly constrained, and it is the oldest entry in the registry. No direct replacement "
+        "for Fe-Ti INTERDIFFUSION has been published since Aragon et al. (1984), but for Ti and "
+        "Fe TRACER diffusion the Aggarwal & Dieckmann (2002) data tabulated by Van Orman & "
+        "Crispin (2010) Table 12 are far better constrained, explicitly fO2-dependent and "
+        "temperature-dependent, and are what Tomiya et al. (2013) used at Shinmoedake. Prefer "
+        "the Table 12 entries unless you specifically need an interdiffusion coefficient. "
+        "Sievwright et al. (2020) add modern magnetite diffusivities for Ti and many other "
+        "elements as a function of fO2, but only at 1150 C, so they give no activation energy "
+        "and cannot be extrapolated to magmatic temperatures on their own."),
     notes=("Interdiffusion between synthetic Fe3O4 and Fe2.8Ti0.2O4 under self-buffered "
            "conditions (sealed silica tubes), so the fO2 is only loosely constrained. This is "
            "the coefficient used for Fe-Ti oxide timescales by Costa et al. (2008, Fig. 8) "
@@ -176,6 +187,7 @@ _add(DiffusionCoefficient(
     verified=True,
     verified_from=("transcribed from Van Orman & Crispin (2010) RiMG 72, Table 11 (p. 820); "
                    "not read from the 1984 primary paper"),
+    secondary_citations=("sievwright2020",),
     notes=("Calibrated at the QFM buffer with solid-state buffering, so the redox state is "
            "better controlled than in Freer & Hauptman (1978). Van Orman & Crispin (2010) "
            "note the two data sets differ by about an order of magnitude when extrapolated "

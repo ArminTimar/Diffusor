@@ -147,6 +147,8 @@ class DiffusionCoefficient:
     X_range: Range = field(default_factory=Range)
     verified: bool = False
     verified_from: str = ""
+    superseded_by: str = ""          # citation key of a newer calibration
+    superseded_note: str = ""        # what changed and by how much
     secondary_citations: Sequence[str] = ()
     notes: str = ""
     recommended: bool = False
@@ -251,6 +253,9 @@ class DiffusionCoefficient:
         if not self.verified:
             w.append(f"{self.key}: coefficients NOT verified against the primary publication "
                      f"({self.verified_from or 'no secondary source recorded'}). Check before publishing.")
+        if self.superseded_by:
+            w.append(f"SUPERSEDED: a newer calibration exists -- {cite(self.superseded_by)}. "
+                     f"{self.superseded_note}")
         return w
 
     def describe(self) -> str:
@@ -278,6 +283,9 @@ class DiffusionCoefficient:
         lines.append(f"  calibration     : T {self.T_range}; P {self.P_range}; "
                      f"fO2 {self.fo2_range}; X {self.X_range}")
         lines.append(f"  verified        : {'YES -- ' + self.verified_from if self.verified else 'NO -- ' + (self.verified_from or 'unchecked')}")
+        if self.superseded_by:
+            lines.append(f"  SUPERSEDED BY   : {get_reference(self.superseded_by).full()}")
+            lines.append(f"     {self.superseded_note}")
         if self.secondary_citations:
             lines.append("  see also        : " + "; ".join(cite(c) for c in self.secondary_citations))
         if self.notes:

@@ -9,17 +9,16 @@ these keys, and the test suite fails if a citation key does not resolve.
 | key | mineral | species | source | verified |
 | --- | --- | --- | --- | --- |
 | `cpx_FeMg_muller2013` | cpx | Fe-Mg | Mueller et al. (2013) | yes |
-| `mt_FeTi_freer_hauptman1978` | magnetite | Fe-Ti | Freer & Hauptman (1978) | yes |
 | `mt_Fe_vanorman_crispin2010` | magnetite | Fe | Van Orman & Crispin (2010) | yes |
 | `mt_Ti_vanorman_crispin2010` | magnetite | Ti | Van Orman & Crispin (2010) | yes |
 | `opx_FeMg_dohmen2016` | opx | Fe-Mg | Dohmen et al. (2016) | yes |
 | `plag_Mg_vanorman2014` | plagioclase | Mg | Van Orman et al. (2014) | yes |
-| `plag_Sr_giletti_casserly1994` | plagioclase | Sr | Giletti & Casserly (1994) | yes |
 | `ol_FeMg_dohmen_chakraborty2007_tamed` | olivine | Fe-Mg | Dohmen & Chakraborty (2007) | **NO** |
 | `mt_Al_vanorman_crispin2010` | magnetite | Al | Van Orman & Crispin (2010) | yes |
 | `mt_Co_vanorman_crispin2010` | magnetite | Co | Van Orman & Crispin (2010) | yes |
 | `mt_Cr_vanorman_crispin2010` | magnetite | Cr | Van Orman & Crispin (2010) | yes |
 | `mt_FeTi_aragon1984` | magnetite | Fe-Ti | Aragon et al. (1984) | yes |
+| `mt_FeTi_freer_hauptman1978` | magnetite | Fe-Ti | Freer & Hauptman (1978) | yes |
 | `mt_Fe_aggarwal2002_MH` | magnetite | Fe | Van Orman & Crispin (2010) | yes |
 | `mt_Fe_aggarwal2002_MH_xti02` | magnetite | Fe | Van Orman & Crispin (2010) | yes |
 | `mt_Fe_aggarwal2002_WM` | magnetite | Fe | Van Orman & Crispin (2010) | yes |
@@ -35,6 +34,7 @@ these keys, and the test suite fails if a citation key does not resolve.
 | `opx_Mg_schwandt1998_b` | opx | Mg | Schwandt et al. (1998) | yes |
 | `opx_Mg_schwandt1998_c` | opx | Mg | Schwandt et al. (1998) | yes |
 | `plag_Mg_costa2003` | plagioclase | Mg | Costa et al. (2003) | yes |
+| `plag_Sr_giletti_casserly1994` | plagioclase | Sr | Giletti & Casserly (1994) | yes |
 | `cpx_CaMg_brady1983` | cpx | Ca-Mg | Brady & McCallister (1983) | **NO** |
 | `cpx_FeMg_dimanov_sautter2000` | cpx | Fe-Mg | Dimanov & Sautter (2000) | **NO** |
 | `ol_FeMg_chakraborty1997` | olivine | Fe-Mg | Chakraborty (1997) | **NO** |
@@ -101,6 +101,7 @@ every exported methods block. Check them against the primary paper before publis
 - **`dohmen_blundy2014`** Dohmen, R. and Blundy, J. (2014) A predictive thermodynamic model for element partitioning between plagioclase and melt as a function of pressure, temperature and composition. American Journal of Science 314:1319-1372. https://doi.org/10.2475/09.2014.04
 - **`dohmen_chakraborty2007`** Dohmen, R. and Chakraborty, S. (2007) Fe-Mg diffusion in olivine II: point defect chemistry, change of diffusion mechanisms and a model for calculation of diffusion coefficients in natural olivine. Physics and Chemistry of Minerals 34:409-430. https://doi.org/10.1007/s00269-007-0158-6 [see also erratum: Phys Chem Minerals 34:597-598, doi:10.1007/s00269-007-0185-3]
   - used by: ol_FeMg_dohmen_chakraborty2007_ped, ol_FeMg_dohmen_chakraborty2007_tamed
+- **`druitt2012`** Druitt, T. H. and Costa, F. and Deloule, E. and Dungan, M. and Scaillet, B. (2012) Decadal to monthly timescales of magma transfer and reservoir growth at a caldera volcano. Nature 482:77-80. https://doi.org/10.1038/nature10706 [Supplementary Table 1 gives measured An, Mg, Sr, Ba, Ti, K, La and Ce profiles across Minoan plagioclase phenocrysts; Diffusor ships crystal S82-30A 12 as a worked example]
 - **`faak2013`** Faak, K. and Chakraborty, S. and Coogan, L. A. (2013) Mg in plagioclase: Experimental calibration of a new geothermometer and diffusion coefficients. Geochimica et Cosmochimica Acta 123:195-217. https://doi.org/10.1016/j.gca.2013.05.009
 - **`freer_hauptman1978`** Freer, R. and Hauptman, Z. (1978) An experimental study of magnetite-titanomagnetite interdiffusion. Physics of the Earth and Planetary Interiors 16:223-231. https://doi.org/10.1016/0031-9201(78)90015-8
   - used by: mt_FeTi_freer_hauptman1978
@@ -112,6 +113,9 @@ every exported methods block. Check them against the primary paper before publis
   - used by: plag_Sr_giletti_casserly1994
 - **`giletti_shanahan1997`** Giletti, B. J. and Shanahan, T. M. (1997) Alkali diffusion in plagioclase feldspar. Chemical Geology 139:3-20. https://doi.org/10.1016/S0009-2541(97)00026-0
 - **`girona_costa2013`** Girona, T. and Costa, F. (2013) DIPRA: A user-friendly program to model multi-element diffusion in olivine with applications to timescales of magmatic processes. Geochemistry, Geophysics, Geosystems 14:422-431. https://doi.org/10.1029/2012GC004427
+- **`grocolas2025`** Grocolas, T. and Bloch, E. M. and Bouvier, A.-S. and Muentener, O. (2025) Diffusion of Sr and Ba in plagioclase: composition and silica activity dependencies, and application to volcanic rocks. Earth and Planetary Science Letters 651:119141. https://doi.org/10.1016/j.epsl.2024.119141 [open access (CC-BY). Finds Sr diffusion in plagioclase 1.5-2 orders of magnitude SLOWER than Giletti & Casserly (1994); Ba diffusion similar to earlier work. Experiments on oligoclase and labradorite, 900-1200 C, 1 atm, with aSiO2 buffered; no resolvable dependence on aSiO2 or crystal orientation. NOT YET IMPLEMENTED in Diffusor -- the Arrhenius parameters could not be retrieved without the PDF.]
+  - used by: plag_Ba_cherniak2002 (secondary)
+- **`grocolas2025cmp`** Grocolas, T. and Muentener, O. and Bloch, E. M. and Escrig, S. and Ulyanov, A. and Bouvier, A.-S. (2025) Cooling rates and melt extraction timescales determined by diffusion chronometry on shallow crustal plutonic rocks. Contributions to Mineralogy and Petrology 180:45. https://doi.org/10.1007/s00410-025-02238-0 [open access, PMC12254178; applies the Grocolas et al. (2025) Sr and Ba diffusivities to the Adamello batholith]
 - **`grove1984`** Grove, T. L. and Baker, M. B. and Kinzler, R. J. (1984) Coupled CaAl-NaSi diffusion in plagioclase feldspar: Experiments and applications to cooling rate speedometry. Geochimica et Cosmochimica Acta 48:2113-2121. https://doi.org/10.1016/0016-7037(84)90391-6
   - used by: plag_NaSiCaAl_grove1984
 - **`hartley2016`** Hartley, M. E. and Morgan, D. J. and Maclennan, J. and Edmonds, M. and Thordarson, T. (2016) Tracking timescales of short-term precursors to large basaltic fissure eruptions through Fe-Mg diffusion in olivine. Earth and Planetary Science Letters 439:58-70. https://doi.org/10.1016/j.epsl.2016.01.018
@@ -148,6 +152,7 @@ every exported methods block. Check them against the primary paper before publis
   - used by: opx_Mg_schwandt1998_a, opx_Mg_schwandt1998_b, opx_Mg_schwandt1998_c
 - **`shea2015`** Shea, T. and Lynn, K. J. and Garcia, M. O. (2015) Cracking the olivine zoning code: Distinguishing between crystal growth and diffusion. Geology 43:935-938. https://doi.org/10.1130/G37082.1
 - **`sievwright2020`** Sievwright, R. H. and O'Neill, H. St. C. and Tolley, J. and Wilkinson, J. J. and Berry, A. J. (2020) Diffusion and partition coefficients of minor and trace elements in magnetite as a function of oxygen fugacity at 1150 C. Contributions to Mineralogy and Petrology 175:40. https://doi.org/10.1007/s00410-020-1679-y
+  - used by: mt_FeTi_aragon1984 (secondary), mt_FeTi_freer_hauptman1978 (secondary)
 - **`sneeringer1984`** Sneeringer, M. and Hart, S. R. and Shimizu, N. (1984) Strontium and samarium diffusion in diopside. Geochimica et Cosmochimica Acta 48:1589-1608. https://doi.org/10.1016/0016-7037(84)90415-6
 - **`tomiya2013`** Tomiya, A. and Miyagi, I. and Saito, G. and Geshi, N. (2013) Short time scales of magma-mixing processes prior to the 2011 eruption of Shinmoedake volcano, Kirishima volcanic group, Japan. Bulletin of Volcanology 75:750. https://doi.org/10.1007/s00445-013-0750-1
   - used by: mt_Al_vanorman_crispin2010 (secondary), mt_Co_vanorman_crispin2010 (secondary), mt_Cr_vanorman_crispin2010 (secondary), mt_Fe_vanorman_crispin2010 (secondary), mt_Mn_vanorman_crispin2010 (secondary), mt_Ti_vanorman_crispin2010 (secondary)

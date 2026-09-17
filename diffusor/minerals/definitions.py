@@ -46,6 +46,9 @@ ORTHOPYROXENE = Mineral(
     species={
         "Fe-Mg": Species("Fe-Mg", "Fe-Mg interdiffusion", "interdiffusion"),
         "Mg": Species("Mg", "Mg self-diffusion", "tracer"),
+        "Lu": Species("Lu", "Lu", "trace", "rare earth element; Dias et al. (2025)"),
+        "Ce": Species("Ce", "Ce", "trace", "rare earth element; Dias et al. (2025)"),
+        "Eu": Species("Eu", "Eu", "trace", "rare earth element, assumed trivalent"),
     },
     notes=("Space group Pbca. D//[001] >= D//[010] > D//[100]; Dohmen et al. (2016) "
            "give D_a = D_c / 3.5."),

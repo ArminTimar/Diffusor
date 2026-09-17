@@ -17,7 +17,7 @@ from __future__ import annotations
 import numpy as np
 
 from ..constants import R_GAS
-from .base import Conditions, DiffusionCoefficient, Parameter, Range, arrhenius
+from .base import LN10, Conditions, DiffusionCoefficient, Parameter, Range, arrhenius
 
 COEFFICIENTS = []
 
@@ -151,8 +151,124 @@ _add(DiffusionCoefficient(
 
 
 # ---------------------------------------------------------------------------
+# Mg -- Audetat, Grocolas & Mutch (2026), silica-activity dependent
+# ---------------------------------------------------------------------------
+def _audetat2026_mg(dc, cond: Conditions, p):
+    """log10 D = a X_An + b - Q/(2.303 R T) + c (1 - aSiO2)   (Audetat et al. 2026 eq. 1)."""
+    XAn = np.asarray(cond.x("XAn"), dtype=float)
+    logD = (p["a"] * XAn + p["b"] - p["Q"] * 1.0e3 / (LN10 * R_GAS * cond.T_K)
+            + p["c"] * (1.0 - p["aSiO2"]))
+    return 10.0 ** logD
+
+
+_add(DiffusionCoefficient(
+    key="plag_Mg_audetat2026",
+    mineral="plagioclase", species="Mg",
+    label="Plagioclase Mg, Audetat et al. (2026) -- with silica activity",
+    citation="audetat2026",
+    equation_number="1",
+    equation_text=("log10 D_Mg [m2/s] = -2.99(+/-0.35) X_An - 4.03(+/-0.63) "
+                   "- [262,914(+/-15,529) / (2.303 R T)] - 1.87(+/-0.45)(1 - aSiO2)"),
+    func=_audetat2026_mg,
+    params={
+        "a": Parameter("a", -2.99, 0.35, "-", "1s", "X_An coefficient"),
+        "b": Parameter("b", -4.03, 0.63, "log10(m2/s)", "1s", "intercept"),
+        "Q": Parameter("Q", 262.914, 15.529, "kJ/mol", "1s", "activation energy"),
+        "c": Parameter("c", -1.87, 0.45, "-", "1s", "coefficient of (1 - aSiO2)"),
+        "aSiO2": Parameter("aSiO2", 1.0, 0.0, "-", "1s",
+                           "silica activity relative to quartz; 1 = quartz saturated"),
+    },
+    sigma_logD=0.25,
+    requires=("XAn",),
+    needs_fo2=False,
+    T_range=Range(1073.15, 1473.15, "K (800-1200 C, the combined range of the two data sets)"),
+    P_range=Range(1.0e5, 1.0e5, "Pa (1 atm)"),
+    X_range=Range(0.23, 0.93, "X_An"),
+    verified=True,
+    verified_from=("read from the accepted-manuscript PDF of Audetat et al. (2026), eq. 1 "
+                   "(manuscript lines 271-278). The confidence level of the +/- values is not "
+                   "stated there; they are treated as 1 sigma"),
+    secondary_citations=("faak2013", "vanorman2014"),
+    recommended=True,
+    notes=("A joint fit of the Faak et al. (2013) and Van Orman et al. (2014) experiments. "
+           "Mg diffusion is faster at higher silica activity (Faak et al. 2013). Diffusor "
+           "evaluates it at aSiO2 = 1 by default, which corresponds to quartz saturation; for "
+           "a silica-undersaturated melt D is lower by up to 1.87 log units at aSiO2 = 0. The "
+           "review recommends this law, together with the Mg partitioning model of Mutch et al. "
+           "(2022), as the Mg calibration that gives timescales most consistent with other "
+           "chronometers. The paper is an accepted manuscript, not the final typeset version. "
+           "The Monte Carlo samples log D at T with a 0.25 log-unit scatter, because no "
+           "covariance matrix is published."),
+))
+
+
+# ---------------------------------------------------------------------------
 # Sr
 # ---------------------------------------------------------------------------
+def _grocolas_form(dc, cond: Conditions, p):
+    """log10 D = a X_An + b - Q/(2.303 R T)   (Grocolas et al. 2025 eqs 7, 8, 12-14)."""
+    XAn = np.asarray(cond.x("XAn"), dtype=float)
+    return 10.0 ** (p["a"] * XAn + p["b"] - p["Q"] * 1.0e3 / (LN10 * R_GAS * cond.T_K))
+
+
+def _compensated_covariance(s_a, s_b, s_Q):
+    """Covariance over (a, b, Q) with log D0 and Q perfectly correlated.
+
+    Grocolas et al. (2025, section 4.3) state that the uncertainties of log10 D0
+    and Ea are strongly covariant (citing Mutch et al. 2021) and that sampling
+    them independently overestimates the total uncertainty. In their own Monte
+    Carlo they "assume that log10 D0 and Ea follow a linear trend without any
+    uncertainty envelope", which they note slightly underestimates it. This
+    matrix encodes exactly that assumption; the X_An slope a is independent.
+    """
+    return np.array([[s_a ** 2, 0.0, 0.0],
+                     [0.0, s_b ** 2, s_b * s_Q],
+                     [0.0, s_b * s_Q, s_Q ** 2]])
+
+
+_add(DiffusionCoefficient(
+    key="plag_Sr_grocolas2025",
+    mineral="plagioclase", species="Sr",
+    label="Plagioclase Sr, Grocolas et al. (2025)",
+    citation="grocolas2025",
+    equation_number="7",
+    equation_text=("log10 D_Sr [m2/s] = -1.65(+/-0.24) X_An - 3.03(+/-1.16) "
+                   "- [368,142(+/-27,141) / (2.303 R T)]"),
+    func=_grocolas_form,
+    params={
+        "a": Parameter("a", -1.65, 0.24, "-", "1s", "X_An coefficient"),
+        "b": Parameter("b", -3.03, 1.16, "log10(m2/s)", "1s", "intercept"),
+        "Q": Parameter("Q", 368.142, 27.141, "kJ/mol", "1s", "activation energy"),
+    },
+    covariance=_compensated_covariance(0.24, 1.16, 27.141),
+    cov_order=("a", "b", "Q"),
+    sigma_logD=0.25,
+    requires=("XAn",),
+    needs_fo2=False,
+    T_range=Range(1173.15, 1473.15, "K (900-1200 C)"),
+    P_range=Range(1.0e5, 1.0e5, "Pa (1 atm, anhydrous)"),
+    X_range=Range(0.28, 0.67, "X_An (oligoclase An28 and labradorite An67)"),
+    verified=True,
+    verified_from=("read from the paper PDF: abstract and eq. 7 (p. 9); uncertainties are one "
+                   "standard deviation from 2000 Monte Carlo resamplings (Fig. 7 caption)"),
+    secondary_citations=("audetat2026",),
+    recommended=True,
+    notes=("Sr in-diffusion into oriented oligoclase and labradorite with the silica activity "
+           "buffered by sol-gel mullite-cristobalite or mullite-corundum powders. No resolvable "
+           "dependence on aSiO2 or crystal orientation, so the law is isotropic. The values are "
+           "1-2 orders of magnitude slower than Giletti & Casserly (1994) and Cherniak & "
+           "Watson (1994), and because the activation energy is higher the gap widens as "
+           "temperature falls: about 1.6 log units at 1100 C, 2.2 at 900 C and 2.8 at 750 C for "
+           "An36 against Giletti & Casserly; Grocolas et al. attribute the older, faster values to SrO-plagioclase "
+           "reaction fronts because Sr-feldspar was not stable in those source materials. "
+           "Applied to a Santorini plagioclase from Druitt et al. (2012) this gives about 99 kyr "
+           "(+62/-42 kyr), and it is the Sr calibration Audetat et al. (2026) recommend. "
+           "The Monte Carlo uses the correlated (a, b, Q) covariance that reproduces the "
+           "authors' own sampling assumption; see _compensated_covariance. Diffusion runs were "
+           "anhydrous, and the effect of water is untested."),
+))
+
+
 def _giletti_casserly1994(dc, cond: Conditions, p):
     """D = D0' * exp(-Q/RT) * 10^(-4.1 X_An), D0' = 8.3176e-5 m2/s."""
     XAn = np.asarray(cond.x("XAn"), dtype=float)
@@ -183,20 +299,21 @@ _add(DiffusionCoefficient(
     verified=True,
     verified_from=("transcribed from the DMG Short Course 2025 supplementary script "
                    "Diff_Model_Sr_in_Plag_implicit.m, which implements it as "
-                   "8.3176e-5*exp(-276000/(temp*8.314))*10^(-4.1*an_conc); the -4.1 X_An form "
-                   "is confirmed by secondary summaries of the paper"),
-    secondary_citations=("dmg2025", "cherniak2010"),
+                   "8.3176e-5*exp(-276000/(temp*8.314))*10^(-4.1*an_conc). Grocolas et al. "
+                   "(2025) eq. 12 re-fit the same data independently as log10 D = -3.76 X_An "
+                   "- 4.52 - 270,607/(2.303 R T); the test suite checks that the two agree"),
+    secondary_citations=("dmg2025", "cherniak2010", "grocolas2025"),
     recommended=False,
     superseded_by="grocolas2025",
     superseded_note=(
         "Grocolas et al. (2025) measured Sr diffusion in oligoclase and labradorite at "
         "900-1200 C with the silica activity buffered, and found it to be 1.5-2 ORDERS OF "
-        "MAGNITUDE SLOWER than this calibration, which they attribute to feldspar stability "
-        "not having been controlled in the earlier experiments. Timescales from this entry "
-        "are therefore likely to be too short by a factor of roughly 30-100. Their Arrhenius "
-        "parameters are not yet implemented in Diffusor because the paper could not be "
-        "retrieved offline; add them to diffusor/coefficients/plagioclase.py from the PDF "
-        "(EPSL 651:119141, open access) before using Sr for new work."),
+        "MAGNITUDE SLOWER than this calibration, which they attribute to a SrCl2-plagioclase "
+        "reaction rather than volume diffusion in the earlier experiments. Timescales from "
+        "this entry are therefore likely to be too short by a factor of roughly 40 at 1100 C "
+        "and 100-600 at 750-900 C; at 750 C and An36 the difference reaches 2.8 log units "
+        "(Audetat et al. 2026). Use the "
+        "plag_Sr_grocolas2025 entry for new work."),
     notes=("Use together with the activity term (A_Sr = -17.4 kJ/mol): because A_Sr is "
            "negative, the equilibrium Sr distribution is inversely correlated with An "
            "content (Dohmen et al. 2017 Appendix; Zellmer et al. 1999; Costa et al. 2003). "
@@ -204,85 +321,170 @@ _add(DiffusionCoefficient(
 ))
 
 
-def _cherniak_watson1994(dc, cond: Conditions, p):
-    """log D = logD0 - Q/(ln10 R T) with composition-dependent parameters.
-
-    Cherniak & Watson (1994) fitted each composition separately; Diffusor
-    interpolates log D0 and Q linearly in X_An between their An23, An43 and
-    An67 fits.
-    """
-    XAn = np.asarray(cond.x("XAn"), dtype=float)
-    xs = np.array([0.23, 0.43, 0.67])
-    logD0 = np.array([-6.07, -6.75, -7.03])
-    Q = np.array([273.0, 265.0, 268.0])
-    l0 = np.interp(XAn, xs, logD0)
-    q = np.interp(XAn, xs, Q) * 1.0e3
-    from .base import LN10
-    return 10.0 ** (l0 - q / (LN10 * R_GAS * cond.T_K))
-
-
 _add(DiffusionCoefficient(
     key="plag_Sr_cherniak_watson1994",
     mineral="plagioclase", species="Sr",
-    label="Plagioclase Sr, Cherniak & Watson (1994) -- per-composition fits",
+    label="Plagioclase Sr, Cherniak & Watson (1994), as re-fitted by Grocolas et al. (2025)",
     citation="cherniak_watson1994",
-    equation_number="(Arrhenius relations normal to (001) for An23, An43, An67)",
-    equation_text=("oligoclase An23: log D = (-6.07 +/- 0.58) + (-273 +/- 13 kJ/mol)/RT; "
-                   "andesine An43: log D = (-6.75 +/- 0.33) + (-265 +/- 8 kJ/mol)/RT; "
-                   "labradorite An67: log D = (-7.03 +/- 0.37) + (-268 +/- 8 kJ/mol)/RT "
-                   "(D in m2/s, 725-1075 C)"),
-    func=_cherniak_watson1994,
-    params={},
+    equation_number="Grocolas et al. (2025) eq. 13",
+    equation_text=("log10 D_Sr [m2/s] = -2.30(+/-0.02) X_An - 4.12(+/-0.08) "
+                   "- [304,382(+/-1,773) / (2.303 R T)]"),
+    func=_grocolas_form,
+    params={
+        "a": Parameter("a", -2.30, 0.02, "-", "1s", "X_An coefficient"),
+        "b": Parameter("b", -4.12, 0.08, "log10(m2/s)", "1s", "intercept"),
+        "Q": Parameter("Q", 304.382, 1.773, "kJ/mol", "1s", "activation energy"),
+    },
     sigma_logD=0.3,
     requires=("XAn",),
     needs_fo2=False,
     T_range=Range(998.15, 1348.15, "K (725-1075 C)"),
-    X_range=Range(0.23, 0.67, "X_An"),
-    verified=False,
-    verified_from="values from secondary summaries of the abstract; primary PDF not available offline",
+    P_range=Range(1.0e5, 1.0e5, "Pa (1 atm)"),
+    X_range=Range(0.23, 0.93, "X_An"),
+    verified=True,
+    verified_from=("read from Grocolas et al. (2025) eq. 13 (p. 13), their Monte Carlo "
+                   "parameterisation of the Cherniak & Watson (1992, 1994) data; not read from "
+                   "the 1994 primary paper"),
+    secondary_citations=("grocolas2025",),
+    recommended=False,
     superseded_by="grocolas2025",
     superseded_note=("Grocolas et al. (2025) find Sr diffusion 1.5-2 orders of magnitude slower "
-                     "than the 1990s calibrations; see the note on the Giletti & Casserly entry."),
-    notes=("Measured by Rutherford backscattering under anhydrous 1 atm conditions. "
-           "Diffusor interpolates log D0 and Q linearly in X_An between the three published "
-           "fits and holds them constant outside 0.23-0.67, so the composition dependence is "
-           "weaker than in the Giletti & Casserly (1994) parameterisation."),
+                     "than this calibration and attribute the difference to SrO-plagioclase "
+                     "reaction fronts, because Sr-feldspar was not stable in the SrO-Al2O3-SiO2 "
+                     "source powders. Timescales from it come out about 1.5-2 orders of "
+                     "magnitude too short (Grocolas et al. 2025, section 4.3)."),
+    notes=("Measured by Rutherford backscattering at 1 atm. Cherniak & Watson (1994) reported "
+           "diffusion parallel to b about 0.7 log units slower than parallel to c in some "
+           "compositions; the re-fit treats the data as isotropic. This entry replaces an "
+           "earlier, unverified interpolation between per-composition fits."),
 ))
 
 
 # ---------------------------------------------------------------------------
 # Ba
 # ---------------------------------------------------------------------------
-def _cherniak2002_ba(dc, cond: Conditions, p):
-    return arrhenius(p["D0"], p["Q"] * 1.0e3, cond.T_K)
-
+_add(DiffusionCoefficient(
+    key="plag_Ba_grocolas2025",
+    mineral="plagioclase", species="Ba",
+    label="Plagioclase Ba, Grocolas et al. (2025)",
+    citation="grocolas2025",
+    equation_number="8",
+    equation_text=("log10 D_Ba [m2/s] = -1.43(+/-0.20) X_An - 4.65(+/-0.96) "
+                   "- [337,037(+/-22,969) / (2.303 R T)]"),
+    func=_grocolas_form,
+    params={
+        "a": Parameter("a", -1.43, 0.20, "-", "1s", "X_An coefficient"),
+        "b": Parameter("b", -4.65, 0.96, "log10(m2/s)", "1s", "intercept"),
+        "Q": Parameter("Q", 337.037, 22.969, "kJ/mol", "1s", "activation energy"),
+    },
+    covariance=_compensated_covariance(0.20, 0.96, 22.969),
+    cov_order=("a", "b", "Q"),
+    sigma_logD=0.25,
+    requires=("XAn",),
+    needs_fo2=False,
+    T_range=Range(1173.15, 1473.15, "K (900-1200 C)"),
+    P_range=Range(1.0e5, 1.0e5, "Pa (1 atm, anhydrous)"),
+    X_range=Range(0.28, 0.67, "X_An (oligoclase An28 and labradorite An67)"),
+    verified=True,
+    verified_from=("read from the paper PDF: abstract and eq. 8 (p. 9); uncertainties are one "
+                   "standard deviation from 2000 Monte Carlo resamplings"),
+    secondary_citations=("audetat2026", "cherniak2002"),
+    recommended=True,
+    notes=("Measured in the same experiments as the Sr law. Unlike Sr, Ba agrees with the "
+           "earlier data of Cherniak (2002) to within about 0.5 log units, which Grocolas et al. "
+           "explain by Ba-feldspar having been stable in that source powder. Ba diffuses "
+           "slightly more slowly than Sr, consistent with its larger ionic radius. Isotropic "
+           "within uncertainty. The Monte Carlo covariance follows the authors' own assumption "
+           "of perfectly correlated log D0 and Q (see the Sr entry)."),
+))
 
 _add(DiffusionCoefficient(
     key="plag_Ba_cherniak2002",
     mineral="plagioclase", species="Ba",
-    label="Feldspar Ba, Cherniak (2002) -- alkali feldspar relation",
+    label="Plagioclase Ba, Cherniak (2002), as re-fitted by Grocolas et al. (2025)",
     citation="cherniak2002",
-    equation_number="(abstract)",
-    equation_text="D = 2.9 x 10^-1 exp(-455 +/- 20 kJ/mol / R T) m2/s",
-    func=_cherniak2002_ba,
+    equation_number="Grocolas et al. (2025) eq. 14",
+    equation_text=("log10 D_Ba [m2/s] = -1.27(+/-0.14) X_An - 5.47(+/-0.44) "
+                   "- [331,858(+/-10,077) / (2.303 R T)]"),
+    func=_grocolas_form,
     params={
-        "D0": Parameter("D0", 2.9e-1, 0.0, "m2/s", "1s", "pre-exponential factor"),
-        "Q": Parameter("Q", 455.0, 20.0, "kJ/mol", "1s", "activation energy"),
+        "a": Parameter("a", -1.27, 0.14, "-", "1s", "X_An coefficient"),
+        "b": Parameter("b", -5.47, 0.44, "log10(m2/s)", "1s", "intercept"),
+        "Q": Parameter("Q", 331.858, 10.077, "kJ/mol", "1s", "activation energy"),
     },
     sigma_logD=0.3,
+    requires=("XAn",),
     needs_fo2=False,
-    T_range=Range(1073.15, 1423.15, "K"),
-    verified=False,
-    verified_from="values from secondary summaries of the abstract; primary PDF not available offline",
-    secondary_citations=("grocolas2025",),
-    notes=("Grocolas et al. (2025) report that Ba diffusion in plagioclase is SIMILAR to the "
-           "earlier determinations, unlike Sr, so this entry is not thought to be badly wrong. "
-           "This is the relation quoted for alkali feldspar (sanidine). Cherniak (2002) also "
-           "reports plagioclase compositions; those were not recoverable offline, so use this "
-           "entry with care for plagioclase and check the primary paper. Ba is much slower "
-           "than Sr, which is why Ba zoning survives where Sr has relaxed "
-           "(Chamberlain et al. 2014)."),
+    T_range=Range(1048.15, 1397.15, "K (775-1124 C)"),
+    P_range=Range(1.0e5, 1.0e5, "Pa (1 atm)"),
+    X_range=Range(0.23, 0.67, "X_An"),
+    verified=True,
+    verified_from=("read from Grocolas et al. (2025) eq. 14 (p. 13), their Monte Carlo "
+                   "parameterisation of the plagioclase data of Cherniak (2002); not read from "
+                   "the 2002 primary paper"),
+    secondary_citations=("grocolas2025", "audetat2026"),
+    recommended=False,
+    notes=("Rutherford backscattering on An23 and An67 at 1 atm. Grocolas et al. (2025) find "
+           "their own Ba diffusivities within about 0.5 log units of these, and Audetat et al. "
+           "(2026) conclude Ba diffusion in plagioclase is relatively well established, so "
+           "this is a legitimate alternative to the 2025 law rather than a superseded one. "
+           "Grocolas et al. note it gives timescales about 3 times longer for the Cerro Galan "
+           "crystals. Ba is much slower than Mg, which is why Ba zoning survives where Mg has "
+           "relaxed (Chamberlain et al. 2014). This entry replaces an earlier, unverified "
+           "sanidine relation that Diffusor had listed under plagioclase."),
 ))
+
+
+# ---------------------------------------------------------------------------
+# Li
+# ---------------------------------------------------------------------------
+def _pohl2024(dc, cond: Conditions, p):
+    return 10.0 ** (p["logD0"] - p["Q"] * 1.0e3 / (LN10 * R_GAS * cond.T_K))
+
+
+_POHL_NOTE = (
+    "Pohl et al. fitted a multispecies model (interstitial and A1-site Li in exchange); "
+    "Diffusor applies each mechanism as a single effective diffusion coefficient, which is "
+    "an approximation. Chemical diffusion of Li is charge balanced by Na and is 1.5-2 orders "
+    "of magnitude slower than the tracer diffusion of Giletti & Shanahan (1997), so earlier "
+    "Li timescales may be too short by up to a factor of about 20. Calibrated on An61 only: "
+    "a dependence on An content is not yet known. No resolvable pressure effect between 0.1 "
+    "and 400 MPa.")
+
+for _mech, _sym, _logD0, _slog, _Q, _sQ, _eq, _rec, _lead in [
+        ("interstitial", "i", -3.76, 0.58, 180.0, 12.0, "21", True,
+         "The faster of the two mechanisms, and the one that sets the length of a Li profile "
+         "(Pohl et al. 2024, section 4.6), so it is the entry to use for timescales from Li "
+         "zoning. "),
+        ("vacancy", "A", -5.53, 0.16, 151.7, 3.2, "22", False,
+         "The slower, vacancy-mediated mechanism, within 0.2-1 orders of magnitude of the "
+         "interstitial one over the experimental range. ")]:
+    _add(DiffusionCoefficient(
+        key=f"plag_Li_pohl2024_{_mech}",
+        mineral="plagioclase", species="Li",
+        label=f"Plagioclase Li, Pohl et al. (2024) -- {_mech} mechanism",
+        citation="pohl2024",
+        equation_number=_eq,
+        equation_text=(f"D_Li^{_sym} = 10^({_logD0:g} +/- {_slog:g}) "
+                       f"exp[-({_Q:g} +/- {_sQ:g} kJ/mol)/(R T)] m2/s"),
+        func=_pohl2024,
+        params={
+            "logD0": Parameter("logD0", _logD0, _slog, "log10(m2/s)", "1s", "pre-exponential factor"),
+            "Q": Parameter("Q", _Q, _sQ, "kJ/mol", "1s", "activation energy"),
+        },
+        sigma_logD=0.3,
+        needs_fo2=False,
+        T_range=Range(879.15, 1387.15, "K (606-1114 C)"),
+        P_range=Range(1.0e5, 4.0e8, "Pa (mostly 200 MPa)"),
+        X_range=Range(0.61, 0.61, "X_An (labradorite An61 only)"),
+        verified=True,
+        verified_from=(f"read from the paper PDF: abstract and eq. {_eq} (p. 997). The "
+                       "confidence level of the +/- values is not stated; they are treated as "
+                       "1 sigma"),
+        secondary_citations=("giletti_shanahan1997",),
+        recommended=_rec,
+        notes=_lead + _POHL_NOTE,
+    ))
 
 
 # ---------------------------------------------------------------------------

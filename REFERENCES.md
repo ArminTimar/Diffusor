@@ -11,11 +11,18 @@ these keys, and the test suite fails if a citation key does not resolve.
 | `cpx_FeMg_muller2013` | cpx | Fe-Mg | Mueller et al. (2013) | yes |
 | `mt_Fe_vanorman_crispin2010` | magnetite | Fe | Van Orman & Crispin (2010) | yes |
 | `mt_Ti_vanorman_crispin2010` | magnetite | Ti | Van Orman & Crispin (2010) | yes |
-| `opx_FeMg_dohmen2016` | opx | Fe-Mg | Dohmen et al. (2016) | yes |
+| `opx_FeMg_dias2025` | opx | Fe-Mg | Dias et al. (2025) | yes |
+| `plag_Ba_grocolas2025` | plagioclase | Ba | Grocolas et al. (2025) | yes |
+| `plag_Li_pohl2024_interstitial` | plagioclase | Li | Pohl et al. (2024) | yes |
+| `plag_Mg_audetat2026` | plagioclase | Mg | Audetat et al. (2026) | yes |
 | `plag_Mg_vanorman2014` | plagioclase | Mg | Van Orman et al. (2014) | yes |
+| `plag_Sr_grocolas2025` | plagioclase | Sr | Grocolas et al. (2025) | yes |
 | `ol_FeMg_dohmen_chakraborty2007_tamed` | olivine | Fe-Mg | Dohmen & Chakraborty (2007) | **NO** |
+| `mt_Al_sievwright2020` | magnetite | Al | Sievwright et al. (2020) | yes |
 | `mt_Al_vanorman_crispin2010` | magnetite | Al | Van Orman & Crispin (2010) | yes |
+| `mt_Co_sievwright2020` | magnetite | Co | Sievwright et al. (2020) | yes |
 | `mt_Co_vanorman_crispin2010` | magnetite | Co | Van Orman & Crispin (2010) | yes |
+| `mt_Cr_sievwright2020` | magnetite | Cr | Sievwright et al. (2020) | yes |
 | `mt_Cr_vanorman_crispin2010` | magnetite | Cr | Van Orman & Crispin (2010) | yes |
 | `mt_FeTi_aragon1984` | magnetite | Fe-Ti | Aragon et al. (1984) | yes |
 | `mt_FeTi_freer_hauptman1978` | magnetite | Fe-Ti | Freer & Hauptman (1978) | yes |
@@ -23,25 +30,35 @@ these keys, and the test suite fails if a citation key does not resolve.
 | `mt_Fe_aggarwal2002_MH_xti02` | magnetite | Fe | Van Orman & Crispin (2010) | yes |
 | `mt_Fe_aggarwal2002_WM` | magnetite | Fe | Van Orman & Crispin (2010) | yes |
 | `mt_Fe_aggarwal2002_WM_xti02` | magnetite | Fe | Van Orman & Crispin (2010) | yes |
+| `mt_Mg_sievwright2020` | magnetite | Mg | Sievwright et al. (2020) | yes |
+| `mt_Mn_sievwright2020` | magnetite | Mn | Sievwright et al. (2020) | yes |
 | `mt_Mn_vanorman_crispin2010` | magnetite | Mn | Van Orman & Crispin (2010) | yes |
 | `mt_Ti_aggarwal2002_MH` | magnetite | Ti | Van Orman & Crispin (2010) | yes |
 | `mt_Ti_aggarwal2002_MH_xti02` | magnetite | Ti | Van Orman & Crispin (2010) | yes |
 | `mt_Ti_aggarwal2002_WM` | magnetite | Ti | Van Orman & Crispin (2010) | yes |
 | `mt_Ti_aggarwal2002_WM_xti02` | magnetite | Ti | Van Orman & Crispin (2010) | yes |
+| `mt_Ti_sievwright2020` | magnetite | Ti | Sievwright et al. (2020) | yes |
+| `opx_Ce_dias2025` | opx | Ce | Dias et al. (2025) | yes |
+| `opx_Eu_dias2025` | opx | Eu | Dias et al. (2025) | yes |
+| `opx_FeMg_dias_dohmen2024` | opx | Fe-Mg | Dias & Dohmen (2024) | yes |
+| `opx_FeMg_dohmen2016` | opx | Fe-Mg | Dohmen et al. (2016) | yes |
 | `opx_FeMg_dohmen2016_fs1` | opx | Fe-Mg | Dohmen et al. (2016) | yes |
 | `opx_FeMg_ganguly_tazzoli1994` | opx | Fe-Mg | Ganguly & Tazzoli (1994) | yes |
+| `opx_FeMg_ganguly_tazzoli1994_nofo2` | opx | Fe-Mg | Ganguly & Tazzoli (1994) | yes |
 | `opx_Mg_schwandt1998_a` | opx | Mg | Schwandt et al. (1998) | yes |
 | `opx_Mg_schwandt1998_b` | opx | Mg | Schwandt et al. (1998) | yes |
 | `opx_Mg_schwandt1998_c` | opx | Mg | Schwandt et al. (1998) | yes |
+| `plag_Ba_cherniak2002` | plagioclase | Ba | Cherniak (2002) | yes |
+| `plag_Li_pohl2024_vacancy` | plagioclase | Li | Pohl et al. (2024) | yes |
 | `plag_Mg_costa2003` | plagioclase | Mg | Costa et al. (2003) | yes |
+| `plag_Sr_cherniak_watson1994` | plagioclase | Sr | Cherniak & Watson (1994) | yes |
 | `plag_Sr_giletti_casserly1994` | plagioclase | Sr | Giletti & Casserly (1994) | yes |
 | `cpx_CaMg_brady1983` | cpx | Ca-Mg | Brady & McCallister (1983) | **NO** |
 | `cpx_FeMg_dimanov_sautter2000` | cpx | Fe-Mg | Dimanov & Sautter (2000) | **NO** |
 | `ol_FeMg_chakraborty1997` | olivine | Fe-Mg | Chakraborty (1997) | **NO** |
 | `ol_FeMg_dohmen_chakraborty2007_ped` | olivine | Fe-Mg | Dohmen & Chakraborty (2007) | **NO** |
-| `plag_Ba_cherniak2002` | plagioclase | Ba | Cherniak (2002) | **NO** |
+| `opx_Lu_dias2025` | opx | Lu | Dias et al. (2025) | **NO** |
 | `plag_NaSiCaAl_grove1984` | plagioclase | NaSi-CaAl | Grove et al. (1984) | **NO** |
-| `plag_Sr_cherniak_watson1994` | plagioclase | Sr | Cherniak & Watson (1994) | **NO** |
 
 Entries marked **NO** were transcribed from a secondary source because the primary
 publication was not available offline. Each one records where its numbers came from
@@ -57,9 +74,12 @@ every exported methods block. Check them against the primary paper before publis
 ## Full bibliography
 
 - **`aggarwal_dieckmann2002`** Aggarwal, S. and Dieckmann, R. (2002) Point defects and cation tracer diffusion in (Ti_x Fe_(1-x))_(3-d) O_4. II. Cation tracer diffusion. Physics and Chemistry of Minerals 29:707-718. https://doi.org/10.1007/s00269-002-0282-2 [primary source of the magnetite tracer data tabulated by Van Orman & Crispin (2010)]
+  - used by: mt_Al_sievwright2020 (secondary), mt_Co_sievwright2020 (secondary), mt_Cr_sievwright2020 (secondary), mt_Mn_sievwright2020 (secondary), mt_Ti_sievwright2020 (secondary)
 - **`allan2013`** Allan, A. S. R. and Morgan, D. J. and Wilson, C. J. N. and Millet, M.-A. (2013) From mush to eruption in centuries: assembly of the super-sized Oruanui magma body. Contributions to Mineralogy and Petrology 166:143-164. https://doi.org/10.1007/s00410-013-0869-2 [source of the fO2-dependent form of the Ganguly & Tazzoli (1994) orthopyroxene law]
 - **`aragon1984`** Aragon, R. and McCallister, R. H. and Harrison, H. R. (1984) Cation diffusion in titanomagnetites. Contributions to Mineralogy and Petrology 85:174-185. https://doi.org/10.1007/BF00371707
   - used by: mt_FeTi_aragon1984
+- **`audetat2026`** Audetat, A. and Grocolas, T. and Mutch, E. J. F. (2026) Ti-in-quartz and Sr-Ba-Mg-in-feldspars diffusion chronometry: a review of available diffusion data, and a critical evaluation of applications to natural samples. Journal of Petrology:egag078. https://doi.org/10.1093/petrology/egag078 [accepted manuscript (advance article); page numbers not yet assigned. Local library copy: audedat_grocolas_mutch_2025_manuscript_ti_quartz_sr_ba_mg_feldspars.pdf. Eq. 1 parameterises Mg diffusion in plagioclase from Faak et al. (2013) and Van Orman et al. (2014)]
+  - used by: plag_Ba_cherniak2002 (secondary), plag_Ba_grocolas2025 (secondary), plag_Mg_audetat2026, plag_Sr_grocolas2025 (secondary)
 - **`bindeman1998`** Bindeman, I. N. and Davis, A. M. and Drake, M. J. (1998) Ion microprobe study of plagioclase-basalt partition experiments at natural concentration levels of trace elements. Geochimica et Cosmochimica Acta 62:1175-1193. https://doi.org/10.1016/S0016-7037(98)00047-7
 - **`bradshaw_kent2017`** Bradshaw, R. W. and Kent, A. J. R. (2017) The analytical limits of modeling short diffusion timescales. Chemical Geology 466:667-677. https://doi.org/10.1016/j.chemgeo.2017.07.018
 - **`brady_mccallister1983`** Brady, J. B. and McCallister, R. H. (1983) Diffusion data for clinopyroxenes from homogenization and self-diffusion experiments. American Mineralogist 68:95-105.
@@ -69,7 +89,7 @@ every exported methods block. Check them against the primary paper before publis
 - **`chakraborty2010`** Chakraborty, S. (2010) Diffusion coefficients in olivine, wadsleyite and ringwoodite. Reviews in Mineralogy and Geochemistry 72:603-639. https://doi.org/10.2138/rmg.2010.72.13
   - used by: ol_FeMg_dohmen_chakraborty2007_tamed (secondary)
 - **`cherniak2002`** Cherniak, D. J. (2002) Ba diffusion in feldspar. Geochimica et Cosmochimica Acta 66:1641-1650. https://doi.org/10.1016/S0016-7037(01)00866-3
-  - used by: plag_Ba_cherniak2002
+  - used by: plag_Ba_cherniak2002, plag_Ba_grocolas2025 (secondary)
 - **`cherniak2010`** Cherniak, D. J. (2010) Cation diffusion in feldspars. Reviews in Mineralogy and Geochemistry 72:691-733. https://doi.org/10.2138/rmg.2010.72.15
   - used by: plag_Sr_giletti_casserly1994 (secondary)
 - **`cherniak_dimanov2010`** Cherniak, D. J. and Dimanov, A. (2010) Diffusion in pyroxene, mica and amphibole. Reviews in Mineralogy and Geochemistry 72:641-690. https://doi.org/10.2138/rmg.2010.72.14
@@ -86,7 +106,12 @@ every exported methods block. Check them against the primary paper before publis
 - **`costa_chakraborty2004`** Costa, F. and Chakraborty, S. (2004) Decadal time gaps between mafic intrusion and silicic eruption obtained from chemical zoning patterns in olivine. Earth and Planetary Science Letters 227:517-530. https://doi.org/10.1016/j.epsl.2004.08.011
 - **`crank1975`** Crank, J. (1975) The Mathematics of Diffusion, 2nd edition. Oxford University Press, Oxford:414 pp.
 - **`deer1992`** Deer, W. A. and Howie, R. A. and Zussman, J. (1992) An Introduction to the Rock-Forming Minerals, 2nd edition. Longman, Harlow:696 pp.
-- **`dias2025`** Dias, M. A. and Dohmen, R. and Behrens, H. (2025) Fe-Mg interdiffusion in orthopyroxene: complex interdependencies of temperature, composition and oxygen fugacity. Geochimica et Cosmochimica Acta 395. [NOT YET IMPLEMENTED in Diffusor: newest orthopyroxene calibration (XFe 0.1-0.4, fO2 1e-7 to 1e-11 Pa, 950-1100 C), with separate parameterisations above and below log fO2 = -10 Pa. Obtain the PDF and add it to diffusor/coefficients/opx.py.]
+- **`dias2025`** Dias, M. A. and Dohmen, R. and Behrens, H. (2025) Fe-Mg interdiffusion in orthopyroxene: complex interdependencies of temperature, composition and oxygen fugacity. Geochimica et Cosmochimica Acta 395:195-211. https://doi.org/10.1016/j.gca.2025.03.002 [local library copy: dias_dohmen_2025_opx_femg_interdependencies.pdf; eqs 22-25 give separate parameterisations above and below log fO2 = -10 Pa]
+  - used by: opx_FeMg_dias2025
+- **`dias2025ree`** Dias, M. A. and Dohmen, R. and Hartmann, N. (2025) Diffusion of Eu, Ce and Lu in orthopyroxene. Geochimica et Cosmochimica Acta 410:85-100. https://doi.org/10.1016/j.gca.2025.09.038 [local library copy: dias_dohmen_2025_opx_eu_ce_lu.pdf]
+  - used by: opx_Ce_dias2025, opx_Eu_dias2025, opx_Lu_dias2025
+- **`dias_dohmen2024`** Dias, M. A. and Dohmen, R. (2024) Experimental determination of Fe-Mg interdiffusion in orthopyroxene as a function of Fe content. Contributions to Mineralogy and Petrology 179:36. https://doi.org/10.1007/s00410-024-02110-7 [local library copy: dias_dohmen_2024_opx_fe_content_diffusion.pdf]
+  - used by: opx_FeMg_dias2025 (secondary), opx_FeMg_dias_dohmen2024, opx_FeMg_dohmen2016 (secondary), opx_FeMg_ganguly_tazzoli1994_nofo2 (secondary)
 - **`dieckmann1987`** Dieckmann, R. and Mason, T. O. and Hodge, J. D. and Schmalzried, H. (1978) Defects and cation diffusion in magnetite (III): tracer diffusion of foreign tracer cations as a function of temperature and oxygen potential. Berichte der Bunsengesellschaft fuer physikalische Chemie 82:778-783. [primary source of the Cr and Al entries in Van Orman & Crispin (2010) Table 12]
 - **`dimanov_sautter2000`** Dimanov, A. and Sautter, V. (2000) 'Average' interdiffusion of (Fe,Mn)-Mg in natural diopside. European Journal of Mineralogy 12:749-760. https://doi.org/10.1127/ejm/12/4/0749
   - used by: cpx_FeMg_dimanov_sautter2000
@@ -96,25 +121,27 @@ every exported methods block. Check them against the primary paper before publis
 - **`dohmen2007`** Dohmen, R. and Becker, H.-W. and Chakraborty, S. (2007) Fe-Mg diffusion in olivine I: experimental determination between 700 and 1,200 C as a function of composition, crystal orientation and oxygen fugacity. Physics and Chemistry of Minerals 34:389-407. https://doi.org/10.1007/s00269-007-0157-7
   - used by: ol_FeMg_dohmen_chakraborty2007_tamed (secondary)
 - **`dohmen2016`** Dohmen, R. and Ter Heege, J. H. and Becker, H.-W. and Chakraborty, S. (2016) Fe-Mg interdiffusion in orthopyroxene. American Mineralogist 101:2210-2221. https://doi.org/10.2138/am-2016-5815
-  - used by: opx_FeMg_dohmen2016, opx_FeMg_dohmen2016_fs1, opx_FeMg_ganguly_tazzoli1994 (secondary)
+  - used by: opx_FeMg_dias2025 (secondary), opx_FeMg_dias_dohmen2024 (secondary), opx_FeMg_dohmen2016, opx_FeMg_dohmen2016_fs1, opx_FeMg_ganguly_tazzoli1994 (secondary), opx_FeMg_ganguly_tazzoli1994_nofo2 (secondary)
 - **`dohmen2017`** Dohmen, R. and Faak, K. and Blundy, J. D. (2017) Chronometry and speedometry of magmatic processes using chemical diffusion in olivine, plagioclase and pyroxenes. Reviews in Mineralogy and Geochemistry 83:535-575. https://doi.org/10.2138/rmg.2017.83.12
 - **`dohmen_blundy2014`** Dohmen, R. and Blundy, J. (2014) A predictive thermodynamic model for element partitioning between plagioclase and melt as a function of pressure, temperature and composition. American Journal of Science 314:1319-1372. https://doi.org/10.2475/09.2014.04
 - **`dohmen_chakraborty2007`** Dohmen, R. and Chakraborty, S. (2007) Fe-Mg diffusion in olivine II: point defect chemistry, change of diffusion mechanisms and a model for calculation of diffusion coefficients in natural olivine. Physics and Chemistry of Minerals 34:409-430. https://doi.org/10.1007/s00269-007-0158-6 [see also erratum: Phys Chem Minerals 34:597-598, doi:10.1007/s00269-007-0185-3]
   - used by: ol_FeMg_dohmen_chakraborty2007_ped, ol_FeMg_dohmen_chakraborty2007_tamed
 - **`druitt2012`** Druitt, T. H. and Costa, F. and Deloule, E. and Dungan, M. and Scaillet, B. (2012) Decadal to monthly timescales of magma transfer and reservoir growth at a caldera volcano. Nature 482:77-80. https://doi.org/10.1038/nature10706 [Supplementary Table 1 gives measured An, Mg, Sr, Ba, Ti, K, La and Ce profiles across Minoan plagioclase phenocrysts; Diffusor ships crystal S82-30A 12 as a worked example]
 - **`faak2013`** Faak, K. and Chakraborty, S. and Coogan, L. A. (2013) Mg in plagioclase: Experimental calibration of a new geothermometer and diffusion coefficients. Geochimica et Cosmochimica Acta 123:195-217. https://doi.org/10.1016/j.gca.2013.05.009
+  - used by: plag_Mg_audetat2026 (secondary)
 - **`freer_hauptman1978`** Freer, R. and Hauptman, Z. (1978) An experimental study of magnetite-titanomagnetite interdiffusion. Physics of the Earth and Planetary Interiors 16:223-231. https://doi.org/10.1016/0031-9201(78)90015-8
   - used by: mt_FeTi_freer_hauptman1978
 - **`frost1991`** Frost, B. R. (1991) Introduction to oxygen fugacity and its petrologic importance. Reviews in Mineralogy 25:1-9.
 - **`ganguly1988`** Ganguly, J. and Bhattacharya, R. N. and Chakraborty, S. (1988) Convolution effect in the determination of compositional profiles and diffusion coefficients by microprobe step scans. American Mineralogist 73:901-909.
 - **`ganguly_tazzoli1994`** Ganguly, J. and Tazzoli, V. (1994) Fe2+-Mg interdiffusion in orthopyroxene: Retrieval from the data on intracrystalline exchange reaction. American Mineralogist 79:930-937.
-  - used by: opx_FeMg_ganguly_tazzoli1994
+  - used by: opx_FeMg_ganguly_tazzoli1994, opx_FeMg_ganguly_tazzoli1994_nofo2
 - **`giletti_casserly1994`** Giletti, B. J. and Casserly, J. E. D. (1994) Strontium diffusion kinetics in plagioclase feldspars. Geochimica et Cosmochimica Acta 58:3785-3793. https://doi.org/10.1016/0016-7037(94)90363-8
   - used by: plag_Sr_giletti_casserly1994
 - **`giletti_shanahan1997`** Giletti, B. J. and Shanahan, T. M. (1997) Alkali diffusion in plagioclase feldspar. Chemical Geology 139:3-20. https://doi.org/10.1016/S0009-2541(97)00026-0
+  - used by: plag_Li_pohl2024_interstitial (secondary), plag_Li_pohl2024_vacancy (secondary)
 - **`girona_costa2013`** Girona, T. and Costa, F. (2013) DIPRA: A user-friendly program to model multi-element diffusion in olivine with applications to timescales of magmatic processes. Geochemistry, Geophysics, Geosystems 14:422-431. https://doi.org/10.1029/2012GC004427
-- **`grocolas2025`** Grocolas, T. and Bloch, E. M. and Bouvier, A.-S. and Muentener, O. (2025) Diffusion of Sr and Ba in plagioclase: composition and silica activity dependencies, and application to volcanic rocks. Earth and Planetary Science Letters 651:119141. https://doi.org/10.1016/j.epsl.2024.119141 [open access (CC-BY). Finds Sr diffusion in plagioclase 1.5-2 orders of magnitude SLOWER than Giletti & Casserly (1994); Ba diffusion similar to earlier work. Experiments on oligoclase and labradorite, 900-1200 C, 1 atm, with aSiO2 buffered; no resolvable dependence on aSiO2 or crystal orientation. NOT YET IMPLEMENTED in Diffusor -- the Arrhenius parameters could not be retrieved without the PDF.]
-  - used by: plag_Ba_cherniak2002 (secondary)
+- **`grocolas2025`** Grocolas, T. and Bloch, E. M. and Bouvier, A.-S. and Muentener, O. (2025) Diffusion of Sr and Ba in plagioclase: composition and silica activity dependencies, and application to volcanic rocks. Earth and Planetary Science Letters 651:119141. https://doi.org/10.1016/j.epsl.2024.119141 [open access (CC-BY); local library copy: grocolas_etal_2025_plagioclase_sr_ba.pdf. Finds Sr diffusion in plagioclase 1.5-2 orders of magnitude SLOWER than Giletti & Casserly (1994); Ba diffusion similar to earlier work. Experiments on oligoclase and labradorite, 900-1200 C, 1 atm, with aSiO2 buffered; no resolvable dependence on aSiO2 or crystal orientation. Eqs 7-8 are implemented, and eqs 12-14 (their Monte Carlo re-fits of the older data) are used for the older entries]
+  - used by: plag_Ba_cherniak2002 (secondary), plag_Ba_grocolas2025, plag_Sr_cherniak_watson1994 (secondary), plag_Sr_giletti_casserly1994 (secondary), plag_Sr_grocolas2025
 - **`grocolas2025cmp`** Grocolas, T. and Muentener, O. and Bloch, E. M. and Escrig, S. and Ulyanov, A. and Bouvier, A.-S. (2025) Cooling rates and melt extraction timescales determined by diffusion chronometry on shallow crustal plutonic rocks. Contributions to Mineralogy and Petrology 180:45. https://doi.org/10.1007/s00410-025-02238-0 [open access, PMC12254178; applies the Grocolas et al. (2025) Sr and Ba diffusivities to the Adamello batholith]
 - **`grove1984`** Grove, T. L. and Baker, M. B. and Kinzler, R. J. (1984) Coupled CaAl-NaSi diffusion in plagioclase feldspar: Experiments and applications to cooling rate speedometry. Geochimica et Cosmochimica Acta 48:2113-2121. https://doi.org/10.1016/0016-7037(84)90391-6
   - used by: plag_NaSiCaAl_grove1984
@@ -138,10 +165,12 @@ every exported methods block. Check them against the primary paper before publis
 - **`oneill1987`** O'Neill, H. St. C. (1987) Quartz-fayalite-iron and quartz-fayalite-magnetite equilibria and the free energy of formation of fayalite (Fe2SiO4) and magnetite (Fe3O4). American Mineralogist 72:67-75.
 - **`oneill_pownceby1993`** O'Neill, H. St. C. and Pownceby, M. I. (1993) Thermodynamic data from redox reactions at high temperatures. I. An experimental and theoretical assessment of the electrochemical method using stabilized zirconia electrolytes, with revised values for the Fe-'FeO', Co-CoO, Ni-NiO and Cu-Cu2O oxygen buffers, and new data for the W-WO2 buffer. Contributions to Mineralogy and Petrology 114:296-314. https://doi.org/10.1007/BF01046533
 - **`ostorero2022`** Ostorero, L. and Balcone-Boissard, H. and Boudon, G. and others (2022) Correlated petrology and seismicity indicate rapid magma accumulation prior to eruption of Kizimen volcano, Kamchatka. Communications Earth & Environment 3:290. https://doi.org/10.1038/s43247-022-00622-3
-  - used by: opx_FeMg_ganguly_tazzoli1994 (secondary)
+  - used by: opx_FeMg_ganguly_tazzoli1994 (secondary), opx_FeMg_ganguly_tazzoli1994_nofo2 (secondary)
 - **`petrone2016`** Petrone, C. M. and Bugatti, G. and Braschi, E. and Tommasini, S. (2016) Pre-eruptive magmatic processes re-timed using a non-isothermal approach to magma chamber dynamics. Nature Communications 7:12946. https://doi.org/10.1038/ncomms12946
   - used by: cpx_FeMg_dimanov_sautter2000 (secondary)
 - **`petry2004`** Petry, C. and Chakraborty, S. and Palme, H. (2004) Experimental determination of Ni diffusion coefficients in olivine and their dependence on temperature, composition, oxygen fugacity, and crystallographic orientation. Geochimica et Cosmochimica Acta 68:4179-4188. https://doi.org/10.1016/j.gca.2004.02.024
+- **`pohl2024`** Pohl, F. and Behrens, H. and Oeser, M. and Marxer, F. and Dohmen, R. (2024) Li diffusion in plagioclase crystals and glasses - implications for timescales of geological processes. European Journal of Mineralogy 36:985-1003. https://doi.org/10.5194/ejm-36-985-2024 [open access; local library copy: pohl_etal_2024_plagioclase_li.pdf]
+  - used by: plag_Li_pohl2024_interstitial, plag_Li_pohl2024_vacancy
 - **`polo_sanchez2023`** Polo-Sanchez, A. and Druitt, T. H. and Cluzel, N. and Devidal, J.-L. (2023) Pyroxene diffusion chronometry of the magmatic plumbing system of Santorini volcano. Frontiers in Earth Science 11:1149446. [local library copy: polo-sanchez_etal_2023_santorini_pyroxene_diffusion.pdf]
   - used by: opx_FeMg_dohmen2016 (secondary)
 - **`sato2022`** Sato, E. and Ban, M. and Yoshida, T. and Andrews, B. (2022) Magma plumbing system and eruption processes of the Okama pyroclastics, Zao volcano, revealed by orthopyroxene Fe-Mg diffusion chronometry. Journal of Volcanology and Geothermal Research 429:107607. https://doi.org/10.1016/j.jvolgeores.2022.107607 [local library copy: sato_etal_2022_zao_opx_diffusion.pdf]
@@ -151,14 +180,14 @@ every exported methods block. Check them against the primary paper before publis
 - **`schwandt1998`** Schwandt, C. S. and Cygan, R. T. and Westrich, H. R. (1998) Magnesium self-diffusion in orthoenstatite. Contributions to Mineralogy and Petrology 130:390-396. https://doi.org/10.1007/s004100050373
   - used by: opx_Mg_schwandt1998_a, opx_Mg_schwandt1998_b, opx_Mg_schwandt1998_c
 - **`shea2015`** Shea, T. and Lynn, K. J. and Garcia, M. O. (2015) Cracking the olivine zoning code: Distinguishing between crystal growth and diffusion. Geology 43:935-938. https://doi.org/10.1130/G37082.1
-- **`sievwright2020`** Sievwright, R. H. and O'Neill, H. St. C. and Tolley, J. and Wilkinson, J. J. and Berry, A. J. (2020) Diffusion and partition coefficients of minor and trace elements in magnetite as a function of oxygen fugacity at 1150 C. Contributions to Mineralogy and Petrology 175:40. https://doi.org/10.1007/s00410-020-1679-y
-  - used by: mt_FeTi_aragon1984 (secondary), mt_FeTi_freer_hauptman1978 (secondary)
+- **`sievwright2020`** Sievwright, R. H. and O'Neill, H. St. C. and Tolley, J. and Wilkinson, J. J. and Berry, A. J. (2020) Diffusion and partition coefficients of minor and trace elements in magnetite as a function of oxygen fugacity at 1150 C. Contributions to Mineralogy and Petrology 175:40. https://doi.org/10.1007/s00410-020-01679-z [local library copy: sievwright_etal_2020_magnetite_trace_diffusion.pdf; Table 5 gives the vacancy and interstitial constants at 1150 C]
+  - used by: mt_Al_sievwright2020, mt_Co_sievwright2020, mt_Cr_sievwright2020, mt_FeTi_aragon1984 (secondary), mt_FeTi_freer_hauptman1978 (secondary), mt_Mg_sievwright2020, mt_Mn_sievwright2020, mt_Ti_sievwright2020
 - **`sneeringer1984`** Sneeringer, M. and Hart, S. R. and Shimizu, N. (1984) Strontium and samarium diffusion in diopside. Geochimica et Cosmochimica Acta 48:1589-1608. https://doi.org/10.1016/0016-7037(84)90415-6
 - **`tomiya2013`** Tomiya, A. and Miyagi, I. and Saito, G. and Geshi, N. (2013) Short time scales of magma-mixing processes prior to the 2011 eruption of Shinmoedake volcano, Kirishima volcanic group, Japan. Bulletin of Volcanology 75:750. https://doi.org/10.1007/s00445-013-0750-1
   - used by: mt_Al_vanorman_crispin2010 (secondary), mt_Co_vanorman_crispin2010 (secondary), mt_Cr_vanorman_crispin2010 (secondary), mt_Fe_vanorman_crispin2010 (secondary), mt_Mn_vanorman_crispin2010 (secondary), mt_Ti_vanorman_crispin2010 (secondary)
 - **`vanorman2001`** Van Orman, J. A. and Grove, T. L. and Shimizu, N. (2001) Rare earth element diffusion in diopside: influence of temperature, pressure, and ionic radius, and an elastic model for diffusion in silicates. Contributions to Mineralogy and Petrology 141:687-703. https://doi.org/10.1007/s004100100269
 - **`vanorman2014`** Van Orman, J. A. and Cherniak, D. J. and Kita, N. T. (2014) Magnesium diffusion in plagioclase: Dependence on composition, and implications for thermal resetting of the 26Al-26Mg early solar system chronometer. Earth and Planetary Science Letters 385:79-88. https://doi.org/10.1016/j.epsl.2013.10.026
-  - used by: plag_Mg_costa2003 (secondary), plag_Mg_vanorman2014
+  - used by: plag_Mg_audetat2026 (secondary), plag_Mg_costa2003 (secondary), plag_Mg_vanorman2014
 - **`vanorman_crispin2010`** Van Orman, J. A. and Crispin, K. L. (2010) Diffusion in oxides. Reviews in Mineralogy and Geochemistry 72:757-825. https://doi.org/10.2138/rmg.2010.72.17
-  - used by: mt_Al_vanorman_crispin2010, mt_Co_vanorman_crispin2010, mt_Cr_vanorman_crispin2010, mt_Fe_aggarwal2002_MH, mt_Fe_aggarwal2002_MH_xti02, mt_Fe_aggarwal2002_WM, mt_Fe_aggarwal2002_WM_xti02, mt_Fe_vanorman_crispin2010, mt_Mn_vanorman_crispin2010, mt_Ti_aggarwal2002_MH, mt_Ti_aggarwal2002_MH_xti02, mt_Ti_aggarwal2002_WM, mt_Ti_aggarwal2002_WM_xti02, mt_Ti_vanorman_crispin2010
+  - used by: mt_Al_sievwright2020 (secondary), mt_Al_vanorman_crispin2010, mt_Co_sievwright2020 (secondary), mt_Co_vanorman_crispin2010, mt_Cr_sievwright2020 (secondary), mt_Cr_vanorman_crispin2010, mt_Fe_aggarwal2002_MH, mt_Fe_aggarwal2002_MH_xti02, mt_Fe_aggarwal2002_WM, mt_Fe_aggarwal2002_WM_xti02, mt_Fe_vanorman_crispin2010, mt_Mn_sievwright2020 (secondary), mt_Mn_vanorman_crispin2010, mt_Ti_aggarwal2002_MH, mt_Ti_aggarwal2002_MH_xti02, mt_Ti_aggarwal2002_WM, mt_Ti_aggarwal2002_WM_xti02, mt_Ti_sievwright2020 (secondary), mt_Ti_vanorman_crispin2010
 - **`zellmer1999`** Zellmer, G. F. and Blake, S. and Vance, D. and Hawkesworth, C. and Turner, S. (1999) Plagioclase residence times at two island arc volcanoes (Kameni Islands, Santorini, and Soufriere, St. Vincent) determined by Sr diffusion systematics. Contributions to Mineralogy and Petrology 136:345-357. https://doi.org/10.1007/s004100050543

@@ -40,7 +40,7 @@ def test_opx_example_recovers_1_5_years():
                       X={"XFe": 0.28}, axis="c")
     spec = ProfileSpec("Distance_um", "FeO_wt", "MgO_wt", "FeO_err", "MgO_err",
                        mode="A/(A+B)", oxide_a="FeO", oxide_b="MgO")
-    r, prof = _fit("opx_femg_step.csv", spec, "opx_FeMg_dohmen2016", cond, comp_key="XFe")
+    r, prof = _fit("opx_femg_step.csv", spec, "opx_FeMg_dias2025", cond, comp_key="XFe")
     assert 0.6 < r.t_seconds / (1.5 * SEC_PER_YEAR) < 1.7
     assert r.stats.r_squared > 0.97
 

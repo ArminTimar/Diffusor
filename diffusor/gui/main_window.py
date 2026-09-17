@@ -101,6 +101,9 @@ class ColumnDialog(QDialog):
         self.oxa.setPlaceholderText("e.g. FeO; blank if not wt% oxide")
         self.oxb.setPlaceholderText("e.g. MgO")
         self.slevel = QComboBox(); self.slevel.addItems(["1s", "2s"])
+        self.xmin = QLineEdit(); self.xmax = QLineEdit()
+        self.xmin.setPlaceholderText("blank = from the first point")
+        self.xmax.setPlaceholderText("blank = to the last point")
 
         def setc(combo, val):
             combo.setCurrentText(str(val) if val is not None else "")
@@ -109,6 +112,13 @@ class ColumnDialog(QDialog):
         setc(self.b, spec.column_b); setc(self.sa, spec.sigma_a_column)
         setc(self.sb, spec.sigma_b_column)
         self.mode.setCurrentText(spec.mode)
+        self.oxa.setText(spec.oxide_a or '')
+        self.oxb.setText(spec.oxide_b or '')
+        self.slevel.setCurrentText(spec.sigma_level)
+        if spec.x_min is not None:
+            self.xmin.setText(f"{spec.x_min:g}")
+        if spec.x_max is not None:
+            self.xmax.setText(f"{spec.x_max:g}")
 
         root.addWidget(pair(field("Distance column", self.dist),
                             field("Distance unit", self.unit)))
@@ -121,6 +131,12 @@ class ColumnDialog(QDialog):
         root.addWidget(note(
             "Name the oxides only if columns A and B are weight per cent oxide. Diffusor then "
             "converts to cation moles before taking the ratio.", "Hint"))
+        root.addWidget(pair(field("Fit from distance", self.xmin),
+                            field("Fit to distance", self.xmax)))
+        root.addWidget(note(
+            "Optional. Points outside this window are kept in the file but left out of the "
+            "fit, for example a later overgrowth at the very rim. Same unit as the distance "
+            "column.", "Hint"))
         root.addStretch(1)
         bb = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         bb.button(QDialogButtonBox.Ok).setObjectName("Primary")
@@ -130,12 +146,17 @@ class ColumnDialog(QDialog):
     def spec(self) -> ProfileSpec:
         def g(c):
             return c.currentText().strip() or None
+
+        def num(edit):
+            t = edit.text().strip()
+            return float(t) if t else None
         return ProfileSpec(
             distance_column=g(self.dist), column_a=g(self.a), column_b=g(self.b),
             sigma_a_column=g(self.sa), sigma_b_column=g(self.sb),
             distance_unit=self.unit.currentText(), mode=self.mode.currentText(),
             oxide_a=self.oxa.text().strip() or None, oxide_b=self.oxb.text().strip() or None,
-            sigma_level=self.slevel.currentText())
+            sigma_level=self.slevel.currentText(),
+            x_min=num(self.xmin), x_max=num(self.xmax))
 
 
 class MainWindow(QMainWindow):
@@ -830,7 +851,7 @@ class MainWindow(QMainWindow):
                 self.lst_coef.setCurrentRow(i)
         an_col = s.get("an_column")
         if an_col and an_col in df.columns:
-            vals = np.asarray(df[an_col], dtype=float)
+            vals = self.profile.column(an_col)
             if s.get("an_is_percent"):
                 vals = vals / 100.0
             self.an_values = vals

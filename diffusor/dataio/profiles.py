@@ -38,6 +38,8 @@ class ProfileSpec:
     oxide_b: Optional[str] = None
     sigma_level: str = "1s"
     label: str = ""
+    x_min: Optional[float] = None    # keep only points with x_min <= x <= x_max,
+    x_max: Optional[float] = None    # in distance_unit; None means no limit
 
     def describe(self) -> str:
         s = f"x = '{self.distance_column}' [{self.distance_unit}], "
@@ -48,6 +50,10 @@ class ProfileSpec:
             s += f" (as {self.oxide_a}/{self.oxide_b} wt%, converted to cation moles)"
         if self.sigma_a_column:
             s += f", uncertainty from '{self.sigma_a_column}' ({self.sigma_level})"
+        if self.x_min is not None or self.x_max is not None:
+            lo = "start" if self.x_min is None else f"{self.x_min:g}"
+            hi = "end" if self.x_max is None else f"{self.x_max:g}"
+            s += f", fitted window {lo} to {hi} {self.distance_unit}"
         return s
 
 
@@ -60,15 +66,28 @@ class Profile:
     spec: Optional[ProfileSpec] = None
     source: str = ""
     notes: List[str] = field(default_factory=list)
+    row_index: Optional[np.ndarray] = None   # rows of ``raw`` behind each point
 
     def __len__(self) -> int:
         return int(self.x.size)
 
     def sorted(self) -> "Profile":
-        idx = np.argsort(self.x)
+        idx = np.argsort(self.x, kind="stable")
         return Profile(self.x[idx], self.C[idx],
                        None if self.sigma is None else self.sigma[idx],
-                       self.raw, self.spec, self.source, list(self.notes))
+                       self.raw, self.spec, self.source, list(self.notes),
+                       None if self.row_index is None else self.row_index[idx])
+
+    def column(self, name: str) -> np.ndarray:
+        """Another column of the source table, aligned point for point with x.
+
+        Use this for anything that must follow the same rows as the profile, such
+        as an anorthite column, so that windowing and sorting can never put it out
+        of step with the modelled composition.
+        """
+        if self.raw is None or self.row_index is None:
+            raise ValueError("this profile does not keep its source table")
+        return np.asarray(self.raw[name], dtype=float)[self.row_index]
 
     def zeroed(self) -> "Profile":
         """Shift x so the traverse starts at zero."""
@@ -159,8 +178,19 @@ def build_profile(df: pd.DataFrame, spec: ProfileSpec, source: str = "") -> Prof
     ok = np.isfinite(x) & np.isfinite(C)
     if not np.all(ok):
         notes.append(f"{int((~ok).sum())} rows with missing values were dropped")
+    if spec.x_min is not None or spec.x_max is not None:
+        lo = -np.inf if spec.x_min is None else float(length_to_m(spec.x_min, spec.distance_unit)) * 1.0e6
+        hi = np.inf if spec.x_max is None else float(length_to_m(spec.x_max, spec.distance_unit)) * 1.0e6
+        inside = (x >= lo) & (x <= hi)
+        n_out = int((ok & ~inside).sum())
+        ok = ok & inside
+        if n_out:
+            notes.append(f"{n_out} points outside the fitted window were excluded")
+        if not np.any(ok):
+            raise ValueError("no points fall inside the fitted window")
+    rows = np.arange(len(df))
     prof = Profile(x=x[ok], C=C[ok], sigma=None if sigma is None else sigma[ok],
-                   raw=df, spec=spec, source=source, notes=notes)
+                   raw=df, spec=spec, source=source, notes=notes, row_index=rows[ok])
     return prof.sorted()
 
 

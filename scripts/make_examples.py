@@ -52,7 +52,7 @@ def opx_example():
     cond = Conditions(T_K=T, P_Pa=1.5e8, log_fo2_bar=log_fo2_from_delta("NNO", 1.0, T),
                       X={"XFe": 0.28}, axis="c")
     ic = InitialCondition("step", {"x0": 0.0, "C_left": 0.32, "C_right": 0.22})
-    m = _model("opx_FeMg_dohmen2016", cond, ic, comp_key="XFe")
+    m = _model("opx_FeMg_dias2025", cond, ic, comp_key="XFe")
     t = 1.5 * SEC_PER_YEAR
     x = np.linspace(-35, 35, 43)
     xfe = m.profile(t, x) + rng.normal(0, 0.003, x.size)
@@ -61,7 +61,7 @@ def opx_example():
                   "MgO_wt": np.round(mgo, 3), "FeO_err": 0.15, "MgO_err": 0.20}
                  ).to_csv(OUT / "opx_femg_step.csv", index=False)
     ANSWERS["opx_femg_step.csv"] = (
-        t, "Opx Fe-Mg, Dohmen et al. (2016), 950 C, NNO+1, 150 MPa, //c, X_Fe about 0.22-0.32. "
+        t, "Opx Fe-Mg, Dias, Dohmen & Behrens (2025), 950 C, NNO+1, 150 MPa, //c, X_Fe about 0.22-0.32. "
            "Map FeO_wt and MgO_wt with oxides FeO/MgO and mode A/(A+B).")
 
 
@@ -169,7 +169,15 @@ def main():
     magnetite_example()
     greyscale_example()
     lines = ["# Example datasets", "",
-             "All of these are **synthetic**: each was produced by running Diffusor's forward",
+             "Two files here are **real measurements** and are not produced by this script:",
+             "",
+             "* `plagioclase_santorini_druitt2012.csv` -- Druitt et al. (2012) Nature 482:77-80,",
+             "  Supplementary Table 1, plagioclase S82-30A 12.",
+             "* `opx_kizimen_ostorero2022.csv` -- Ostorero et al. (2022) Commun. Earth Environ.",
+             "  3:290, Supplementary Data 2, orthopyroxene K9_L10C4; regenerate it with",
+             "  `python scripts/extract_kizimen.py <folder with the supplementary files>`.",
+             "",
+             "The files below are **synthetic**: each was produced by running Diffusor's forward",
              "model with a known time, then adding Gaussian noise. They exist so the fitting,",
              "the Monte Carlo and the export can be checked against a known answer.",
              "Regenerate them with `python scripts/make_examples.py`.", "",

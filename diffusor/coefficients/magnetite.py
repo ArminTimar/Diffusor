@@ -119,6 +119,111 @@ for _sp in ("Ti", "Fe", "Mn", "Co", "Cr", "Al"):
     ))
 
 
+# --- Sievwright et al. (2020): modern data at 1150 C ----------------------------
+# Table 5: log D_V1 and log D_I1 (m2/s) of the fit to eq. 5,
+#     D = D_V1 fO2^(2/3) + D_I1 fO2^(-2/3),   fO2 in bar, T = 1150 C.
+# The last two numbers are the published location of the minimum (log fO2, log D),
+# kept so the test suite can check the transcription.
+SIEVWRIGHT_T_K = 1423.15
+SIEVWRIGHT_TABLE5 = {
+    "Mn": (-9.07, -18.8, -7.22, -13.61),
+    "Co": (-9.13, -18.4, -6.94, -13.47),
+    "Ni": (-9.68, -18.5, -6.58, -13.79),
+    "Mg": (-9.27, -18.5, -6.87, -13.58),
+    "Zn": (-9.18, -18.8, -7.20, -13.71),
+    "Sc": (-9.60, -20.2, -7.91, -14.60),
+    "Al": (-10.3, -21.0, -8.01, -15.33),
+    "Ga": (-9.48, -20.3, -8.07, -14.58),
+    "In": (-8.97, -20.1, -8.28, -14.22),
+    "Y": (-9.04, -19.6, -7.89, -14.03),
+    "Cr": (-12.0, -21.6, -7.18, -16.47),
+    "Lu": (-9.15, -19.6, -7.81, -14.07),
+    "V3+": (-10.5, -21.2, -7.94, -15.56),
+    "Ti": (-10.1, -21.3, -8.40, -15.41),
+    "V4+": (-10.5, -21.2, -7.94, -15.56),
+    "Zr": (-9.17, -20.6, -8.56, -14.60),
+    "Hf": (-9.86, -21.1, -8.40, -15.18),
+    "U": (-8.23, -19.8, -8.63, -13.71),
+    "Nb": (-9.50, -21.4, -8.90, -15.17),
+    "Ta": (-10.3, -22.0, -8.77, -15.87),
+    "Mo": (-10.3, -22.2, -8.89, -15.91),
+}
+
+
+def sievwright_D_1150(species: str, log_fo2_bar):
+    """D (m2/s) at 1150 C from Sievwright et al. (2020) Table 5 and eq. 5."""
+    lv, li = SIEVWRIGHT_TABLE5[species][:2]
+    lf = np.asarray(log_fo2_bar, dtype=float)
+    return 10.0 ** (lv + lf * 2.0 / 3.0) + 10.0 ** (li - lf * 2.0 / 3.0)
+
+
+def _make_sievwright_func(species: str, scale_with_table12: bool):
+    def _f(dc, cond: Conditions, p):
+        lf = cond.log_fo2_bar
+        vac = 10.0 ** (SIEVWRIGHT_TABLE5[species][0] + lf * 2.0 / 3.0)
+        inter = 10.0 ** (SIEVWRIGHT_TABLE5[species][1] - lf * 2.0 / 3.0)
+        if scale_with_table12:
+            _, QV, _, QI = TABLE12_PURE[species]
+            dinv = 1.0 / cond.T_K - 1.0 / SIEVWRIGHT_T_K
+            vac = vac * np.exp(-QV * 1.0e3 / R_GAS * dinv)
+            inter = inter * np.exp(-QI * 1.0e3 / R_GAS * dinv)
+        return vac + inter
+    return _f
+
+
+for _sp in ("Ti", "Mn", "Co", "Cr", "Al", "Mg"):
+    _scaled = _sp in TABLE12_PURE
+    _lv, _li, _lfmin, _ldmin = SIEVWRIGHT_TABLE5[_sp]
+    _add(DiffusionCoefficient(
+        key=f"mt_{_sp}_sievwright2020",
+        mineral="magnetite", species=_sp,
+        label=(f"Magnetite {_sp}, Sievwright et al. (2020) at 1150 C"
+               + (", T-scaled with Table 12" if _scaled else ", 1150 C ONLY")),
+        citation="sievwright2020",
+        equation_number="5 and Table 5",
+        equation_text=(f"D = D_V1 fO2^(2/3) + D_I1 fO2^(-2/3), fO2 in bar, at 1150 C; "
+                       f"{_sp}: log D_V1 = {_lv:g}, log D_I1 = {_li:g} (m2/s); minimum "
+                       f"log D = {_ldmin:g} at log fO2 = {_lfmin:g}"
+                       + ("; away from 1150 C each branch is scaled by "
+                          "exp[-Q/R (1/T - 1/1423.15 K)] with the Q_V and Q_I of Van Orman "
+                          "& Crispin (2010) Table 12 for pure magnetite" if _scaled else "")),
+        func=_make_sievwright_func(_sp, _scaled),
+        params={},
+        sigma_logD=0.2,
+        needs_fo2=True, fo2_unit="bar",
+        T_range=(Range(1273.15, 1573.15, "K (anchored at 1150 C; T dependence borrowed)")
+                 if _scaled else Range(1423.15, 1423.15, "K (1150 C only)")),
+        P_range=Range(1.0e5, 1.0e5, "Pa (1 bar)"),
+        fo2_range=Range(-9.9, -4.0, "log10 bar (FMQ-1 to FMQ+4.89 at 1150 C)"),
+        verified=True,
+        verified_from=("read from the paper PDF: eq. 5 (p. 12) and Table 5 (p. 13). The "
+                       "transcription reproduces the published minimum log D and log fO2 of "
+                       "every element to within 0.05 log units"
+                       + ("; the temperature scaling is Diffusor's construction, not the "
+                          "authors'" if _scaled else "")),
+        secondary_citations=(("vanorman_crispin2010", "aggarwal_dieckmann2002")
+                             if _scaled else ()),
+        recommended=False,
+        notes=(("Natural magnetite equilibrated with a silicate melt at 1 bar and FMQ-1 to "
+                "FMQ+4.89, measured by LA-ICP-MS. Uncertainties on individual log D values are "
+                "typically below 0.2 log units (1 sigma). ")
+               + ("Sievwright et al. give no activation energy because all runs were at "
+                  "1150 C. To use the data at other temperatures Diffusor borrows the vacancy "
+                  "and interstitial activation energies of the same element from the tracer "
+                  "data of Van Orman & Crispin (2010) Table 12, which is the comparison "
+                  "Sievwright et al. themselves made with the earlier literature (their "
+                  "Supplementary Fig. S3). At 1150 C this entry and the Table 12 entry agree "
+                  "to within 0.5 log units for Ti, Mn and Co and within 0.4 for Cr above "
+                  "FMQ+2, but Al differs by up to 2 log units at FMQ-1. Treat any temperature "
+                  "far from 1150 C as an extrapolation of the borrowed energies, not of "
+                  "Sievwright's data." if _scaled else
+                  "There is no published temperature dependence for Mg in magnetite, so this "
+                  "entry returns the 1150 C value at every temperature and Diffusor warns "
+                  "whenever T is not 1150 C. Use it only for experiments or checks at that "
+                  "temperature. Tomiya et al. (2013) instead set D_Mg = D_Fe.")),
+    ))
+
+
 # --- Fe-Ti interdiffusion ---------------------------------------------------
 def _feti_lnD(dc, cond: Conditions, p):
     xTi = np.asarray(cond.X.get("xTi", 0.0), dtype=float)
@@ -157,8 +262,8 @@ _add(DiffusionCoefficient(
         "temperature-dependent, and are what Tomiya et al. (2013) used at Shinmoedake. Prefer "
         "the Table 12 entries unless you specifically need an interdiffusion coefficient. "
         "Sievwright et al. (2020) add modern magnetite diffusivities for Ti and many other "
-        "elements as a function of fO2, but only at 1150 C, so they give no activation energy "
-        "and cannot be extrapolated to magmatic temperatures on their own."),
+        "elements as a function of fO2, but only at 1150 C; Diffusor lists them as the "
+        "mt_*_sievwright2020 entries."),
     notes=("Interdiffusion between synthetic Fe3O4 and Fe2.8Ti0.2O4 under self-buffered "
            "conditions (sealed silica tubes), so the fO2 is only loosely constrained. This is "
            "the coefficient used for Fe-Ti oxide timescales by Costa et al. (2008, Fig. 8) "

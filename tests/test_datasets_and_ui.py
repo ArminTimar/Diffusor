@@ -148,7 +148,7 @@ def test_loading_an_example_fills_in_the_later_steps(app):
     assert w.cmb_mineral.currentData() == "opx"
     assert w.cmb_species.currentText() == "Fe-Mg"
     assert w.sp_T.value() == pytest.approx(950.0)
-    assert w._checked_keys() == ["opx_FeMg_dohmen2016"]
+    assert w._checked_keys() == ["opx_FeMg_dias2025"]
     w._go(6)
     assert w.step == 6
     w.close()
@@ -244,4 +244,38 @@ def test_a_fit_runs_end_to_end_through_the_interface(app):
     app.processEvents()
     assert 0.5 < r.t_seconds / (1.5 * SEC_PER_YEAR) < 2.0
     assert w.fit_result is not None
+    w.close()
+
+
+def test_kizimen_dataset_is_the_real_ostorero_traverse():
+    d = ds.get("opx_kizimen")
+    assert d.kind == "measured" and d.citation == "ostorero2022"
+    df = read_table(d.path)
+    assert len(df) == 109
+    assert df["Distance_from_rim_um"].iloc[0] == pytest.approx(2.28)
+    prof = build_profile(df, ProfileSpec(**d.spec))
+    assert prof.x.min() >= 4.0 and prof.x.max() <= 60.0
+    # reverse zone: Fe-poor rim band against a Fe-richer core
+    assert prof.C[prof.x < 11].max() < 0.30 < prof.C[prof.x > 20].min()
+
+
+def test_kizimen_fit_lands_inside_ostorero_uncertainty(app):
+    """Ostorero et al. (2022) Supplementary Data 4: K9_L10C4 = 2.32 yr (+7.16 / -1.75)."""
+    from PySide6.QtCore import Qt
+    from diffusor.constants import SEC_PER_YEAR
+    from diffusor.fitting import fit_time
+    w = _window(app)
+    for i in range(w.lst_examples.count()):
+        if w.lst_examples.item(i).data(Qt.UserRole) == "opx_kizimen":
+            w.lst_examples.setCurrentRow(i)
+            break
+    w.load_example()
+    app.processEvents()
+    assert w._checked_keys() == ["opx_FeMg_ganguly_tazzoli1994_nofo2"]
+    assert w.sp_T.value() == pytest.approx(850.0)
+    model = w._model(w._checked_keys()[0])
+    assert model.comp_key == "XFe"
+    r = fit_time(model, w.profile.x, w.profile.C, w.profile.sigma, w._free_parameters())
+    years = r.t_seconds / SEC_PER_YEAR
+    assert 2.32 - 1.75 < years < 2.32 + 7.16, years
     w.close()

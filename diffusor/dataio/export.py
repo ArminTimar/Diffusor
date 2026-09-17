@@ -98,40 +98,40 @@ def methods_paragraph(fit_result, mc_result=None, profile=None) -> str:
 
     L.append("Conditions")
     L.append("-" * 70)
-    L.append(f"T = {cond.T_K - 273.15:.1f} C ({cond.T_K:.2f} K); P = {cond.P_Pa/1e6:.1f} MPa")
+    L.append(f"T = {cond.T_K - 273.15:.1f} C ({cond.T_K:.2f} K), P = {cond.P_Pa/1e6:.1f} MPa")
     if cond.log_fo2_bar is not None:
         L.append(f"log10 fO2 = {cond.log_fo2_bar:.3f} (bar) = {cond.log_fo2_Pa:.3f} (Pa)")
         if mc_result is not None and mc_result.budget.fo2_mode == "buffer":
             b = mc_result.budget
             L.append(f"  set as {b.buffer} {b.delta_buffer:+.2f} log units, with the buffer "
-                     f"evaluated from Frost (1991) Table 1; in the Monte Carlo the buffer is "
-                     f"re-evaluated at every sampled temperature so that fO2 and T stay correlated.")
+                     f"evaluated from Frost (1991) Table 1. The Monte Carlo re-evaluates the "
+                     f"buffer at every sampled temperature, so fO2 and T stay correlated.")
     for k, v in cond.X.items():
         if np.ndim(v) == 0:
             L.append(f"{k} = {float(v):.4f}")
     if cond.axis:
         L.append(f"Traverse along the {cond.axis}-axis.")
     if cond.angles_deg:
-        L.append(f"Traverse at {cond.angles_deg} degrees to a, b, c; the direction-cosine "
+        L.append(f"Traverse at {cond.angles_deg} degrees to a, b, c. The direction-cosine "
                  f"relation of Costa & Chakraborty (2004) was applied.")
     if model.history is not None and not model.history.is_isothermal:
-        L.append(f"Non-isothermal history ({model.history.label}); the diffusion integral "
-                 f"int D(T(t)) dt was evaluated numerically (Crank 1975 eq. 7.7; Lasaga 1983).")
+        L.append(f"Non-isothermal history ({model.history.label}). The diffusion integral "
+                 f"int D(T(t)) dt was evaluated numerically (Crank 1975 eq. 7.7, Lasaga 1983).")
     L.append("")
 
     L.append("Model")
     L.append("-" * 70)
     L.append(f"Geometry: {model.geometry.kind}. {model.geometry.describe()}")
     L.append(f"Initial condition: {model.initial.describe()}")
-    L.append(f"Boundaries: left = {model.bc_left.describe()}; right = {model.bc_right.describe()}")
+    L.append(f"Boundaries: left {model.bc_left.describe()}, right {model.bc_right.describe()}")
     L.append(f"Solver: {'analytical, ' + why if ok else 'numerical Crank-Nicolson (theta = 1/2), ' + why}")
     if not ok:
         L.append(f"  Finite-difference scheme after Crank (1975) section 8.4 with D evaluated at "
-                 f"half-nodes (Dohmen et al. 2017, Appendix eqs A17-A21); {model.n_nodes} grid nodes.")
+                 f"half-nodes (Dohmen et al. 2017, Appendix eqs A17-A21), {model.n_nodes} grid nodes.")
     if model.beam_sigma_um:
         L.append(f"Model profiles were convolved with a Gaussian of sigma = "
                  f"{model.beam_sigma_um:.2f} um to account for the analytical spatial "
-                 f"resolution (Ganguly et al. 1988; Bradshaw & Kent 2017).")
+                 f"resolution (Ganguly et al. 1988, Bradshaw & Kent 2017).")
     L.append("")
 
     L.append("Result")
@@ -156,18 +156,16 @@ def methods_paragraph(fit_result, mc_result=None, profile=None) -> str:
         if "diffusion_coefficient" in b.active_sources():
             mode = c.default_sampling_mode() if b.coefficient_mode == "auto" else b.coefficient_mode
             expl = {"covariance": "sampled from the published parameter covariance matrix",
-                    "logD_at_T": "ln D sampled directly at the working temperature using the "
-                                 "scatter reported by the source, which avoids treating "
-                                 "ln D0 and Q as independent",
-                    "independent": "each Arrhenius parameter sampled independently (NOT "
-                                   "recommended: it ignores the strong ln D0 - Q correlation "
-                                   "and overestimates the uncertainty)"}[mode]
+                    "logD_at_T": "ln D sampled at the working temperature from the scatter "
+                                 "reported by the source, so ln D0 and Q stay correlated",
+                    "independent": "each Arrhenius parameter sampled independently. This "
+                                   "ignores the strong ln D0 - Q correlation and overstates "
+                                   "the uncertainty"}[mode]
             L.append(f"  Diffusion coefficient: {expl}.")
-        L.append(f"Median time {human_time(mc_result.median)}; 68% interval "
-                 f"{human_time(mc_result.p16)} to {human_time(mc_result.p84)}; 95% interval "
-                 f"{human_time(mc_result.p2_5)} to {human_time(mc_result.p97_5)} "
-                 f"(times are log-normally distributed, so percentiles are reported rather "
-                 f"than a symmetric standard deviation).")
+        L.append(f"Median time {human_time(mc_result.median)}. 68% interval "
+                 f"{human_time(mc_result.p16)} to {human_time(mc_result.p84)}, 95% interval "
+                 f"{human_time(mc_result.p2_5)} to {human_time(mc_result.p97_5)}. Times are "
+                 f"log-normally distributed, so percentiles are reported.")
         if mc_result.contributions:
             L.append("Contribution of each source to sigma(log10 t), one at a time:")
             for k, v in sorted(mc_result.contributions.items(), key=lambda kv: -kv[1]):

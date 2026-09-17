@@ -280,14 +280,14 @@ class DiffusionCoefficient:
         if self.axis_factors:
             fac = ", ".join(f"D_{k}/D_{self.reference_axis} = {v:g}" for k, v in self.axis_factors.items())
             lines.append(f"  anisotropy      : {fac}")
-        lines.append(f"  calibration     : T {self.T_range}; P {self.P_range}; "
-                     f"fO2 {self.fo2_range}; X {self.X_range}")
+        lines.append(f"  calibration     : T {self.T_range}, P {self.P_range}, "
+                     f"fO2 {self.fo2_range}, X {self.X_range}")
         lines.append(f"  verified        : {'YES -- ' + self.verified_from if self.verified else 'NO -- ' + (self.verified_from or 'unchecked')}")
         if self.superseded_by:
             lines.append(f"  SUPERSEDED BY   : {get_reference(self.superseded_by).full()}")
             lines.append(f"     {self.superseded_note}")
         if self.secondary_citations:
-            lines.append("  see also        : " + "; ".join(cite(c) for c in self.secondary_citations))
+            lines.append("  see also        : " + ", ".join(cite(c) for c in self.secondary_citations))
         if self.notes:
             lines.append(f"  notes           : {self.notes}")
         return "\n".join(lines)

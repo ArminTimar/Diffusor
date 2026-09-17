@@ -6,21 +6,19 @@ and change it.
 """
 from __future__ import annotations
 
-import copy
 import traceback
 from pathlib import Path
 from typing import Dict, List, Optional
 
 import numpy as np
-from PySide6.QtCore import Qt
-from PySide6.QtGui import QAction, QFont
-from PySide6.QtWidgets import (QButtonGroup, QCheckBox, QComboBox, QDialog,
-                               QDialogButtonBox, QDoubleSpinBox, QFileDialog, QFrame,
-                               QHBoxLayout, QLabel, QLineEdit, QListWidget,
-                               QListWidgetItem, QMainWindow, QMessageBox, QProgressBar,
-                               QPushButton, QRadioButton, QSizePolicy, QSpinBox,
-                               QSplitter, QStackedWidget, QTextEdit, QVBoxLayout,
-                               QWidget)
+from PySide6.QtCore import Qt, Slot
+from PySide6.QtGui import QAction, QFont, QGuiApplication
+from PySide6.QtWidgets import (QApplication, QCheckBox, QComboBox, QDialog, QDialogButtonBox,
+                               QDoubleSpinBox, QFileDialog, QFrame, QHBoxLayout, QHeaderView, QLabel,
+                               QLineEdit, QListWidget, QListWidgetItem, QMainWindow,
+                               QMessageBox, QProgressBar, QPushButton, QSizePolicy, QSpinBox,
+                               QSplitter, QStackedWidget, QTableWidget, QTableWidgetItem,
+                               QTextEdit, QVBoxLayout, QWidget)
 
 from .. import datasets as ds
 from ..coefficients import Conditions, get as get_coefficient, list_coefficients
@@ -29,7 +27,7 @@ from ..dataio import (ProfileSpec, build_profile, methods_paragraph, read_table,
                       save_results, suggest_spec)
 from ..fitting import DiffusionModel, UncertaintyBudget
 from ..minerals import MINERALS, get_mineral
-from ..references import format_reference
+from ..references import cite, format_reference
 from ..solvers import Geometry, InitialCondition, dirichlet, zero_flux
 from ..solvers.history import ThermalHistory
 from ..solvers.initial import guess_step_from_data
@@ -37,12 +35,38 @@ from ..thermo import available_buffers, log_fo2_from_delta
 from ..thermo.units import human_time
 from . import format_help, theme
 from .plot_widget import ProfilePlot
-from .widgets import (WrapLabel, badge, card, divider, field, ghost_button, note,
-                      pair, page_body, primary_button, row, scrollable)
+from .widgets import (WrapLabel, card, collapsible, divider, field, ghost_button,
+                      install_no_wheel, note, pair, page_body, primary_button, row,
+                      scrollable)
 from .workers import CompareWorker, FitWorker, MonteCarloWorker, start
 
 STEPS = ["Data", "Mineral", "Conditions", "Model", "Coefficient", "Uncertainty", "Results"]
 RESULTS = len(STEPS) - 1
+
+# Analytical resolution presets: (label, width kind, default width in um, sigma for a
+# fixed preset, hint). Width kind is "spot" (sigma = d / 4 for an evenly lit round
+# spot), "slit" (sigma = w / sqrt 12 for an evenly lit slit), or None.
+RESOLUTION_PRESETS = [
+    ("No correction", None, 0.0, 0.0,
+     "The model is compared with the data as it is."),
+    ("BSE image profile", None, 0.0, 0.0,
+     "Grey-value profiles resolve better than 0.5 um (Petrone et al. 2016), so a "
+     "correction is rarely needed."),
+    ("Microprobe, focused beam", None, 0.0, 0.6,
+     "Ganguly et al. (1988) found sigma rarely exceeds 0.6 um on a modern microprobe. "
+     "Profiles longer than about 15 um are barely affected."),
+    ("Microprobe, defocused beam", "spot", 5.0, None,
+     "Feldspar is often measured with a 5 um beam (Chamberlain et al. 2014, "
+     "Grocolas et al. 2025)."),
+    ("LA-ICP-MS spot", "spot", 10.0, None,
+     "Druitt et al. (2012) used a 10 um laser spot."),
+    ("LA-ICP-MS line scan", "slit", 7.5, None,
+     "Grocolas et al. (2025) scanned with a 7.5 um wide slit."),
+    ("SIMS spot", "spot", 12.0, None,
+     "Druitt et al. (2012) used 10 to 15 um ion beams."),
+    ("Custom sigma", None, 0.0, None,
+     "Standard deviation of the Gaussian beam profile (Ganguly et al. 1988)."),
+]
 
 
 def _spin(lo, hi, val, dec=3, step=1.0, suffix=""):
@@ -56,10 +80,11 @@ def _spin(lo, hi, val, dec=3, step=1.0, suffix=""):
     return s
 
 
-def _text_dialog(parent, title, text, width=940, height=640):
+def _text_dialog(parent, title, text, width=900, height=600):
     dlg = QDialog(parent)
     dlg.setWindowTitle(title)
-    dlg.resize(width, height)
+    screen = QGuiApplication.primaryScreen().availableGeometry()
+    dlg.resize(min(width, int(screen.width() * 0.9)), min(height, int(screen.height() * 0.85)))
     lay = QVBoxLayout(dlg)
     lay.setContentsMargins(18, 18, 18, 18)
     te = QTextEdit()
@@ -69,102 +94,166 @@ def _text_dialog(parent, title, text, width=940, height=640):
     lay.addWidget(te)
     bb = QDialogButtonBox(QDialogButtonBox.Close)
     bb.rejected.connect(dlg.reject)
-    bb.accepted.connect(dlg.accept)
     lay.addWidget(bb)
     dlg.exec()
 
 
+def _repolish(w, name):
+    w.setObjectName(name)
+    w.style().unpolish(w)
+    w.style().polish(w)
+
+
+# ==================================================================== columns
 class ColumnDialog(QDialog):
-    """Map the columns of a loaded table onto the model."""
+    """Confirm the guessed column mapping. Everything else sits under Advanced."""
 
     def __init__(self, df, spec: ProfileSpec, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("Map your columns")
-        self.resize(560, 640)
-        cols = [""] + [str(c) for c in df.columns]
+        self.df = df
+        self.setWindowTitle("Check the columns")
+        cols = [str(c) for c in df.columns]
+        numeric = [str(c) for c in df.columns if np.issubdtype(df[c].dtype, np.number)]
         root = QVBoxLayout(self)
-        root.setContentsMargins(20, 18, 20, 18)
-        root.setSpacing(12)
-        head = QLabel("Map your columns")
+        root.setContentsMargins(20, 16, 20, 16)
+        root.setSpacing(10)
+        head = QLabel("Is this right?")
         head.setObjectName("H2")
         root.addWidget(head)
-        root.addWidget(note("Diffusor has guessed from the column names. Check each one.", "Sub"))
 
-        self.dist = QComboBox(); self.dist.addItems(cols)
+        self.dist = QComboBox(); self.dist.addItems(numeric or cols)
         self.unit = QComboBox(); self.unit.addItems(["um", "mm", "nm", "m"])
-        self.a = QComboBox(); self.a.addItems(cols)
-        self.b = QComboBox(); self.b.addItems(cols)
-        self.sa = QComboBox(); self.sa.addItems(cols)
-        self.sb = QComboBox(); self.sb.addItems(cols)
-        self.mode = QComboBox(); self.mode.addItems(["A/(A+B)", "B/(A+B)", "A", "A-B"])
-        self.oxa = QLineEdit(); self.oxb = QLineEdit()
-        self.oxa.setPlaceholderText("e.g. FeO; blank if not wt% oxide")
-        self.oxb.setPlaceholderText("e.g. MgO")
+        self.a = QComboBox(); self.a.addItems(numeric or cols)
+        self.b = QComboBox(); self.b.addItems(["(none)"] + (numeric or cols))
+        self.dist.setCurrentText(str(spec.distance_column))
+        self.unit.setCurrentText(spec.distance_unit)
+        self.a.setCurrentText(str(spec.column_a))
+        self.b.setCurrentText(str(spec.column_b) if spec.column_b else "(none)")
+        root.addWidget(pair(field("Distance", self.dist), field("Unit", self.unit)))
+        root.addWidget(pair(field("Element A", self.a), field("Element B", self.b)))
+        self.lbl_what = note("", "Good")
+        root.addWidget(self.lbl_what)
+
+        self.preview = QTableWidget(3, 3)
+        self.preview.verticalHeader().setVisible(False)
+        self.preview.setEditTriggers(QTableWidget.NoEditTriggers)
+        self.preview.setFocusPolicy(Qt.NoFocus)
+        self.preview.setFixedHeight(118)
+        self.preview.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        root.addWidget(self.preview)
+
+        # --- advanced
+        adv = QWidget()
+        av = QVBoxLayout(adv)
+        av.setContentsMargins(0, 0, 8, 0)
+        av.setSpacing(10)
+        self.sa = QComboBox(); self.sa.addItems(["(none)"] + numeric)
+        self.sb = QComboBox(); self.sb.addItems(["(none)"] + numeric)
+        self.sa.setCurrentText(spec.sigma_a_column or "(none)")
+        self.sb.setCurrentText(spec.sigma_b_column or "(none)")
+        av.addWidget(pair(field("Uncertainty of A", self.sa), field("Uncertainty of B", self.sb)))
         self.slevel = QComboBox(); self.slevel.addItems(["1s", "2s"])
-        self.xmin = QLineEdit(); self.xmax = QLineEdit()
-        self.xmin.setPlaceholderText("blank = from the first point")
-        self.xmax.setPlaceholderText("blank = to the last point")
-
-        def setc(combo, val):
-            combo.setCurrentText(str(val) if val is not None else "")
-
-        setc(self.dist, spec.distance_column); setc(self.a, spec.column_a)
-        setc(self.b, spec.column_b); setc(self.sa, spec.sigma_a_column)
-        setc(self.sb, spec.sigma_b_column)
-        self.mode.setCurrentText(spec.mode)
-        self.oxa.setText(spec.oxide_a or '')
-        self.oxb.setText(spec.oxide_b or '')
         self.slevel.setCurrentText(spec.sigma_level)
-        if spec.x_min is not None:
-            self.xmin.setText(f"{spec.x_min:g}")
-        if spec.x_max is not None:
-            self.xmax.setText(f"{spec.x_max:g}")
+        self.mode = QComboBox(); self.mode.addItems(["A/(A+B)", "B/(A+B)", "A", "A-B"])
+        self.mode.setCurrentText(spec.mode)
+        av.addWidget(pair(field("Uncertainty level", self.slevel),
+                          field("Modelled variable", self.mode)))
+        self.oxa = QLineEdit(spec.oxide_a or ""); self.oxb = QLineEdit(spec.oxide_b or "")
+        self.oxa.setPlaceholderText("e.g. FeO")
+        self.oxb.setPlaceholderText("e.g. MgO")
+        av.addWidget(pair(field("Oxide of A", self.oxa), field("Oxide of B", self.oxb)))
+        av.addWidget(note("Name oxides only for wt% oxide columns.", "Hint"))
+        self.xmin = QLineEdit("" if spec.x_min is None else f"{spec.x_min:g}")
+        self.xmax = QLineEdit("" if spec.x_max is None else f"{spec.x_max:g}")
+        self.xmin.setPlaceholderText("first point")
+        self.xmax.setPlaceholderText("last point")
+        av.addWidget(pair(field("Fit from", self.xmin), field("Fit to", self.xmax)))
+        av.addWidget(note("Points outside this range stay in the file but are left out of "
+                          "the fit.", "Hint"))
+        self.an = QComboBox(); self.an.addItems(["(none)"] + numeric)
+        self.an_percent = QCheckBox("in mol%")
+        self.an_percent.setChecked(True)
+        av.addWidget(pair(field("Anorthite column (plagioclase)", self.an), self.an_percent))
+        av.addStretch(1)
+        area = scrollable(adv)
+        area.setMaximumHeight(260)
+        area.setMinimumHeight(200)
+        root.addWidget(collapsible("Advanced settings", area))
 
-        root.addWidget(pair(field("Distance column", self.dist),
-                            field("Distance unit", self.unit)))
-        root.addWidget(pair(field("Element A", self.a), field("Element B (optional)", self.b)))
-        root.addWidget(pair(field("Uncertainty of A", self.sa),
-                            field("Uncertainty of B", self.sb)))
-        root.addWidget(pair(field("Uncertainty level", self.slevel),
-                            field("Modelled variable", self.mode)))
-        root.addWidget(pair(field("Oxide of A", self.oxa), field("Oxide of B", self.oxb)))
-        root.addWidget(note(
-            "Name the oxides only if columns A and B are weight per cent oxide. Diffusor then "
-            "converts to cation moles before taking the ratio.", "Hint"))
-        root.addWidget(pair(field("Fit from distance", self.xmin),
-                            field("Fit to distance", self.xmax)))
-        root.addWidget(note(
-            "Optional. Points outside this window are kept in the file but left out of the "
-            "fit, for example a later overgrowth at the very rim. Same unit as the distance "
-            "column.", "Hint"))
-        root.addStretch(1)
-        bb = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
-        bb.button(QDialogButtonBox.Ok).setObjectName("Primary")
-        bb.accepted.connect(self.accept); bb.rejected.connect(self.reject)
+        bb = QDialogButtonBox()
+        ok = bb.addButton("Looks right", QDialogButtonBox.AcceptRole)
+        ok.setObjectName("Primary")
+        bb.addButton(QDialogButtonBox.Cancel)
+        bb.accepted.connect(self.accept)
+        bb.rejected.connect(self.reject)
         root.addWidget(bb)
 
-    def spec(self) -> ProfileSpec:
-        def g(c):
-            return c.currentText().strip() or None
+        for w in (self.dist, self.unit, self.a, self.b, self.mode):
+            w.currentIndexChanged.connect(self._update)
+        self.oxa.textChanged.connect(self._update)
+        self.oxb.textChanged.connect(self._update)
+        self._update()
+        screen = QGuiApplication.primaryScreen().availableGeometry()
+        self.setMinimumWidth(min(560, int(screen.width() * 0.9)))
+        self.resize(min(620, int(screen.width() * 0.9)), 10)
+        self.setMaximumHeight(int(screen.height() * 0.92))
 
+    @staticmethod
+    def _none(text):
+        text = text.strip()
+        return None if text in ("", "(none)") else text
+
+    def _update(self):
+        a, b = self.a.currentText(), self._none(self.b.currentText())
+        if b and self.mode.currentText() == "A":
+            self.mode.setCurrentText("A/(A+B)")
+        if not b and self.mode.currentText() != "A":
+            self.mode.setCurrentText("A")
+        mode = self.mode.currentText()
+        if mode == "A":
+            what = f"Models {a} as it stands."
+        else:
+            ox = (" in cation moles" if self.oxa.text().strip() and self.oxb.text().strip()
+                  else "")
+            forms = {"A/(A+B)": f"{a}/({a}+{b})", "B/(A+B)": f"{b}/({a}+{b})",
+                     "A-B": f"{a} - {b}"}
+            what = f"Models {forms.get(mode, mode)}{ox}."
+        self.lbl_what.setText(f"{what} {len(self.df)} rows.")
+        shown = [self.dist.currentText(), a] + ([b] if b else [])
+        self.preview.setColumnCount(len(shown))
+        self.preview.setHorizontalHeaderLabels(shown)
+        for r in range(3):
+            for c, name in enumerate(shown):
+                v = self.df[name].iloc[r] if r < len(self.df) and name in self.df else ""
+                self.preview.setItem(r, c, QTableWidgetItem(f"{v:g}" if isinstance(v, (int, float, np.number)) else str(v)))
+
+    def spec(self) -> ProfileSpec:
         def num(edit):
             t = edit.text().strip()
             return float(t) if t else None
         return ProfileSpec(
-            distance_column=g(self.dist), column_a=g(self.a), column_b=g(self.b),
-            sigma_a_column=g(self.sa), sigma_b_column=g(self.sb),
+            distance_column=self.dist.currentText(), column_a=self.a.currentText(),
+            column_b=self._none(self.b.currentText()),
+            sigma_a_column=self._none(self.sa.currentText()),
+            sigma_b_column=self._none(self.sb.currentText()),
             distance_unit=self.unit.currentText(), mode=self.mode.currentText(),
             oxide_a=self.oxa.text().strip() or None, oxide_b=self.oxb.text().strip() or None,
             sigma_level=self.slevel.currentText(),
             x_min=num(self.xmin), x_max=num(self.xmax))
 
+    def an_column(self):
+        return self._none(self.an.currentText()), self.an_percent.isChecked()
 
+
+# ==================================================================== window
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Diffusor")
-        self.resize(1440, 920)
+        screen = QGuiApplication.primaryScreen().availableGeometry()
+        self.resize(min(1440, int(screen.width() * 0.95)), min(920, int(screen.height() * 0.92)))
         self.setStyleSheet(theme.stylesheet())
+        self._no_wheel = install_no_wheel(QApplication.instance())
 
         self.profile = None
         self.dataset: Optional[ds.ExampleDataset] = None
@@ -172,9 +261,9 @@ class MainWindow(QMainWindow):
         self.fit_result = None
         self.mc_result = None
         self.compare_results = None
-        self._threads: List = []
-        self._workers: List = []
+        self._jobs: List = []           # (thread, worker) pairs kept alive until finished
         self._log_lines: List[str] = []
+        self._prefill: Dict[int, QLabel] = {}
         self.step = 0
 
         self.plot = ProfilePlot()
@@ -201,21 +290,18 @@ class MainWindow(QMainWindow):
         self.statusBar().addPermanentWidget(self.progress)
         self._build_menu()
         self._on_mineral_changed()
-        self._on_ic_changed()
+        self._on_resolution_changed()
         self._go(0)
 
     # ================================================================ chrome
     def _build_header(self) -> QWidget:
         w = QWidget(); w.setObjectName("Page")
         h = QHBoxLayout(w)
-        h.setContentsMargins(24, 14, 24, 14)
+        h.setContentsMargins(24, 12, 24, 12)
         h.setSpacing(16)
         title = QLabel("Diffusor")
         title.setObjectName("H1")
         h.addWidget(title)
-        sub = QLabel("diffusion chronometry")
-        sub.setObjectName("Sub")
-        h.addWidget(sub)
         h.addStretch(1)
         self.step_labels = []
         rail = QWidget()
@@ -235,7 +321,7 @@ class MainWindow(QMainWindow):
     def _build_footer(self) -> QWidget:
         w = QWidget(); w.setObjectName("Page")
         h = QHBoxLayout(w)
-        h.setContentsMargins(24, 12, 24, 12)
+        h.setContentsMargins(24, 10, 24, 10)
         h.setSpacing(10)
         self.btn_back = QPushButton("Back")
         self.btn_back.clicked.connect(lambda: self._go(self.step - 1))
@@ -265,86 +351,74 @@ class MainWindow(QMainWindow):
                          ("Log", self.show_log)):
             a = QAction(text, self); a.triggered.connect(fn); v.addAction(a)
         h = self.menuBar().addMenu("&Help")
-        a = QAction("Input file format", self,
-                    triggered=lambda: _text_dialog(self, "Input file format",
-                                                   format_help.as_plain_text()))
-        h.addAction(a)
+        a = QAction("Input file format", self); a.triggered.connect(self.show_format); h.addAction(a)
         a = QAction("About", self); a.triggered.connect(self.show_about); h.addAction(a)
+
+    def _prefill_label(self, step: int) -> QLabel:
+        lab = note("", "Good")
+        lab.setVisible(False)
+        self._prefill[step] = lab
+        return lab
 
     # ================================================================ step 1
     def _page_data(self) -> QWidget:
-        load_card, body = card(
-            "Load a profile",
-            "A measured traverse across the zone boundary you want to date.")
+        load_card, body = card("Load a profile")
         btn = primary_button("Choose a file...")
         btn.clicked.connect(self.load_file)
-        body.addWidget(row(btn, note(f"Accepts {format_help.FILE_TYPES}", "Hint"),
-                           stretch_last=True))
-        self.lbl_data = note("No file loaded yet.", "Sub")
+        fmt = ghost_button("File format")
+        fmt.clicked.connect(self.show_format)
+        body.addWidget(row(btn, fmt))
+        body.addWidget(note(format_help.SHORT, "Hint"))
+        self.lbl_data = note("", "Good")
+        self.lbl_data.setVisible(False)
         body.addWidget(self.lbl_data)
 
-        fmt_card, fbody = card("How the file has to look", format_help.SHORT)
-        sample = QLabel(format_help.EXAMPLE_TABLE)
-        sample.setObjectName("Mono")
-        sample.setStyleSheet(
-            f"background:{theme.SURFACE_ALT}; border:1px solid {theme.BORDER};"
-            f"border-radius:7px; padding:11px; font-family:{theme.MONO_STACK};")
-        fbody.addWidget(sample)
-        self._rules_box = QWidget()
-        rb = QVBoxLayout(self._rules_box)
-        rb.setContentsMargins(0, 4, 0, 0)
-        rb.setSpacing(9)
-        for title, text in format_help.RULES:
-            t = QLabel(title); t.setObjectName("H2")
-            t.setStyleSheet("font-size:12.5px; font-weight:600;")
-            rb.addWidget(t)
-            rb.addWidget(note(text, "Hint"))
-        rb.addWidget(note("Greyscale profiles: " + format_help.GREYSCALE, "Hint"))
-        self._rules_box.setVisible(False)
-        toggle = ghost_button("Show the detailed rules")
-
-        def _toggle():
-            vis = not self._rules_box.isVisible()
-            self._rules_box.setVisible(vis)
-            toggle.setText("Hide the detailed rules" if vis else "Show the detailed rules")
-        toggle.clicked.connect(_toggle)
-        fbody.addWidget(row(toggle, stretch_last=True))
-        fbody.addWidget(self._rules_box)
-
-        ex_card, ebody = card("Or start with an example", format_help.NO_DATA)
+        ex_card, ebody = card("Or try an example")
         self.lst_examples = QListWidget()
-        self.lst_examples.setMinimumHeight(190)
+        self.lst_examples.setMinimumHeight(200)
         for d in ds.DATASETS:
-            it = QListWidgetItem(f"{d.name}\n{d.mineral} / {d.species}")
+            kind = "measured" if d.kind == "measured" else "synthetic"
+            it = QListWidgetItem(f"{d.name.split(' (')[0]}   ·   {kind}")
             it.setData(Qt.UserRole, d.key)
             if not d.exists:
                 it.setFlags(it.flags() & ~Qt.ItemIsEnabled)
-                it.setText(it.text() + "   (file missing)")
             self.lst_examples.addItem(it)
         self.lst_examples.currentItemChanged.connect(self._example_selected)
+        self.lst_examples.itemDoubleClicked.connect(lambda _it: self.load_example())
         ebody.addWidget(self.lst_examples)
-        self.lbl_example = note("Select one to see where its numbers come from.", "Hint")
+        self.lbl_example = note("", "Hint")
         ebody.addWidget(self.lbl_example)
-        b = QPushButton("Load the selected example")
+        b = QPushButton("Load example")
         b.clicked.connect(self.load_example)
-        ebody.addWidget(row(b, stretch_last=True))
-        return page_body(load_card, fmt_card, ex_card)
+        info = ghost_button("Where the data come from")
+        info.clicked.connect(self.show_example_details)
+        ebody.addWidget(row(b, info))
+        return page_body(load_card, ex_card, max_width=640)
 
     def _example_selected(self, item, _prev=None):
         if item is None:
             return
         d = ds.get(item.data(Qt.UserRole))
-        self.lbl_example.setText(d.provenance_banner() +
-                                 (f"\n\nExpected answer: {d.expected}" if d.expected else ""))
-        self.lbl_example.setObjectName("Warn" if d.kind == "synthetic" else "Hint")
-        self.lbl_example.setStyleSheet("")
-        self.lbl_example.style().unpolish(self.lbl_example)
-        self.lbl_example.style().polish(self.lbl_example)
+        src = (f"Measured. {cite(d.citation)}." if d.kind == "measured"
+               else "Synthetic, made by Diffusor with a known answer.")
+        self.lbl_example.setText(f"{src} {d.mineral}, {d.species}.")
+
+    def show_example_details(self):
+        item = self.lst_examples.currentItem()
+        if item is None:
+            return
+        d = ds.get(item.data(Qt.UserRole))
+        parts = [d.provenance_banner(), "", "Expected answer", d.expected]
+        if d.notes:
+            parts += ["", "Notes", d.notes]
+        _text_dialog(self, d.name, "\n".join(parts), 760, 520)
+
+    def show_format(self):
+        _text_dialog(self, "Input file format", format_help.as_plain_text(), 760, 560)
 
     # ================================================================ step 2
     def _page_mineral(self) -> QWidget:
-        c, body = card("Mineral and diffusing species",
-                       "This decides which published diffusion coefficients apply.")
+        c, body = card("Mineral")
         self.cmb_mineral = QComboBox()
         for k, mn in MINERALS.items():
             self.cmb_mineral.addItem(mn.name, k)
@@ -356,115 +430,100 @@ class MainWindow(QMainWindow):
         self.lbl_mineral_note = note("", "Hint")
         body.addWidget(self.lbl_mineral_note)
 
-        o, obody = card("Crystal orientation",
-                        "Diffusion is anisotropic in most of these minerals, so the direction "
-                        "of the traverse matters.")
+        o, obody = card("Traverse direction")
         self.cmb_axis = QComboBox()
-        self.cmb_axis.addItems(["Use the reference axis of the publication",
+        self.cmb_axis.addItems(["Same axis as the experiments",
                                 "a-axis", "b-axis", "c-axis", "Angles to a, b and c"])
         self.cmb_axis.currentIndexChanged.connect(self._on_axis_changed)
-        obody.addWidget(field("Traverse direction", self.cmb_axis))
+        obody.addWidget(self.cmb_axis)
         self.sp_alpha = _spin(0, 180, 90, 1, 1, " deg")
         self.sp_beta = _spin(0, 180, 90, 1, 1, " deg")
         self.sp_gamma = _spin(0, 180, 0, 1, 1, " deg")
-        self._angle_row = row(field("to a", self.sp_alpha), field("to b", self.sp_beta),
-                              field("to c", self.sp_gamma), stretch_last=True)
+        self._angle_row = QWidget()
+        ar = QVBoxLayout(self._angle_row)
+        ar.setContentsMargins(0, 0, 0, 0)
+        ar.addWidget(row(field("to a", self.sp_alpha), field("to b", self.sp_beta),
+                         field("to c", self.sp_gamma), stretch_last=True))
+        ar.addWidget(note("D = Da cos²α + Db cos²β + Dc cos²γ (Costa & Chakraborty 2004)",
+                          "Hint"))
         self._angle_row.setVisible(False)
         obody.addWidget(self._angle_row)
-        obody.addWidget(note(
-            "With angles, Diffusor applies D = D_a cos2(alpha) + D_b cos2(beta) + D_c cos2(gamma) "
-            "after Costa & Chakraborty (2004). The three cosines squared must sum to one.",
-            "Hint"))
 
-        x, xbody = card("Composition",
-                        "The diffusion coefficient depends on composition in most of these "
-                        "minerals.")
+        x, xbody = card("Composition")
         self.sp_xcomp = _spin(0, 1, 0.15, 4, 0.01)
-        xbody.addWidget(field("Representative composition", self.sp_xcomp))
-        self.chk_comp_dep = QCheckBox("Let the fitted profile set the local composition")
+        xbody.addWidget(field("Representative value", self.sp_xcomp))
+        self.chk_comp_dep = QCheckBox("D follows the composition along the profile")
         self.chk_comp_dep.setChecked(True)
         xbody.addWidget(self.chk_comp_dep)
-        xbody.addWidget(note(
-            "With this on, D is re-evaluated at every grid node from the profile itself, which "
-            "is the physically correct treatment and forces the numerical solver. With it off, "
-            "D is constant at the value above and a closed-form solution can be used.", "Hint"))
-        return page_body(c, o, x)
+        return page_body(self._prefill_label(1), c, o, x)
 
     # ================================================================ step 3
     def _page_conditions(self) -> QWidget:
-        c, body = card("Temperature and pressure",
-                       "Give the uncertainty on each: it is propagated by the Monte Carlo, and "
-                       "temperature is almost always the dominant term.")
-        self.sp_T = _spin(300, 2000, 950, 1, 5, " C")
+        c, body = card("Temperature and pressure")
+        self.sp_T = _spin(300, 2000, 950, 1, 5, " °C")
         self.sp_T.valueChanged.connect(self._update_fo2_label)
         self.sp_T_sig = _spin(0, 300, 20, 1, 1, " K")
-        body.addWidget(pair(field("Temperature", self.sp_T),
-                            field("1 sigma", self.sp_T_sig)))
+        body.addWidget(pair(field("Temperature", self.sp_T), field("± 1σ", self.sp_T_sig)))
         self.sp_P = _spin(0, 5000, 200, 1, 10, " MPa")
         self.sp_P.valueChanged.connect(self._update_fo2_label)
         self.sp_P_sig = _spin(0, 2000, 100, 1, 10, " MPa")
-        body.addWidget(pair(field("Pressure", self.sp_P), field("1 sigma", self.sp_P_sig)))
+        body.addWidget(pair(field("Pressure", self.sp_P), field("± 1σ", self.sp_P_sig)))
 
-        f, fbody = card("Oxygen fugacity",
-                        "Given as an offset from a mineral buffer, the buffer is re-evaluated "
-                        "at every sampled temperature, so fO2 and T stay correlated.")
+        f, fbody = card("Oxygen fugacity")
         self.cmb_fo2_mode = QComboBox()
-        self.cmb_fo2_mode.addItems(["Offset from a buffer", "Absolute log10 fO2 (bar)"])
+        self.cmb_fo2_mode.addItems(["Relative to a buffer", "Absolute log fO2 (bar)"])
         self.cmb_fo2_mode.currentIndexChanged.connect(self._update_fo2_label)
         self.cmb_buffer = QComboBox()
         self.cmb_buffer.addItems(available_buffers())
         self.cmb_buffer.setCurrentText("NNO")
         self.cmb_buffer.currentIndexChanged.connect(self._update_fo2_label)
-        fbody.addWidget(pair(field("Specified as", self.cmb_fo2_mode),
+        fbody.addWidget(pair(field("Given as", self.cmb_fo2_mode),
                              field("Buffer", self.cmb_buffer)))
         self.sp_dbuf = _spin(-14, 8, 1.0, 2, 0.1)
         self.sp_dbuf.valueChanged.connect(self._update_fo2_label)
         self.sp_dbuf_sig = _spin(0, 5, 0.3, 2, 0.1)
-        fbody.addWidget(pair(field("Offset / value", self.sp_dbuf),
-                             field("1 sigma", self.sp_dbuf_sig)))
-        self.lbl_fo2 = note("", "Good")
+        fbody.addWidget(pair(field("Value", self.sp_dbuf), field("± 1σ", self.sp_dbuf_sig)))
+        self.lbl_fo2 = note("", "Hint")
         fbody.addWidget(self.lbl_fo2)
 
-        r, rbody = card("Analytical resolution",
-                        "A microbeam averages over its interaction volume, which makes a short "
-                        "profile look more diffused than it is.")
-        self.sp_beam = _spin(0, 20, 0.0, 2, 0.1, " um")
+        r, rbody = card("Analytical resolution")
+        self.cmb_resolution = QComboBox()
+        for label, *_ in RESOLUTION_PRESETS:
+            self.cmb_resolution.addItem(label)
+        self.cmb_resolution.currentIndexChanged.connect(self._on_resolution_changed)
+        self.sp_width = _spin(0, 200, 5.0, 1, 0.5, " um")
+        self.sp_width.valueChanged.connect(self._update_beam_sigma)
+        self.sp_beam = _spin(0, 50, 0.0, 2, 0.1, " um")
+        rbody.addWidget(field("How the profile was measured", self.cmb_resolution))
+        self._width_field = field("Spot or slit width", self.sp_width)
+        rbody.addWidget(pair(self._width_field, field("Beam σ", self.sp_beam)))
+        self.lbl_resolution = note("", "Hint")
+        rbody.addWidget(self.lbl_resolution)
         self.sp_xscale_sig = _spin(0, 0.5, 0.0, 3, 0.005)
-        rbody.addWidget(pair(
-            field("Beam sigma", self.sp_beam, "0 disables the convolution correction"),
-            field("Distance scale 1 sigma", self.sp_xscale_sig,
-                  "relative, e.g. 0.02 for a 2% image calibration")))
-        return page_body(c, f, r)
+        rbody.addWidget(field("Distance scale error (relative, 1σ)", self.sp_xscale_sig))
+        return page_body(self._prefill_label(2), c, f, r)
 
     # ================================================================ step 4
     def _page_model(self) -> QWidget:
-        g, gbody = card("Geometry",
-                        "A petrological choice, not a numerical one. Modelling a 3-D crystal "
-                        "in 1-D always returns a maximum estimate of the time.")
+        g, gbody = card("Geometry")
         self.cmb_geom = QComboBox()
         self.cmb_geom.addItems(["plane", "cylinder", "sphere"])
         self.cmb_geom.currentIndexChanged.connect(self._update_geometry_note)
-        gbody.addWidget(field("Shape", self.cmb_geom))
+        gbody.addWidget(self.cmb_geom)
         self.lbl_geom = note("", "Hint")
         gbody.addWidget(self.lbl_geom)
 
-        b, bbody = card("Boundaries",
-                        "Fixed concentration means an open system held by an infinite melt "
-                        "reservoir; zero flux means a closed system or a symmetry plane.")
+        b, bbody = card("Boundaries")
         self.cmb_bcl = QComboBox(); self.cmb_bcl.addItems(["Fixed concentration", "Zero flux"])
         self.cmb_bcr = QComboBox(); self.cmb_bcr.addItems(["Fixed concentration", "Zero flux"])
-        bbody.addWidget(pair(field("Left end of the traverse", self.cmb_bcl),
-                             field("Right end", self.cmb_bcr)))
+        bbody.addWidget(pair(field("Left end", self.cmb_bcl), field("Right end", self.cmb_bcr)))
+        bbody.addWidget(note("Fixed: held by the melt or a large reservoir. Zero flux: a "
+                             "closed system or the crystal centre.", "Hint"))
 
-        i, ibody = card("Initial condition",
-                        "The largest single source of systematic error. A profile that grew "
-                        "partly by crystal growth will give a spuriously long time if all of "
-                        "it is attributed to diffusion.")
+        i, ibody = card("Initial profile")
         self.cmb_ic = QComboBox()
-        self.cmb_ic.addItems(["Step between two plateaus",
-                              "Equilibrium profile from the anorthite gradient"])
         self.cmb_ic.currentIndexChanged.connect(self._on_ic_changed)
-        ibody.addWidget(field("Shape of the initial profile", self.cmb_ic))
+        ibody.addWidget(self.cmb_ic)
         self.lbl_ic = note("", "Hint")
         ibody.addWidget(self.lbl_ic)
         self.sp_x0 = _spin(-1e5, 1e5, 0.0, 3, 1, " um")
@@ -475,88 +534,88 @@ class MainWindow(QMainWindow):
         sc = QVBoxLayout(self._step_controls)
         sc.setContentsMargins(0, 0, 0, 0)
         sc.setSpacing(10)
-        sc.addWidget(pair(field("Interface position x0", self.sp_x0),
+        sc.addWidget(pair(field("Step position", self.sp_x0),
                           field("Initial smoothing", self.sp_smooth)))
-        sc.addWidget(pair(field("Plateau on the left", self.sp_cl),
-                          field("Plateau on the right", self.sp_cr)))
+        sc.addWidget(pair(field("Left plateau", self.sp_cl), field("Right plateau", self.sp_cr)))
         bg = QPushButton("Guess from the data")
         bg.clicked.connect(self._guess_initial)
-        sc.addWidget(row(bg, stretch_last=True))
+        sc.addWidget(row(bg))
         ibody.addWidget(self._step_controls)
-        self.chk_free_x0 = QCheckBox("Let the fit adjust x0")
+        self.chk_free_x0 = QCheckBox("Fit the step position")
         self.chk_free_x0.setChecked(True)
-        self.chk_free_plateaus = QCheckBox("Let the fit adjust the plateaus")
-        ibody.addWidget(self.chk_free_x0)
-        ibody.addWidget(self.chk_free_plateaus)
+        self.chk_free_plateaus = QCheckBox("Fit the plateaus")
+        ibody.addWidget(pair(self.chk_free_x0, self.chk_free_plateaus))
 
         n, nbody = card("Solver and thermal history")
         self.sp_nodes = QSpinBox(); self.sp_nodes.setRange(51, 4001); self.sp_nodes.setValue(301)
         self.chk_force_num = QCheckBox("Always use the numerical solver")
         nbody.addWidget(pair(field("Grid nodes", self.sp_nodes), self.chk_force_num))
-        self.chk_cooling = QCheckBox("Linear cooling rather than isothermal")
-        self.sp_Tend = _spin(300, 2000, 900, 1, 5, " C")
+        self.chk_cooling = QCheckBox("Linear cooling")
+        self.sp_Tend = _spin(300, 2000, 900, 1, 5, " °C")
         self.sp_Tend.setEnabled(False)
         self.chk_cooling.toggled.connect(self.sp_Tend.setEnabled)
-        nbody.addWidget(self.chk_cooling)
-        nbody.addWidget(field("Final temperature", self.sp_Tend))
-        nbody.addWidget(note(
-            "Diffusor uses a closed-form solution whenever one is exactly valid and the "
-            "Crank-Nicolson solver otherwise, and tells you which it used.", "Hint"))
+        nbody.addWidget(pair(self.chk_cooling, field("Final temperature", self.sp_Tend)))
         self._update_geometry_note()
-        return page_body(g, b, i, n)
+        return page_body(self._prefill_label(3), g, b, i, n)
 
     # ================================================================ step 5
     def _page_coefficient(self) -> QWidget:
-        c, body = card("Diffusion coefficient",
-                       "Tick one to fit with. Tick several and Diffusor will fit them all and "
-                       "show the spread, which is usually larger than the analytical "
-                       "uncertainty.")
+        c, body = card("Diffusion coefficient")
+        body.addWidget(note("Tick one to fit. Tick several to compare them.", "Hint"))
         self.lst_coef = QListWidget()
         self.lst_coef.setMinimumHeight(230)
         self.lst_coef.currentItemChanged.connect(self._coefficient_selected)
         body.addWidget(self.lst_coef)
-        b = ghost_button("Show the full equation, ranges and citation")
-        b.clicked.connect(lambda: self.show_coefficient_info())
-        body.addWidget(row(b, stretch_last=True))
         self.lbl_coef = note("", "Hint")
         body.addWidget(self.lbl_coef)
-        return page_body(c)
+        b = ghost_button("Equation, ranges and citation")
+        b.clicked.connect(lambda: self.show_coefficient_info())
+        body.addWidget(row(b))
+        return page_body(self._prefill_label(4), c)
 
     # ================================================================ step 6
     def _page_uncertainty(self) -> QWidget:
-        c, body = card("Monte Carlo",
-                       "Every draw re-runs the whole fit, so correlations between the sampled "
-                       "quantities are honoured exactly rather than assumed away.")
+        c, body = card("Monte Carlo")
         self.sp_draws = QSpinBox(); self.sp_draws.setRange(20, 100000); self.sp_draws.setValue(500)
         self.sp_seed = QSpinBox(); self.sp_seed.setRange(0, 2 ** 31 - 1); self.sp_seed.setValue(12345)
-        body.addWidget(pair(field("Draws", self.sp_draws, "500 is usually enough; 1000 for a paper"),
-                            field("Random seed", self.sp_seed, "recorded, so runs are reproducible")))
+        body.addWidget(pair(field("Draws", self.sp_draws, "500 for a quick look, 1000 for a paper"),
+                            field("Random seed", self.sp_seed)))
 
-        s, sbody = card("What to sample")
+        s, sbody = card("Sample")
         self.chk_mc_T = QCheckBox("Temperature"); self.chk_mc_T.setChecked(True)
         self.chk_mc_f = QCheckBox("Oxygen fugacity"); self.chk_mc_f.setChecked(True)
         self.chk_mc_P = QCheckBox("Pressure"); self.chk_mc_P.setChecked(True)
         self.chk_mc_D = QCheckBox("Diffusion coefficient"); self.chk_mc_D.setChecked(True)
         self.chk_mc_n = QCheckBox("Measurement noise"); self.chk_mc_n.setChecked(True)
         self.chk_mc_x = QCheckBox("Distance scale")
-        for w in (self.chk_mc_T, self.chk_mc_f, self.chk_mc_P, self.chk_mc_D,
-                  self.chk_mc_n, self.chk_mc_x):
-            sbody.addWidget(w)
-        self.chk_contrib = QCheckBox("Also rank how much each source contributes (slower)")
+        sbody.addWidget(pair(self.chk_mc_T, self.chk_mc_f))
+        sbody.addWidget(pair(self.chk_mc_P, self.chk_mc_D))
+        sbody.addWidget(pair(self.chk_mc_n, self.chk_mc_x))
+        self.chk_contrib = QCheckBox("Rank what each source contributes (slower)")
         sbody.addWidget(self.chk_contrib)
 
-        d, dbody = card("How the diffusion coefficient is sampled")
+        d, dbody = card("How the coefficient is sampled")
         self.cmb_dmode = QComboBox()
-        self.cmb_dmode.addItems(["auto", "covariance", "logD_at_T", "independent"])
-        dbody.addWidget(field("Sampling mode", self.cmb_dmode))
-        dbody.addWidget(note(
-            "auto picks the best available for the chosen coefficient. covariance samples the "
-            "published parameter covariance. logD_at_T samples ln D directly at the working "
-            "temperature using the scatter the paper reports. independent samples each "
-            "Arrhenius parameter on its own, which ignores the strong correlation between "
-            "ln D0 and Q and inflates the uncertainty; it is offered only so older published "
-            "estimates can be reproduced.", "Hint"))
+        for label, key in (("Best available", "auto"), ("Published covariance", "covariance"),
+                           ("Scatter of log D at T", "logD_at_T"),
+                           ("Each parameter independently", "independent")):
+            self.cmb_dmode.addItem(label, key)
+        self.cmb_dmode.currentIndexChanged.connect(self._on_dmode_changed)
+        dbody.addWidget(self.cmb_dmode)
+        self.lbl_dmode = note("", "Hint")
+        dbody.addWidget(self.lbl_dmode)
+        self._on_dmode_changed()
         return page_body(c, s, d)
+
+    def _on_dmode_changed(self):
+        texts = {
+            "auto": "Uses the covariance when the paper gives one, otherwise the scatter of log D.",
+            "covariance": "Draws the Arrhenius parameters together from their covariance.",
+            "logD_at_T": "Draws log D at the working temperature from the reported scatter.",
+            "independent": "Ignores the correlation between D0 and Q and overstates the "
+                           "uncertainty. Use it only to reproduce older estimates.",
+        }
+        self.lbl_dmode.setText(texts[self.cmb_dmode.currentData()])
 
     # ================================================================ results
     def _page_results(self) -> QWidget:
@@ -566,7 +625,6 @@ class MainWindow(QMainWindow):
         v.setSpacing(0)
 
         split = QSplitter(Qt.Horizontal)
-        # --- summary sidebar
         self.summary_inner = QWidget()
         self.summary_inner.setObjectName("Summary")
         self.summary_layout = QVBoxLayout(self.summary_inner)
@@ -589,7 +647,7 @@ class MainWindow(QMainWindow):
 
         bar = QWidget(); bar.setObjectName("Page")
         bh = QHBoxLayout(bar)
-        bh.setContentsMargins(18, 11, 18, 11)
+        bh.setContentsMargins(18, 10, 18, 10)
         bh.setSpacing(9)
         self.btn_fit = primary_button("Fit")
         self.btn_fit.clicked.connect(self.run_fit)
@@ -642,9 +700,8 @@ class MainWindow(QMainWindow):
         self.summary_layout.addWidget(w)
 
     def _rebuild_summary(self):
-        # setParent(None) detaches immediately; deleteLater alone leaves the old
-        # widgets on screen until the event loop catches up, which paints stale
-        # text over the new summary.
+        # setParent(None) detaches at once. deleteLater alone leaves the old widgets
+        # painted until the event loop catches up.
         while self.summary_layout.count():
             item = self.summary_layout.takeAt(0)
             w = item.widget()
@@ -682,7 +739,7 @@ class MainWindow(QMainWindow):
             if self.dataset is not None:
                 self._summary_line("provenance",
                                    "measured, published" if self.dataset.kind == "measured"
-                                   else "synthetic, not a measurement")
+                                   else "synthetic")
         else:
             self._summary_line("", "no data loaded")
 
@@ -692,24 +749,24 @@ class MainWindow(QMainWindow):
                            f"{self.cmb_axis.currentText().lower()}")
 
         self._summary_head("Conditions", 2)
-        self._summary_line("temperature", f"{self.sp_T.value():.0f} C  +/- {self.sp_T_sig.value():.0f}")
-        self._summary_line("pressure", f"{self.sp_P.value():.0f} MPa  +/- {self.sp_P_sig.value():.0f}")
+        self._summary_line("temperature", f"{self.sp_T.value():.0f} °C ± {self.sp_T_sig.value():.0f}")
+        self._summary_line("pressure", f"{self.sp_P.value():.0f} MPa ± {self.sp_P_sig.value():.0f}")
         if self.cmb_fo2_mode.currentIndex() == 0:
             self._summary_line("oxygen fugacity",
                                f"{self.cmb_buffer.currentText()} {self.sp_dbuf.value():+.2f} "
-                               f"+/- {self.sp_dbuf_sig.value():.2f}")
+                               f"± {self.sp_dbuf_sig.value():.2f}")
         else:
-            self._summary_line("oxygen fugacity", f"log10 fO2 = {self.sp_dbuf.value():.2f} bar")
+            self._summary_line("oxygen fugacity", f"log fO2 {self.sp_dbuf.value():.2f} bar")
         if self.sp_beam.value() > 0:
-            self._summary_line("beam sigma", f"{self.sp_beam.value():.2f} um")
+            self._summary_line("beam σ", f"{self.sp_beam.value():.2f} um "
+                               f"({self.cmb_resolution.currentText().lower()})")
 
         self._summary_head("Model", 3)
         self._summary_line("geometry", self.cmb_geom.currentText())
-        if self.cmb_ic.currentIndex() == 1 and self.an_values is not None:
-            self._summary_line("initial condition",
-                               "equilibrium profile from the anorthite gradient")
+        if self._equilibrium_ic():
+            self._summary_line("initial profile", "equilibrium with the anorthite zoning")
         else:
-            self._summary_line("initial condition",
+            self._summary_line("initial profile",
                                f"step at {self.sp_x0.value():.1f} um, "
                                f"{self.sp_cl.value():.4g} to {self.sp_cr.value():.4g}")
         self._summary_line("boundaries",
@@ -742,13 +799,12 @@ class MainWindow(QMainWindow):
         self.step = index
         self.pages.setCurrentIndex(index)
         for i, lab in enumerate(self.step_labels):
-            lab.setObjectName("StepDotActive" if i == index
-                              else ("StepDotDone" if i < index else "StepDot"))
-            lab.style().unpolish(lab); lab.style().polish(lab)
+            _repolish(lab, "StepDotActive" if i == index
+                      else ("StepDotDone" if i < index else "StepDot"))
         self.btn_back.setVisible(index > 0)
         if index == RESULTS:
             self.btn_next.setVisible(False)
-            self.lbl_footer.setText("Change anything from the summary on the left.")
+            self.lbl_footer.setText("Click edit in the summary to change a setting.")
             self._rebuild_summary()
         else:
             self.btn_next.setVisible(True)
@@ -758,8 +814,7 @@ class MainWindow(QMainWindow):
 
     def _next(self):
         if self.step == 0 and self.profile is None:
-            QMessageBox.information(self, "No data",
-                                    "Load a file or one of the example datasets first.")
+            QMessageBox.information(self, "No data", "Load a file or an example first.")
             return
         self._go(self.step + 1)
 
@@ -778,15 +833,14 @@ class MainWindow(QMainWindow):
             return
         d = ds.get(item.data(Qt.UserRole))
         if not d.exists:
-            QMessageBox.warning(self, "File missing",
-                                f"{d.filename} is not in the examples folder. "
-                                "Run scripts/make_examples.py to regenerate it.")
+            QMessageBox.warning(self, "File missing", f"{d.filename} is not in the examples folder.")
             return
         self._load(d.path, dataset=d)
 
     def _load(self, path: Path, dataset: Optional[ds.ExampleDataset]):
         try:
             df = read_table(path)
+            an = (None, True)
             if dataset is not None:
                 spec = ProfileSpec(**dataset.spec)
             else:
@@ -794,15 +848,26 @@ class MainWindow(QMainWindow):
                 if dlg.exec() != QDialog.Accepted:
                     return
                 spec = dlg.spec()
+                an = dlg.an_column()
             self.profile = build_profile(df, spec, source=str(path))
             self.dataset = dataset
             self.an_values = None
+            for lab in self._prefill.values():
+                lab.setVisible(False)
             p = self.profile
-            head = f"{path.name}: {len(p)} points, {p.x.min():.2f} to {p.x.max():.2f} um"
             if dataset is not None:
-                head += "\n\n" + dataset.provenance_banner()
                 self._apply_dataset_settings(dataset, df)
-            self.lbl_data.setText(head + "\n" + p.spec.describe())
+                msg = (f"Loaded {dataset.name.split(' (')[0]}, {len(p)} points. The example "
+                       "also filled in the mineral, conditions, model and coefficient. "
+                       "Each step shows what it set.")
+            else:
+                msg = f"Loaded {path.name}, {len(p)} points from {p.x.min():.1f} to {p.x.max():.1f} um."
+                if an[0]:
+                    vals = self.profile.column(an[0])
+                    self.an_values = vals / 100.0 if an[1] else vals
+                self._refresh_ic_options()
+            self.lbl_data.setText(msg)
+            self.lbl_data.setVisible(True)
             self._log(f"loaded {path}")
             self._log("  " + p.spec.describe())
             for n in p.notes:
@@ -816,7 +881,7 @@ class MainWindow(QMainWindow):
             QMessageBox.critical(self, "Could not load the file", traceback.format_exc())
 
     def _apply_dataset_settings(self, d: ds.ExampleDataset, df):
-        """Pre-fill the steps with the settings that go with a bundled dataset."""
+        """Fill in the later steps from a bundled dataset and say so on each step."""
         s = d.settings
         keys = [self.cmb_mineral.itemData(i) for i in range(self.cmb_mineral.count())]
         if d.mineral in keys:
@@ -829,10 +894,12 @@ class MainWindow(QMainWindow):
         if "fo2_absolute" in s:
             self.cmb_fo2_mode.setCurrentIndex(1)
             self.sp_dbuf.setValue(s["fo2_absolute"])
+            fo2 = f"log fO2 {s['fo2_absolute']:g} bar"
         else:
             self.cmb_fo2_mode.setCurrentIndex(0)
             self.cmb_buffer.setCurrentText(s.get("buffer", "NNO"))
             self.sp_dbuf.setValue(s.get("delta_buffer", 0.0))
+            fo2 = f"{s.get('buffer', 'NNO')} {s.get('delta_buffer', 0.0):+g}"
         self.sp_dbuf_sig.setValue(s.get("sigma_delta", 0.3))
         axis = s.get("axis")
         self.cmb_axis.setCurrentIndex({"a": 1, "b": 2, "c": 3}.get(axis, 0))
@@ -840,8 +907,6 @@ class MainWindow(QMainWindow):
         self.chk_comp_dep.setChecked(bool(s.get("composition_dependent", False)))
         if "x_composition" in s:
             self.sp_xcomp.setValue(s["x_composition"])
-        self.cmb_ic.setCurrentIndex(
-            1 if s.get("initial_condition") == "equilibrium_plag" else 0)
         want = s.get("coefficient")
         self._refresh_coefficients()
         for i in range(self.lst_coef.count()):
@@ -856,8 +921,28 @@ class MainWindow(QMainWindow):
                 vals = vals / 100.0
             self.an_values = vals
             self.sp_xcomp.setValue(float(np.nanmean(vals)))
-            self._log(f"  anorthite profile read from '{an_col}' "
+            self._log(f"  anorthite read from '{an_col}' "
                       f"(X_An {np.nanmin(vals):.2f} to {np.nanmax(vals):.2f})")
+        self._refresh_ic_options()
+        self._select_ic("equilibrium_plag" if s.get("initial_condition") == "equilibrium_plag"
+                        else "step")
+
+        name = d.name.split(" (")[0]
+        head = f"Set by the {name} example: "
+        self._show_prefill(1, head + f"{self.cmb_mineral.currentText()}, {d.species}, "
+                           f"{self.cmb_axis.currentText().lower()}.")
+        self._show_prefill(2, head + f"{s.get('T_C', 950):g} ± {s.get('sigma_T_K', 20):g} °C, "
+                           f"{s.get('P_MPa', 200):g} ± {s.get('sigma_P_MPa', 100):g} MPa, {fo2}.")
+        self._show_prefill(3, head + f"{s.get('geometry', 'plane')} geometry, "
+                           f"{self.cmb_ic.currentText().lower()}.")
+        if want:
+            self._show_prefill(4, head + get_coefficient(want).label + ".")
+
+    def _show_prefill(self, step: int, text: str):
+        lab = self._prefill.get(step)
+        if lab is not None:
+            lab.setText(text)
+            lab.setVisible(True)
 
     # ================================================================ reactions
     def _log(self, msg: str):
@@ -871,10 +956,10 @@ class MainWindow(QMainWindow):
         self.cmb_species.addItems(mineral.species_keys())
         self.cmb_species.blockSignals(False)
         self.cmb_axis.setEnabled(not mineral.isotropic)
-        self.lbl_mineral_note.setText(
-            (f"Modelled variable: {mineral.composition_variable}. " if mineral.composition_variable
-             else "") + mineral.notes)
+        cv = mineral.composition_variable
+        self.lbl_mineral_note.setText(f"Modelled as {cv.label} = {cv.definition}." if cv else "")
         self._refresh_coefficients()
+        self._refresh_ic_options()
         self._update_fo2_label()
 
     def _on_axis_changed(self):
@@ -910,42 +995,75 @@ class MainWindow(QMainWindow):
             return
         c = get_coefficient(item.data(Qt.UserRole))
         parts = [c.equation_text]
-        if c.superseded_by or c.superseded_note:
-            parts.append("SUPERSEDED. " + c.superseded_note)
+        if c.superseded_by:
+            parts.append(f"Superseded by {cite(c.superseded_by)}.")
+        elif c.superseded_note:
+            parts.append("Superseded. See the details.")
         if not c.verified:
-            parts.append("Coefficients not verified against the primary publication: "
-                         + c.verified_from)
-        self.lbl_coef.setText("\n\n".join(parts))
-        self.lbl_coef.setObjectName(
-            "Warn" if (c.superseded_by or c.superseded_note or not c.verified) else "Hint")
-        self.lbl_coef.style().unpolish(self.lbl_coef)
-        self.lbl_coef.style().polish(self.lbl_coef)
+            parts.append("Not checked against the original paper. See the details.")
+        self.lbl_coef.setText("\n".join(parts))
+        _repolish(self.lbl_coef, "Warn" if (c.superseded_by or c.superseded_note
+                                            or not c.verified) else "Hint")
+
+    # --- initial profile -----------------------------------------------------
+    def _refresh_ic_options(self):
+        current = self.cmb_ic.currentData()
+        self.cmb_ic.blockSignals(True)
+        self.cmb_ic.clear()
+        self.cmb_ic.addItem("Sharp step between two plateaus", "step")
+        if self.cmb_mineral.currentData() == "plagioclase" and self.an_values is not None:
+            self.cmb_ic.addItem("Equilibrium with the anorthite zoning", "equilibrium_plag")
+        self.cmb_ic.blockSignals(False)
+        self._select_ic(current or "step")
+
+    def _select_ic(self, key: str):
+        i = self.cmb_ic.findData(key)
+        self.cmb_ic.setCurrentIndex(i if i >= 0 else 0)
+        self._on_ic_changed()
+
+    def _equilibrium_ic(self) -> bool:
+        return self.cmb_ic.currentData() == "equilibrium_plag" and self.an_values is not None
 
     def _on_ic_changed(self):
-        equil = self.cmb_ic.currentIndex() == 1
+        equil = self.cmb_ic.currentData() == "equilibrium_plag"
         self._step_controls.setVisible(not equil)
         self.chk_free_x0.setEnabled(not equil)
         self.chk_free_plateaus.setEnabled(not equil)
         if equil:
-            ok = self.an_values is not None
-            msg = ("C(x) = C0 exp(A_i X_An(x) / R T), the quasi-steady state a fast trace "
-                   "element relaxes to while the anorthite profile stays frozen (Dohmen, Faak "
-                   "& Blundy 2017, Appendix eq. A13; Costa et al. 2003; Zellmer et al. 1999). "
-                   "Diffusion then runs from this profile towards the boundary values.")
-            if not ok:
-                msg += ("\n\nNo anorthite column is loaded, so this cannot be used. Load a "
-                        "dataset that carries one.")
-            self.lbl_ic.setText(msg)
-            self.lbl_ic.setObjectName("Hint" if ok else "Warn")
+            self.lbl_ic.setText("The trace element starts in equilibrium with the measured "
+                                "anorthite profile, C = C0 exp(A X_An / RT) (Dohmen et al. "
+                                "2017, eq. A13).")
         else:
-            self.lbl_ic.setText("Two plateaus meeting at a sharp interface: the classic "
-                                "diffusion couple (Crank 1975 eq. 2.14).")
-            self.lbl_ic.setObjectName("Hint")
-        self.lbl_ic.style().unpolish(self.lbl_ic)
-        self.lbl_ic.style().polish(self.lbl_ic)
+            self.lbl_ic.setText("Crank (1975) eq. 2.14")
 
     def _update_geometry_note(self):
         self.lbl_geom.setText(Geometry(self.cmb_geom.currentText()).describe())
+
+    # --- resolution --------------------------------------------------------------
+    def _on_resolution_changed(self):
+        label, kind, width, sigma, hint = RESOLUTION_PRESETS[self.cmb_resolution.currentIndex()]
+        self._width_field.setVisible(kind is not None)
+        custom = label == "Custom sigma"
+        self.sp_beam.setReadOnly(not custom)
+        if kind is not None:
+            self.sp_width.blockSignals(True)
+            self.sp_width.setValue(width)
+            self.sp_width.blockSignals(False)
+            rule = ("σ = diameter / 4 for an evenly lit round spot." if kind == "spot"
+                    else "σ = width / √12 for an evenly lit slit.")
+            self.lbl_resolution.setText(f"{hint} {rule}")
+        else:
+            self.lbl_resolution.setText(hint)
+        if sigma is not None:
+            self.sp_beam.setValue(sigma)
+        self._update_beam_sigma()
+
+    def _update_beam_sigma(self):
+        kind = RESOLUTION_PRESETS[self.cmb_resolution.currentIndex()][1]
+        if kind == "spot":
+            self.sp_beam.setValue(self.sp_width.value() / 4.0)
+        elif kind == "slit":
+            self.sp_beam.setValue(self.sp_width.value() / np.sqrt(12.0))
 
     def _update_fo2_label(self):
         try:
@@ -953,10 +1071,10 @@ class MainWindow(QMainWindow):
             P = self.sp_P.value() * 1e6
             if self.cmb_fo2_mode.currentIndex() == 0:
                 lf = log_fo2_from_delta(self.cmb_buffer.currentText(), self.sp_dbuf.value(), T, P)
-                txt = (f"log10 fO2 = {lf:.3f} bar = {lf + 5:.3f} Pa, from Frost (1991) Table 1")
+                txt = f"log fO2 = {lf:.2f} bar ({lf + 5:.2f} Pa), buffer from Frost (1991)"
             else:
                 lf = self.sp_dbuf.value()
-                txt = f"log10 fO2 = {lf:.3f} bar = {lf + 5:.3f} Pa (absolute)"
+                txt = f"log fO2 = {lf:.2f} bar ({lf + 5:.2f} Pa)"
             self.lbl_fo2.setText(txt)
             self.cmb_buffer.setEnabled(self.cmb_fo2_mode.currentIndex() == 0)
         except Exception as exc:
@@ -971,7 +1089,7 @@ class MainWindow(QMainWindow):
         self.sp_cr.setValue(ic.params["C_right"])
         if self.an_values is None:
             self.sp_xcomp.setValue(float(np.mean(self.profile.C)))
-        self._log("initial condition: " + ic.describe())
+        self._log("initial profile: " + ic.describe())
 
     # ================================================================ model
     def _checked_keys(self) -> List[str]:
@@ -1001,7 +1119,7 @@ class MainWindow(QMainWindow):
         cond = self._conditions(coef)
         mineral = get_mineral(self.cmb_mineral.currentData())
         species = self.cmb_species.currentText()
-        if self.cmb_ic.currentIndex() == 1 and self.an_values is not None:
+        if self._equilibrium_ic():
             ic = InitialCondition(
                 "equilibrium_plag",
                 {"x_an_x": np.asarray(self.profile.x, dtype=float),
@@ -1051,7 +1169,7 @@ class MainWindow(QMainWindow):
 
     def _free_parameters(self):
         free = ["t"]
-        if self.cmb_ic.currentIndex() == 1 and self.an_values is not None:
+        if self._equilibrium_ic():
             return free
         if self.chk_free_x0.isChecked():
             free.append("x0")
@@ -1069,7 +1187,7 @@ class MainWindow(QMainWindow):
             sigma_log_fo2=self.sp_dbuf_sig.value() if self.chk_mc_f.isChecked() else 0.0,
             sigma_P_Pa=self.sp_P_sig.value() * 1e6 if self.chk_mc_P.isChecked() else 0.0,
             sample_coefficient=self.chk_mc_D.isChecked(),
-            coefficient_mode=self.cmb_dmode.currentText(),
+            coefficient_mode=self.cmb_dmode.currentData(),
             sample_measurement_noise=self.chk_mc_n.isChecked(),
             sigma_distance_scale=self.sp_xscale_sig.value() if self.chk_mc_x.isChecked() else 0.0)
 
@@ -1080,6 +1198,26 @@ class MainWindow(QMainWindow):
         return f"{mineral.composition_variable.label} ({self.cmb_species.currentText()})"
 
     # ================================================================ running
+    # Worker signals are connected only to methods of this window. Qt then delivers
+    # them on the interface thread. A lambda has no thread of its own, so it would
+    # run on the worker thread and touch widgets from there, which crashes.
+    def _running(self) -> bool:
+        return any(t.isRunning() for t, _ in self._jobs)
+
+    def _launch(self, worker, busy_max: int = 0) -> bool:
+        if self._running():
+            self.statusBar().showMessage("Still working. Wait or press Stop.")
+            return False
+        self._busy(True, busy_max)
+        thread = start(worker)
+        self._jobs.append((thread, worker))
+        thread.finished.connect(self._reap_jobs)
+        return True
+
+    @Slot()
+    def _reap_jobs(self):
+        self._jobs = [(t, w) for t, w in self._jobs if not t.isFinished()]
+
     def _busy(self, on: bool, maximum: int = 0):
         for b in (self.btn_fit, self.btn_cmp, self.btn_mc):
             b.setEnabled(not on)
@@ -1089,18 +1227,24 @@ class MainWindow(QMainWindow):
         self.progress.setValue(0)
 
     def stop_work(self):
-        for w in self._workers:
+        for _, w in self._jobs:
             if hasattr(w, "abort"):
                 w.abort()
         self._log("stop requested")
+
+    def closeEvent(self, event):
+        self.stop_work()
+        for t, _ in self._jobs:
+            t.quit()
+            t.wait(3000)
+        super().closeEvent(event)
 
     def _ready(self) -> bool:
         if self.profile is None:
             QMessageBox.information(self, "No data", "Load a profile first.")
             return False
         if not self._checked_keys():
-            QMessageBox.information(self, "No coefficient",
-                                    "Choose a diffusion coefficient on step 5.")
+            QMessageBox.information(self, "No coefficient", "Choose a coefficient on step 5.")
             return False
         return True
 
@@ -1113,13 +1257,12 @@ class MainWindow(QMainWindow):
             QMessageBox.critical(self, "Model error", traceback.format_exc())
             return
         p = self.profile
-        self._busy(True)
         w = FitWorker(model, p.x, p.C, p.sigma, self._free_parameters(), 1e2, 3.2e12)
-        self._workers = [w]
         w.finished.connect(self._fit_done)
         w.failed.connect(self._work_failed)
-        self._threads.append(start(w))
+        self._launch(w)
 
+    @Slot(object)
     def _fit_done(self, res):
         self._busy(False)
         self.fit_result = res
@@ -1138,7 +1281,7 @@ class MainWindow(QMainWindow):
         keys = self._checked_keys()
         if len(keys) < 2:
             QMessageBox.information(self, "Tick at least two",
-                                    "Go back to step 5 and tick two or more coefficients.")
+                                    "Tick two or more coefficients on step 5.")
             return
         try:
             models = {get_coefficient(k).label: self._model(k) for k in keys}
@@ -1146,44 +1289,44 @@ class MainWindow(QMainWindow):
             QMessageBox.critical(self, "Model error", traceback.format_exc())
             return
         p = self.profile
-        self._busy(True, len(models))
         w = CompareWorker(models, p.x, p.C, p.sigma, self._free_parameters(), 1e2, 3.2e12)
-        self._workers = [w]
-        w.progress.connect(lambda i, n, k: (self.progress.setValue(i),
-                                            self.statusBar().showMessage(f"{i}/{n}: {k}")))
+        w.progress.connect(self._compare_progress)
         w.finished.connect(self._compare_done)
         w.failed.connect(self._work_failed)
-        self._threads.append(start(w))
+        self._launch(w, len(models))
 
+    @Slot(int, int, str)
+    def _compare_progress(self, i, n, key):
+        self.progress.setValue(i)
+        self.statusBar().showMessage(f"{i}/{n}: {key}")
+
+    @Slot(object)
     def _compare_done(self, results):
         self._busy(False)
         self.compare_results = results
         ok = {k: r for k, r in results.items() if not isinstance(r, Exception)}
-        lines = ["Comparison of diffusion coefficients", "=" * 62]
+        lines = []
         for k, r in results.items():
             if isinstance(r, Exception):
-                lines.append(f"{k}\n   FAILED: {r}")
+                lines.append(f"{k}\n   failed: {r}")
                 continue
-            lines.append(f"{k}\n   t = {human_time(r.t_seconds):<14s} "
-                         f"reduced chi2 = {r.stats.reduced_chi2:.3g}   "
-                         f"R2 = {r.stats.r_squared:.4f}")
+            lines.append(f"{k}\n   {human_time(r.t_seconds):<14s} "
+                         f"reduced chi2 {r.stats.reduced_chi2:.3g}   R2 {r.stats.r_squared:.4f}")
             c = r.model.coefficient
-            if c.superseded_by or c.superseded_note:
-                lines.append("   [superseded] " + c.superseded_note[:160])
+            if c.superseded_by:
+                lines.append(f"   superseded by {cite(c.superseded_by)}")
             elif not c.verified:
-                lines.append("   [coefficients not verified against the primary publication]")
+                lines.append("   not checked against the original paper")
         if len(ok) > 1:
             ts = [r.t_seconds for r in ok.values()]
-            lines += ["", f"Spread: {human_time(min(ts))} to {human_time(max(ts))}, "
-                          f"a factor of {max(ts)/min(ts):.1f} between the extremes.",
-                      "That spread is the real uncertainty on the choice of coefficient, and it "
-                      "is usually larger than the analytical uncertainty on any one of them."]
+            lines += ["", f"Range {human_time(min(ts))} to {human_time(max(ts))}, "
+                          f"a factor of {max(ts) / min(ts):.1f}."]
         self.plot.show_comparison(ok, y_label=self._y_label())
         if ok:
             self.fit_result = next(iter(ok.values()))
         self._rebuild_summary()
         self._log("comparison complete")
-        _text_dialog(self, "Coefficient comparison", "\n".join(lines), 820, 520)
+        _text_dialog(self, "Coefficient comparison", "\n".join(lines), 820, 460)
 
     def run_mc(self):
         if not self._ready():
@@ -1195,20 +1338,27 @@ class MainWindow(QMainWindow):
             return
         p = self.profile
         n = self.sp_draws.value()
-        self._busy(True, n)
         w = MonteCarloWorker(model, p.x, p.C, p.sigma, self._budget(), n,
                              self.sp_seed.value(), self._free_parameters(), 1e2, 3.2e12,
                              do_contributions=self.chk_contrib.isChecked(),
                              contribution_draws=max(40, n // 5))
-        self._workers = [w]
-        w.progress.connect(lambda i, tot: self.progress.setValue(i))
-        w.stage.connect(lambda s: self.statusBar().showMessage(s))
+        w.progress.connect(self._mc_progress)
+        w.stage.connect(self._mc_stage)
         w.finished.connect(self._mc_done)
         w.failed.connect(self._work_failed)
-        self._threads.append(start(w))
-        self._log(f"Monte Carlo: {n} draws, seed {self.sp_seed.value()}, "
-                  f"sampling {', '.join(self._budget().active_sources())}")
+        if self._launch(w, n):
+            self._log(f"Monte Carlo: {n} draws, seed {self.sp_seed.value()}, "
+                      f"sampling {', '.join(self._budget().active_sources())}")
 
+    @Slot(int, int)
+    def _mc_progress(self, i, total):
+        self.progress.setValue(i)
+
+    @Slot(str)
+    def _mc_stage(self, stage):
+        self.statusBar().showMessage(stage)
+
+    @Slot(object)
     def _mc_done(self, res):
         self._busy(False)
         self.mc_result = res
@@ -1222,6 +1372,7 @@ class MainWindow(QMainWindow):
         self._log("Monte Carlo complete: median " + human_time(res.median))
         _text_dialog(self, "Monte Carlo result", res.summary(), 780, 460)
 
+    @Slot(str)
     def _work_failed(self, msg: str):
         self._busy(False)
         self._log(msg)
@@ -1232,8 +1383,7 @@ class MainWindow(QMainWindow):
                    if "SUPERSEDED" in w or "NOT verified" in w or "semi-infinite" in w
                    or "resolution limit" in w]
         if serious:
-            QMessageBox.warning(self, "Check these before you use the result",
-                                "\n\n".join(serious))
+            QMessageBox.warning(self, "Check before using the result", "\n\n".join(serious))
 
     # ================================================================ dialogs
     def show_methods(self):
@@ -1281,9 +1431,7 @@ class MainWindow(QMainWindow):
         from .. import __version__
         QMessageBox.about(self, "About Diffusor", (
             f"<b>Diffusor {__version__}</b><br><br>"
-            "Diffusion chronometry with analytical (Crank 1975) and numerical "
-            "(Crank-Nicolson) solvers, a registry of literature diffusion coefficients, "
-            "and Monte Carlo error propagation that keeps temperature, oxygen fugacity "
-            "and the Arrhenius parameters correlated.<br><br>"
-            "Every equation and coefficient carries its citation, and the Methods view "
-            "lists the references used by the current run."))
+            "Diffusion chronometry with closed-form and Crank-Nicolson solvers, a registry "
+            "of published diffusion coefficients, and Monte Carlo error propagation.<br><br>"
+            "Every equation and coefficient carries its citation. View > Methods lists the "
+            "references used by the current run."))

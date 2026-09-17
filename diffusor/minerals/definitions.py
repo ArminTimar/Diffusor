@@ -19,7 +19,7 @@ X_AN = CompositionVariable(
     "XAn", "X_An", "Ca/(Ca+Na+K) molar (anorthite fraction)",
     default_mode="A/(A+B)", citation="deer1992")
 X_TI = CompositionVariable(
-    "xTi", "x_Ti", "Ti per cation site in (Ti_x Fe_(1-x))3 O4; x_Ti = X_Usp/3",
+    "xTi", "x_Ti", "Ti per cation site in (Ti_x Fe_(1-x))3 O4, x_Ti = X_Usp/3",
     default_mode="A", citation="vanorman_crispin2010")
 
 # --- minerals --------------------------------------------------------------------
@@ -35,7 +35,7 @@ OLIVINE = Mineral(
         "Ca": Species("Ca", "Ca", "tracer"),
     },
     notes=("Diffusion is strongly anisotropic: D[001] is about 6x D[100] and D[010] "
-           "(Dohmen & Chakraborty 2007; Hartley et al. 2016 confirm the factor ~6 in "
+           "(Dohmen & Chakraborty 2007). Hartley et al. (2016) confirm the factor of 6 in "
            "natural crystals)."),
 )
 
@@ -46,11 +46,11 @@ ORTHOPYROXENE = Mineral(
     species={
         "Fe-Mg": Species("Fe-Mg", "Fe-Mg interdiffusion", "interdiffusion"),
         "Mg": Species("Mg", "Mg self-diffusion", "tracer"),
-        "Lu": Species("Lu", "Lu", "trace", "rare earth element; Dias et al. (2025)"),
-        "Ce": Species("Ce", "Ce", "trace", "rare earth element; Dias et al. (2025)"),
+        "Lu": Species("Lu", "Lu", "trace", "rare earth element, Dias et al. (2025)"),
+        "Ce": Species("Ce", "Ce", "trace", "rare earth element, Dias et al. (2025)"),
         "Eu": Species("Eu", "Eu", "trace", "rare earth element, assumed trivalent"),
     },
-    notes=("Space group Pbca. D//[001] >= D//[010] > D//[100]; Dohmen et al. (2016) "
+    notes=("Space group Pbca. D//[001] >= D//[010] > D//[100]. Dohmen et al. (2016) "
            "give D_a = D_c / 3.5."),
 )
 
@@ -62,7 +62,7 @@ CLINOPYROXENE = Mineral(
         "Fe-Mg": Species("Fe-Mg", "Fe-Mg interdiffusion", "interdiffusion"),
         "Ca-Mg": Species("Ca-Mg", "Ca-(Mg,Fe) interdiffusion", "interdiffusion"),
     },
-    notes=("Mueller et al. (2013) measured along [001] only; anisotropy of Fe-Mg in cpx "
+    notes=("Mueller et al. (2013) measured along [001] only. Anisotropy of Fe-Mg in cpx "
            "is not well constrained (Cherniak & Dimanov 2010)."),
 )
 
@@ -71,16 +71,16 @@ PLAGIOCLASE = Mineral(
     axes=("a", "b", "c"),
     composition_variable=X_AN,
     species={
-        "Mg": Species("Mg", "Mg", "trace", "An-dependent; needs the activity term"),
-        "Sr": Species("Sr", "Sr", "trace", "An-dependent; needs the activity term"),
-        "Ba": Species("Ba", "Ba", "trace", "An-dependent; needs the activity term"),
+        "Mg": Species("Mg", "Mg", "trace", "depends on An content"),
+        "Sr": Species("Sr", "Sr", "trace", "depends on An content"),
+        "Ba": Species("Ba", "Ba", "trace", "depends on An content"),
         "Li": Species("Li", "Li", "trace"),
         "NaSi-CaAl": Species("NaSi-CaAl", "coupled NaSi-CaAl interdiffusion", "interdiffusion",
-                             "the anorthite profile itself; normally treated as frozen"),
+                             "the anorthite profile itself, normally treated as frozen"),
     },
     isotropic=True,
     notes=("Trace-element diffusion is coupled to the anorthite gradient through the "
-           "activity term of Costa et al. (2003); X_An is treated as frozen because "
+           "activity term of Costa et al. (2003). X_An is treated as frozen because "
            "NaSi-CaAl interdiffusion is orders of magnitude slower (Grove et al. 1984). "
            "Van Orman et al. (2014) found little anisotropy for Mg and recommend treating "
            "plagioclase as isotropic."),
@@ -103,7 +103,7 @@ MAGNETITE = Mineral(
     isotropic=True,
     notes=("Cubic, so diffusion is isotropic. Cation diffusion has a minimum with respect "
            "to both T and fO2 because a vacancy mechanism (D ~ fO2^(2/3)) competes with an "
-           "interstitial mechanism (D ~ fO2^(-2/3)); see Van Orman & Crispin (2010) Table 12. "
+           "interstitial mechanism (D ~ fO2^(-2/3)), see Van Orman & Crispin (2010) Table 12. "
            "Tomiya et al. (2013) used exactly this formulation for Shinmoedake 2011."),
 )
 

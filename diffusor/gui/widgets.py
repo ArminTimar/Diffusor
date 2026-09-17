@@ -3,8 +3,9 @@ from __future__ import annotations
 
 from typing import Optional
 
-from PySide6.QtCore import Qt
-from PySide6.QtWidgets import (QFrame, QHBoxLayout, QLabel, QPushButton, QScrollArea,
+from PySide6.QtCore import QEvent, QObject, Qt
+from PySide6.QtWidgets import (QAbstractScrollArea, QAbstractSpinBox, QApplication, QComboBox,
+                               QFrame, QHBoxLayout, QLabel, QPushButton, QScrollArea,
                                QSizePolicy, QVBoxLayout, QWidget)
 
 from . import theme
@@ -173,3 +174,47 @@ def primary_button(text: str) -> QPushButton:
     b.setObjectName("Primary")
     b.setCursor(Qt.PointingHandCursor)
     return b
+
+
+class NoWheelOnInputs(QObject):
+    """Stop the mouse wheel and touchpad from changing numbers and choices.
+
+    Scrolling over a spin box or a drop-down scrolls the page instead, so a
+    value can only change when it is typed or clicked.
+    """
+
+    def eventFilter(self, obj, event):
+        if event.type() == QEvent.Wheel and isinstance(obj, (QAbstractSpinBox, QComboBox)):
+            w = obj.parentWidget()
+            while w is not None and not isinstance(w, QAbstractScrollArea):
+                w = w.parentWidget()
+            if w is not None:
+                QApplication.sendEvent(w.verticalScrollBar(), event)
+            return True
+        return False
+
+
+def install_no_wheel(app) -> NoWheelOnInputs:
+    f = NoWheelOnInputs(app)
+    app.installEventFilter(f)
+    return f
+
+
+def collapsible(title: str, content: QWidget, expanded: bool = False) -> QWidget:
+    """A text button that shows or hides ``content`` underneath it."""
+    box = QWidget()
+    v = QVBoxLayout(box)
+    v.setContentsMargins(0, 0, 0, 0)
+    v.setSpacing(8)
+    btn = ghost_button("")
+    btn.setStyleSheet("text-align:left; padding-left:0;")
+
+    def _set(on):
+        content.setVisible(on)
+        btn.setText(("▾  " if on else "▸  ") + title)
+    btn.clicked.connect(lambda: _set(not content.isVisible()))
+    v.addWidget(btn, 0, Qt.AlignLeft)
+    v.addWidget(content)
+    _set(expanded)
+    box.toggle_button = btn
+    return box

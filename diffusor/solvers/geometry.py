@@ -29,13 +29,12 @@ import numpy as np
 GEOMETRIES: Dict[str, int] = {"plane": 0, "cylinder": 1, "sphere": 2}
 
 GEOMETRY_NOTES = {
-    "plane": ("Plane sheet / semi-infinite medium. Use for a traverse across a zone boundary "
-              "in a crystal that is large compared with the diffusion length "
-              "(Crank 1975 section 2 and section 4)."),
-    "cylinder": ("Infinite cylinder, x is the radius. Use for a prismatic crystal equilibrating "
-                 "radially with negligible transport along the prism axis (Crank 1975 section 5)."),
-    "sphere": ("Sphere, x is the radius. Use for a small equant crystal equilibrating from all "
-               "sides (Crank 1975 section 6)."),
+    "plane": ("A traverse across a zone boundary in a crystal much larger than the diffusion "
+              "length (Crank 1975, sections 2 and 4)."),
+    "cylinder": ("x is the radius. A long prism exchanging through its sides "
+                 "(Crank 1975, section 5)."),
+    "sphere": ("x is the radius. A small equant crystal exchanging on all sides "
+               "(Crank 1975, section 6)."),
 }
 
 

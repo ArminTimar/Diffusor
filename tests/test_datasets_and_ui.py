@@ -279,3 +279,127 @@ def test_kizimen_fit_lands_inside_ostorero_uncertainty(app):
     years = r.t_seconds / SEC_PER_YEAR
     assert 2.32 - 1.75 < years < 2.32 + 7.16, years
     w.close()
+
+
+# --- regressions from user testing ---------------------------------------------------
+def _load_example(app, key):
+    from PySide6.QtCore import Qt
+    w = _window(app)
+    for i in range(w.lst_examples.count()):
+        if w.lst_examples.item(i).data(Qt.UserRole) == key:
+            w.lst_examples.setCurrentRow(i)
+    w.load_example()
+    app.processEvents()
+    return w
+
+
+def test_compare_runs_to_completion_and_ignores_a_second_click(app, monkeypatch):
+    """Compare used to crash: its progress lambda touched widgets from the worker thread."""
+    import inspect
+    import time
+    from PySide6.QtCore import Qt
+    from diffusor.gui import main_window as mw
+    for fn in (mw.MainWindow.run_compare, mw.MainWindow.run_mc, mw.MainWindow.run_fit):
+        src = inspect.getsource(fn)
+        assert "lambda" not in src, f"{fn.__name__} connects a worker signal to a lambda"
+    monkeypatch.setattr(mw, "_text_dialog", lambda *a, **k: None)
+    w = _load_example(app, "opx_kizimen")
+    for i in range(w.lst_coef.count()):
+        it = w.lst_coef.item(i)
+        if it.data(Qt.UserRole) == "opx_FeMg_dias2025":
+            it.setCheckState(Qt.Checked)
+    w._go(6)
+    w.run_compare()
+    w.run_fit()              # a second job while one runs must be refused, not crash
+    assert len(w._jobs) == 1
+    t0 = time.time()
+    while w.compare_results is None and time.time() - t0 < 300:
+        app.processEvents()
+        time.sleep(0.02)
+    assert w.compare_results is not None and len(w.compare_results) == 2
+    w.close()
+
+
+def test_mouse_wheel_does_not_change_numbers(app):
+    from PySide6.QtCore import QPoint, QPointF, Qt
+    from PySide6.QtGui import QWheelEvent
+    from PySide6.QtWidgets import QApplication
+    w = _load_example(app, "opx_kizimen")
+    w._go(2)
+    app.processEvents()
+    before = w.sp_T.value()
+    ev = QWheelEvent(QPointF(5, 5), QPointF(5, 5), QPoint(0, 0), QPoint(0, 120),
+                     Qt.NoButton, Qt.NoModifier, Qt.NoScrollPhase, False)
+    QApplication.sendEvent(w.sp_T, ev)
+    QApplication.sendEvent(w.cmb_fo2_mode, ev)
+    assert w.sp_T.value() == before
+    assert w.cmb_fo2_mode.currentIndex() == 0
+    w.close()
+
+
+def test_example_says_what_it_filled_in(app):
+    w = _load_example(app, "opx_kizimen")
+    assert w.lbl_data.isVisibleTo(w.pages.widget(0))
+    assert "filled in" in w.lbl_data.text()
+    for step in (1, 2, 3, 4):
+        assert not w._prefill[step].isHidden(), step
+    assert "850" in w._prefill[2].text()
+    assert "Ganguly" in w._prefill[4].text()
+    w.close()
+
+
+def test_anorthite_initial_profile_is_offered_only_for_plagioclase(app):
+    w = _load_example(app, "opx_kizimen")
+    assert [w.cmb_ic.itemData(i) for i in range(w.cmb_ic.count())] == ["step"]
+    w.close()
+    w = _load_example(app, "plag_santorini")
+    assert w.cmb_ic.currentData() == "equilibrium_plag"
+    w.close()
+
+
+def test_resolution_presets_set_sigma_from_the_spot_size(app):
+    from diffusor.gui.main_window import RESOLUTION_PRESETS
+    w = _window(app)
+    labels = [p[0] for p in RESOLUTION_PRESETS]
+    w.cmb_resolution.setCurrentIndex(labels.index("Microprobe, focused beam"))
+    assert w.sp_beam.value() == pytest.approx(0.6)
+    w.cmb_resolution.setCurrentIndex(labels.index("LA-ICP-MS spot"))
+    w.sp_width.setValue(10.0)
+    assert w.sp_beam.value() == pytest.approx(2.5)
+    w.cmb_resolution.setCurrentIndex(labels.index("LA-ICP-MS line scan"))
+    w.sp_width.setValue(7.5)
+    assert w.sp_beam.value() == pytest.approx(7.5 / np.sqrt(12), abs=0.01)
+    assert "Grocolas" in w.lbl_resolution.text()
+    w.close()
+
+
+def test_column_dialog_guesses_and_fits_a_laptop_screen(app):
+    from diffusor.gui.main_window import ColumnDialog
+    from diffusor.dataio.profiles import suggest_spec
+    d = ds.get("opx_kizimen")
+    df = read_table(d.path)
+    spec = suggest_spec(df)
+    assert (spec.column_a, spec.column_b, spec.oxide_a, spec.oxide_b) == ("FeO_wt", "MgO_wt", "FeO", "MgO")
+    assert spec.distance_column == "Distance_from_rim_um" and spec.distance_unit == "um"
+    dlg = ColumnDialog(df, spec)
+    dlg.show()
+    app.processEvents()
+    assert dlg.sizeHint().height() < 640, dlg.sizeHint().height()
+    got = dlg.spec()
+    assert (got.column_a, got.column_b, got.oxide_a, got.mode) == ("FeO_wt", "MgO_wt", "FeO", "A/(A+B)")
+    dlg.close()
+
+
+def test_interface_text_has_no_semicolons(app):
+    from PySide6.QtWidgets import QAbstractButton, QLabel
+    w = _load_example(app, "plag_santorini")
+    for page in range(w.pages.count()):
+        w._go(page)
+        app.processEvents()
+        for lab in w.pages.widget(page).findChildren(QLabel):
+            assert ";" not in lab.text().replace("&middot;", ""), lab.text()
+        for b in w.pages.widget(page).findChildren(QAbstractButton):
+            assert ";" not in b.text()
+    for d in ds.DATASETS:
+        assert ";" not in d.provenance + d.expected + d.notes, d.key
+    w.close()

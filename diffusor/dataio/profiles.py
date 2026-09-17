@@ -13,6 +13,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from pathlib import Path
+import re
 from typing import Dict, List, Optional, Sequence
 
 import numpy as np
@@ -20,8 +21,6 @@ import pandas as pd
 
 from ..thermo.units import composition_variable, length_to_m
 
-DISTANCE_HINTS = ("distance", "dist", "x", "micron", "um", "µm", "position", "real_distance")
-ERROR_HINTS = ("err", "error", "sigma", "sd", "std", "2s", "1s", "stdev", "standard_error")
 
 
 @dataclass
@@ -106,31 +105,118 @@ def read_table(path) -> pd.DataFrame:
     return pd.read_csv(p, sep=None, engine="python")
 
 
-def _match(columns: Sequence[str], hints: Sequence[str]) -> Optional[str]:
-    low = {c: str(c).strip().lower() for c in columns}
-    for c, lc in low.items():
-        if lc in hints:
-            return c
-    for c, lc in low.items():
-        if any(h in lc for h in hints):
-            return c
+DISTANCE_WORDS = ("distance", "dist", "position", "pos", "x", "depth", "micron", "microns")
+ERROR_WORDS = ("err", "error", "sigma", "sd", "std", "stdev", "1s", "2s", "unc", "uncertainty",
+               "standard_error", "se")
+UNIT_WORDS = {"um": "um", "µm": "um", "micron": "um", "microns": "um", "mum": "um",
+              "mm": "mm", "nm": "nm", "m": "m"}
+# pairs that are normally modelled as a molar ratio, most common first
+OXIDE_PAIRS = (("FeO", "MgO"), ("CaO", "Na2O"), ("FeO", "MnO"))
+KNOWN_OXIDES = ("SiO2", "TiO2", "Al2O3", "Cr2O3", "FeO", "Fe2O3", "MnO", "MgO", "NiO", "CaO",
+                "Na2O", "K2O", "Li2O", "SrO", "BaO")
+
+
+CATION_WORDS = ("fe", "mg", "ca", "na", "mn")
+CATION_PAIRS = (("fe", "mg"), ("ca", "na"), ("fe", "mn"))
+FRACTION_WORDS = ("xan", "an", "xfe", "xmg", "fo", "fa", "en", "fs", "mg#", "mgnumber", "grey",
+                  "gray", "greyvalue", "grayvalue")
+
+
+def _tokens(name) -> List[str]:
+    return [t for t in re.split(r"[^0-9a-zµ]+", str(name).strip().lower()) if t]
+
+
+def _oxide_of(name) -> Optional[str]:
+    """The oxide a column holds, from names like 'FeO', 'FeO_wt' or 'MgO (wt%)'."""
+    low = str(name).strip().lower()
+    for ox in sorted(KNOWN_OXIDES, key=len, reverse=True):
+        o = ox.lower()
+        if low == o or (low.startswith(o) and not low[len(o)].isalnum()):
+            return ox
     return None
 
 
+def _is_error(name) -> bool:
+    return any(t in ERROR_WORDS for t in _tokens(name))
+
+
+def _unit_of(name) -> Optional[str]:
+    for t in reversed(_tokens(name)):
+        if t in UNIT_WORDS:
+            return UNIT_WORDS[t]
+    if "µm" in str(name):
+        return "um"
+    return None
+
+
+def guess_distance_unit(name) -> str:
+    return _unit_of(name) or "um"
+
+
 def suggest_spec(df: pd.DataFrame) -> ProfileSpec:
-    """A first guess at the column mapping; always shown to the user for confirmation."""
+    """A first guess at the column mapping, shown to the user for confirmation.
+
+    Distance is the first numeric column named like a distance. If the table
+    holds a common oxide pair (FeO and MgO, CaO and Na2O) that pair is used as a
+    molar ratio with the oxides named. Otherwise a table with exactly two
+    composition columns is modelled as their ratio, and anything else models
+    the first composition column on its own. Uncertainty columns are paired to
+    their value column by name.
+    """
     cols = list(df.columns)
     numeric = [c for c in cols if pd.api.types.is_numeric_dtype(df[c])]
-    dist = _match(numeric, DISTANCE_HINTS) or (numeric[0] if numeric else cols[0])
+    if not numeric:
+        raise ValueError("the table has no numeric columns")
+    dist = next((c for c in numeric if any(t in DISTANCE_WORDS for t in _tokens(c))), None)
+    dist = dist or numeric[0]
     rest = [c for c in numeric if c != dist]
-    errs = [c for c in rest if any(h in str(c).lower() for h in ERROR_HINTS)]
+    errs = [c for c in rest if _is_error(c)]
     vals = [c for c in rest if c not in errs]
-    a = vals[0] if vals else None
-    b = vals[1] if len(vals) > 1 else None
+
+    by_oxide = {}
+    for c in vals:
+        ox = _oxide_of(c)
+        if ox and ox not in by_oxide:
+            by_oxide[ox] = c
+    a = b = ox_a = ox_b = None
+    for pa, pb in OXIDE_PAIRS:
+        if pa in by_oxide and pb in by_oxide:
+            a, b, ox_a, ox_b = by_oxide[pa], by_oxide[pb], pa, pb
+            break
+    if a is None:
+        by_cation = {}
+        for c in vals:
+            el = _tokens(c)[0] if _tokens(c) else ""
+            if el in CATION_WORDS and el not in by_cation:
+                by_cation[el] = c
+        for pa, pb in CATION_PAIRS:
+            if pa in by_cation and pb in by_cation:
+                a, b = by_cation[pa], by_cation[pb]
+                break
+    if a is None and vals:
+        a = vals[0]
+        # two bare columns with no unit or name clue are taken as elements A and B
+        if len(vals) == 2 and all(len(_tokens(c)) <= 1 and _tokens(c)[0] not in FRACTION_WORDS
+                                  for c in vals):
+            b = vals[1]
+
+    def error_for(col):
+        if col is None or not _tokens(col):
+            return None
+        stem = _tokens(col)[0]
+        for e in errs:
+            t = _tokens(e)
+            if t and (t[0] == stem or stem.startswith(t[0]) or t[0].startswith(stem)):
+                return e
+        return None
+
+    sa, sb = error_for(a), error_for(b)
+    level = "2s" if any("2s" in _tokens(e) for e in (sa, sb) if e) else "1s"
     return ProfileSpec(distance_column=dist, column_a=a, column_b=b,
-                       sigma_a_column=errs[0] if errs else None,
-                       sigma_b_column=errs[1] if len(errs) > 1 else None,
-                       mode="A/(A+B)" if b else "A")
+                       sigma_a_column=sa, sigma_b_column=sb,
+                       distance_unit=guess_distance_unit(dist),
+                       mode="A/(A+B)" if b else "A",
+                       oxide_a=ox_a, oxide_b=ox_b, sigma_level=level)
 
 
 def build_profile(df: pd.DataFrame, spec: ProfileSpec, source: str = "") -> Profile:
@@ -162,7 +248,7 @@ def build_profile(df: pd.DataFrame, spec: ProfileSpec, source: str = "") -> Prof
             if spec.mode == "B/(A+B)":
                 pass                       # the ratio uncertainty is symmetric
             if not spec.sigma_b_column:
-                notes.append("only one uncertainty column was given; the second element was "
+                notes.append("only one uncertainty column was given. The second element was "
                              "assumed to carry the same relative uncertainty")
         else:
             sigma = sa

@@ -86,7 +86,7 @@ class DiffusionModel:
             return False, "numerical solver requested explicitly"
         if self.composition_dependent and self.comp_key:
             return False, ("D depends on the composition being modelled, so no closed-form "
-                           "solution exists (Crank 1975 section 7.2); the numerical solver is used")
+                           "solution exists (Crank 1975 section 7.2). The numerical solver is used.")
         if self.activity_theta:
             return False, ("the plagioclase activity term couples D to the anorthite gradient "
                            "(Costa et al. 2003 eq. 7), which has no closed form")
@@ -94,10 +94,10 @@ class DiffusionModel:
             return False, f"initial condition '{self.initial.kind}' has no closed-form solution"
         if self.geometry.kind != "plane":
             return False, ("closed forms for cylinder and sphere assume a uniform initial "
-                           "profile and a fixed surface concentration; use them through "
-                           "diffusor.solvers.analytical directly if that is your problem")
+                           "profile and a fixed surface concentration. Call "
+                           "diffusor.solvers.analytical directly for that case.")
         if self.initial.params.get("smooth"):
-            return False, "a smoothed initial step is not the Crank step solution"
+            return False, "a smoothed initial step has no closed-form solution"
         return True, "step initial condition, constant D, plane geometry: Crank (1975) eq. 2.14"
 
     # -- forward model ------------------------------------------------------
@@ -176,11 +176,11 @@ class DiffusionModel:
                     w.append(
                         f"the diffusion length 2*sqrt(Dt) = {L:.1f} um is a large fraction of "
                         f"the distance from the interface to the end of the profile "
-                        f"({half:.1f} um): the far field is no longer undisturbed, so the "
-                        "semi-infinite assumption is breaking down. Measure a longer traverse "
-                        "or model the whole crystal with an explicit geometry.")
+                        f"({half:.1f} um). The far field has been reached, so the semi-infinite "
+                        "assumption is breaking down. Measure a longer traverse or model the "
+                        "whole crystal with an explicit geometry.")
         if self.geometry.kind == "plane":
-            w.append("1-D modelling of a 3-D crystal gives a maximum estimate of the time; "
-                     "sectioning effects can bias it further (Shea et al. 2015; "
+            w.append("1-D modelling of a 3-D crystal gives a maximum estimate of the time. "
+                     "Sectioning can bias it further (Shea et al. 2015, "
                      "Krimer & Costa 2017).")
         return w

@@ -90,15 +90,15 @@ _add(DiffusionCoefficient(
     verified=False,
     verified_from=("coefficients transcribed from secondary sources, NOT from the primary PDF. "
                    "Independently confirmed from the local library: the fO2 exponent of 1/6 and "
-                   "the TaMED/PED mechanism change (Dohmen et al. 2016, p. 2216 and p. 2219); "
-                   "the ~6x anisotropy of D//[001] over D//[100] and D//[010] (Hartley et al. "
-                   "2016, p. 60; Mutch et al. 2021 DFENS source code uses aniso = 6.0); the "
+                   "the TaMED/PED mechanism change (Dohmen et al. 2016, p. 2216 and p. 2219). "
+                   "The ~6x anisotropy of D//[001] over D//[100] and D//[010] (Hartley et al. "
+                   "2016, p. 60. Mutch et al. 2021 DFENS source code uses aniso = 6.0). The "
                    "activation volume of 7e-6 m3/mol (Costa et al. 2008, p. 571, citing "
                    "Holzapfel et al. 2007)."),
     secondary_citations=("dohmen2007", "holzapfel2007", "chakraborty2010", "hartley2016"),
     recommended=True,
     notes=("Valid where transition-metal extrinsic diffusion dominates, i.e. at relatively "
-           "oxidising conditions; below about the IW buffer the mechanism changes to PED and "
+           "oxidising conditions. Below about the IW buffer the mechanism changes to PED and "
            "D stops depending on fO2 -- use the PED entry there. D//[001] is about 6 times "
            "D//[100] and D//[010]. The sigma_logD of 0.21 reflects the roughly 0.2-log-unit "
            "scatter of the experimental database and should be replaced with the published "
@@ -112,7 +112,7 @@ _add(DiffusionCoefficient(
     citation="dohmen_chakraborty2007",
     equation_number="model equation of Dohmen & Chakraborty (2007) as corrected by the erratum",
     equation_text=("log D_Fe-Mg [m2/s] = -8.91 - (220000 + (P - 1e5) * 7e-6) / (2.303 R T) "
-                   "+ 3 (X_Fe - 0.1),  P in Pa; independent of fO2"),
+                   "+ 3 (X_Fe - 0.1),  P in Pa. Independent of fO2"),
     func=_dohmen_chakraborty_ped,
     params={
         "c0": Parameter("c0", -8.91, 0.0, "log10(m2/s)", "1s", "intercept"),
@@ -131,7 +131,7 @@ _add(DiffusionCoefficient(
     verified=False,
     verified_from="as for the TaMED entry -- transcribed from secondary sources",
     notes=("Pure extrinsic diffusion: point defect concentrations are fixed by aliovalent "
-           "impurities rather than by fO2, so D is fO2-independent. Applies at reducing "
+           "impurities, so D does not depend on fO2. Applies at reducing "
            "conditions (around and below the IW buffer). Diffusor does not switch between "
            "the two regimes automatically -- choose the one appropriate to your fO2, or run "
            "both and compare."),
@@ -164,7 +164,7 @@ _add(DiffusionCoefficient(
     T_range=Range(1253.15, 1573.15, "K (980-1300 C)"),
     X_range=Range(0.12, 0.16, "XFe (around Fo86)"),
     verified=False,
-    verified_from="approximate transcription from secondary summaries; NOT checked against the primary paper",
+    verified_from="approximate transcription from secondary summaries. NOT checked against the primary paper",
     notes=("Superseded by Dohmen & Chakraborty (2007) but retained so that older published "
            "timescales can be reproduced and compared. Treat the numbers as provisional."),
 ))

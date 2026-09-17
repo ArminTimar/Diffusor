@@ -64,12 +64,11 @@ DATASETS: List[ExampleDataset] = [
         kind="measured",
         citation="druitt2012",
         provenance=(
-            "Real measured data. Electron microprobe and ion probe traverse across "
-            "plagioclase phenocryst S82-30A 12 from Minoan pumice, Santorini, transcribed "
-            "from Supplementary Table 1 of Druitt, Costa, Deloule, Dungan & Scaillet (2012), "
-            "Nature 482:77-80, doi:10.1038/nature10706. Columns are distance from the rim "
-            "(um), An (mol%), and Mg, K, Ti, Sr, Ba, La and Ce in ppm. 14 points from 21 to "
-            "267 um."),
+            'Real measured data. Microprobe and ion probe traverse across plagioclase '
+            'S82-30A 12 from Minoan pumice, Santorini. From Supplementary Table 1 of '
+            'Druitt, Costa, Deloule, Dungan & Scaillet (2012), Nature 482:77-80, '
+            'doi:10.1038/nature10706. Distance from the rim (um), An (mol%), and Mg, K, Ti, '
+            'Sr, Ba, La and Ce (ppm). 14 points from 21 to 267 um.'),
         spec=dict(distance_column="Distance_from_rim_um", column_a="Mg_ppm",
                   column_b=None, mode="A", distance_unit="um"),
         settings=dict(T_C=900.0, sigma_T_K=20.0, P_MPa=200.0, sigma_P_MPa=100.0,
@@ -78,24 +77,19 @@ DATASETS: List[ExampleDataset] = [
                       an_column="An_mol_percent", an_is_percent=True,
                       initial_condition="equilibrium_plag"),
         expected=(
-            "Druitt et al. (2012) modelled this crystal for Mg at 900 C and obtained about 47 "
-            "years with a one-step model, improving to 70 years at 900 C followed by 12 years "
-            "at 855 C with a two-step model (their Supplementary Figure 5). "
-            "Diffusor does NOT reproduce that number from a standing start, and the fit "
-            "quality says so: with the equilibrium initial condition it returns roughly 90 "
-            "years with a reduced chi-squared in the hundreds. The reason is the initial "
-            "condition, not the solver. Druitt et al. reconstructed the initial Mg profile "
-            "from the Sr-An correlation and the Mg-Sr liquid line of descent, and modelled a "
-            "two-melt history; Diffusor's built-in initial conditions cannot express that. "
-            "Treat this dataset as a worked example of loading real measured data, of using "
-            "an anorthite column to drive the activity term, and of how sharply the retrieved "
-            "time depends on an initial condition you have to justify yourself -- not as a "
-            "validation of the code against a published timescale."),
-        notes=("This crystal is normally zoned in An from about 37 mol% at the rim to 80 mol% "
-               "in the core, so the anorthite column drives the activity term of Costa et al. "
-               "(2003). Mg itself varies only from about 98 to 179 ppm with real scatter, so "
-               "the profile carries little shape information and the answer is controlled "
-               "almost entirely by the initial condition. That is the lesson of this example."),
+            'Druitt et al. (2012) got about 47 years for Mg at 900 C with a one-step model, '
+            'and 70 years at 900 C plus 12 years at 855 C with a two-step model (their '
+            'Supplementary Figure 5). Diffusor does NOT reproduce that number. With the '
+            'equilibrium initial profile it returns about 90 years with a reduced '
+            'chi-squared in the hundreds. Druitt et al. rebuilt the initial Mg profile from '
+            'the Sr-An correlation and a two-melt history, and Diffusor has no initial '
+            'profile of that kind. Use this example to see how an anorthite column is '
+            'loaded and how much the answer depends on the initial profile. It is no check '
+            'of the code against a published timescale.'),
+        notes=(
+            'Normally zoned from about An37 at the rim to An80 in the core. Mg only varies '
+            'from 98 to 179 ppm with real scatter, so the initial profile controls the '
+            'answer almost completely.'),
     ),
 
     ExampleDataset(
@@ -106,14 +100,14 @@ DATASETS: List[ExampleDataset] = [
         kind="measured",
         citation="ostorero2022",
         provenance=(
-            "Real measured data. Electron microprobe traverse across orthopyroxene K9_L10C4 "
-            "(andesite K9, 355 um fraction) from the 2010-2013 eruption of Kizimen, Kamchatka, "
-            "extracted from Supplementary Data 2 of Ostorero, Balcone-Boissard, Boudon and "
-            "others (2022), Communications Earth & Environment 3:290, "
-            "doi:10.1038/s43247-022-00622-3 (archived at doi:10.5281/zenodo.7307563), by "
-            "scripts/extract_kizimen.py. 109 points at about 2 um spacing from the first point "
-            "the authors flagged as good quality. FeO_err and MgO_err are the authors' mean "
-            "analytical standard deviations (wt%), not per-point values."),
+            'Real measured data. Microprobe traverse across orthopyroxene K9_L10C4 '
+            '(andesite K9, 355 um fraction) from the 2010-2013 eruption of Kizimen, '
+            'Kamchatka. From Supplementary Data 2 of Ostorero, Balcone-Boissard, Boudon and '
+            'others (2022), Communications Earth & Environment 3:290, '
+            'doi:10.1038/s43247-022-00622-3, archived at doi:10.5281/zenodo.7307563. '
+            'Extracted by scripts/extract_kizimen.py. 109 points about 2 um apart, starting '
+            'at the first point the authors marked as good. FeO_err and MgO_err are the '
+            "authors' mean analytical standard deviations in wt%."),
         spec=dict(distance_column="Distance_from_rim_um", column_a="FeO_wt", column_b="MgO_wt",
                   sigma_a_column="FeO_err", sigma_b_column="MgO_err",
                   mode="A/(A+B)", oxide_a="FeO", oxide_b="MgO", distance_unit="um",
@@ -123,24 +117,22 @@ DATASETS: List[ExampleDataset] = [
                       coefficient="opx_FeMg_ganguly_tazzoli1994_nofo2", axis="b",
                       geometry="plane", composition_dependent=True),
         expected=(
-            "Ostorero et al. (2022, Supplementary Data 4) modelled this reverse zone at 850 +/- "
-            "57 C with the Ganguly & Tazzoli (1994) law and no fO2 term, and obtained 2.32 "
-            "years (+7.16 / -1.75). With the same law and temperature Diffusor fits about 3 "
-            "years to the microprobe traverse, inside their uncertainty; the test suite checks "
-            "this. The agreement is not exact for a known reason: Ostorero et al. fitted "
-            "high-resolution back-scattered electron grey-scale profiles with D. J. Morgan's "
-            "spreadsheet, whereas the supplement only provides the 2 um microprobe traverse, "
-            "which resolves the 4 um wide zone with just three or four points. The first point "
-            "(2.3 um) is excluded by the fit window because its Al2O3 of 2.5 wt%, against "
-            "0.7 wt% in the rest of the rim zone, suggests the beam overlapped the crystal "
-            "edge."),
-        notes=("The rim zone (Mg# 0.71-0.74) sits between about 4 and 11 um from the rim, "
-               "against a core of Mg# 0.62. Try switching the coefficient to "
-               "opx_FeMg_dias2025 to see how much the newest calibration changes the answer: at "
-               "850 C and NNO it returns roughly ten times longer (about 30-50 years), because "
-               "D is about one log unit slower there. 850 C is below the 900 C lower limit of "
-               "that calibration, so the difference is partly extrapolation, but it shows how "
-               "strongly the choice of law controls an opx timescale."),
+            'Ostorero et al. (2022, Supplementary Data 4) modelled this reverse zone at 850 '
+            '± 57 C with the Ganguly & Tazzoli (1994) law without an fO2 term and got 2.32 '
+            'years (+7.16/-1.75). With the same law and temperature Diffusor fits about 3 '
+            'years to the microprobe traverse, inside their uncertainty. The test suite '
+            'checks this. The match is close but inexact. Ostorero et al. fitted '
+            "high-resolution BSE grey-value profiles with D. J. Morgan's spreadsheet. The "
+            'supplement only has the 2 um microprobe traverse, which crosses the 4 um zone '
+            'in three or four points. The fit window leaves out the first point at 2.3 um. '
+            'Its 2.5 wt% Al2O3, against 0.7 wt% in the rest of the rim zone, suggests the '
+            'beam hit the crystal edge.'),
+        notes=(
+            'The rim zone (Mg# 0.71-0.74) lies 4 to 11 um from the rim. The core is Mg# '
+            '0.62. Switch to opx_FeMg_dias2025 to see the effect of the newest calibration. '
+            'At 850 C and NNO it gives about ten times longer, 30 to 50 years, because D is '
+            'about one log unit slower. 850 C is below its 900 C calibration limit, so part '
+            'of that difference is extrapolation.'),
     ),
 
     # --------------------------------------------------------------- synthetic
@@ -152,11 +144,10 @@ DATASETS: List[ExampleDataset] = [
         kind="synthetic",
         citation=None,
         provenance=(
-            "SYNTHETIC. Generated by Diffusor's forward model with the Dias, Dohmen & Behrens "
-            "(2025) coefficient and Gaussian noise added, then converted to FeO and MgO wt%. The "
-            "conditions (950 C, NNO+1, 150 MPa, traverse along [001]) follow the kind of "
-            "andesitic arc setting studied at Shinmoedake by Tomiya et al. (2013) and at Zao "
-            "by Sato et al. (2022). The profile is not a measurement."),
+            "SYNTHETIC. Made with Diffusor's forward model and the Dias, Dohmen & Behrens "
+            '(2025) coefficient, with noise added and converted to FeO and MgO wt%. The '
+            'conditions (950 C, NNO+1, 150 MPa, along [001]) resemble the andesites of '
+            'Shinmoedake (Tomiya et al. 2013) and Zao (Sato et al. 2022).'),
         spec=dict(distance_column="Distance_um", column_a="FeO_wt", column_b="MgO_wt",
                   sigma_a_column="FeO_err", sigma_b_column="MgO_err",
                   mode="A/(A+B)", oxide_a="FeO", oxide_b="MgO", distance_unit="um"),
@@ -164,7 +155,8 @@ DATASETS: List[ExampleDataset] = [
                       buffer="NNO", delta_buffer=1.0, sigma_delta=0.3,
                       coefficient="opx_FeMg_dias2025", axis="c", geometry="plane",
                       composition_dependent=True),
-        expected="True time 1.5 years, built into the file by construction.",
+        expected=(
+            'True time 1.5 years, set when the file was made.'),
     ),
     ExampleDataset(
         key="cpx_stromboli",
@@ -174,17 +166,17 @@ DATASETS: List[ExampleDataset] = [
         kind="synthetic",
         citation=None,
         provenance=(
-            "SYNTHETIC. Generated by Diffusor's forward model with the Mueller et al. (2013) "
-            "coefficient and Gaussian noise added. The conditions (1100 C, 200 MPa) are "
-            "typical of the Stromboli clinopyroxenes modelled by Petrone et al. (2016, 2018). "
-            "The profile is not a measurement."),
+            "SYNTHETIC. Made with Diffusor's forward model and the Mueller et al. (2013) "
+            'coefficient, with noise added. The conditions (1100 C, 200 MPa) resemble the '
+            'Stromboli clinopyroxenes of Petrone et al. (2016, 2018).'),
         spec=dict(distance_column="Distance_um", column_a="FeO_wt", column_b="MgO_wt",
                   sigma_a_column="FeO_err", sigma_b_column="MgO_err",
                   mode="A/(A+B)", oxide_a="FeO", oxide_b="MgO", distance_unit="um"),
         settings=dict(T_C=1100.0, sigma_T_K=25.0, P_MPa=200.0, sigma_P_MPa=100.0,
                       buffer="NNO", delta_buffer=0.0, sigma_delta=0.5,
                       coefficient="cpx_FeMg_muller2013", geometry="plane"),
-        expected="True time 45 days, built into the file by construction.",
+        expected=(
+            'True time 45 days, set when the file was made.'),
     ),
     ExampleDataset(
         key="olivine_laki",
@@ -194,21 +186,22 @@ DATASETS: List[ExampleDataset] = [
         kind="synthetic",
         citation=None,
         provenance=(
-            "SYNTHETIC. Generated by Diffusor's forward model with the Dohmen & Chakraborty "
-            "(2007) TaMED coefficient and Gaussian noise added. The conditions (1150 C, "
-            "FMQ-1, 1 atm, traverse along [001]) follow the basaltic setting of the Laki "
-            "olivines of Hartley et al. (2016). The profile is not a measurement, and the "
-            "coefficient used to make it is itself flagged as an unverified transcription."),
+            "SYNTHETIC. Made with Diffusor's forward model and the Dohmen & Chakraborty "
+            '(2007) TaMED coefficient, with noise added. The conditions (1150 C, FMQ-1, 1 '
+            'atm, along [001]) resemble the Laki olivines of Hartley et al. (2016). The '
+            'coefficient itself is flagged as unverified.'),
         spec=dict(distance_column="Distance_um", column_a="Fo_mol", column_b=None,
                   sigma_a_column="Fo_err", mode="A", distance_unit="um"),
         settings=dict(T_C=1150.0, sigma_T_K=30.0, P_MPa=0.1, sigma_P_MPa=0.0,
                       buffer="FMQ", delta_buffer=-1.0, sigma_delta=0.5,
                       coefficient="ol_FeMg_dohmen_chakraborty2007_tamed", axis="c",
                       geometry="plane"),
-        expected="True time 120 days, built into the file by construction.",
-        notes=("The file stores forsterite content in mol%. The Fe-Mg coefficient needs X_Fe, "
-               "so convert with X_Fe = 1 - Fo/100, or load Fo directly and treat it as the "
-               "modelled variable if you switch the composition dependence off."),
+        expected=(
+            'True time 120 days, set when the file was made.'),
+        notes=(
+            'The file holds forsterite in mol%. The Fe-Mg coefficient needs X_Fe = 1 - '
+            'Fo/100. Alternatively model Fo directly with the composition dependence '
+            'switched off.'),
     ),
     ExampleDataset(
         key="magnetite_shinmoedake",
@@ -218,20 +211,22 @@ DATASETS: List[ExampleDataset] = [
         kind="synthetic",
         citation=None,
         provenance=(
-            "SYNTHETIC. Generated by Diffusor's forward model with the Van Orman & Crispin "
-            "(2010) Table 12 Ti coefficient and Gaussian noise added. The conditions (950 C, "
-            "log fO2 = -11, X_Usp = 0.3) are exactly those Tomiya et al. (2013) used for the "
-            "2011 Shinmoedake eruption, and Diffusor reproduces their published diffusivity "
-            "of 4.3e-16 m2/s to about 1 per cent. The profile is not a measurement."),
+            "SYNTHETIC. Made with Diffusor's forward model and the Van Orman & Crispin "
+            '(2010) Table 12 Ti coefficient, with noise added. The conditions (950 C, log '
+            'fO2 -11, X_Usp 0.3) are the ones Tomiya et al. (2013) used for Shinmoedake '
+            '2011. Diffusor reproduces their diffusivity of 4.3e-16 m2/s to about 1 per '
+            'cent.'),
         spec=dict(distance_column="Distance_um", column_a="TiO2_wt", column_b=None,
                   sigma_a_column="TiO2_err", mode="A", distance_unit="um"),
         settings=dict(T_C=950.0, sigma_T_K=20.0, P_MPa=0.1, sigma_P_MPa=0.0,
                       fo2_absolute=-11.0, sigma_delta=0.5,
                       coefficient="mt_Ti_vanorman_crispin2010", geometry="plane",
                       x_composition=0.1),
-        expected="True time 8 days, built into the file by construction.",
-        notes=("Diffusion in magnetite passes through a minimum near 950-980 C, so the "
-               "retrieved time is unusually insensitive to temperature here."),
+        expected=(
+            'True time 8 days, set when the file was made.'),
+        notes=(
+            'Diffusion in magnetite has a minimum near 950-980 C, so the time depends '
+            'little on temperature here.'),
     ),
     ExampleDataset(
         key="cpx_greyscale",
@@ -241,18 +236,18 @@ DATASETS: List[ExampleDataset] = [
         kind="synthetic",
         citation=None,
         provenance=(
-            "SYNTHETIC. Back-scattered electron grey values generated from a forward-modelled "
-            "Fe-Mg profile through a linear response X_Fe = (grey - 90)/620, with noise. Five "
-            "microprobe anchor points are supplied in cpx_greyscale_anchors.csv. The workflow "
-            "follows the greyscale calibration of Petrone et al. (2016). Neither the image nor "
-            "the profile is a measurement."),
+            'SYNTHETIC. BSE grey values made from a modelled Fe-Mg profile through X_Fe = '
+            '(grey - 90)/620, with noise. Five microprobe anchor points are in '
+            'cpx_greyscale_anchors.csv. The workflow follows the grey-value calibration of '
+            'Petrone et al. (2016).'),
         spec=dict(distance_column="Distance_um", column_a="GreyValue", column_b=None,
                   sigma_a_column="Grey_sd", mode="A", distance_unit="um"),
         settings=dict(T_C=1000.0, sigma_T_K=25.0, P_MPa=200.0, sigma_P_MPa=100.0,
                       buffer="NNO", delta_buffer=0.0, sigma_delta=0.5,
                       coefficient="cpx_FeMg_muller2013", geometry="plane",
                       greyscale=True, anchors="cpx_greyscale_anchors.csv"),
-        expected="True time 3 years, built into the file by construction.",
+        expected=(
+            'True time 3 years, set when the file was made.'),
     ),
 ]
 

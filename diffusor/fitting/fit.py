@@ -171,7 +171,7 @@ def fit_time(model: DiffusionModel, x_data, C_data, sigma=None,
         success, message = bool(sol.success), str(sol.message)
     except Exception as exc:                      # pragma: no cover - defensive
         t_best, free_best = t0, {}
-        success, message = False, f"refinement failed ({exc}); using the scan minimum"
+        success, message = False, f"refinement failed ({exc}). Using the scan minimum."
 
     m_final = _apply_free(model, free_best)
     C_model = m_final.profile(t_best, x_data, overrides)
@@ -187,7 +187,7 @@ def fit_time(model: DiffusionModel, x_data, C_data, sigma=None,
     if t_best <= 1.05 * t_min or t_best >= 0.95 * t_max:
         res.warnings.append(
             f"the fitted time is at the edge of the search window "
-            f"({human_time(t_min)} to {human_time(t_max)}); widen it or check the data")
+            f"({human_time(t_min)} to {human_time(t_max)}). Widen it or check the data.")
     if verbose:
         print(res.summary())
     return res

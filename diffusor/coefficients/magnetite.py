@@ -81,11 +81,11 @@ for _sp in ("Ti", "Fe", "Mn", "Co", "Cr", "Al"):
         citation="vanorman_crispin2010",
         equation_number="Table 12",
         equation_text=("D* = D_V,0 exp(-Q_V/RT) a_O2^(2/3) + D_I,0 exp(-Q_I/RT) a_O2^(-2/3), "
-                       "a_O2 = fO2 / fO2_0 with fO2_0 = 1 atm; "
+                       "a_O2 = fO2 / fO2_0 with fO2_0 = 1 atm. "
                        f"{_sp} (x_Ti = 0): D_V,0 = {TABLE12_PURE[_sp][0]:g} m2/s, "
                        f"Q_V = {TABLE12_PURE[_sp][1]:g} kJ/mol, "
                        f"D_I,0 = {TABLE12_PURE[_sp][2]:g} m2/s, Q_I = {TABLE12_PURE[_sp][3]:g} kJ/mol"
-                       + (f"; {_sp} (x_Ti = 0.2): D_V,0 = {TABLE12_XTI02[_sp][0]:g} m2/s, "
+                       + (f". {_sp} (x_Ti = 0.2): D_V,0 = {TABLE12_XTI02[_sp][0]:g} m2/s, "
                           f"Q_V = {TABLE12_XTI02[_sp][1]:g} kJ/mol, "
                           f"D_I,0 = {TABLE12_XTI02[_sp][2]:g} m2/s, "
                           f"Q_I = {TABLE12_XTI02[_sp][3]:g} kJ/mol" if _has02 else "")),
@@ -94,8 +94,8 @@ for _sp in ("Ti", "Fe", "Mn", "Co", "Cr", "Al"):
         sigma_logD=0.3,
         requires=("xTi",) if _has02 else (),
         needs_fo2=True, fo2_unit="atm",
-        T_range=Range(1373.15, 1673.15, "K (1100-1400 C; extrapolated to magmatic T)"),
-        X_range=Range(0.0, 0.2, "x_Ti (Ti per cation site; x_Ti = X_Usp / 3)"),
+        T_range=Range(1373.15, 1673.15, "K (1100-1400 C. Extrapolated to magmatic T)"),
+        X_range=Range(0.0, 0.2, "x_Ti (Ti per cation site. X_Ti = X_Usp / 3)"),
         verified=True,
         verified_from=("read from the PDF of Van Orman & Crispin (2010) RiMG 72, Table 12 "
                        "(p. 821) and its footnote giving the vacancy/interstitial sum"),
@@ -181,17 +181,17 @@ for _sp in ("Ti", "Mn", "Co", "Cr", "Al", "Mg"):
                + (", T-scaled with Table 12" if _scaled else ", 1150 C ONLY")),
         citation="sievwright2020",
         equation_number="5 and Table 5",
-        equation_text=(f"D = D_V1 fO2^(2/3) + D_I1 fO2^(-2/3), fO2 in bar, at 1150 C; "
-                       f"{_sp}: log D_V1 = {_lv:g}, log D_I1 = {_li:g} (m2/s); minimum "
+        equation_text=(f"D = D_V1 fO2^(2/3) + D_I1 fO2^(-2/3), fO2 in bar, at 1150 C. "
+                       f"{_sp}: log D_V1 = {_lv:g}, log D_I1 = {_li:g} (m2/s). Minimum "
                        f"log D = {_ldmin:g} at log fO2 = {_lfmin:g}"
-                       + ("; away from 1150 C each branch is scaled by "
+                       + (". Away from 1150 C each branch is scaled by "
                           "exp[-Q/R (1/T - 1/1423.15 K)] with the Q_V and Q_I of Van Orman "
                           "& Crispin (2010) Table 12 for pure magnetite" if _scaled else "")),
         func=_make_sievwright_func(_sp, _scaled),
         params={},
         sigma_logD=0.2,
         needs_fo2=True, fo2_unit="bar",
-        T_range=(Range(1273.15, 1573.15, "K (anchored at 1150 C; T dependence borrowed)")
+        T_range=(Range(1273.15, 1573.15, "K (anchored at 1150 C. T dependence borrowed)")
                  if _scaled else Range(1423.15, 1423.15, "K (1150 C only)")),
         P_range=Range(1.0e5, 1.0e5, "Pa (1 bar)"),
         fo2_range=Range(-9.9, -4.0, "log10 bar (FMQ-1 to FMQ+4.89 at 1150 C)"),
@@ -199,8 +199,8 @@ for _sp in ("Ti", "Mn", "Co", "Cr", "Al", "Mg"):
         verified_from=("read from the paper PDF: eq. 5 (p. 12) and Table 5 (p. 13). The "
                        "transcription reproduces the published minimum log D and log fO2 of "
                        "every element to within 0.05 log units"
-                       + ("; the temperature scaling is Diffusor's construction, not the "
-                          "authors'" if _scaled else "")),
+                       + (". Diffusor added the temperature scaling. It is absent from the "
+                          "paper" if _scaled else "")),
         secondary_citations=(("vanorman_crispin2010", "aggarwal_dieckmann2002")
                              if _scaled else ()),
         recommended=False,
@@ -214,9 +214,8 @@ for _sp in ("Ti", "Mn", "Co", "Cr", "Al", "Mg"):
                   "Sievwright et al. themselves made with the earlier literature (their "
                   "Supplementary Fig. S3). At 1150 C this entry and the Table 12 entry agree "
                   "to within 0.5 log units for Ti, Mn and Co and within 0.4 for Cr above "
-                  "FMQ+2, but Al differs by up to 2 log units at FMQ-1. Treat any temperature "
-                  "far from 1150 C as an extrapolation of the borrowed energies, not of "
-                  "Sievwright's data." if _scaled else
+                  "FMQ+2. Al differs by up to 2 log units at FMQ-1. Far from 1150 C the result "
+                  "rests on the borrowed energies." if _scaled else
                   "There is no published temperature dependence for Mg in magnetite, so this "
                   "entry returns the 1150 C value at every temperature and Diffusor warns "
                   "whenever T is not 1150 C. Use it only for experiments or checks at that "
@@ -249,8 +248,8 @@ _add(DiffusionCoefficient(
     T_range=Range(873.15, 1307.15, "K (600-1034 C)"),
     X_range=Range(0.0, 0.2, "x_Ti"),
     verified=True,
-    verified_from=("transcribed from Van Orman & Crispin (2010) RiMG 72, Table 11 (p. 820); "
-                   "not read from the 1978 primary paper"),
+    verified_from=("transcribed from Van Orman & Crispin (2010) RiMG 72, Table 11 (p. 820). "
+                   "Not read from the 1978 primary paper"),
     secondary_citations=("saunders2012", "costa2008", "sievwright2020"),
     recommended=False,
     superseded_note=(
@@ -262,7 +261,7 @@ _add(DiffusionCoefficient(
         "temperature-dependent, and are what Tomiya et al. (2013) used at Shinmoedake. Prefer "
         "the Table 12 entries unless you specifically need an interdiffusion coefficient. "
         "Sievwright et al. (2020) add modern magnetite diffusivities for Ti and many other "
-        "elements as a function of fO2, but only at 1150 C; Diffusor lists them as the "
+        "elements as a function of fO2, but only at 1150 C. Diffusor lists them as the "
         "mt_*_sievwright2020 entries."),
     notes=("Interdiffusion between synthetic Fe3O4 and Fe2.8Ti0.2O4 under self-buffered "
            "conditions (sealed silica tubes), so the fO2 is only loosely constrained. This is "
@@ -290,8 +289,8 @@ _add(DiffusionCoefficient(
     T_range=Range(873.15, 1473.15, "K"),
     X_range=Range(0.0, 0.2, "x_Ti"),
     verified=True,
-    verified_from=("transcribed from Van Orman & Crispin (2010) RiMG 72, Table 11 (p. 820); "
-                   "not read from the 1984 primary paper"),
+    verified_from=("transcribed from Van Orman & Crispin (2010) RiMG 72, Table 11 (p. 820). "
+                   "Not read from the 1984 primary paper"),
     secondary_citations=("sievwright2020",),
     notes=("Calibrated at the QFM buffer with solid-state buffering, so the redox state is "
            "better controlled than in Freer & Hauptman (1978). Van Orman & Crispin (2010) "

@@ -28,12 +28,15 @@ python -m diffusor
 
 The window walks through six steps and then opens a results view.
 
-1. **Data** loads your file, or one of the bundled example datasets. This step
-   also states the input format in full, so you never have to guess.
+1. **Data** loads your file or a bundled example. Diffusor guesses the distance
+   column, its unit and the two composition columns from the names and asks you
+   to confirm them. Uncertainties, oxides and a fit window sit under Advanced.
+   An example also fills in the later steps, and each step shows what it set.
 2. **Mineral** picks the phase, the diffusing species and the traverse
    orientation.
 3. **Conditions** takes temperature, pressure and oxygen fugacity with their
-   uncertainties, plus the analytical resolution.
+   uncertainties, plus the analytical resolution. Pick the instrument and
+   Diffusor fills in a beam sigma with the published convention it came from.
 4. **Model** sets the geometry, the boundaries and the initial condition.
 5. **Coefficient** lists everything published for that mineral and species,
    tagged *recommended*, *unverified* or *superseded*.
@@ -42,7 +45,10 @@ The window walks through six steps and then opens a results view.
 The results view puts the fitted time and its interval at the top of a narrow
 summary of every setting, with an *edit* link beside each group that jumps back
 to the relevant step. The plot takes the rest of the width. Methods, the Monte
-Carlo histogram and the log open on demand rather than occupying the window.
+Carlo histogram and the log open on demand.
+
+Scrolling never changes a number or a drop-down. Values change only when you
+type or click.
 
 ## Input format
 
@@ -64,7 +70,7 @@ forsterite content in mol% or a calibrated grey value. Distances may run either
 way and need not be evenly spaced. Extra columns are ignored, so a plagioclase
 anorthite column can be carried along and used to drive the activity term. An
 optional fit window leaves points out of the fit without deleting them from the
-file, for example a later overgrowth at the very rim; any extra column such as
+file, for example a later overgrowth at the very rim. Any extra column such as
 anorthite follows the same window.
 
 ## Example datasets
@@ -117,7 +123,7 @@ route it took and why.
 diffusion coefficient evaluated at half-nodes, following Crank (1975)
 section 8.4 and the finite-difference appendix of Dohmen, Faak & Blundy (2017).
 Plane, cylindrical and spherical geometry are handled by a single conservative
-operator; the centre of a cylinder or sphere uses the L'Hopital limit. The time
+operator. The centre of a cylinder or sphere uses the L'Hopital limit. The time
 step starts at the explicit stability limit and grows geometrically, which
 keeps a 100 kyr run to a few hundred steps while still resolving the sharp
 initial transient. Against the closed forms the solver is accurate to about
@@ -133,7 +139,7 @@ anorthite gradient.
 (2004), with the per-axis ratios published for each mineral.
 
 **Analytical resolution** is handled by convolving the model with a Gaussian
-before comparing it with the data (Ganguly et al. 1988; Bradshaw & Kent 2017),
+before comparing it with the data (Ganguly et al. 1988, Bradshaw & Kent 2017),
 so the fitted time is corrected for beam smearing rather than inflated by it.
 
 ## Error propagation
@@ -211,7 +217,7 @@ python -m pytest
 times, so the whole chain can be checked against an answer that is known
 exactly. Regenerate them with `python scripts/make_examples.py`. The round-trip
 tests in `tests/test_examples_roundtrip.py` load each one, fit it and check the
-recovered time. The two measured files are not produced by that script; the
+recovered time. The two measured files come from elsewhere. The
 Kizimen traverse is extracted from the published spreadsheet by
 `python scripts/extract_kizimen.py <folder>`.
 
@@ -224,7 +230,7 @@ publication or from a named re-fit. The recommended ones are:
 | --- | --- | --- |
 | Orthopyroxene | Fe-Mg | Dias, Dohmen & Behrens (2025), two fO2 regimes |
 | Clinopyroxene | Fe-Mg | Mueller et al. (2013) |
-| Plagioclase | Mg | Van Orman, Cherniak & Kita (2014); Audétat, Grocolas & Mutch (2026), with silica activity |
+| Plagioclase | Mg | Van Orman, Cherniak & Kita (2014), and Audétat, Grocolas & Mutch (2026) with silica activity |
 | Plagioclase | Sr, Ba | Grocolas, Bloch, Bouvier & Müntener (2025) |
 | Plagioclase | Li | Pohl et al. (2024), interstitial mechanism |
 | Magnetite | Ti, Fe | Van Orman & Crispin (2010), Table 12 |
@@ -241,10 +247,10 @@ construction, not the authors'.
 Older calibrations are kept alongside them so published timescales can be
 reproduced and compared: Dohmen et al. (2016) and Ganguly & Tazzoli (1994) for
 orthopyroxene, the latter also in the no-fO2 form used by Ostorero et al.
-(2022); Dimanov & Sautter (2000) for clinopyroxene (the coefficient behind the
-published NIDIS results); Costa et al. (2003) for Mg in plagioclase; Giletti &
+(2022). Dimanov & Sautter (2000) for clinopyroxene, the coefficient behind the
+published NIDIS results. Costa et al. (2003) for Mg in plagioclase. Giletti &
 Casserly (1994), Cherniak & Watson (1994) and Cherniak (2002) for Sr and Ba in
-plagioclase, the last two in the re-fitted form of Grocolas et al. (2025); and
+plagioclase, the last two in the re-fitted form of Grocolas et al. (2025). And
 Freer & Hauptman (1978) for Fe-Ti in titanomagnetite. `REFERENCES.md` lists all
 of them with their verification status.
 
@@ -288,7 +294,7 @@ Those are the recommended entries. At 1150 °C they agree with Sievwright et al.
 ## Known limitations
 
 - Version 1 is 1-D only. Modelling a 3-D crystal in 1-D returns a maximum
-  estimate, and sectioning adds further bias (Shea et al. 2015; Krimer & Costa
+  estimate, and sectioning adds further bias (Shea et al. 2015, Krimer & Costa
   2017). The application says so on every fit.
 - The olivine entries were transcribed from secondary sources and are flagged
   unverified. Check them against Dohmen & Chakraborty (2007) and its erratum.
@@ -296,11 +302,11 @@ Those are the recommended entries. At 1150 °C they agree with Sievwright et al.
   Pohl et al. (2024) fitted a multispecies model with interstitial and
   lattice-site Li exchanging, which Diffusor does not implement.
 - The Lu law of Dias et al. (2025) quotes its fO2 term relative to an fO2_0 that
-  the paper does not define; Diffusor assumes the IW buffer and flags the entry
+  the paper does not define. Diffusor assumes the IW buffer and flags the entry
   unverified until that is checked.
 - The Audétat et al. (2026) Mg law is taken from the accepted manuscript. Its
   silica activity is fixed at 1 (quartz saturation) unless overridden from
-  Python; the interface does not expose it yet.
+  Python. The interface does not expose it yet.
 - Multi-component and isotopic diffusion are not implemented.
 
 ## Licence

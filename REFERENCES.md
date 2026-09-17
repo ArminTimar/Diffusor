@@ -88,6 +88,7 @@ every exported methods block. Check them against the primary paper before publis
   - used by: ol_FeMg_chakraborty1997
 - **`chakraborty2010`** Chakraborty, S. (2010) Diffusion coefficients in olivine, wadsleyite and ringwoodite. Reviews in Mineralogy and Geochemistry 72:603-639. https://doi.org/10.2138/rmg.2010.72.13
   - used by: ol_FeMg_dohmen_chakraborty2007_tamed (secondary)
+- **`chamberlain2014`** Chamberlain, K. J. and Morgan, D. J. and Wilson, C. J. N. (2014) Timescales of mixing and mobilisation in the Bishop Tuff magma body: perspectives from diffusion chronometry. Contributions to Mineralogy and Petrology 168:1034. https://doi.org/10.1007/s00410-014-1034-2 [local library copy: chamberlain_etal_2014_bishop_tuff_diffusion.pdf; feldspar microprobe traverses with a 5 um defocused beam]
 - **`cherniak2002`** Cherniak, D. J. (2002) Ba diffusion in feldspar. Geochimica et Cosmochimica Acta 66:1641-1650. https://doi.org/10.1016/S0016-7037(01)00866-3
   - used by: plag_Ba_cherniak2002, plag_Ba_grocolas2025 (secondary)
 - **`cherniak2010`** Cherniak, D. J. (2010) Cation diffusion in feldspars. Reviews in Mineralogy and Geochemistry 72:691-733. https://doi.org/10.2138/rmg.2010.72.15

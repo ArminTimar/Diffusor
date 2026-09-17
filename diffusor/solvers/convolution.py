@@ -42,7 +42,7 @@ def resolution_warning(Dt: float, sigma: float, factor: float = 3.0):
         return None
     L = 2.0 * np.sqrt(max(Dt, 0.0))
     if L < factor * sigma:
-        return (f"Diffusion length 2*sqrt(Dt) = {L:.3g} is < {factor:g} x beam sigma ({sigma:.3g}); "
-                "the timescale is at the analytical resolution limit and should be treated as an "
-                "upper bound (Bradshaw & Kent 2017).")
+        return (f"Diffusion length 2*sqrt(Dt) = {L:.3g} is below {factor:g} x beam sigma "
+                f"({sigma:.3g}). The timescale is at the analytical resolution limit. Treat it "
+                "as an upper bound (Bradshaw & Kent 2017).")
     return None

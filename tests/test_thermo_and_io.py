@@ -212,7 +212,7 @@ def test_methods_paragraph_lists_the_sources_actually_used(tmp_path):
                                                  delta_buffer=1.0, sigma_delta_buffer=0.3))
     text = methods_paragraph(r, mc)
     assert "Dohmen" in text and "Crank" in text
-    assert "re-evaluated at every sampled temperature" in text
+    assert "buffer at every sampled temperature" in text
     assert "References" in text
     assert "https://doi.org/10.2138/am-2016-5815" in text
 

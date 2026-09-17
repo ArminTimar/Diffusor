@@ -256,7 +256,7 @@ def run(model: DiffusionModel, x_data, C_data, sigma=None, *,
                 break
 
     if not times:
-        raise RuntimeError("every Monte Carlo draw failed; check the model set-up")
+        raise RuntimeError("every Monte Carlo draw failed. Check the model set-up.")
 
     res = MonteCarloResult(
         times=np.array(times), t_best=base.t_seconds, n_draws=len(times),
@@ -264,7 +264,7 @@ def run(model: DiffusionModel, x_data, C_data, sigma=None, *,
         profiles=np.array(kept) if kept else None,
         x_profiles=x_data, warnings=list(base.warnings))
     if n_failed > 0.1 * n_draws:
-        res.warnings.append(f"{n_failed} of {n_draws} draws failed; the result may be biased")
+        res.warnings.append(f"{n_failed} of {n_draws} draws failed. The result may be biased.")
     return res
 
 

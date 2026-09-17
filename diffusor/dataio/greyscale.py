@@ -87,7 +87,7 @@ def calibrate(grey_anchors, comp_anchors, degree: int = 1) -> GreyscaleCalibrati
     r2 = 1.0 - ss_res / ss_tot if ss_tot > 0 else float("nan")
     if degree == 1 and g.size >= 4 and r2 < 0.95:
         notes.append(f"the linear calibration explains only R2 = {r2:.3f} of the anchor "
-                     "variance; check for a non-linear BSE response or for a second element "
+                     "variance. Check for a non-linear BSE response or for a second element "
                      "(e.g. Ca) varying along the traverse")
     return GreyscaleCalibration(coeffs, degree, g, c, resid, rmse, r2, cov, notes)
 

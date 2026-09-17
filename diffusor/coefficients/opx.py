@@ -39,8 +39,8 @@ _add(DiffusionCoefficient(
     citation="dohmen2016",
     equation_number="1 (+ compositional correction, p. 2219)",
     equation_text=("log D_Fe-Mg^c = log D0 - {Q / ln(10) R T} + n log fO2   with "
-                   "Q = 308 +/- 23 kJ/mol, log(D0 [m2/s]) = -5.95 +/- 0.83, n = 0.053 +/- 0.027; "
-                   "abstract form D_Fe-Mg [m2/s] = 1.12e-6 (fO2 [Pa])^0.053 exp[-308 kJ/mol /(R T)]; "
+                   "Q = 308 +/- 23 kJ/mol, log(D0 [m2/s]) = -5.95 +/- 0.83, n = 0.053 +/- 0.027. "
+                   "Abstract form D_Fe-Mg [m2/s] = 1.12e-6 (fO2 [Pa])^0.053 exp[-308 kJ/mol /(R T)]. "
                    "D(XFe,T,fO2) = D(T,fO2) * 10^(m (XFe - 0.09)) with m = 1"),
     func=_dohmen2016_fs9,
     params={
@@ -70,7 +70,7 @@ _add(DiffusionCoefficient(
                      "the two agree to within about 0.3 log units for Fs10 at log fO2 = -7 Pa, "
                      "but differ by up to 0.9 log units for Fe-rich opx at 1100 C and by up "
                      "to 1 log unit under reducing conditions. Prefer opx_FeMg_dias2025."),
-    notes=("Reference axis is [001]. D//[100] = D//[001]/3.5; D//[010] is indistinguishable "
+    notes=("Reference axis is [001]. D//[100] = D//[001]/3.5. D//[010] is indistinguishable "
            "from D//[001]. The compositional term is only recommended for XFe = 0.09-0.5. "
            "Test case: at 950 C and log fO2 = -7 Pa the equation gives log D = -19.48, "
            "against the measured -19.49 +/- 0.07 (run OPXD_14, sample 7D_20)."),
@@ -88,7 +88,7 @@ _add(DiffusionCoefficient(
     label="Opx Fe-Mg, Dohmen et al. (2016) -- Fs1, fO2-independent",
     citation="dohmen2016",
     equation_number="1 with n = 0 (Opx8 fit, p. 2215)",
-    equation_text=("D_Fe-Mg [m2/s] = 1.66e-4 exp[-377 +/- 30 kJ/mol /(R T)]; "
+    equation_text=("D_Fe-Mg [m2/s] = 1.66e-4 exp[-377 +/- 30 kJ/mol /(R T)]. "
                    "log(D0 [m2/s]) = -3.78 +/- 1.26, Q = 377 +/- 30 kJ/mol"),
     func=_dohmen2016_fs1,
     params={
@@ -104,7 +104,7 @@ _add(DiffusionCoefficient(
     X_range=Range(0.0, 0.05, "XFe"),
     verified=True,
     verified_from="read from the paper PDF: abstract and p. 2215",
-    notes="For near-end-member enstatite only (XFe ~ 0.01); no fO2 dependence resolved.",
+    notes="For near-end-member enstatite only (XFe ~ 0.01). No fO2 dependence resolved.",
 ))
 
 
@@ -150,9 +150,9 @@ _add(DiffusionCoefficient(
     equation_number="22-25",
     equation_text=(
         "log fO2 [Pa] > -10:  D [m2/s] = 3.085e-8 (fO2[Pa]/1e-7)^0.25 exp[-(284 +/- 19 kJ/mol)/(R T)] "
-        "10^(m1 (XFe - 0.1)),  m1 = -2.37(+/-0.45) (1e4/T) + 21.09   (eqs 22, 24); "
+        "10^(m1 (XFe - 0.1)),  m1 = -2.37(+/-0.45) (1e4/T) + 21.09   (eqs 22, 24). "
         "log fO2 [Pa] <= -10:  D [m2/s] = 1.93e-10 exp[-(246 +/- 78 kJ/mol)/(R T)] "
-        "10^(m2 (XFe - 0.1)),  m2 = 2.96(+/-0.49) (1e4/T) - 21.08   (eqs 23, 25); T in K"),
+        "10^(m2 (XFe - 0.1)),  m2 = 2.96(+/-0.49) (1e4/T) - 21.08   (eqs 23, 25). T in K"),
     func=_dias2025,
     params={
         "D0_1": Parameter("D0_1", 3.085e-8, 0.0, "m2/s", "1s", "pre-exponential factor, eq. 22"),
@@ -170,13 +170,13 @@ _add(DiffusionCoefficient(
     reference_axis="c",
     requires=("XFe",),
     needs_fo2=True, fo2_unit="Pa",
-    T_range=Range(1173.15, 1373.15, "K (900-1100 C; eq. 23 stated from 870 C)"),
+    T_range=Range(1173.15, 1373.15, "K (900-1100 C. Eq. 23 stated from 870 C)"),
     P_range=Range(1.0e5, 1.0e5, "Pa (1 atm)"),
     fo2_range=Range(-11.0, -7.0, "log10 Pa"),
     X_range=Range(0.1, 0.4, "XFe"),
     verified=True,
-    verified_from=("read from the paper PDF: abstract, eqs 22-25 (p. 208) and Table 3; "
-                   "cross-checked against Table 1 of Dias & Dohmen (2024), which it reproduces "
+    verified_from=("read from the paper PDF: abstract, eqs 22-25 (p. 208) and Table 3. "
+                   "Cross-checked against Table 1 of Dias & Dohmen (2024), which it reproduces "
                    "to within 0.1 log units at 950, 1050 and 1100 C and 0.3 at 1000 C"),
     secondary_citations=("dias_dohmen2024", "dohmen2016"),
     recommended=True,
@@ -185,7 +185,7 @@ _add(DiffusionCoefficient(
         "as Dias et al. did not re-measure anisotropy. The two equations meet at log fO2 = -10 "
         "Pa but do not join smoothly there: Dias et al. found a change of diffusion mechanism, "
         "with D independent of fO2 under more reducing conditions and the composition effect "
-        "m decreasing rather than increasing with temperature. The composition exponent m "
+        "m decreasing with temperature. The composition exponent m "
         "falls from about 3.8 at 1100 C to 0.9 at 900 C in the oxidised regime and is "
         "extrapolated to near zero below about 850 C, consistent with the smaller effect "
         "inferred from order-disorder kinetics (Kroll et al. 1997, as re-evaluated by Dias et "
@@ -217,7 +217,7 @@ _add(DiffusionCoefficient(
     citation="dias_dohmen2024",
     equation_number="12-13",
     equation_text=("D_Fe-Mg [m2/s] = 3.8e-9 exp[-(261.07 +/- 24 kJ/mol)/(R T)] at XFe = 0.09 and "
-                   "log fO2 = -7 Pa (eq. 12); D(XFe) = D(XFe = 0.09) 10^(m (XFe - 0.09)) with "
+                   "log fO2 = -7 Pa (eq. 12). D(XFe) = D(XFe = 0.09) 10^(m (XFe - 0.09)) with "
                    "m = -2.711e4 / T[K] + 23.5408 (eq. 13)"),
     func=_dias2024,
     params={
@@ -236,7 +236,7 @@ _add(DiffusionCoefficient(
     X_range=Range(0.09, 0.5, "XFe"),
     verified=True,
     verified_from=("read from the paper PDF: abstract, eqs 12-13 (pp. 16-17) and Table 1. The "
-                   "typeset m(T) expression is ambiguous in the text layer; the form -2.711e4/T "
+                   "typeset m(T) expression is ambiguous in the text layer. The form -2.711e4/T "
                    "+ 23.5408 is the one that reproduces the fitted m values of Table 1 (3.7, "
                    "3.0, 2.4 and 1.1 at 1102, 1050, 1000 and 950 C) and matches the 1/T form of "
                    "Dias et al. (2025) eq. 2"),
@@ -249,7 +249,7 @@ _add(DiffusionCoefficient(
                      "for Fs9."),
     notes=("Combined regression of the new data with the Dohmen et al. (2016) Fs9 data refitted "
            "with the temperature-dependent m. Only valid at log fO2 = -7 Pa (about FMQ-1 to "
-           "FMQ-2.5 over the experimental range); it has no fO2 term."),
+           "FMQ-2.5 over the experimental range). It has no fO2 term."),
 ))
 
 
@@ -295,7 +295,7 @@ for _el, _D0, _Q, _sQ, _eq, _inv_n in [
         verified=not _is_lu,
         verified_from=(
             f"read from the paper PDF: abstract and eq. {_eq} (p. 93)"
-            + ("; the reference fugacity fO2[Pa]_0 is not defined in the text. The law is "
+            + (". The reference fugacity fO2[Pa]_0 is not defined in the text. The law is "
                "stated for 'fO2 close to the iron-wustite (IW) buffer', so Diffusor takes "
                "fO2_0 as the IW buffer at T. Check this against the paper before relying on "
                "the fO2 term" if _is_lu else "")),
@@ -306,7 +306,7 @@ for _el, _D0, _Q, _sQ, _eq, _inv_n in [
                   "Eu. " if _is_lu else
                   f"No resolvable dependence of {_el} diffusion on fO2 between 1e-7 and 1e-11 "
                   "Pa. " + ("Eu is assumed to be trivalent. " if _el == "Eu" else ""))
-               + "Faster than earlier opx and diopside REE data (Cherniak & Liang 2007; Van "
+               + "Faster than earlier opx and diopside REE data (Cherniak & Liang 2007, Van "
                "Orman et al. 2001), and with lower activation energies. Relevant to Lu-Hf "
                "systematics and to diffusive fractionation of REE between opx and melt."),
     ))
@@ -380,7 +380,7 @@ _add(DiffusionCoefficient(
     mineral="opx", species="Fe-Mg",
     label="Opx Fe-Mg, Ganguly & Tazzoli (1994) / Allan et al. (2013) form",
     citation="ganguly_tazzoli1994",
-    equation_number="Dohmen et al. (2016) eq. 3; Ostorero et al. (2022) eq. 1",
+    equation_number="Dohmen et al. (2016) eq. 3. Ostorero et al. (2022) eq. 1",
     equation_text=("log D_Fe-Mg [m2/s] = -9.54 + 2.6 XFe - 12530/T[K] "
                    "+ (1/6) log( fO2(sample,T) / fO2(IW,T) )"),
     func=_ganguly_tazzoli,
@@ -403,8 +403,8 @@ _add(DiffusionCoefficient(
     verified_from=("transcribed from Dohmen et al. (2016) eq. 3 (PDF p. 2216) and cross-checked "
                    "against Ostorero et al. (2022) eq. 1, which is the same law in cm2/s"),
     secondary_citations=("dohmen2016", "ostorero2022"),
-    notes=("Retrieved indirectly from Fe-Mg order-disorder kinetics, not from a direct "
-           "diffusion measurement. Dohmen et al. (2016) argue the fO2 exponent of 1/6 "
+    notes=("Retrieved indirectly from Fe-Mg order-disorder kinetics. It comes from no "
+           "direct diffusion measurement. Dohmen et al. (2016) argue the fO2 exponent of 1/6 "
            "(taken by analogy with olivine) is not supported by their experiments, which "
            "give n = 0.053, and that it produces an artificially low activation energy "
            "(150 kJ/mol) at constant fO2. Set use_fo2 = 0 to drop the fO2 term, as "
@@ -429,7 +429,7 @@ for _axis, _label, _logD0, _slog, _Q, _sQ in [
         label=f"Opx Mg self-diffusion // {_axis}-axis {_label}, Schwandt et al. (1998)",
         citation="schwandt1998",
         equation_number="Table 3",
-        equation_text=(f"D = D0 exp(-Ea/RT); {_label}: Ea = {_Q:g} +/- {_sQ:g} kJ/mol, "
+        equation_text=(f"D = D0 exp(-Ea/RT). {_label}: Ea = {_Q:g} +/- {_sQ:g} kJ/mol, "
                        f"log D0 [m2/s] = {_logD0:g} +/- {_slog:g}"),
         func=_schwandt,
         params={

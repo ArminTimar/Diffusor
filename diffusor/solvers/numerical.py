@@ -198,7 +198,7 @@ def solve_1d(x: np.ndarray, C0: np.ndarray, D_func: Callable[[np.ndarray, float]
     if t_total / dt_cap > max_steps:
         result.warnings.append(
             f"{t_total/dt_cap:.3g} steps would be needed at the stability limit "
-            f"(max_steps = {max_steps}); the time step was enlarged, so check the "
+            f"(max_steps = {max_steps}). The time step was enlarged. Check the "
             "result against a finer grid.")
         dt_cap = t_total / max_steps
     dt_nominal = dt_cap

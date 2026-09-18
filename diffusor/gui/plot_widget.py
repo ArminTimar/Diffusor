@@ -73,24 +73,14 @@ class ProfilePlot(QWidget):
         self._plot_data(x, C, sig)
 
         if mc_result is not None:
-            # Band drawn at the 16th and 84th percentile *times*, under the
-            # best-fit conditions. The envelope of the re-fitted Monte Carlo
-            # profiles themselves is not informative: every draw is re-fitted,
-            # so all of them pass through the data by construction. What the
-            # reader wants to see is how different the profile would look at
-            # the ends of the time interval.
-            xf_b = np.linspace(x.min(), x.max(), 300)
-            try:
-                lo = fit_result.model.profile(mc_result.p16, xf_b)
-                hi = fit_result.model.profile(mc_result.p84, xf_b)
-                self.ax.fill_between(xf_b, lo, hi, color=theme.PLOT_BAND, alpha=0.20, lw=0,
-                                     label="68% time interval", zorder=1)
-                lo2 = fit_result.model.profile(mc_result.p2_5, xf_b)
-                hi2 = fit_result.model.profile(mc_result.p97_5, xf_b)
-                self.ax.fill_between(xf_b, lo2, hi2, color=theme.PLOT_BAND, alpha=0.10, lw=0,
-                                     label="95% time interval", zorder=1)
-            except Exception:
-                pass
+            # The band is the spread of the profiles the Monte Carlo actually fitted.
+            # It is narrow, because what the data fix is the diffusion length
+            # sqrt(D t), and every draw is re-fitted to the same points. Temperature
+            # and the diffusion coefficient barely move the curve. They convert that
+            # length into a time, so their uncertainty belongs to t and is shown in
+            # the histogram, not here. Drawing the profile at the ends of the time
+            # interval with D held fixed would show curves that no draw ever fitted.
+            self._plot_draw_envelope(mc_result)
 
         if initial:
             try:
@@ -106,8 +96,11 @@ class ProfilePlot(QWidget):
             Cf = fit_result.model.profile(fit_result.t_seconds, xf)
         except Exception:
             xf, Cf = x, fit_result.C_model
-        self.ax.plot(xf, Cf, "-", color=theme.PLOT_MODEL, lw=2.2,
-                     label=f"fit: t = {human_time(fit_result.t_seconds)}", zorder=4)
+        label = f"fit: t = {human_time(fit_result.t_seconds)}"
+        if mc_result is not None:
+            label += (f"\n68% of t: {human_time(mc_result.p16)} to "
+                      f"{human_time(mc_result.p84)}")
+        self.ax.plot(xf, Cf, "-", color=theme.PLOT_MODEL, lw=2.2, label=label, zorder=4)
 
         self.ax.set_ylabel(y_label)
         self.ax.legend(fontsize=9, frameon=False, loc="best")
@@ -125,6 +118,21 @@ class ProfilePlot(QWidget):
         self.ax_res.set_ylabel("residual")
         theme.apply_plot_style(self.figure, [self.ax, self.ax_res])
         self.canvas.draw_idle()
+
+    def _plot_draw_envelope(self, mc_result):
+        xp = mc_result.x_profiles
+        if xp is None:
+            return
+        order = np.argsort(np.asarray(xp, dtype=float))
+        xs = np.asarray(xp, dtype=float)[order]
+        for q_lo, q_hi, alpha, label in ((16, 84, 0.30, "68% of the re-fitted draws"),
+                                         (2.5, 97.5, 0.15, "95% of the re-fitted draws")):
+            env = mc_result.envelope(q_lo, q_hi)
+            if env is None:
+                return
+            lo, hi = env[0][order], env[1][order]
+            self.ax.fill_between(xs, lo, hi, color=theme.PLOT_BAND, alpha=alpha, lw=0,
+                                 label=label, zorder=1)
 
     def show_comparison(self, results: Dict[str, object], y_label="composition"):
         """Overlay the fits from several diffusion coefficients."""

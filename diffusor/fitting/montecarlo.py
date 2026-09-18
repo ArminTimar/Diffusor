@@ -40,7 +40,7 @@ import numpy as np
 
 from ..thermo.buffers import log_fo2_from_delta
 from ..thermo.units import human_time
-from .fit import fit_time
+from .fit import T_MAX_DEFAULT, T_MIN_DEFAULT, fit_time
 from .model import DiffusionModel
 
 SOURCES = ("temperature", "fo2", "pressure", "diffusion_coefficient",
@@ -195,7 +195,7 @@ def run(model: DiffusionModel, x_data, C_data, sigma=None, *,
         budget: Optional[UncertaintyBudget] = None,
         n_draws: int = 1000, seed: int = 12345,
         free_parameters: Sequence[str] = ("t",),
-        t_min: float = 1.0e2, t_max: float = 3.2e12,
+        t_min: float = T_MIN_DEFAULT, t_max: float = T_MAX_DEFAULT,
         keep_profiles: int = 200,
         progress: Optional[Callable[[int, int], bool]] = None,
         only_source: Optional[str] = None,
@@ -279,6 +279,12 @@ def run(model: DiffusionModel, x_data, C_data, sigma=None, *,
         x_profiles=x_data, warnings=list(base.warnings))
     if n_failed > 0.1 * n_draws:
         res.warnings.append(f"{n_failed} of {n_draws} draws failed. The result may be biased.")
+    at_bound = int(np.sum(res.times >= 0.95 * t_max) + np.sum(res.times <= 1.05 * t_min))
+    if at_bound:
+        res.warnings.append(
+            f"{at_bound} of {len(res.times)} draws stopped at the edge of the search range "
+            f"({human_time(t_min)} to {human_time(t_max)}), so the interval is cut off there. "
+            "Those draws are the coldest ones. Widen the range or tighten the temperature.")
     return res
 
 

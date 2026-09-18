@@ -26,6 +26,7 @@ from ..coefficients import Conditions, get as get_coefficient, list_coefficients
 from ..coefficients.plagioclase import ACTIVITY_A, activity_theta
 from ..dataio import ProfileSpec, build_profile, read_table, save_results, suggest_spec
 from ..fitting import DiffusionModel, UncertaintyBudget
+from ..fitting.fit import T_MAX_DEFAULT as T_MAX, T_MIN_DEFAULT as T_MIN
 from ..minerals import MINERALS, get_mineral
 from ..references import cite
 from ..solvers import Geometry, InitialCondition, dirichlet, zero_flux
@@ -1559,7 +1560,7 @@ class MainWindow(QMainWindow):
             QMessageBox.critical(self, "Model error", traceback.format_exc())
             return
         p = self.profile
-        w = FitWorker(model, p.x, p.C, p.sigma, self._free_parameters(), 1e2, 3.2e12)
+        w = FitWorker(model, p.x, p.C, p.sigma, self._free_parameters(), T_MIN, T_MAX)
         w.finished.connect(self._fit_done)
         w.failed.connect(self._work_failed)
         if self._launch(w):
@@ -1591,7 +1592,7 @@ class MainWindow(QMainWindow):
             QMessageBox.critical(self, "Model error", traceback.format_exc())
             return
         p = self.profile
-        w = CompareWorker(models, p.x, p.C, p.sigma, self._free_parameters(), 1e2, 3.2e12)
+        w = CompareWorker(models, p.x, p.C, p.sigma, self._free_parameters(), T_MIN, T_MAX)
         w.progress.connect(self._compare_progress)
         w.finished.connect(self._compare_done)
         w.failed.connect(self._work_failed)
@@ -1630,7 +1631,7 @@ class MainWindow(QMainWindow):
         n = self.sp_draws.value()
         budget = self._budget()
         w = MonteCarloWorker(model, p.x, p.C, p.sigma, budget, n,
-                             self.sp_seed.value(), self._free_parameters(), 1e2, 3.2e12,
+                             self.sp_seed.value(), self._free_parameters(), T_MIN, T_MAX,
                              do_contributions=self.chk_contrib.isChecked(),
                              contribution_draws=max(40, n // 5))
         w.progress.connect(self._mc_progress)

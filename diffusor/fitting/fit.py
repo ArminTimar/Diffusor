@@ -30,6 +30,12 @@ from .objective import FitStatistics, residuals, statistics
 
 FREE_PARAMETERS = ("t", "x0", "C_left", "C_right", "beam_sigma")
 
+# Default search range: 100 s to 10 Myr. The upper end has to leave room for the
+# Monte Carlo, whose coldest draws can need hundreds of times the best-fit time.
+# A run that stops at the bound is reported rather than silently clipped.
+T_MIN_DEFAULT = 1.0e2
+T_MAX_DEFAULT = 3.2e14
+
 
 @dataclass
 class FitResult:
@@ -85,13 +91,16 @@ def predict(model: DiffusionModel, t_seconds: float, x_data, free=None, override
 
 
 def scan_time(model: DiffusionModel, x_data, C_data, sigma=None,
-              t_min: float = 1.0e2, t_max: float = 3.2e12, n: int = 60,
+              t_min: float = T_MIN_DEFAULT, t_max: float = T_MAX_DEFAULT, n: int = 0,
               free=None, overrides=None) -> Tuple[float, np.ndarray, np.ndarray]:
     """Coarse logarithmic scan of chi2 against time.
 
     Default range is 100 s to about 100 kyr, which brackets everything from
     syn-eruptive ascent to long crustal residence (Costa et al. 2020).
     """
+    if not n:
+        # about six points per decade, so a wider range is not scanned more coarsely
+        n = int(np.clip(6 * (np.log10(t_max) - np.log10(t_min)), 60, 150))
     ts = np.logspace(np.log10(t_min), np.log10(t_max), n)
     chi = np.empty(n)
     for i, t in enumerate(ts):
@@ -105,7 +114,7 @@ def scan_time(model: DiffusionModel, x_data, C_data, sigma=None,
 
 def fit_time(model: DiffusionModel, x_data, C_data, sigma=None,
              free_parameters: Sequence[str] = ("t",),
-             t_min: float = 1.0e2, t_max: float = 3.2e12,
+             t_min: float = T_MIN_DEFAULT, t_max: float = T_MAX_DEFAULT,
              overrides=None, verbose: bool = False,
              t_guess: Optional[float] = None, scan_points: int = 60) -> FitResult:
     """Fit the diffusion time, optionally with nuisance parameters.

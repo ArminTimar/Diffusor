@@ -149,6 +149,50 @@ def test_worker_sends_all_draws_in_batches():
     assert done and sum(len(b) for b in batches) == 15
 
 
+def test_the_band_on_the_profile_is_the_spread_of_the_refitted_draws(app):
+    """The band must show what the data constrain, not the ends of the time interval.
+
+    Every draw is re-fitted, so all of them pass through the points and the band is
+    about the size of the measurement uncertainty. Temperature moves the time, not
+    the curve, so drawing the profile at the 16th and 84th percentile times with D
+    held fixed would be many times too wide.
+    """
+    from matplotlib.collections import PolyCollection
+    from diffusor.fitting import fit_time
+    from diffusor.gui.plot_widget import ProfilePlot
+    d = ds.get("sanidine_ba")
+    from diffusor.dataio import ProfileSpec, build_profile, read_table
+    p = build_profile(read_table(d.path), ProfileSpec(**d.spec))
+    ic = InitialCondition("step", {"x0": 10.0, "C_left": 4800.0, "C_right": 1600.0})
+    m = DiffusionModel(coefficient=get("kfs_Ba_cherniak2002"), conditions=Conditions(T_K=1063.15),
+                       initial=ic, bc_left=dirichlet(4800.0), bc_right=dirichlet(1600.0))
+    free = ["t", "x0"]
+    r = fit_time(m, p.x, p.C, p.sigma, free)
+    mc = run_montecarlo(m, p.x, p.C, p.sigma, budget=UncertaintyBudget(sigma_T_K=30.0),
+                        n_draws=40, seed=2, free_parameters=free)
+    plot = ProfilePlot()
+    plot.show_fit(r, mc)
+
+    def widest(ax):
+        out = 0.0
+        for coll in ax.collections:
+            if not isinstance(coll, PolyCollection):
+                continue
+            v = coll.get_paths()[0].vertices
+            for xv in np.unique(np.round(v[:, 0], 6)):
+                ys = v[np.isclose(v[:, 0], xv), 1]
+                if ys.size >= 2:
+                    out = max(out, float(ys.max() - ys.min()))
+        return out
+
+    sigma = float(np.mean(p.sigma))
+    drawn = widest(plot.ax)
+    assert 0 < drawn < 3 * sigma, (drawn, sigma)
+    time_band = float(np.max(np.abs(m.profile(mc.p84, p.x) - m.profile(mc.p16, p.x))))
+    assert time_band > 5 * drawn, "the old time band was not this narrow, so this test is blind"
+    plot.deleteLater()
+
+
 # --- interface ----------------------------------------------------------------------------
 @pytest.fixture(scope="module")
 def app():

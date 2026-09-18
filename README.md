@@ -198,6 +198,14 @@ parameters that are not independent:
 - Composition enters both the diffusion coefficient and the profile being
   fitted, so measurement noise propagates by two routes at once.
 
+The band on the profile plot is the spread of the profiles the Monte Carlo
+actually fitted, which is about as wide as the measurement uncertainty. It is
+not the profile at the ends of the time interval. What the data fix is the
+diffusion length sqrt(D t), and every draw is re-fitted to the same points, so
+temperature and the diffusion coefficient hardly move the curve. They convert
+that length into a time, so their uncertainty belongs to t and is shown in the
+histogram and the reported interval.
+
 Every draw re-runs the whole fit, so all of this is honoured automatically.
 Times are log-normally distributed, so the median and the 16th, 84th, 2.5th and
 97.5th percentiles are reported rather than a symmetric standard deviation.

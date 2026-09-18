@@ -1,6 +1,8 @@
 """Visual theme: a warm off-white palette shared by the interface and the plots."""
 from __future__ import annotations
 
+from pathlib import Path
+
 # --- palette ------------------------------------------------------------------
 BG = "#F7F5F2"            # page background, warm off-white
 SURFACE = "#FFFFFF"       # cards and inputs
@@ -13,13 +15,15 @@ TEXT_FAINT = "#96907F"
 
 ACCENT = "#1B6E6B"        # deep teal
 ACCENT_HOVER = "#175D5B"
-ACCENT_SOFT = "#E7F0EF"
+ACCENT_SOFT = "#E7F0EF"   # hover fill
+ACCENT_SELECTED = "#CFE4E1"  # selected fill, one step stronger than hover
 ACCENT_TEXT = "#FFFFFF"
 
 WARN = "#A65423"
 WARN_SOFT = "#FBF0E7"
 DANGER = "#9B3535"
 OK = "#2F6B45"
+OK_SOFT = "#E8F2EC"
 
 # --- plot colours (kept in step with the interface) ---------------------------
 PLOT_DATA = "#2E4B66"
@@ -33,8 +37,18 @@ PLOT_SERIES = ["#C2562F", "#1B6E6B", "#6B4FA0", "#B0891C", "#2E4B66", "#9B3535"]
 FONT_STACK = '"Segoe UI", "Inter", "Helvetica Neue", Arial, sans-serif'
 MONO_STACK = '"Cascadia Mono", Consolas, "SF Mono", Menlo, monospace'
 
+ICONS = Path(__file__).resolve().parent / "icons"
+
+
+def _icon(name: str) -> str:
+    return (ICONS / name).as_posix()
+
 
 def stylesheet() -> str:
+    check = _icon("check.svg")
+    dot = _icon("dot.svg")
+    down = _icon("chevron_down.svg")
+    up = _icon("chevron_up.svg")
     return f"""
 * {{
     font-family: {FONT_STACK};
@@ -52,81 +66,133 @@ QFrame#Card {{
 }}
 QFrame#Divider {{ background: {BORDER}; max-height: 1px; border: none; }}
 
-QLabel#H1 {{ font-size: 21px; font-weight: 600; color: {TEXT}; }}
-QLabel#H2 {{ font-size: 15px; font-weight: 600; color: {TEXT}; }}
+QLabel#H1 {{ font-size: 20px; font-weight: 600; color: {TEXT}; }}
+QLabel#H2 {{ font-size: 14.5px; font-weight: 600; color: {TEXT}; }}
 QLabel#Sub {{ font-size: 12.5px; color: {TEXT_MUTED}; }}
-QLabel#Hint {{ font-size: 12px; color: {TEXT_FAINT}; }}
+QLabel#Hint {{ font-size: 12px; color: {TEXT_MUTED}; }}
 QLabel#FieldLabel {{ font-size: 12.5px; color: {TEXT_MUTED}; }}
 QLabel#Mono {{ font-family: {MONO_STACK}; font-size: 12px; color: {TEXT_MUTED}; }}
+QLabel#Equation {{ color: {TEXT}; }}
 QLabel#Warn {{
     background: {WARN_SOFT}; color: {WARN}; border: 1px solid #F0DCC9;
-    border-radius: 7px; padding: 9px 11px; font-size: 12.5px;
+    border-radius: 7px; padding: 8px 10px; font-size: 12.5px;
 }}
+QLabel#Info {{
+    background: {ACCENT_SOFT}; color: {TEXT}; border: 1px solid #D3E4E2;
+    border-radius: 7px; padding: 8px 10px; font-size: 12.5px;
+}}
+QFrame#InfoBox {{ background: {ACCENT_SOFT}; border: 1px solid #D3E4E2; border-radius: 7px; }}
+QFrame#WarnBox {{ background: {WARN_SOFT}; border: 1px solid #F0DCC9; border-radius: 7px; }}
+QLabel#CalloutText {{ font-size: 12.5px; color: {TEXT}; background: transparent; border: none; }}
+QFrame#WarnBox QLabel#CalloutText {{ color: {WARN}; }}
 QLabel#Good {{ color: {OK}; font-size: 12.5px; }}
 QLabel#Danger {{ color: {DANGER}; font-size: 12.5px; }}
 
-/* ---- buttons ------------------------------------------------------------- */
+/* ---- buttons: hover always keeps dark text on a light fill ---------------- */
 QPushButton {{
     background: {SURFACE}; border: 1px solid {BORDER_STRONG};
-    border-radius: 7px; padding: 7px 15px; color: {TEXT};
+    border-radius: 7px; padding: 6px 14px; color: {TEXT};
 }}
-QPushButton:hover {{ background: {SURFACE_ALT}; border-color: {TEXT_FAINT}; }}
-QPushButton:pressed {{ background: {BORDER}; }}
+QPushButton:hover {{ background: {ACCENT_SOFT}; border-color: {ACCENT}; color: {TEXT}; }}
+QPushButton:pressed {{ background: {ACCENT_SELECTED}; color: {TEXT}; }}
 QPushButton:disabled {{ color: {TEXT_FAINT}; background: {SURFACE_ALT}; border-color: {BORDER}; }}
 QPushButton#Primary {{
     background: {ACCENT}; border: 1px solid {ACCENT}; color: {ACCENT_TEXT}; font-weight: 600;
-    padding: 8px 20px;
+    padding: 7px 20px;
 }}
-QPushButton#Primary:hover {{ background: {ACCENT_HOVER}; border-color: {ACCENT_HOVER}; }}
+QPushButton#Primary:hover {{ background: {ACCENT_SELECTED}; border-color: {ACCENT}; color: {TEXT}; }}
+QPushButton#Primary:pressed {{ background: {ACCENT_SOFT}; color: {TEXT}; }}
 QPushButton#Primary:disabled {{ background: #B9CBCA; border-color: #B9CBCA; color: #EEF4F3; }}
-QPushButton#Ghost {{ background: transparent; border: none; color: {ACCENT}; padding: 5px 9px; }}
-QPushButton#Ghost:hover {{ background: {ACCENT_SOFT}; border-radius: 6px; }}
-QPushButton#Chip {{
-    background: {SURFACE}; border: 1px solid {BORDER}; border-radius: 16px;
-    padding: 5px 13px; font-size: 12px; color: {TEXT_MUTED};
-}}
-QPushButton#Chip:hover {{ border-color: {ACCENT}; color: {ACCENT}; }}
+QPushButton#Ghost {{ background: transparent; border: none; color: {ACCENT}; padding: 4px 8px; }}
+QPushButton#Ghost:hover {{ background: {ACCENT_SOFT}; border-radius: 6px; color: {TEXT}; }}
+QPushButton#Ghost:checked {{ background: {ACCENT_SELECTED}; border-radius: 6px; color: {TEXT}; }}
+QPushButton#Ghost:disabled {{ color: {TEXT_FAINT}; background: transparent; }}
+QToolButton {{ background: transparent; border: none; border-radius: 6px; padding: 3px; color: {TEXT}; }}
+QToolButton:hover {{ background: {ACCENT_SOFT}; color: {TEXT}; }}
+QToolButton:checked {{ background: {ACCENT_SELECTED}; }}
 
 /* ---- inputs --------------------------------------------------------------- */
-QLineEdit, QDoubleSpinBox, QSpinBox, QComboBox, QTextEdit, QPlainTextEdit {{
+QLineEdit, QDoubleSpinBox, QSpinBox, QComboBox {{
     background: {SURFACE}; border: 1px solid {BORDER_STRONG}; border-radius: 7px;
-    padding: 6px 9px; selection-background-color: {ACCENT_SOFT}; selection-color: {TEXT};
+    padding: 5px 9px; selection-background-color: {ACCENT_SELECTED}; selection-color: {TEXT};
+    min-height: 20px;
 }}
+QLineEdit:hover, QDoubleSpinBox:hover, QSpinBox:hover, QComboBox:hover {{ border-color: {TEXT_FAINT}; }}
 QLineEdit:focus, QDoubleSpinBox:focus, QSpinBox:focus, QComboBox:focus {{
     border-color: {ACCENT};
 }}
-QComboBox::drop-down {{ border: none; width: 20px; }}
-QComboBox::down-arrow {{
-    image: none; border-left: 4px solid transparent; border-right: 4px solid transparent;
-    border-top: 5px solid {TEXT_MUTED}; margin-right: 8px;
+QLineEdit:disabled, QDoubleSpinBox:disabled, QSpinBox:disabled, QComboBox:disabled {{
+    color: {TEXT_FAINT}; background: {SURFACE_ALT}; border-color: {BORDER};
 }}
+QDoubleSpinBox[readOnly="true"] {{ background: {SURFACE_ALT}; }}
+QComboBox::drop-down {{ border: none; width: 24px; }}
+QComboBox::down-arrow {{ image: url("{down}"); width: 12px; height: 12px; margin-right: 6px; }}
 QComboBox QAbstractItemView {{
     background: {SURFACE}; border: 1px solid {BORDER_STRONG};
-    selection-background-color: {ACCENT_SOFT}; selection-color: {TEXT}; outline: none;
+    selection-background-color: {ACCENT_SELECTED}; selection-color: {TEXT}; outline: none;
     padding: 4px;
 }}
-QDoubleSpinBox::up-button, QDoubleSpinBox::down-button,
-QSpinBox::up-button, QSpinBox::down-button {{ width: 16px; border: none; background: transparent; }}
+QComboBox QAbstractItemView::item {{ padding: 5px 8px; min-height: 22px; }}
+QComboBox QAbstractItemView::item:hover {{ background: {ACCENT_SOFT}; color: {TEXT}; }}
+QComboBox QAbstractItemView::item:selected {{ background: {ACCENT_SELECTED}; color: {TEXT}; }}
+QDoubleSpinBox::up-button, QSpinBox::up-button {{
+    subcontrol-origin: border; subcontrol-position: top right;
+    width: 18px; border: none; background: transparent; margin-top: 2px;
+}}
+QDoubleSpinBox::down-button, QSpinBox::down-button {{
+    subcontrol-origin: border; subcontrol-position: bottom right;
+    width: 18px; border: none; background: transparent; margin-bottom: 2px;
+}}
+QDoubleSpinBox::up-button:hover, QSpinBox::up-button:hover,
+QDoubleSpinBox::down-button:hover, QSpinBox::down-button:hover {{ background: {ACCENT_SOFT}; }}
+QDoubleSpinBox::up-arrow, QSpinBox::up-arrow {{ image: url("{up}"); width: 9px; height: 9px; }}
+QDoubleSpinBox::down-arrow, QSpinBox::down-arrow {{ image: url("{down}"); width: 9px; height: 9px; }}
+QDoubleSpinBox::up-arrow:disabled, QSpinBox::up-arrow:disabled,
+QDoubleSpinBox::down-arrow:disabled, QSpinBox::down-arrow:disabled,
+QDoubleSpinBox[readOnly="true"]::up-arrow, QDoubleSpinBox[readOnly="true"]::down-arrow {{ image: none; }}
 
+/* ---- check boxes: a filled box with a visible tick ------------------------- */
 QCheckBox, QRadioButton {{ spacing: 8px; color: {TEXT}; padding: 2px 0; }}
-QCheckBox::indicator, QRadioButton::indicator {{
+QCheckBox::indicator, QRadioButton::indicator,
+QListView::indicator, QListWidget::indicator {{
     width: 16px; height: 16px; border: 1px solid {BORDER_STRONG};
     background: {SURFACE}; border-radius: 4px;
 }}
 QRadioButton::indicator {{ border-radius: 9px; }}
-QCheckBox::indicator:checked, QRadioButton::indicator:checked {{
-    background: {ACCENT}; border-color: {ACCENT};
+QCheckBox::indicator:hover, QRadioButton::indicator:hover,
+QListView::indicator:hover, QListWidget::indicator:hover {{ border-color: {ACCENT}; }}
+QCheckBox::indicator:checked, QListView::indicator:checked, QListWidget::indicator:checked {{
+    background: {ACCENT}; border-color: {ACCENT}; image: url("{check}");
 }}
-QCheckBox::indicator:hover, QRadioButton::indicator:hover {{ border-color: {ACCENT}; }}
+QRadioButton::indicator:checked {{ background: {ACCENT}; border-color: {ACCENT}; image: url("{dot}"); }}
+QCheckBox::indicator:disabled {{ background: {SURFACE_ALT}; border-color: {BORDER}; }}
+QCheckBox::indicator:checked:disabled {{ background: #B9CBCA; border-color: #B9CBCA; }}
+QCheckBox:disabled {{ color: {TEXT_FAINT}; }}
 
 /* ---- lists and tables ------------------------------------------------------ */
 QListWidget {{
     background: {SURFACE}; border: 1px solid {BORDER}; border-radius: 8px;
     outline: none; padding: 4px;
 }}
-QListWidget::item {{ padding: 8px 8px; border-radius: 6px; }}
-QListWidget::item:selected {{ background: {ACCENT_SOFT}; color: {TEXT}; }}
-QListWidget::item:hover {{ background: {SURFACE_ALT}; }}
+QListWidget::item {{ padding: 7px 8px; border-radius: 6px; color: {TEXT}; border: 1px solid transparent; }}
+QListWidget::item:hover {{ background: {ACCENT_SOFT}; color: {TEXT}; }}
+QListWidget::item:selected, QListWidget::item:selected:!active {{
+    background: {ACCENT_SELECTED}; color: {TEXT}; border: 1px solid #A9CBC7;
+}}
+QListWidget::item:selected:hover {{ background: {ACCENT_SELECTED}; color: {TEXT}; border: 1px solid {ACCENT}; }}
+QTableWidget {{
+    background: {SURFACE}; border: 1px solid {BORDER}; border-radius: 8px; gridline-color: {BORDER};
+}}
+QHeaderView::section {{
+    background: {SURFACE_ALT}; color: {TEXT_MUTED}; border: none;
+    border-bottom: 1px solid {BORDER}; padding: 4px 6px; font-size: 12px;
+}}
+
+/* ---- rich text panes --------------------------------------------------------- */
+QTextBrowser, QTextEdit, QPlainTextEdit {{
+    background: {SURFACE}; border: 1px solid {BORDER}; border-radius: 10px;
+    selection-background-color: {ACCENT_SELECTED}; selection-color: {TEXT};
+}}
 
 /* ---- scroll areas ---------------------------------------------------------- */
 QScrollArea {{ background: transparent; border: none; }}
@@ -141,17 +207,19 @@ QScrollBar::handle:horizontal {{ background: {BORDER_STRONG}; border-radius: 5px
 
 /* ---- step rail -------------------------------------------------------------- */
 QLabel#StepDot {{
-    font-size: 12px; color: {TEXT_FAINT}; padding: 5px 11px;
-    border-radius: 14px; background: transparent;
+    font-size: 12px; color: {TEXT_MUTED}; padding: 4px 10px;
+    border-radius: 13px; background: transparent;
 }}
+QLabel#StepDot:hover {{ background: {ACCENT_SOFT}; color: {TEXT}; }}
 QLabel#StepDotActive {{
-    font-size: 12px; font-weight: 600; color: {ACCENT_TEXT}; padding: 5px 11px;
-    border-radius: 14px; background: {ACCENT};
+    font-size: 12px; font-weight: 600; color: {ACCENT_TEXT}; padding: 4px 10px;
+    border-radius: 13px; background: {ACCENT};
 }}
 QLabel#StepDotDone {{
-    font-size: 12px; color: {ACCENT}; padding: 5px 11px;
-    border-radius: 14px; background: {ACCENT_SOFT};
+    font-size: 12px; color: {ACCENT}; padding: 4px 10px;
+    border-radius: 13px; background: {ACCENT_SOFT};
 }}
+QLabel#StepDotDone:hover {{ background: {ACCENT_SELECTED}; color: {TEXT}; }}
 
 /* ---- summary sidebar --------------------------------------------------------- */
 QWidget#Summary {{ background: {SURFACE}; }}
@@ -163,22 +231,23 @@ QLabel#SummaryHead {{
 }}
 
 QProgressBar {{
-    background: {BORDER}; border: none; border-radius: 4px; height: 7px; text-align: center;
+    background: {BORDER}; border: none; border-radius: 4px; max-height: 7px; text-align: center;
     color: transparent;
 }}
 QProgressBar::chunk {{ background: {ACCENT}; border-radius: 4px; }}
 
-QStatusBar {{ background: {BG}; color: {TEXT_MUTED}; border-top: 1px solid {BORDER}; }}
 QToolTip {{
-    background: {TEXT}; color: {BG}; border: none; padding: 6px 9px; border-radius: 6px;
+    background: {SURFACE}; color: {TEXT}; border: 1px solid {BORDER_STRONG};
+    padding: 5px 8px; border-radius: 6px;
 }}
 QMenuBar {{ background: {BG}; border-bottom: 1px solid {BORDER}; }}
-QMenuBar::item {{ padding: 6px 11px; background: transparent; border-radius: 6px; }}
-QMenuBar::item:selected {{ background: {ACCENT_SOFT}; }}
+QMenuBar::item {{ padding: 5px 11px; background: transparent; border-radius: 6px; color: {TEXT}; }}
+QMenuBar::item:selected {{ background: {ACCENT_SOFT}; color: {TEXT}; }}
 QMenu {{ background: {SURFACE}; border: 1px solid {BORDER_STRONG}; border-radius: 8px; padding: 5px; }}
-QMenu::item {{ padding: 7px 22px; border-radius: 6px; }}
-QMenu::item:selected {{ background: {ACCENT_SOFT}; }}
+QMenu::item {{ padding: 6px 22px; border-radius: 6px; color: {TEXT}; }}
+QMenu::item:selected {{ background: {ACCENT_SOFT}; color: {TEXT}; }}
 QSplitter::handle {{ background: {BORDER}; width: 1px; }}
+QMessageBox QLabel {{ color: {TEXT}; }}
 """
 
 

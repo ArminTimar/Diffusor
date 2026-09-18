@@ -161,6 +161,23 @@ def greyscale_example():
            "X_Fe = (grey - 90)/620), then fit with Mueller et al. (2013) at 1000 C.")
 
 
+# --- 7. sanidine Ba, at Bishop Tuff temperatures --------------------------------
+def sanidine_example():
+    T = 790 + 273.15
+    cond = Conditions(T_K=T, P_Pa=1.0e5)
+    ic = InitialCondition("step", {"x0": 0.0, "C_left": 4800.0, "C_right": 1600.0})
+    m = _model("kfs_Ba_cherniak2002", cond, ic, n_nodes=401)
+    t = 5000 * SEC_PER_YEAR
+    x = np.linspace(-10, 10, 81)
+    ba = m.profile(t, x) + rng.normal(0, 90.0, x.size)
+    pd.DataFrame({"Distance_um": np.round(x - x[0], 4), "Ba_ppm": np.round(ba, 0),
+                  "Ba_err": 90.0}).to_csv(OUT / "sanidine_ba.csv", index=False)
+    ANSWERS["sanidine_ba.csv"] = (
+        t, "Sanidine Ba, Cherniak (2002), 790 C, a bright Ba-rich rim against a darker core. "
+           "790 C lies inside the 753-815 C range Chamberlain et al. (2014) used for Bishop Tuff "
+           "sanidine. Map Ba_ppm with mode 'A'.")
+
+
 def main():
     opx_example()
     cpx_example()
@@ -168,13 +185,14 @@ def main():
     olivine_example()
     magnetite_example()
     greyscale_example()
+    sanidine_example()
     lines = ["# Example datasets", "",
              "Two files here are **real measurements** and are not produced by this script:",
              "",
              "* `plagioclase_santorini_druitt2012.csv` -- Druitt et al. (2012) Nature 482:77-80,",
              "  Supplementary Table 1, plagioclase S82-30A 12.",
              "* `opx_kizimen_ostorero2022.csv` -- Ostorero et al. (2022) Commun. Earth Environ.",
-             "  3:290, Supplementary Data 2, orthopyroxene K9_L10C4; regenerate it with",
+             "  3:290, Supplementary Data 2, orthopyroxene K9_L10C4. Regenerate it with",
              "  `python scripts/extract_kizimen.py <folder with the supplementary files>`.",
              "",
              "The files below are **synthetic**: each was produced by running Diffusor's forward",

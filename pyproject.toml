@@ -28,5 +28,8 @@ diffusor = "diffusor.gui.app:main"
 [tool.setuptools.packages.find]
 include = ["diffusor*"]
 
+[tool.setuptools.package-data]
+"diffusor.gui" = ["icons/*.svg"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]

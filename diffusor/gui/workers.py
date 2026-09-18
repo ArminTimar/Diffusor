@@ -6,6 +6,7 @@ cancelled.
 """
 from __future__ import annotations
 
+import time
 import traceback
 from typing import Dict, List, Optional, Sequence
 
@@ -71,10 +72,19 @@ class CompareWorker(QObject):
 
 
 class MonteCarloWorker(QObject):
+    """Monte Carlo with a live feed.
+
+    Every successful draw is buffered and sent to the interface in batches, at
+    most once a second, so the plot can grow while the run goes on
+    without flooding the event loop.
+    """
     finished = Signal(object)
     failed = Signal(str)
     progress = Signal(int, int)
     stage = Signal(str)
+    draws = Signal(object)
+
+    BATCH_SECONDS = 1.0
 
     def __init__(self, model: DiffusionModel, x, C, sigma, budget: UncertaintyBudget,
                  n_draws: int, seed: int, free_parameters, t_min: float, t_max: float,
@@ -84,6 +94,8 @@ class MonteCarloWorker(QObject):
         self.do_contributions = do_contributions
         self.contribution_draws = contribution_draws
         self._abort = False
+        self._buffer: List[dict] = []
+        self._last_emit = 0.0
 
     def abort(self):
         self._abort = True
@@ -92,13 +104,26 @@ class MonteCarloWorker(QObject):
         self.progress.emit(i, n)
         return self._abort
 
+    def _on_draw(self, info: dict):
+        self._buffer.append(info)
+        now = time.monotonic()
+        if now - self._last_emit >= self.BATCH_SECONDS:
+            self._flush()
+            self._last_emit = now
+
+    def _flush(self):
+        if self._buffer:
+            batch, self._buffer = self._buffer, []
+            self.draws.emit(batch)
+
     def run(self):
         try:
             model, x, C, sigma, budget, n_draws, seed, free, t_min, t_max = self.args
             self.stage.emit("Monte Carlo")
             res = run_montecarlo(model, x, C, sigma, budget=budget, n_draws=n_draws,
                                  seed=seed, free_parameters=free, t_min=t_min, t_max=t_max,
-                                 progress=self._cb)
+                                 progress=self._cb, on_draw=self._on_draw)
+            self._flush()
             if self.do_contributions and not self._abort:
                 self.stage.emit("variance contributions")
                 res.contributions = contributions(

@@ -39,6 +39,10 @@ class ExampleDataset:
     settings: Dict                 # suggested conditions and model settings
     expected: str = ""             # the known or published answer
     notes: str = ""
+    # Where each condition in ``settings`` comes from, keyed "T", "P" and "fO2".
+    # A value with no published source says so, so nobody mistakes a placeholder
+    # for a measurement.
+    sources: Dict[str, str] = field(default_factory=dict)
 
     @property
     def path(self) -> Path:
@@ -71,11 +75,11 @@ DATASETS: List[ExampleDataset] = [
             'Sr, Ba, La and Ce (ppm). 14 points from 21 to 267 um.'),
         spec=dict(distance_column="Distance_from_rim_um", column_a="Mg_ppm",
                   column_b=None, mode="A", distance_unit="um"),
-        settings=dict(T_C=900.0, sigma_T_K=20.0, P_MPa=200.0, sigma_P_MPa=100.0,
+        settings=dict(T_C=900.0, sigma_T_K=25.0, P_MPa=200.0, sigma_P_MPa=100.0,
                       buffer="NNO", delta_buffer=1.0, sigma_delta=0.5,
                       coefficient="plag_Mg_vanorman2014", geometry="plane",
                       an_column="An_mol_percent", an_is_percent=True,
-                      initial_condition="equilibrium_plag"),
+                      initial_condition="equilibrium_plag", bc_left="rim_melt"),
         expected=(
             'Druitt et al. (2012) got about 47 years for Mg at 900 C with a one-step model, '
             'and 70 years at 900 C plus 12 years at 855 C with a two-step model (their '
@@ -90,6 +94,11 @@ DATASETS: List[ExampleDataset] = [
             'Normally zoned from about An37 at the rim to An80 in the core. Mg only varies '
             'from 98 to 179 ppm with real scatter, so the initial profile controls the '
             'answer almost completely.'),
+        sources=dict(
+            T=('Druitt et al. (2012, Methods) modelled crystals in dacitic melt at 900 C and '
+               'propagated a nominal uncertainty of 25 C.'),
+            P='Placeholder. Druitt et al. (2012) give no storage pressure for this model.',
+            fO2='Placeholder. Druitt et al. (2012) give no oxygen fugacity for this model.'),
     ),
 
     ExampleDataset(
@@ -112,8 +121,8 @@ DATASETS: List[ExampleDataset] = [
                   sigma_a_column="FeO_err", sigma_b_column="MgO_err",
                   mode="A/(A+B)", oxide_a="FeO", oxide_b="MgO", distance_unit="um",
                   x_min=4.0, x_max=60.0),
-        settings=dict(T_C=850.0, sigma_T_K=57.0, P_MPa=150.0, sigma_P_MPa=50.0,
-                      buffer="NNO", delta_buffer=0.0, sigma_delta=0.5,
+        settings=dict(T_C=850.0, sigma_T_K=57.0, P_MPa=200.0, sigma_P_MPa=50.0,
+                      buffer="NNO", delta_buffer=1.3, sigma_delta=0.35,
                       coefficient="opx_FeMg_ganguly_tazzoli1994_nofo2", axis="b",
                       geometry="plane", composition_dependent=True),
         expected=(
@@ -133,6 +142,15 @@ DATASETS: List[ExampleDataset] = [
             'At 850 C and NNO it gives about ten times longer, 30 to 50 years, because D is '
             'about one log unit slower. 850 C is below its 900 C calibration limit, so part '
             'of that difference is extrapolation.'),
+        sources=dict(
+            T=('Mean and standard deviation of 21 magnetite-ilmenite pairs from the andesites, '
+               'Ostorero et al. (2022) Supplementary Data 3, Sauerzapf et al. (2008) '
+               'thermometer. The main text swaps the andesite and dacite values. The table '
+               'is unambiguous.'),
+            P=('Earlier Kizimen studies cited by Ostorero et al. (2022) put storage at 1 to '
+               '3 kbar. 200 +/- 50 MPa covers that range at 2 sigma.'),
+            fO2=('Mean and standard deviation of delta NNO for the same 21 oxide pairs, '
+                 'Supplementary Data 3 (NNO +1.28 +/- 0.35).')),
     ),
 
     # --------------------------------------------------------------- synthetic
@@ -146,8 +164,8 @@ DATASETS: List[ExampleDataset] = [
         provenance=(
             "SYNTHETIC. Made with Diffusor's forward model and the Dias, Dohmen & Behrens "
             '(2025) coefficient, with noise added and converted to FeO and MgO wt%. The '
-            'conditions (950 C, NNO+1, 150 MPa, along [001]) resemble the andesites of '
-            'Shinmoedake (Tomiya et al. 2013) and Zao (Sato et al. 2022).'),
+            'conditions (950 C, NNO+1, 150 MPa, along [001]) are typical of an arc andesite '
+            'and are not taken from one study.'),
         spec=dict(distance_column="Distance_um", column_a="FeO_wt", column_b="MgO_wt",
                   sigma_a_column="FeO_err", sigma_b_column="MgO_err",
                   mode="A/(A+B)", oxide_a="FeO", oxide_b="MgO", distance_unit="um"),
@@ -157,6 +175,10 @@ DATASETS: List[ExampleDataset] = [
                       composition_dependent=True),
         expected=(
             'True time 1.5 years, set when the file was made.'),
+        sources=dict(
+            T='Used to make the file. The uncertainty is illustrative.',
+            P='Used to make the file. The uncertainty is illustrative.',
+            fO2='Used to make the file. The uncertainty is illustrative.'),
     ),
     ExampleDataset(
         key="cpx_stromboli",
@@ -177,6 +199,11 @@ DATASETS: List[ExampleDataset] = [
                       coefficient="cpx_FeMg_muller2013", geometry="plane"),
         expected=(
             'True time 45 days, set when the file was made.'),
+        sources=dict(
+            T=('Used to make the file. Petrone et al. (2018) found 1040 to 1180 C for Stromboli '
+               'clinopyroxene. The uncertainty is illustrative.'),
+            P='Placeholder. The coefficient has no pressure term.',
+            fO2='Placeholder. The coefficient has no fO2 term.'),
     ),
     ExampleDataset(
         key="olivine_laki",
@@ -202,6 +229,10 @@ DATASETS: List[ExampleDataset] = [
             'The file holds forsterite in mol%. The Fe-Mg coefficient needs X_Fe = 1 - '
             'Fo/100. Alternatively model Fo directly with the composition dependence '
             'switched off.'),
+        sources=dict(
+            T='Hartley et al. (2016) modelled Laki olivine at 1150 +/- 30 C.',
+            P='Placeholder. The file was made at 1 atm.',
+            fO2='Hartley et al. (2016) used FMQ -1 +/- 0.5.'),
     ),
     ExampleDataset(
         key="magnetite_shinmoedake",
@@ -227,6 +258,11 @@ DATASETS: List[ExampleDataset] = [
         notes=(
             'Diffusion in magnetite has a minimum near 950-980 C, so the time depends '
             'little on temperature here.'),
+        sources=dict(
+            T=('Tomiya et al. (2013) used 950 C for Shinmoedake 2011. The uncertainty is '
+               'illustrative.'),
+            P='Placeholder. The coefficient has no pressure term.',
+            fO2='Tomiya et al. (2013) used log fO2 = -11. The uncertainty is illustrative.'),
     ),
     ExampleDataset(
         key="cpx_greyscale",
@@ -248,6 +284,37 @@ DATASETS: List[ExampleDataset] = [
                       greyscale=True, anchors="cpx_greyscale_anchors.csv"),
         expected=(
             'True time 3 years, set when the file was made.'),
+        sources=dict(
+            T='Used to make the file. The uncertainty is illustrative.',
+            P='Placeholder. The coefficient has no pressure term.',
+            fO2='Placeholder. The coefficient has no fO2 term.'),
+    ),
+    ExampleDataset(
+        key="sanidine_ba",
+        name="Sanidine Ba (synthetic)",
+        mineral="kfeldspar", species="Ba",
+        filename="sanidine_ba.csv",
+        kind="synthetic",
+        citation=None,
+        provenance=(
+            "SYNTHETIC. Made with Diffusor's forward model and the Cherniak (2002) Ba "
+            'coefficient at 790 C for 5000 years, with noise added. A Ba-rich rim against a '
+            'darker core, sampled every 0.25 um like a calibrated BSE profile.'),
+        spec=dict(distance_column="Distance_um", column_a="Ba_ppm", column_b=None,
+                  sigma_a_column="Ba_err", mode="A", distance_unit="um"),
+        settings=dict(T_C=790.0, sigma_T_K=30.0, P_MPa=200.0, sigma_P_MPa=100.0,
+                      buffer="NNO", delta_buffer=0.0, sigma_delta=0.5,
+                      coefficient="kfs_Ba_cherniak2002", geometry="plane"),
+        expected=(
+            'True time 5000 years, set when the file was made.'),
+        notes=(
+            'Ba diffuses so slowly that the whole profile is under 10 um wide. Try the Sr '
+            'coefficient on the same file to see how much faster Sr would have relaxed.'),
+        sources=dict(
+            T=('Chamberlain et al. (2014) modelled Bishop Tuff sanidine at 753 to 815 C with '
+               '+/- 30 C uncertainty in their thermometry.'),
+            P='Placeholder. The coefficient has no pressure term.',
+            fO2='Placeholder. The coefficient has no fO2 term.'),
     ),
 ]
 

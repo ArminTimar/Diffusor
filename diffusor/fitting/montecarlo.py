@@ -198,12 +198,15 @@ def run(model: DiffusionModel, x_data, C_data, sigma=None, *,
         t_min: float = 1.0e2, t_max: float = 3.2e12,
         keep_profiles: int = 200,
         progress: Optional[Callable[[int, int], bool]] = None,
-        only_source: Optional[str] = None) -> MonteCarloResult:
+        only_source: Optional[str] = None,
+        on_draw: Optional[Callable[[dict], None]] = None) -> MonteCarloResult:
     """Run the Monte Carlo, re-fitting the time for every draw.
 
     ``progress(i, n)`` may return True to abort.  ``only_source`` restricts the
     sampling to a single source, which is how the variance contributions are
-    computed.
+    computed.  ``on_draw(info)`` receives every successful draw: the fitted time,
+    the sampled temperature, fO2 and log10 D, the perturbed data and the fitted
+    profile. The interface uses it to draw the Monte Carlo while it runs.
     """
     budget = budget or UncertaintyBudget()
     rng = np.random.default_rng(seed)
@@ -249,6 +252,17 @@ def run(model: DiffusionModel, x_data, C_data, sigma=None, *,
             times.append(float(t))
             if len(kept) < keep_profiles:
                 kept.append(np.asarray(prof, dtype=float))
+            if on_draw is not None:
+                try:
+                    logD = float(np.log10(m.D_bulk(overrides, C_ref=float(np.mean(Cd)))))
+                except Exception:
+                    logD = float("nan")
+                on_draw({"t": float(t), "T_K": float(cond.T_K),
+                         "log_fo2_bar": (None if cond.log_fo2_bar is None
+                                         else float(cond.log_fo2_bar)),
+                         "log10_D": logD, "x": np.asarray(xd, dtype=float),
+                         "C": np.asarray(Cd, dtype=float),
+                         "C_model": np.asarray(prof, dtype=float)})
         except Exception:
             n_failed += 1
         if progress is not None and (i % 5 == 0):

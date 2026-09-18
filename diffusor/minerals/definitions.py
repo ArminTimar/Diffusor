@@ -18,6 +18,9 @@ X_FO = CompositionVariable(
 X_AN = CompositionVariable(
     "XAn", "X_An", "Ca/(Ca+Na+K) molar (anorthite fraction)",
     default_mode="A/(A+B)", citation="deer1992")
+X_OR = CompositionVariable(
+    "XOr", "X_Or", "K/(K+Na+Ca) molar (orthoclase fraction)",
+    default_mode="A", citation="deer1992")
 X_TI = CompositionVariable(
     "xTi", "x_Ti", "Ti per cation site in (Ti_x Fe_(1-x))3 O4, x_Ti = X_Usp/3",
     default_mode="A", citation="vanorman_crispin2010")
@@ -86,6 +89,22 @@ PLAGIOCLASE = Mineral(
            "plagioclase as isotropic."),
 )
 
+KFELDSPAR = Mineral(
+    key="kfeldspar", name="K-feldspar (sanidine, orthoclase)", formula="(K,Na)AlSi3O8",
+    system="monoclinic", axes=("a", "b", "c"),
+    composition_variable=X_OR,
+    species={
+        "Sr": Species("Sr", "Sr", "trace", "Cherniak (1996), sanidine Or61"),
+        "Ba": Species("Ba", "Ba", "trace", "Cherniak (2002), sanidine Or61"),
+        "Ti": Species("Ti", "Ti", "trace", "Cherniak & Watson (2020)"),
+    },
+    isotropic=True,
+    notes=("Sr and Ba diffusion in sanidine showed no resolvable dependence on orientation "
+           "(Cherniak 1996, 2002) and Ti little anisotropy (Cherniak & Watson 2020). Ba diffuses "
+           "about 50 times slower than Sr, so paired Sr and Ba profiles across the same zone "
+           "boundary test whether the boundary is diffusive (Chamberlain et al. 2014)."),
+)
+
 MAGNETITE = Mineral(
     key="magnetite", name="Magnetite / titanomagnetite", formula="(Ti_x Fe_(1-x))3 O4",
     system="cubic", axes=("a",),
@@ -107,7 +126,8 @@ MAGNETITE = Mineral(
            "Tomiya et al. (2013) used exactly this formulation for Shinmoedake 2011."),
 )
 
-MINERALS = {m.key: m for m in (OLIVINE, ORTHOPYROXENE, CLINOPYROXENE, PLAGIOCLASE, MAGNETITE)}
+MINERALS = {m.key: m for m in (OLIVINE, ORTHOPYROXENE, CLINOPYROXENE, PLAGIOCLASE, KFELDSPAR,
+                                   MAGNETITE)}
 
 
 def get_mineral(key: str) -> Mineral:

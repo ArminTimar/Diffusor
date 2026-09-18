@@ -22,13 +22,26 @@ class WrapLabel(QLabel):
     def __init__(self, text: str = "", parent=None):
         super().__init__(text, parent)
         self.setWordWrap(True)
-        self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.MinimumExpanding)
+        self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Minimum)
         self.setAlignment(Qt.AlignTop | Qt.AlignLeft)
+
+    def sizeHint(self):
+        # A wrapped QLabel guesses its height for a narrow, golden-ratio width and
+        # asks for far more than it needs. Once it has a real width, use that.
+        s = super().sizeHint()
+        if self.width() > 0:
+            s.setHeight(self.heightForWidth(self.width()))
+        return s
 
     def _sync(self):
         w = self.width()
         if w > 0:
-            self.setMinimumHeight(self.heightForWidth(w))
+            h = self.heightForWidth(w)
+            if h != self.minimumHeight():
+                # shrink as well as grow, and tell the layout, or a label first laid
+                # out narrow keeps the tall height it needed then
+                self.setMinimumHeight(h)
+                self.updateGeometry()
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
@@ -45,8 +58,8 @@ def card(title: str = "", subtitle: str = "") -> tuple[QFrame, QVBoxLayout]:
     frame = QFrame()
     frame.setObjectName("Card")
     outer = QVBoxLayout(frame)
-    outer.setContentsMargins(18, 16, 18, 16)
-    outer.setSpacing(10)
+    outer.setContentsMargins(16, 12, 16, 14)
+    outer.setSpacing(8)
     if title:
         lab = QLabel(title)
         lab.setObjectName("H2")
@@ -56,8 +69,8 @@ def card(title: str = "", subtitle: str = "") -> tuple[QFrame, QVBoxLayout]:
         sub.setObjectName("Sub")
         outer.addWidget(sub)
     body = QVBoxLayout()
-    body.setSpacing(10)
-    outer.addLayout(body)
+    body.setSpacing(8)
+    outer.addLayout(body, 1)
     return frame, body
 
 
@@ -114,6 +127,23 @@ def note(text: str, kind: str = "Hint") -> QLabel:
     return lab
 
 
+def callout(kind: str = "Info") -> QFrame:
+    """A tinted box holding a wrapped label, available as ``box.label``.
+
+    The padding lives on the frame. Padding set on a wrapped QLabel itself makes
+    Qt overestimate the label's height and leaves an empty band under the text.
+    """
+    box = QFrame()
+    box.setObjectName(kind + "Box")
+    lay = QVBoxLayout(box)
+    lay.setContentsMargins(11, 8, 11, 8)
+    lab = WrapLabel("")
+    lab.setObjectName("CalloutText")
+    lay.addWidget(lab)
+    box.label = lab
+    return box
+
+
 def scrollable(inner: QWidget) -> QScrollArea:
     area = QScrollArea()
     area.setWidget(inner)
@@ -143,6 +173,44 @@ def page_body(*widgets: QWidget, max_width: int = 720) -> QScrollArea:
     outer.addWidget(col, 10)
     outer.addStretch(1)
     return scrollable(inner)
+
+
+def page_columns(left, right, top=(), max_width: int = 1200) -> QWidget:
+    """A page that never scrolls: an optional full-width top row and two columns.
+
+    ``left`` and ``right`` hold widgets or ``(widget, stretch)`` pairs. A column
+    without a stretching widget gets its spare height at the bottom. Only lists
+    and text panes inside the cards scroll.
+    """
+    page = QWidget()
+    page.setObjectName("Page")
+    outer = QHBoxLayout(page)
+    outer.setContentsMargins(24, 10, 24, 10)
+    outer.addStretch(1)
+    col = QWidget()
+    col.setMaximumWidth(max_width)
+    v = QVBoxLayout(col)
+    v.setContentsMargins(0, 0, 0, 0)
+    v.setSpacing(12)
+    for w in top:
+        v.addWidget(w)
+    h = QHBoxLayout()
+    h.setSpacing(14)
+    for items in (left, right):
+        c = QVBoxLayout()
+        c.setSpacing(12)
+        stretched = False
+        for it in items:
+            w, s = it if isinstance(it, tuple) else (it, 0)
+            c.addWidget(w, s)
+            stretched = stretched or s > 0
+        if not stretched:
+            c.addStretch(1)
+        h.addLayout(c, 1)
+    v.addLayout(h, 1)
+    outer.addWidget(col, 20)
+    outer.addStretch(1)
+    return page
 
 
 def badge(text: str, kind: str = "muted") -> QLabel:

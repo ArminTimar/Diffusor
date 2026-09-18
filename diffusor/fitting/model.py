@@ -53,6 +53,10 @@ class DiffusionModel:
     an_profile: Optional[np.ndarray] = None       # plagioclase X_An on the grid
     activity_theta: float = 0.0                   # A_i/(RT) for the plag term
     force_numerical: bool = False
+    # True when both ends of the profile only stand in for "far away", which is what
+    # the closed-form step solution assumes (Crank 1975 eq. 2.14). False when an end
+    # is a real crystal rim or centre and its boundary condition matters.
+    boundaries_far: bool = True
 
     # -- grid ---------------------------------------------------------------
     def grid(self, x_data) -> np.ndarray:
@@ -83,22 +87,20 @@ class DiffusionModel:
     # -- analytical applicability -------------------------------------------
     def can_use_analytical(self) -> Tuple[bool, str]:
         if self.force_numerical:
-            return False, "numerical solver requested explicitly"
+            return False, "you asked for the numerical solver"
+        if not self.boundaries_far:
+            return False, "an end of the profile is a crystal rim or centre"
         if self.composition_dependent and self.comp_key:
-            return False, ("D depends on the composition being modelled, so no closed-form "
-                           "solution exists (Crank 1975 section 7.2). The numerical solver is used.")
+            return False, "D depends on the composition along the profile (Crank 1975 section 7.2)"
         if self.activity_theta:
-            return False, ("the plagioclase activity term couples D to the anorthite gradient "
-                           "(Costa et al. 2003 eq. 7), which has no closed form")
+            return False, "the anorthite activity term has no closed form (Costa et al. 2003)"
         if self.initial.kind not in ("step", "plateau_rim"):
-            return False, f"initial condition '{self.initial.kind}' has no closed-form solution"
+            return False, "the initial profile is not a sharp step"
         if self.geometry.kind != "plane":
-            return False, ("closed forms for cylinder and sphere assume a uniform initial "
-                           "profile and a fixed surface concentration. Call "
-                           "diffusor.solvers.analytical directly for that case.")
+            return False, "the geometry is a cylinder or sphere"
         if self.initial.params.get("smooth"):
-            return False, "a smoothed initial step has no closed-form solution"
-        return True, "step initial condition, constant D, plane geometry: Crank (1975) eq. 2.14"
+            return False, "the initial step is smoothed"
+        return True, "sharp step, constant D, plane geometry, plateaus continue (Crank 1975 eq. 2.14)"
 
     # -- forward model ------------------------------------------------------
     def profile(self, t_seconds: float, x_out, overrides=None) -> np.ndarray:

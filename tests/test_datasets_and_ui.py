@@ -302,7 +302,7 @@ def test_compare_runs_to_completion_and_ignores_a_second_click(app, monkeypatch)
     for fn in (mw.MainWindow.run_compare, mw.MainWindow.run_mc, mw.MainWindow.run_fit):
         src = inspect.getsource(fn)
         assert "lambda" not in src, f"{fn.__name__} connects a worker signal to a lambda"
-    monkeypatch.setattr(mw, "_text_dialog", lambda *a, **k: None)
+    monkeypatch.setattr(mw.richtext, "show", lambda *a, **k: None)
     w = _load_example(app, "opx_kizimen")
     for i in range(w.lst_coef.count()):
         it = w.lst_coef.item(i)

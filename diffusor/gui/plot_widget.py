@@ -6,6 +6,7 @@ from typing import Dict, Optional, Sequence
 import numpy as np
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
 from matplotlib.backends.backend_qtagg import NavigationToolbar2QT
+from matplotlib.collections import LineCollection
 from matplotlib.figure import Figure
 from PySide6.QtWidgets import QVBoxLayout, QWidget
 
@@ -33,6 +34,7 @@ class ProfilePlot(QWidget):
         self._make_axes()
 
     def _make_axes(self):
+        self._mc = None            # leaving the Monte Carlo view detaches its live panels
         self.figure.clear()
         gs = self.figure.add_gridspec(4, 1)
         self.ax = self.figure.add_subplot(gs[0:3, 0])
@@ -173,4 +175,186 @@ class ProfilePlot(QWidget):
         theme.apply_plot_style(self.figure, [ax])
         self.ax = ax
         self.ax_res = None
+        self.canvas.draw_idle()
+
+    # ------------------------------------------------------------------ live Monte Carlo
+    def start_monte_carlo(self, x, C, sigma, y_label: str, n_total: int, sampled,
+                          fixed: Dict[str, str]):
+        """Lay out the live view: profile, time histogram and the sampled inputs.
+
+        ``sampled`` names the sources being varied. ``fixed`` gives the text shown in
+        a panel whose input is held constant, for example ``{"T": "850 °C"}``.
+        """
+        self.figure.clear()
+        gs = self.figure.add_gridspec(3, 3, width_ratios=[1.0, 1.0, 0.95],
+                                      height_ratios=[1.0, 1.0, 1.05])
+        self.ax = self.figure.add_subplot(gs[0:2, 0:2])
+        self.ax_res = None
+        self._mc = {
+            "x": np.asarray(x, float), "C": np.asarray(C, float),
+            "sigma": None if sigma is None else np.asarray(sigma, float),
+            "n_total": int(n_total), "sampled": set(sampled), "fixed": dict(fixed),
+            "t": [], "T": [], "f": [], "D": [], "curves": 0, "clouds": 0,
+            "ax_t": self.figure.add_subplot(gs[2, 0:2]),
+            "ax_T": self.figure.add_subplot(gs[0, 2]),
+            "ax_f": self.figure.add_subplot(gs[1, 2]),
+            "ax_D": self.figure.add_subplot(gs[2, 2]),
+            "y_label": y_label,
+        }
+        self._mc["order"] = np.argsort(self._mc["x"])
+        ax = self.ax
+        self._plot_data(x, C, sigma, label="measured")
+        ax.set_ylabel(y_label)
+        ax.set_xlabel("distance (um)")
+        ax.plot([], [], "-", color=theme.PLOT_MODEL, alpha=0.5, lw=1, label="fit to each draw")
+        if "measurement_noise" in self._mc["sampled"]:
+            ax.plot([], [], "o", color=theme.PLOT_DATA_ERR, alpha=0.6, ms=3,
+                    label="data as drawn with its noise")
+        ax.legend(fontsize=8.5, frameon=False, loc="best")
+        self._redraw_mc_panels()
+        self.canvas.draw_idle()
+
+    def add_monte_carlo_draws(self, draws, max_curves: int = 250):
+        """Add a batch of draws (dicts from ``montecarlo.run(on_draw=...)``)."""
+        mc = getattr(self, "_mc", None)
+        if mc is None or not draws:
+            return
+        xs, ys, segments = [], [], []
+        for dr in draws:
+            mc["t"].append(dr["t"])
+            mc["T"].append(dr["T_K"] - 273.15)
+            mc["f"].append(np.nan if dr["log_fo2_bar"] is None else dr["log_fo2_bar"])
+            mc["D"].append(dr["log10_D"])
+            if mc["curves"] < max_curves:
+                o = np.argsort(dr["x"])
+                segments.append(np.column_stack([dr["x"][o], dr["C_model"][o]]))
+                mc["curves"] += 1
+            if mc["clouds"] < max_curves and "measurement_noise" in mc["sampled"]:
+                xs.append(dr["x"])
+                ys.append(dr["C"])
+                mc["clouds"] += 1
+        if segments:
+            # one collection per batch draws far faster than a line per draw
+            self.ax.add_collection(LineCollection(segments, colors=theme.PLOT_MODEL,
+                                                  alpha=0.07, linewidths=1.0, zorder=1))
+        if xs:
+            self.ax.plot(np.concatenate(xs), np.concatenate(ys), "o", ms=2.2,
+                         color=theme.PLOT_DATA_ERR, alpha=0.10, zorder=2, mew=0)
+        self._redraw_mc_panels()
+        self.canvas.draw_idle()
+
+    def finish_monte_carlo(self, res, best_curve=None):
+        mc = getattr(self, "_mc", None)
+        if mc is None:
+            return
+        if best_curve is not None:
+            xf, Cf = best_curve
+            self.ax.plot(xf, Cf, "-", color=theme.PLOT_MODEL, lw=2.2, zorder=4,
+                         label="best fit: " + human_time(res.t_best))
+            self.ax.legend(fontsize=8.5, frameon=False, loc="best")
+        mc["result"] = res
+        self._redraw_mc_panels()
+        self.canvas.draw_idle()
+
+    def _panel_note(self, ax, text):
+        ax.cla()
+        for spine in ax.spines.values():
+            spine.set_visible(False)
+        ax.text(0.5, 0.5, text, ha="center", va="center", fontsize=9,
+                color=theme.TEXT_MUTED, transform=ax.transAxes)
+        ax.set_xticks([])
+        ax.set_yticks([])
+
+    def _redraw_mc_panels(self):
+        mc = self._mc
+        n = len(mc["t"])
+        year = 365.25 * 86400.0
+        t_yr = np.asarray(mc["t"], float) / year
+
+        ax = mc["ax_t"]
+        ax.cla()
+        if n:
+            lo, hi = np.log10(t_yr.min()), np.log10(t_yr.max())
+            if hi - lo < 0.2:
+                lo, hi = lo - 0.1, hi + 0.1
+            ax.hist(t_yr, bins=np.logspace(lo, hi, 40), color=theme.PLOT_DATA, alpha=0.85)
+            ax.set_xscale("log")
+            p16, p50, p84 = np.percentile(t_yr, [16, 50, 84])
+            ax.axvline(p50, color=theme.PLOT_MODEL, lw=1.8)
+            for q in (p16, p84):
+                ax.axvline(q, color=theme.PLOT_MODEL, lw=1.2, ls="--")
+            ax.set_title("median " + human_time(p50 * year) + ", 68% "
+                         + human_time(p16 * year) + " to " + human_time(p84 * year),
+                         fontsize=9.5, color=theme.TEXT, loc="left")
+        ax.set_xlabel("time (years)")
+        ax.set_ylabel("draws")
+
+        T = np.asarray(mc["T"], float)
+        if "T" in mc["fixed"] or n == 0 or np.ptp(T) == 0:
+            self._panel_note(mc["ax_T"], "temperature\nnot varied\n" + mc["fixed"].get("T", ""))
+        else:
+            mc["ax_T"].cla()
+            mc["ax_T"].hist(T, bins=30, color=theme.ACCENT, alpha=0.8)
+            mc["ax_T"].set_xlabel("temperature (°C)")
+
+        f = np.asarray(mc["f"], float)
+        good = np.isfinite(f)
+        if "f" in mc["fixed"] or good.sum() < 2 or np.ptp(f[good]) == 0:
+            self._panel_note(mc["ax_f"], "oxygen fugacity\nnot varied\n" + mc["fixed"].get("f", ""))
+        else:
+            ax = mc["ax_f"]
+            ax.cla()
+            ax.plot(T[good], f[good], "o", ms=2.5, color=theme.ACCENT, alpha=0.35, mew=0)
+            ax.set_xlabel("temperature (°C)")
+            ax.set_ylabel("log fO2 (bar)")
+
+        D = np.asarray(mc["D"], float)
+        D = D[np.isfinite(D)]
+        if D.size < 2 or np.ptp(D) == 0:
+            self._panel_note(mc["ax_D"], "diffusion coefficient\nnot varied")
+        else:
+            mc["ax_D"].cla()
+            mc["ax_D"].hist(D, bins=30, color=theme.ACCENT, alpha=0.8)
+            mc["ax_D"].set_xlabel("log10 D (m²/s)")
+
+        state = "done" if mc.get("result") is not None else "running"
+        self.ax.set_title(f"Monte Carlo, {n} of {mc['n_total']} draws ({state})",
+                          fontsize=10.5, color=theme.TEXT, loc="left")
+        theme.apply_plot_style(self.figure, [self.ax, mc["ax_t"]]
+                               + [a for a in (mc["ax_T"], mc["ax_f"], mc["ax_D"]) if a.get_xticks().size])
+
+
+class DataPreview(QWidget):
+    """A small plot of the loaded profile, without the toolbar."""
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.figure = Figure(figsize=(5, 3), layout="constrained", facecolor=theme.SURFACE)
+        self.canvas = FigureCanvasQTAgg(self.figure)
+        lay = QVBoxLayout(self)
+        lay.setContentsMargins(0, 0, 0, 0)
+        lay.addWidget(self.canvas)
+        self.clear()
+
+    def clear(self, message: str = "Your profile will appear here."):
+        self.figure.clear()
+        ax = self.figure.add_subplot(111)
+        ax.text(0.5, 0.5, message, ha="center", va="center", fontsize=10,
+                color=theme.TEXT_FAINT, transform=ax.transAxes)
+        ax.set_axis_off()
+        self.canvas.draw_idle()
+
+    def show_data(self, x, C, sigma=None, y_label="composition", title=""):
+        self.figure.clear()
+        ax = self.figure.add_subplot(111)
+        if sigma is not None:
+            ax.errorbar(x, C, yerr=sigma, fmt="o", ms=3.5, color=theme.PLOT_DATA,
+                        ecolor=theme.PLOT_DATA_ERR, elinewidth=0.9, capsize=1.5)
+        else:
+            ax.plot(x, C, "o", ms=3.5, color=theme.PLOT_DATA)
+        ax.set_xlabel("distance (um)")
+        ax.set_ylabel(y_label)
+        if title:
+            ax.set_title(title, fontsize=10, color=theme.TEXT, loc="left")
+        theme.apply_plot_style(self.figure, [ax])
         self.canvas.draw_idle()

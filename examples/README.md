@@ -5,7 +5,7 @@ Two files here are **real measurements** and are not produced by this script:
 * `plagioclase_santorini_druitt2012.csv` -- Druitt et al. (2012) Nature 482:77-80,
   Supplementary Table 1, plagioclase S82-30A 12.
 * `opx_kizimen_ostorero2022.csv` -- Ostorero et al. (2022) Commun. Earth Environ.
-  3:290, Supplementary Data 2, orthopyroxene K9_L10C4; regenerate it with
+  3:290, Supplementary Data 2, orthopyroxene K9_L10C4. Regenerate it with
   `python scripts/extract_kizimen.py <folder with the supplementary files>`.
 
 The files below are **synthetic**: each was produced by running Diffusor's forward
@@ -21,6 +21,7 @@ Regenerate them with `python scripts/make_examples.py`.
 | `olivine_fo.csv` | **120 d** | Olivine Fe-Mg, Dohmen & Chakraborty (2007) TaMED, 1150 C, FMQ-1, //[001]. Map Fo_mol with mode 'A' and remember that the coefficients of this entry are flagged as UNVERIFIED. |
 | `magnetite_ti.csv` | **8 d** | Titanomagnetite Ti, Van Orman & Crispin (2010) Table 12, 950 C, log fO2 = -11, X_Usp = 0.3 (x_Ti = 0.1): the conditions Tomiya et al. (2013) used for the 2011 Shinmoedake eruption. Map TiO2_wt with mode 'A'. |
 | `cpx_greyscale.csv` | **3 yr** | BSE grey values across a cpx zone boundary, with five microprobe anchor points in cpx_greyscale_anchors.csv. Calibrate first (the true response is X_Fe = (grey - 90)/620), then fit with Mueller et al. (2013) at 1000 C. |
+| `sanidine_ba.csv` | **5 kyr** | Sanidine Ba, Cherniak (2002), 790 C, a bright Ba-rich rim against a darker core. 790 C lies inside the 753-815 C range Chamberlain et al. (2014) used for Bishop Tuff sanidine. Map Ba_ppm with mode 'A'. |
 
 A fit will not return the true time exactly: the noise, and for the
 composition-dependent cases the difference between the fitting grid and the

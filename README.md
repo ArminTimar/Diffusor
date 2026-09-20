@@ -214,6 +214,11 @@ time, which ranks what is worth measuring better.
 
 ## Traceability
 
+- `WRITEUP.md` is the framework document: every module, what it does, when the
+  application calls it and which paper is behind each of its equations, and
+  every paper in the registry with what is taken from it. Section 4 lists the
+  known discrepancies between the code and its sources. `tests/test_writeup.py`
+  fails when it falls behind the code.
 - `diffusor/references.py` is the single citation registry. `REFERENCES.md` and
   `references.bib` are generated from it by `scripts/build_references.py`.
 - Every `DiffusionCoefficient` records the equation as printed in its source,

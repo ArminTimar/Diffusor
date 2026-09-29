@@ -23,7 +23,7 @@ already known.
 | --- | --- |
 | Covers | September 29 working tree; section 5 updates the September 18 baseline |
 | Package version | 0.1.0 |
-| Modules documented | 67 Python modules |
+| Modules documented | 68 Python modules |
 | Coefficients | 103 entries, 13 minerals, 96 with source-transcription checks |
 | References | 95 keys in `diffusor/references.py` |
 
@@ -141,8 +141,12 @@ Two lines: `from .gui.app import main; raise SystemExit(main())`. Makes
 
 #### `diffusor/gui/app.py`
 Creates the `QApplication`, forces the matplotlib `QtAgg` backend before the
-window is imported, and shows a `MainWindow`. Also the console script
-`diffusor` declared in `pyproject.toml`.
+window is imported, sets the application icon (`icons/diffusor.png`, which
+every window inherits) and shows a `MainWindow`. On Windows it first sets an
+explicit AppUserModelID, so the taskbar shows Diffusor's icon instead of
+grouping the window under `pythonw.exe`. Also the `diffusor` launcher, declared
+under `[project.gui-scripts]` in `pyproject.toml` so it opens no console window;
+a desktop shortcut to it can use `icons/diffusor.ico`.
 
 ---
 
@@ -1185,6 +1189,13 @@ boundary of half-width 0.8 um 6 um inside the crystal face, plus a crack, an
 oxide inclusion and a darker lamella. `opx_mg_map_jet.png` is a 'jet' MgO
 map with a drawn legend (16 to 30 wt%) and a 20 um scale bar of 40 px, but no
 pixel size in its metadata, as a microprobe export would be.
+
+#### `scripts/make_icon.py`
+Draws the application icon into `diffusor/gui/icons/`: a teal tile in the
+interface accent colour, a crystal shaded across a gold zone boundary by an
+error function, and the error-function profile across it in white. Drawn at
+1024 px (the curve stamped with a round brush so it stays smooth) and reduced
+to `diffusor.png` (256 px, the window icon) and `diffusor.ico` (16 to 256 px).
 
 #### `scripts/extract_kizimen.py`
 Rebuilds `examples/opx_kizimen_ostorero2022.csv` from the published
@@ -2431,6 +2442,7 @@ The current registry has 103 entries across 13 minerals. The earlier counts, rec
 | `diffusor/gui/image_extractor.py` | The image window: drawing tools, live extraction, overlays, workbook, hand-over to the main window. |
 | `diffusor/gui/image_calibration.py` | Pixel size and value-to-composition map for an image profile. |
 | `scripts/make_example_images.py` | Synthetic BSE TIFF and jet element map in examples/images/. |
+| `scripts/make_icon.py` | Draws the application icon (PNG for the window, ICO for shortcuts). |
 | `tests/test_image_profiles.py` | Readers, geometry, cleaning, colour legends, workbook round trip and the window. |
 
 ### New coefficient keys

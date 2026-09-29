@@ -50,6 +50,11 @@ cannot. The image extractor works without it.
 python -m diffusor
 ```
 
+Installing also creates a `diffusor` launcher that opens the window without a
+console. On Windows it is `Scripts\diffusor.exe` in the Python folder; make a
+desktop or Start-menu shortcut to it to start Diffusor from the file explorer,
+and give the shortcut the icon in `diffusor/gui/icons/diffusor.ico`.
+
 The window walks through six steps and then opens a results view.
 
 1. **Data** loads your file or a bundled example. Diffusor guesses the distance

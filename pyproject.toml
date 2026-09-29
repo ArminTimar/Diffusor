@@ -24,14 +24,15 @@ dependencies = [
 dev = ["pytest>=7", "pypdf>=3"]
 images = ["tifffile>=2023.1"]
 
-[project.scripts]
+# a GUI script: the launcher opens the window without a console
+[project.gui-scripts]
 diffusor = "diffusor.gui.app:main"
 
 [tool.setuptools.packages.find]
 include = ["diffusor*"]
 
 [tool.setuptools.package-data]
-"diffusor.gui" = ["icons/*.svg"]
+"diffusor.gui" = ["icons/*.svg", "icons/*.png", "icons/*.ico"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

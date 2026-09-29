@@ -139,6 +139,17 @@ into every exported JSON and methods block by `dataio/export.py`.
 Two lines: `from .gui.app import main; raise SystemExit(main())`. Makes
 `python -m diffusor` start the window.
 
+#### `Start Diffusor.bat`
+The double-click start for someone who downloaded the ZIP. On the first run
+it finds Python 3.10 or newer (the `py -3` launcher, then `python`), makes a
+virtual environment in `.venv` beside it, runs `pip install -e .`, checks that
+`diffusor.gui.main_window` imports, and writes `.venv/diffusor-ready.txt`.
+Later runs skip straight to the start: `pythonw -m diffusor` from the venv,
+so no console stays open. Each run also remakes a `Diffusor.lnk` shortcut
+with `icons/diffusor.ico` beside it (ignored by git), so the shortcut follows
+the folder when it is moved. `.gitattributes` keeps the file's Windows line
+endings, which cmd needs, in every checkout and GitHub ZIP.
+
 #### `diffusor/gui/app.py`
 Creates the `QApplication`, forces the matplotlib `QtAgg` backend before the
 window is imported, sets the application icon (`icons/diffusor.png`, which

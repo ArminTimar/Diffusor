@@ -12,6 +12,25 @@ Everything is traceable. Every equation, coefficient, constant and convention
 carries a citation key, the test suite fails if a key does not resolve, and
 every run exports a methods block listing the sources it actually used.
 
+## Quick start on Windows
+
+1. Install Python 3.10 or newer from [python.org](https://www.python.org/downloads/)
+   if you do not have it. Tick *Add python.exe to PATH* in the installer.
+2. On this page, click **Code > Download ZIP**, then right-click the ZIP and
+   choose **Extract All**. Diffusor will not run from inside the ZIP.
+3. In the extracted folder, double-click **Start Diffusor.bat**. If Windows
+   warns that the file came from the internet, choose **More info > Run
+   anyway** (or **Run**).
+
+The first start sets Diffusor up: it makes a private Python environment in a
+`.venv` folder inside the Diffusor folder, so nothing else on the computer
+changes, and downloads the libraries it needs. That takes a few minutes and an
+internet connection. After that, **Start Diffusor.bat** opens the app straight
+away, and a **Diffusor** shortcut with the app's icon appears beside it; drag
+that shortcut to the desktop or taskbar if you like. If the folder is moved,
+start once with **Start Diffusor.bat** and the shortcut is remade. If the setup
+ever breaks, delete the `.venv` folder and run **Start Diffusor.bat** again.
+
 ## Literature expansion and shared-duration studies
 
 The current source audit, mathematical corrections and remaining research roadmap

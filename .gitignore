@@ -11,3 +11,5 @@ venv/
 *.swp
 .DS_Store
 tmp/
+# made by Start Diffusor.bat, with paths of the machine it ran on
+/Diffusor.lnk

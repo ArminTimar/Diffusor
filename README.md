@@ -78,9 +78,12 @@ Exports include an Excel workbook with numeric results, profile/residual charts,
 calibration metadata and methods, alongside CSV, JSON and PNG/SVG figures. Joint
 exports include a study workbook and complete reports for each profile.
 
-Olivine Fe–Mg profiles have an explicit XFe/XFo/Fo-percent selector. The corrected
-2007 equation uses +3 XFe. Fo percent maps to coefficient XFe=1-C/100.
-The erratum still needs verification, so the entry is not recommended by default.
+Olivine Fe–Mg profiles have an explicit XFe/XFo/Fo-percent selector. Fo percent
+maps to coefficient XFe=1-C/100. The Dohmen & Chakraborty (2007) equations are
+checked against the paper and its erratum, whose composition term is
+3 (XFe - 0.1). Between 20 and 29 September 2026 Diffusor used the misprinted
+3 XFe, which made olivine Fe-Mg times about half as long as they should be; refit
+olivine results from that window.
 
 ## Install
 
@@ -489,8 +492,9 @@ Those are the recommended entries. At 1150 °C they agree with Sievwright et al.
 - Version 1 is 1-D only. Modelling a 3-D crystal in 1-D returns a maximum
   estimate, and sectioning adds further bias (Shea et al. 2015, Krimer & Costa
   2017). The application says so on every fit.
-- The olivine entries were transcribed from secondary sources and are flagged
-  unverified. Check them against Dohmen & Chakraborty (2007) and its erratum.
+- The older Chakraborty (1997) olivine law is transcribed from secondary
+  sources and flagged unverified. The two Dohmen & Chakraborty (2007) entries
+  are checked against the paper and its erratum.
 - Li in plagioclase is modelled with one effective coefficient per mechanism.
   Pohl et al. (2024) fitted a multispecies model with interstitial and
   lattice-site Li exchanging, which Diffusor does not implement.

@@ -173,9 +173,12 @@ def test_olivine_fo2_exponent_is_one_sixth():
 
 
 def test_unverified_entries_are_flagged_in_their_warnings():
-    c = get("ol_FeMg_dohmen_chakraborty2007_tamed")
-    w = c.check_conditions(Conditions(T_K=1473.15, log_fo2_bar=-7.0, X={"XFe": 0.1}))
+    cond = Conditions(T_K=1473.15, log_fo2_bar=-7.0, X={"XFe": 0.1})
+    w = get("ol_FeMg_chakraborty1997").check_conditions(cond)
     assert any("NOT verified" in s for s in w)
+    # checked against the paper and its erratum, so no longer flagged
+    w = get("ol_FeMg_dohmen_chakraborty2007_tamed").check_conditions(cond)
+    assert not any("NOT verified" in s for s in w)
 
 
 def test_out_of_range_conditions_produce_a_warning():

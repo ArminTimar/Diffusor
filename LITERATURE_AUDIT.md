@@ -8,11 +8,14 @@ No copyrighted full text is committed to this repository.
 
 ## Corrections established from the sources
 
-- **Olivine Fe–Mg:** Dohmen & Chakraborty (2007), pp. 424–425, equations 27–28,
-  contain `+3 XFe`, not `+3 (XFe-0.1)`. The latter lowered D by 0.3 dex and
-  doubled inferred times under otherwise equivalent conditions. Both branches
-  are corrected. The erratum has not been checked in full; these legacy entries
-  remain unverified and TaMED is no longer recommended by default.
+- **Olivine Fe–Mg:** Dohmen & Chakraborty (2007), pp. 424–425, print equations
+  27–28 with `+3 XFe`, but the erratum (Phys. Chem. Minerals 34:597–598,
+  doi:10.1007/s00269-007-0185-3, checked 29 September 2026) corrects both to
+  `+3 (XFe − 0.1)`, and the global eq. 29 to `+3 (XFe − 0.14)`. An earlier pass
+  of this audit (20 September) read only the printed equations and changed the
+  code to `+3 XFe`; that raised D by 0.3 dex and halved inferred olivine times.
+  It is now reverted to the erratum form, both entries are verified, and TaMED
+  is recommended again.
 - **Ni in olivine:** Petry et al. (2004), p. 4184, give the fixed-fO2 Fo90 fit
   `D0=3.84e-9 m²/s, Q=216 kJ/mol`. Its intercept must not be paired with the
   separate global activation energy of 220 kJ/mol. The implemented fit is restricted

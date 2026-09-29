@@ -14,6 +14,7 @@ these keys, and the test suite fails if a citation key does not resolve.
 | `kfs_Ti_cherniak_watson2020` | kfeldspar | Ti | Cherniak & Watson (2020) | yes |
 | `mt_Fe_vanorman_crispin2010` | magnetite | Fe | Van Orman & Crispin (2010) | yes |
 | `mt_Ti_vanorman_crispin2010` | magnetite | Ti | Van Orman & Crispin (2010) | yes |
+| `ol_FeMg_dohmen_chakraborty2007_tamed` | olivine | Fe-Mg | Dohmen & Chakraborty (2007) | yes |
 | `opx_FeMg_dias2025` | opx | Fe-Mg | Dias et al. (2025) | yes |
 | `plag_Ba_grocolas2025` | plagioclase | Ba | Grocolas et al. (2025) | yes |
 | `plag_Li_pohl2024_interstitial` | plagioclase | Li | Pohl et al. (2024) | yes |
@@ -71,6 +72,7 @@ these keys, and the test suite fails if a citation key does not resolve.
 | `mt_Zr_sievwright2020` | magnetite | Zr | Sievwright et al. (2020) | yes |
 | `ol_Be_jollands2016` | olivine | Be | Jollands et al. (2016) | yes |
 | `ol_Ca_coogan2005` | olivine | Ca | Coogan et al. (2005) | yes |
+| `ol_FeMg_dohmen_chakraborty2007_ped` | olivine | Fe-Mg | Dohmen & Chakraborty (2007) | yes |
 | `ol_Ni_petry2004` | olivine | Ni | Petry et al. (2004) | yes |
 | `ol_P_watson2015` | olivine | P | Watson et al. (2015) | yes |
 | `opx_Ce_dias2025` | opx | Ce | Dias et al. (2025) | yes |
@@ -107,8 +109,6 @@ these keys, and the test suite fails if a citation key does not resolve.
 | `cpx_CaMg_brady1983` | cpx | Ca-Mg | Brady & McCallister (1983) | **NO** |
 | `cpx_FeMg_dimanov_sautter2000` | cpx | Fe-Mg | Dimanov & Sautter (2000) | **NO** |
 | `ol_FeMg_chakraborty1997` | olivine | Fe-Mg | Chakraborty (1997) | **NO** |
-| `ol_FeMg_dohmen_chakraborty2007_ped` | olivine | Fe-Mg | Dohmen & Chakraborty (2007) | **NO** |
-| `ol_FeMg_dohmen_chakraborty2007_tamed` | olivine | Fe-Mg | Dohmen & Chakraborty (2007) | **NO** |
 | `opx_Lu_dias2025` | opx | Lu | Dias et al. (2025) | **NO** |
 | `plag_NaSiCaAl_grove1984` | plagioclase | NaSi-CaAl | Grove et al. (1984) | **NO** |
 

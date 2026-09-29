@@ -13,14 +13,17 @@ from diffusor.solvers.initial import InitialCondition
 from diffusor.solvers.history import ThermalHistory
 
 
-@pytest.mark.parametrize("regime,expected", [("tamed", -16.556), ("ped", -16.979)])
-def test_olivine_primary_equations_have_no_spurious_reference_subtraction(regime, expected):
-    # Eq. 27/28, pp. 424-425: evaluated at 1100 C, XFe=.1, 1 bar,
-    # fO2=1e-7 Pa. The old -0.3 dex error is much larger than rounding here.
+@pytest.mark.parametrize("regime,expected", [("tamed", -16.856), ("ped", -17.279)])
+def test_olivine_equations_follow_the_erratum(regime, expected):
+    # Eqs 27/28 (pp. 424-425) as corrected by the erratum (PCM 34:597-598), whose
+    # composition term is 3 (XFe - 0.1): at Fo90 it vanishes. Evaluated at 1100 C,
+    # XFe = 0.1, 1 bar, fO2 = 1e-7 Pa, tabulated by hand from the erratum. The printed
+    # 3 XFe would give 0.3 log units more, far outside the tolerance.
     c = get("ol_FeMg_dohmen_chakraborty2007_" + regime)
     cond = Conditions(1373.15, X={"XFe": .1}, log_fo2_bar=-12, axis="c")
-    # Independently tabulated to three decimals from the printed equations.
     assert c.log10_D(cond) == pytest.approx(expected, abs=.015)
+    richer = c.log10_D(cond.replace(X={"XFe": .2}))
+    assert richer - c.log10_D(cond) == pytest.approx(0.3)
 
 
 def test_ni_matches_petry_experiment_ni10():

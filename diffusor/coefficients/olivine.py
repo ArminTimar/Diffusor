@@ -2,10 +2,18 @@
 
 Verification status
 --------------------------------
-The primary paper's equations 27-28 (pp. 424-425) were checked in September
-2026. The composition term is 3 XFe, not 3 (XFe - 0.1). The erratum full text
-has not yet been obtained, so verification remains incomplete. Earlier outputs
-used a diffusivity smaller by 10**0.3; refit old olivine results.
+Dohmen & Chakraborty (2007) equations 27 (TaMED) and 28 (PED) were checked on
+29 September 2026 against the printed paper (Phys. Chem. Minerals 34:409-430,
+pp. 424-425) and its erratum (34:597-598, doi:10.1007/s00269-007-0185-3).
+The printed equations end in ``+ 3 X_Fe``; the erratum corrects that to
+``+ 3 (X_Fe - 0.1)``, consistent with the data being normalised to Fo90. Every
+other constant (log D0, Q, dV, the 1/6 fO2 exponent, fO2 reference 1e-7 Pa,
+the 1e-10 Pa regime boundary, log 6 for [100] and [010]) is unchanged by the
+erratum and matches the code.
+
+Between 20 and 29 September 2026 Diffusor used the printed ``+ 3 X_Fe``, which
+makes D 10**0.3 (about 2x) too large and olivine Fe-Mg times about half too
+short. Refit olivine results made in that window.
 """
 from __future__ import annotations
 
@@ -23,15 +31,15 @@ def _add(c):
 
 
 # ---------------------------------------------------------------------------
-# Dohmen & Chakraborty (2007), primary equations; erratum verification pending
+# Dohmen & Chakraborty (2007), eqs 27-28 as corrected by the erratum
 # ---------------------------------------------------------------------------
 def _dohmen_chakraborty_tamed(dc, cond: Conditions, p):
     """TaMED regime (transition-metal extrinsic diffusion), D//[001]:
 
     log D = -9.21 - [201000 + (P - 1e5) * 7e-6] / (2.303 R T)
-            + 1/6 log(fO2 / 1e-7) + 3 X_Fe
+            + 1/6 log(fO2 / 1e-7) + 3 (X_Fe - 0.1)
 
-    fO2 in Pa, P in Pa, D in m^2/s.
+    fO2 in Pa, P in Pa, D in m^2/s. Eq. 27 with the erratum's composition term.
     """
     XFe = np.asarray(cond.x("XFe"), dtype=float)
     fo2_Pa_log = cond.log_fo2_Pa
@@ -45,7 +53,9 @@ def _dohmen_chakraborty_tamed(dc, cond: Conditions, p):
 def _dohmen_chakraborty_ped(dc, cond: Conditions, p):
     """PED regime (pure extrinsic diffusion, fO2-independent), D//[001]:
 
-    log D = -8.91 - [220000 + (P - 1e5) * 7e-6] / (2.303 R T) + 3 X_Fe
+    log D = -8.91 - [220000 + (P - 1e5) * 7e-6] / (2.303 R T) + 3 (X_Fe - 0.1)
+
+    Eq. 28 with the erratum's composition term.
     """
     XFe = np.asarray(cond.x("XFe"), dtype=float)
     logD = (p["c0"]
@@ -60,13 +70,13 @@ _add(DiffusionCoefficient(
     key="ol_FeMg_dohmen_chakraborty2007_tamed",
     mineral="olivine", species="Fe-Mg",
     kind="interdiffusion", transported_variable="XFe = Fe/(Fe+Mg), mole fraction",
-    calibration_notes=("Primary equations 27-28 checked; erratum full text still unverified. "
-                       "The September 2026 correction removes an erroneous XFe reference subtraction.",),
+    calibration_notes=("Eq. 27 applies at fO2 above 1e-10 Pa (TaMED); below it use the PED "
+                       "entry (eq. 28).",),
     label="Olivine Fe-Mg // [001], Dohmen & Chakraborty (2007), TaMED regime",
     citation="dohmen_chakraborty2007",
-    equation_number="27 (TaMED) / 28 (PED), primary paper pp. 424-425; erratum text not yet verified",
+    equation_number="27 (TaMED), p. 424, as corrected by the erratum (PCM 34:597-598)",
     equation_text=("log D_Fe-Mg [m2/s] = -9.21 - (201000 + (P - 1e5) * 7e-6) / (2.303 R T) "
-                   "+ 1/6 log(fO2 / 1e-7) + 3 X_Fe,  fO2 and P in Pa"),
+                   "+ 1/6 log(fO2 / 1e-7) + 3 (X_Fe - 0.1),  fO2 and P in Pa"),
     func=_dohmen_chakraborty_tamed,
     params={
         "c0": Parameter("c0", -9.21, 0.0, "log10(m2/s)", "1s", "intercept at the reference state"),
@@ -75,7 +85,8 @@ _add(DiffusionCoefficient(
         "n_fo2": Parameter("n_fo2", 1.0 / 6.0, 0.0, "-", "1s", "fO2 exponent"),
         "log_fo2_ref": Parameter("log_fo2_ref", -7.0, 0.0, "log10 Pa", "1s", "reference fO2"),
         "m": Parameter("m", 3.0, 0.0, "-", "1s", "X_Fe coefficient"),
-        "XFe_ref": Parameter("XFe_ref", 0.0, 0.0, "-", "1s", "reference X_Fe of the formulation"),
+        "XFe_ref": Parameter("XFe_ref", 0.1, 0.0, "-", "1s",
+                             "reference X_Fe (Fo90), from the erratum"),
     },
     sigma_logD=0.21,
     axis_factors=_OLIVINE_ANISO,
@@ -84,25 +95,27 @@ _add(DiffusionCoefficient(
     needs_fo2=True, fo2_unit="Pa",
     T_range=Range(973.15, 1473.15, "K (700-1200 C)"),
     P_range=Range(1.0e5, 1.2e10, "Pa"),
-    fo2_range=Range(-12.0, -5.0, "log10 Pa"),
+    fo2_range=Range(-10.0, None, "log10 Pa: TaMED regime above 1e-10 Pa (p. 424), no upper limit given"),
     X_range=Range(0.0, 0.5, "XFe"),
-    verified=False,
-    verified_from=("primary PDF pp. 424-425 checked: composition term corrected to 3 XFe. "
-                   "Erratum full text not verified. "
-                   "Independently confirmed from the local library: the fO2 exponent of 1/6 and "
+    verified=True,
+    verified_from=("Checked 29 September 2026 against the primary paper, Phys. Chem. Minerals "
+                   "34:409-430, pp. 424-425 (eqs 27, 28), and its erratum, 34:597-598 "
+                   "(doi:10.1007/s00269-007-0185-3), which corrects the composition term of "
+                   "eqs 27 and 28 from 3 X_Fe to 3 (X_Fe - 0.1). "
+                   "Also confirmed from the local library: the fO2 exponent of 1/6 and "
                    "the TaMED/PED mechanism change (Dohmen et al. 2016, p. 2216 and p. 2219). "
                    "The ~6x anisotropy of D//[001] over D//[100] and D//[010] (Hartley et al. "
                    "2016, p. 60. Mutch et al. 2021 DFENS source code uses aniso = 6.0). The "
                    "activation volume of 7e-6 m3/mol (Costa et al. 2008, p. 571, citing "
                    "Holzapfel et al. 2007)."),
     secondary_citations=("dohmen2007", "holzapfel2007", "chakraborty2010", "hartley2016"),
-    recommended=False,
+    recommended=True,
     notes=("Valid where transition-metal extrinsic diffusion dominates, i.e. at relatively "
            "oxidising conditions. Below about the IW buffer the mechanism changes to PED and "
            "D stops depending on fO2 -- use the PED entry there. D//[001] is about 6 times "
            "D//[100] and D//[010]. The sigma_logD of 0.21 reflects the roughly 0.2-log-unit "
-           "scatter of the experimental database and should be replaced with the published "
-           "covariance once the primary paper is checked."),
+           "scatter of the experimental database; the paper gives no parameter covariance, "
+           "only that eqs 27-28 reproduce all 113 data points within 0.5 log units."),
 ))
 
 _add(DiffusionCoefficient(
@@ -111,16 +124,16 @@ _add(DiffusionCoefficient(
     kind="interdiffusion", transported_variable="XFe = Fe/(Fe+Mg), mole fraction",
     label="Olivine Fe-Mg // [001], Dohmen & Chakraborty (2007), PED regime",
     citation="dohmen_chakraborty2007",
-    equation_number="27 (TaMED) / 28 (PED), primary paper pp. 424-425; erratum text not yet verified",
+    equation_number="28 (PED), p. 425, as corrected by the erratum (PCM 34:597-598)",
     equation_text=("log D_Fe-Mg [m2/s] = -8.91 - (220000 + (P - 1e5) * 7e-6) / (2.303 R T) "
-                   "+ 3 X_Fe,  P in Pa. Independent of fO2"),
+                   "+ 3 (X_Fe - 0.1),  P in Pa. Independent of fO2"),
     func=_dohmen_chakraborty_ped,
     params={
         "c0": Parameter("c0", -8.91, 0.0, "log10(m2/s)", "1s", "intercept"),
         "Q": Parameter("Q", 220.0, 0.0, "kJ/mol", "1s", "activation energy (PED)"),
         "dV": Parameter("dV", 7.0e-6, 0.0, "m3/mol", "1s", "activation volume"),
         "m": Parameter("m", 3.0, 0.0, "-", "1s", "X_Fe coefficient"),
-        "XFe_ref": Parameter("XFe_ref", 0.0, 0.0, "-", "1s", "reference X_Fe"),
+        "XFe_ref": Parameter("XFe_ref", 0.1, 0.0, "-", "1s", "reference X_Fe (Fo90), from the erratum"),
     },
     sigma_logD=0.21,
     axis_factors=_OLIVINE_ANISO,
@@ -129,8 +142,11 @@ _add(DiffusionCoefficient(
     needs_fo2=False,
     T_range=Range(973.15, 1473.15, "K (700-1200 C)"),
     X_range=Range(0.0, 0.5, "XFe"),
-    verified=False,
-    verified_from="primary PDF p. 425 equation 28 checked; erratum full text not yet verified",
+    verified=True,
+    verified_from=("Checked 29 September 2026 against the primary paper, Phys. Chem. Minerals "
+                   "34:409-430, pp. 424-425 (eqs 27, 28), and its erratum, 34:597-598 "
+                   "(doi:10.1007/s00269-007-0185-3), which corrects the composition term of "
+                   "eqs 27 and 28 from 3 X_Fe to 3 (X_Fe - 0.1). Eq. 28 applies at fO2 below 1e-10 Pa."),
     notes=("Pure extrinsic diffusion: point defect concentrations are fixed by aliovalent "
            "impurities, so D does not depend on fO2. Applies at reducing "
            "conditions (around and below the IW buffer). Diffusor does not switch between "

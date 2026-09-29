@@ -24,7 +24,7 @@ already known.
 | Covers | September 29 working tree; section 5 updates the September 18 baseline |
 | Package version | 0.1.0 |
 | Modules documented | 68 Python modules |
-| Coefficients | 103 entries, 13 minerals, 96 with source-transcription checks |
+| Coefficients | 103 entries, 13 minerals, 98 with source-transcription checks |
 | References | 95 keys in `diffusor/references.py` |
 
 ---
@@ -419,10 +419,12 @@ Two regimes of Dohmen & Chakraborty (2007) plus one older comparison law.
 `_dohmen_chakraborty_tamed` and `_dohmen_chakraborty_ped` differ only in the
 intercept, the activation energy and whether an fO2 term is present. The
 anisotropy dict `_OLIVINE_ANISO = {"c": 1, "b": 1/6, "a": 1/6}` is shared by
-all three. **The whole module is flagged `verified=False`**: the numbers come
-from secondary sources, not the primary PDF and its erratum. The
-`verified_from` field of the TaMED entry lists which parts are independently
-confirmed and from where, which is the model the rest of the registry follows.
+all three. The two Dohmen & Chakraborty entries are **verified** against the
+printed equations 27 and 28 (pp. 424-425) and the erratum (PCM 34:597-598),
+which corrects their composition term from `3 X_Fe` to `3 (X_Fe - 0.1)`; that
+reference is the `XFe_ref = 0.1` parameter. TaMED's `fo2_range` starts at the
+paper's 1e-10 Pa regime boundary and has no upper limit, as the paper gives
+none. Only `ol_FeMg_chakraborty1997` remains unverified.
 Diffusor does not switch between TaMED and PED automatically; the user picks.
 
 ##### `coefficients/opx.py`
@@ -1562,15 +1564,18 @@ Part II of the pair that established the modern olivine Fe-Mg law. It
 separates a transition-metal extrinsic (TaMED) regime, in which D depends on
 fO2 through an exponent of 1/6, from a pure extrinsic (PED) regime at reducing
 conditions in which it does not, and gives a model equation in T, P, fO2 and
-X_Fe. The erratum corrects numbers in the published equation.
+X_Fe. The erratum (published 31 August 2007, free to read at
+doi:10.1007/s00269-007-0185-3) corrects the composition term of eqs 27 and 28
+from `3 X_Fe` to `3 (X_Fe - 0.1)`, and of the global eq. 29 from `3 X_Fe` to
+`3 (X_Fe - 0.14)`; nothing else changes.
 *Used for:* both olivine Fe-Mg entries —
 `log D = -9.21 - (201000 + (P-1e5) 7e-6)/(2.303 R T) + (1/6) log(fO2/1e-7) +
 3 (X_Fe - 0.1)` for TaMED and the -8.91 / 220 kJ/mol form for PED, D//[001],
 fO2 and P in Pa; the ~6x anisotropy of [001] over [100] and [010]; and the
 TaMED/PED mechanism change itself.
-**Both entries are `verified=False`**: the numbers were transcribed from
-secondary sources because the primary PDF and its erratum were not available
-offline. This is the largest open verification item in the registry.
+**Both entries are verified** (29 September 2026) against the printed pages
+and the erratum. From 20 to 29 September 2026 the code used the misprinted
+`3 X_Fe`, which makes D twice as large and olivine times half as long.
 
 **`dohmen2007`** — Dohmen, Becker & Chakraborty (2007) Fe-Mg diffusion in
 olivine I: experimental determination between 700 and 1200 C as a function of
@@ -2192,8 +2197,8 @@ number, and every one is stated in the relevant entry's notes:
 | `mt_Ti_sievwright2020` | Ti | Sievwright et al. (2020), 5 and Table 5 | 0.2 | - |
 | `mt_Ti_vanorman_crispin2010` | Ti | Van Orman & Crispin (2010), Table 12 | 0.3 | rec |
 | `ol_FeMg_chakraborty1997` | Fe-Mg | Chakraborty (1997), (Arrhenius fit at fO2 = 1e-7 Pa, Fo86) | 0.3 | **unver** |
-| `ol_FeMg_dohmen_chakraborty2007_ped` | Fe-Mg | Dohmen & Chakraborty (2007), model equation of Dohmen & Chakraborty (2007) as ... | 0.21 | **unver** |
-| `ol_FeMg_dohmen_chakraborty2007_tamed` | Fe-Mg | Dohmen & Chakraborty (2007), model equation of Dohmen & Chakraborty (2007) as ... | 0.21 | rec, **unver** |
+| `ol_FeMg_dohmen_chakraborty2007_ped` | Fe-Mg | Dohmen & Chakraborty (2007), eq. 28 as corrected by the erratum | 0.21 | - |
+| `ol_FeMg_dohmen_chakraborty2007_tamed` | Fe-Mg | Dohmen & Chakraborty (2007), eq. 27 as corrected by the erratum | 0.21 | rec |
 | `opx_Ce_dias2025` | Ce | Dias et al. (2025), 7 | 0.3 | - |
 | `opx_Eu_dias2025` | Eu | Dias et al. (2025), 8 | 0.3 | - |
 | `opx_FeMg_dias2025` | Fe-Mg | Dias et al. (2025), 22-25 | 0.2 | rec |
@@ -2229,16 +2234,15 @@ what Diffusor currently does, and what would settle it.
 
 #### Verification gaps
 
-1. **The olivine entries are unverified, and one of them is recommended.**
-   All three `ol_*` entries were transcribed from secondary sources.
-   `ol_FeMg_dohmen_chakraborty2007_tamed` is nevertheless `recommended=True`,
-   and the test that guards the recommended flag only checks for supersession,
-   not for verification, so nothing catches this. *Settle it by* reading
-   Dohmen & Chakraborty (2007) and its erratum (Phys. Chem. Minerals
-   34:597-598) and confirming -9.21, 201 kJ/mol, -8.91, 220 kJ/mol, the 1/6
-   exponent, the factor of 3 on (X_Fe - 0.1) and the reference state.
+1. **Settled: the Dohmen & Chakraborty (2007) olivine entries.** Checked on
+   29 September 2026 against pp. 424-425 and the erratum (Phys. Chem.
+   Minerals 34:597-598): -9.21, 201 kJ/mol, -8.91, 220 kJ/mol, 7e-6 m3/mol,
+   the 1/6 exponent on fO2/1e-7 Pa, the 1e-10 Pa regime boundary, log 6 for
+   [100] and [010], and the erratum's `3 (X_Fe - 0.1)`. The printed pages
+   alone say `3 X_Fe`, which is why reading them without the erratum (as the
+   20 September audit did) gives D twice too large.
 
-2. **Seven entries are unverified.** Besides the three olivine ones:
+2. **Five entries are unverified.** Besides `ol_FeMg_chakraborty1997`:
    `cpx_FeMg_dimanov_sautter2000` (numbers from a table footnote in
    Petrone et al. 2016, whose own NIDIS script uses 9.55e-5 rather than
    9.5e-5 m2/s, a 0.5 per cent difference); `cpx_CaMg_brady1983` (secondary
@@ -2400,13 +2404,13 @@ what Diffusor currently does, and what would settle it.
 
 | mineral | entries | verified | recommended |
 | --- | --- | --- | --- |
-| olivine | 3 | **0** | 1 |
+| olivine | 3 | 2 | 1 |
 | orthopyroxene | 12 | 11 | 1 |
 | clinopyroxene | 3 | 1 | 1 |
 | plagioclase | 11 | 10 | 5 |
 | K-feldspar | 3 | 3 | 3 |
 | magnetite | 22 | 22 | 2 |
-| **total** | **54** | **47** | **13** |
+| **total** | **54** | **49** | **13** |
 
 Checks the test suite makes against numbers printed in the sources:
 
@@ -2423,13 +2427,14 @@ Checks the test suite makes against numbers printed in the sources:
 | Opx K9_L10C4, Kizimen (Ostorero et al. 2022, Supplementary Data 4) | 2.32 yr (+7.16/-1.75) | about 3 yr |
 | Numerical solver against Crank (1975) closed forms | exact | ~3 parts in 1e6, second-order convergence |
 | Mass conservation, closed system | exact | 1 part in 1e8 |
+| Olivine Fe-Mg TaMED and PED, 1100 C, Fo90, 1e-7 Pa (Dohmen & Chakraborty 2007 eqs 27-28 with the erratum) | log D = -16.856 and -17.279 | -16.856 and -17.279 |
 
 ### 4.5 What to improve first
 
 Ordered by how much it would change a published answer, not by effort:
 
-1. Verify the olivine transcription against the primary paper and its erratum
-   (items 1, 2), or demote the entry from *recommended*.
+1. Done: the olivine transcription is verified against the primary paper and
+   its erratum (item 1).
 2. Settle the Mueller et al. (2013) D0 (item 11). A factor of ten sits under
    every clinopyroxene timescale.
 3. Resolve the magnetite Fe branch against Tomiya et al. (2013) (item 12).
@@ -2543,7 +2548,7 @@ The current registry has 103 entries across 13 minerals. The earlier counts, rec
 
 ### Mathematical and reporting changes
 
-Olivine Fo-percent profiles map to coefficient XFe=1-C/100. Dohmen & Chakraborty equations 27–28 use +3 XFe. The erratum remains unchecked, so those entries stay unverified and TaMED is no longer recommended. Ca/Be principal functions are evaluated before direction-cosine projection. Fixed-temperature tables reject other temperatures and thermal Monte Carlo. No unmeasured tensor or parameter covariance is invented.
+Olivine Fo-percent profiles map to coefficient XFe=1-C/100. Dohmen & Chakraborty equations 27–28 use the erratum's +3 (XFe − 0.1) (checked 29 September 2026; the 20 September reading of the printed +3 XFe was wrong and is reverted), so both entries are verified and TaMED is recommended again. Ca/Be principal functions are evaluated before direction-cosine projection. Fixed-temperature tables reject other temperatures and thermal Monte Carlo. No unmeasured tensor or parameter covariance is invented.
 
 The numerical operator uses exact node-centred control volumes in plane/cylinder/sphere geometry and includes activity fluxes at boundary-adjacent faces. Mass uses the same weights. Zero external total flux conserves mass. Invalid grids, diffusivity arrays and exhausted step budgets raise errors. Callable boundaries force numerical integration; an isothermal supplied history uses its own temperature.
 

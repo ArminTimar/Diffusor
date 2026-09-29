@@ -21,7 +21,7 @@ from PySide6.QtWidgets import (QComboBox, QDialog, QDialogButtonBox, QDoubleSpin
 
 from ..dataio import ProfileSpec, anchors_from_microprobe, calibrate, read_table
 from ..dataio.image_profiles import ExtractionTable, composition_table
-from .widgets import callout, field, ghost_button, note, pair, row
+from .widgets import callout, field, fit_to_screen, ghost_button, note, pair, row, scrollable
 
 STATISTICS = {"Clean_Mean": "Cleaned mean (recommended)", "Clean_Median": "Cleaned median",
               "Raw_Mean": "Raw mean, nothing removed"}
@@ -52,8 +52,14 @@ class ImageCalibrationDialog(QDialog):
         self.spec: Optional[ProfileSpec] = None
         self.calibration = None
         self.setWindowTitle("Use an image profile")
-        self.resize(620, 720)
-        v = QVBoxLayout(self)
+        fit_to_screen(self, 640, 760)
+        outer = QVBoxLayout(self)
+        outer.setContentsMargins(12, 12, 12, 12)
+        # the form scrolls, the buttons stay put, so they are reachable on any screen
+        form = QWidget()
+        form.setObjectName("Page")
+        v = QVBoxLayout(form)
+        v.setContentsMargins(4, 0, 8, 0)
         v.setSpacing(10)
         src = Path(table.source).name or Path(table.path).name
         v.addWidget(note(f"<b>{len(table.profile)}</b> positions from <b>{src}</b>. "
@@ -73,9 +79,10 @@ class ImageCalibrationDialog(QDialog):
         for key, label in UNCERTAINTIES:
             self.cmb_unc.addItem(label, key)
         v.addWidget(pair(field("Profile value", self.cmb_stat),
-                         field("Uncertainty", self.cmb_unc,
-                               "Neighbouring lines share pixels, so the standard error is a "
-                               "lower bound.")))
+                         field("Uncertainty", self.cmb_unc)))
+        v.addWidget(note("Neighbouring lines share pixels, so the standard error is a lower "
+                         "bound. The standard deviation across the lines is the cautious "
+                         "choice.", "Hint"))
 
         self.cmb_map = QComboBox()
         for key, label in MAPS:
@@ -95,11 +102,12 @@ class ImageCalibrationDialog(QDialog):
         self.box = callout("Info")
         v.addWidget(self.box)
         v.addStretch(1)
+        outer.addWidget(scrollable(form), 1)
         bb = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         bb.button(QDialogButtonBox.Ok).setText("Load profile")
         bb.accepted.connect(self._accept)
         bb.rejected.connect(self.reject)
-        v.addWidget(bb)
+        outer.addWidget(bb)
 
         self.cmb_map.currentIndexChanged.connect(self._map_changed)
         for w in (self.sp_px, self.sp_g1, self.sp_c1, self.sp_g2, self.sp_c2):
@@ -107,6 +115,9 @@ class ImageCalibrationDialog(QDialog):
         for w in (self.cmb_stat, self.cmb_unc, self.cmb_degree):
             w.currentIndexChanged.connect(self._update)
         self.tbl.itemChanged.connect(self._update)
+        if table.value_label.startswith("legend value"):
+            # a legend is usually drawn in composition units already
+            self.cmb_map.setCurrentIndex(self.cmb_map.findData("none"))
         self._map_changed()
 
     # ------------------------------------------------------------ pages

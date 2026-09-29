@@ -4,6 +4,7 @@ from __future__ import annotations
 from typing import Optional
 
 from PySide6.QtCore import QEvent, QObject, Qt
+from PySide6.QtGui import QGuiApplication
 from PySide6.QtWidgets import (QAbstractScrollArea, QAbstractSpinBox, QApplication, QComboBox,
                                QFrame, QHBoxLayout, QLabel, QPushButton, QScrollArea,
                                QSizePolicy, QVBoxLayout, QWidget)
@@ -142,6 +143,19 @@ def callout(kind: str = "Info") -> QFrame:
     lay.addWidget(lab)
     box.label = lab
     return box
+
+
+def fit_to_screen(window: QWidget, width: int, height: int,
+                  width_share: float = 0.95, height_share: float = 0.88) -> None:
+    """Resize to ``width`` x ``height``, or less so the whole window fits the screen.
+
+    ``height_share`` leaves room for the title bar and the taskbar, so the
+    buttons at the bottom of a dialog are always on screen.
+    """
+    screen = (window.screen() if window.screen() is not None
+              else QGuiApplication.primaryScreen()).availableGeometry()
+    window.resize(min(width, int(screen.width() * width_share)),
+                  min(height, int(screen.height() * height_share)))
 
 
 def scrollable(inner: QWidget) -> QScrollArea:

@@ -13,6 +13,7 @@ take the mouse while they are on):
   lines start on the right of the guideline, looking from its first point.
 * Scale bar: click both ends of the scale bar and type its length.
 * Legend: click the low-value end of the colour legend, then the high end.
+  A legend saved as a separate image is opened and picked in its own window.
 * Exclude area: click around an inclusion or lamella, right-click to close.
 """
 from __future__ import annotations
@@ -37,7 +38,8 @@ from ..dataio.image_profiles import (CLIP_METHODS, KEPT, OUTSIDE, CleaningSettin
                                      ExtractionSettings, extract_profiles, is_extraction_workbook,
                                      suggest_limits, table_from_extraction, write_workbook)
 from . import theme
-from .widgets import card, field, ghost_button, note, pair, primary_button, row, scrollable
+from .widgets import (card, field, fit_to_screen, ghost_button, note, pair, primary_button, row,
+                      scrollable)
 
 TOOLS = {
     "boundary": "Click along the zone boundary to add guideline points. Right-click removes "
@@ -106,13 +108,82 @@ class RawDialog(QDialog):
                     offset=self.sp_off.value(), bands=self.sp_bands.value())
 
 
+class LegendPickerDialog(QDialog):
+    """Pick the two ends of a colour legend that sits in a separate image file."""
+
+    def __init__(self, image: imgio.LoadedImage, parent=None, points=None):
+        super().__init__(parent)
+        self.image = image
+        self.points: List[tuple] = list(points or [])
+        self.setWindowTitle(f"Legend in {Path(image.source).name}")
+        fit_to_screen(self, 820, 560)
+        v = QVBoxLayout(self)
+        v.addWidget(note("Click the low-value end of the legend, then the high-value end, "
+                         "inside the coloured bar. Right-click removes the last point. Use the "
+                         "toolbar to zoom on a small legend.", "Sub"))
+        self.fig = Figure(figsize=(7, 4), layout="constrained", facecolor=theme.SURFACE)
+        self.canvas = FigureCanvasQTAgg(self.fig)
+        self.toolbar = NavigationToolbar2QT(self.canvas, self)
+        v.addWidget(self.toolbar)
+        v.addWidget(self.canvas, 1)
+        self.ax = self.fig.add_subplot(111)
+        self.ax.set_axis_off()
+        if image.is_rgb:
+            self.ax.imshow(image.rgb01(), interpolation="nearest")
+        else:
+            self.ax.imshow(image.channel(0), cmap="gray", interpolation="nearest")
+        self.ax.set_autoscale_on(False)
+        self._artists = []
+        self.lbl = note("", "Hint")
+        v.addWidget(self.lbl)
+        self.bb = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        self.bb.button(QDialogButtonBox.Ok).setText("Use this legend")
+        self.bb.accepted.connect(self.accept)
+        self.bb.rejected.connect(self.reject)
+        v.addWidget(self.bb)
+        self.canvas.mpl_connect("button_press_event", self._on_click)
+        self._redraw()
+
+    def _on_click(self, ev):
+        if ev.inaxes is not self.ax or self.toolbar.mode or ev.xdata is None:
+            return
+        if ev.button == 3:
+            if self.points:
+                self.points.pop()
+        else:
+            if len(self.points) >= 2:
+                self.points = []
+            self.points.append((float(ev.xdata), float(ev.ydata)))
+        self._redraw()
+
+    def _redraw(self):
+        for a in self._artists:
+            a.remove()
+        self._artists = []
+        kw = dict(scalex=False, scaley=False)
+        if len(self.points) == 2:
+            (x0, y0), (x1, y1) = self.points
+            self._artists += self.ax.plot([x0, x1], [y0, y1], "-", color="white", lw=2.5, **kw)
+            self._artists += self.ax.plot([x0, x1], [y0, y1], "-", color="black", lw=1, **kw)
+        for pt, name in zip(self.points, ("low", "high")):
+            self._artists += self.ax.plot([pt[0]], [pt[1]], "+", color="#FF3B30", ms=12, mew=2,
+                                          **kw)
+            self._artists.append(self.ax.annotate(name, pt, xytext=(5, 5),
+                                                  textcoords="offset points", fontsize=8,
+                                                  color="black", backgroundcolor="white"))
+        self.lbl.setText(["Click the low-value end.", "Now click the high-value end.",
+                          "Legend line set. Click again to start over."][len(self.points)])
+        self.bb.button(QDialogButtonBox.Ok).setEnabled(len(self.points) == 2)
+        self.canvas.draw_idle()
+
+
 class ImageExtractorDialog(QDialog):
     def __init__(self, owner=None):
         super().__init__(owner)
         self.owner = owner
         self.setWindowTitle("Extract a profile from an image")
         self.setWindowFlag(Qt.WindowMaximizeButtonHint, True)
-        self.resize(1360, 880)
+        fit_to_screen(self, 1360, 880)
         self.image: Optional[imgio.LoadedImage] = None
         self.values = None                     # (values, no_value, label)
         self.color_scale: Optional[imgio.ColorScale] = None
@@ -121,6 +192,8 @@ class ImageExtractorDialog(QDialog):
         self.current_poly: List[tuple] = []
         self.clicks: List[tuple] = []          # scale bar or legend ends being drawn
         self.legend_pts: Optional[List[tuple]] = None
+        self.legend_image: Optional[imgio.LoadedImage] = None   # a legend in its own file
+        self.legend_image_pts: Optional[List[tuple]] = None
         self.extraction = None
         self._overlay = []
         self._timer = QTimer(self)
@@ -227,12 +300,19 @@ class ImageExtractorDialog(QDialog):
 
         self.card_legend, b = card("Colour legend")
         self.cmb_legend = QComboBox()
-        self.cmb_legend.addItem("Drawn on the image", "drawn")
+        self.cmb_legend.addItem("Drawn on this image", "drawn")
+        self.cmb_legend.addItem("On a separate image", "file")
         for name in COLORMAPS:
             self.cmb_legend.addItem(f"Colour map '{name}'", name)
-        self.cmb_legend.currentIndexChanged.connect(self._legend_changed)
+        self.cmb_legend.currentIndexChanged.connect(self._legend_source_changed)
         b.addWidget(field("Legend", self.cmb_legend,
                           "Use a named map only when you know the image was drawn with it."))
+        self.btn_legend_file = QPushButton("Open the legend image...")
+        self.btn_legend_file.clicked.connect(lambda: self.pick_legend_image())
+        self.btn_legend_redo = ghost_button("Pick the ends again")
+        self.btn_legend_redo.clicked.connect(self.repick_legend)
+        self.row_legend_file = row(self.btn_legend_file, self.btn_legend_redo, spacing=6)
+        b.addWidget(self.row_legend_file)
         self.sp_v0 = _spin(-1e12, 1e12, 0.0, 4)
         self.sp_v1 = _spin(-1e12, 1e12, 100.0, 4)
         b.addWidget(pair(field("Value at the low end", self.sp_v0),
@@ -400,7 +480,13 @@ class ImageExtractorDialog(QDialog):
         mode = self._mode()
         self.fld_channel.setVisible(mode == "channel")
         self.card_legend.setVisible(mode == "colour_scale")
-        self.tool_buttons["legend"].setEnabled(mode == "colour_scale")
+        src = self.cmb_legend.currentData()
+        legend_tool = mode == "colour_scale" and src == "drawn"
+        self.tool_buttons["legend"].setEnabled(legend_tool)
+        if not legend_tool and getattr(self, "tool", None) == "legend":
+            self._set_tool("boundary")
+        self.row_legend_file.setVisible(src == "file")
+        self.btn_legend_redo.setEnabled(self.legend_image is not None)
 
     def _mode_changed(self, *_):
         self._mode_widgets()
@@ -409,13 +495,70 @@ class ImageExtractorDialog(QDialog):
         else:
             self._values_changed()
 
+    def _legend_source_changed(self, *_):
+        self._mode_widgets()
+        if (self.cmb_legend.currentData() == "file" and self.legend_image is None
+                and self.image is not None and self._mode() == "colour_scale"):
+            self.pick_legend_image()
+        self._legend_changed()
+
+    def pick_legend_image(self, path: Optional[str] = None) -> bool:
+        """Open the image that holds the legend and let the user pick its two ends."""
+        if not path:
+            path, _ = QFileDialog.getOpenFileName(self, "Open the legend image", "",
+                                                  imgio.FILE_FILTER)
+            if not path:
+                return False
+        try:
+            img = imgio.load_image(path)
+        except Exception as exc:
+            QMessageBox.warning(self, "Could not read the legend image", str(exc))
+            return False
+        if not img.is_rgb:
+            QMessageBox.warning(self, "Not a colour image",
+                                f"{Path(path).name} has no red, green and blue channels, so it "
+                                "cannot hold a colour legend.")
+            return False
+        dlg = LegendPickerDialog(img, self)
+        if dlg.exec() != QDialog.Accepted or len(dlg.points) != 2:
+            return False
+        self.set_legend_image(img, dlg.points)
+        return True
+
+    def repick_legend(self):
+        if self.legend_image is None:
+            return
+        dlg = LegendPickerDialog(self.legend_image, self, self.legend_image_pts)
+        if dlg.exec() == QDialog.Accepted and len(dlg.points) == 2:
+            self.set_legend_image(self.legend_image, dlg.points)
+
+    def set_legend_image(self, img: imgio.LoadedImage, points):
+        """Use a legend from a separate image, with its low and high ends at ``points``."""
+        self.legend_image, self.legend_image_pts = img, [tuple(p) for p in points]
+        i = self.cmb_legend.findData("file")
+        if self.cmb_legend.currentIndex() != i:
+            self.cmb_legend.blockSignals(True)
+            self.cmb_legend.setCurrentIndex(i)
+            self.cmb_legend.blockSignals(False)
+        self._mode_widgets()
+        self._legend_changed()
+
     def _legend_changed(self, *_):
         if self.image is None or self._mode() != "colour_scale":
             return
         src = self.cmb_legend.currentData()
         v0, v1 = self.sp_v0.value(), self.sp_v1.value()
         try:
-            if src == "drawn":
+            if src == "file":
+                if self.legend_image is None or not self.legend_image_pts:
+                    self.color_scale = None
+                    self.lbl_legend.setText("Open the image that holds the legend.")
+                    self._values_changed()
+                    return
+                cs = imgio.ColorScale.from_legend(self.legend_image, *self.legend_image_pts,
+                                                  v0, v1, units=self.le_units.text().strip(),
+                                                  log=self.chk_log.isChecked())
+            elif src == "drawn":
                 if not self.legend_pts:
                     self.color_scale = None
                     self.lbl_legend.setText("Draw the legend with the Legend tool.")

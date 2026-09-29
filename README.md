@@ -107,8 +107,10 @@ have any number of points, so a curved boundary can be followed.
   click both ends of the scale bar and give its length.
 * **Values.** Grey value, luminance or mean of a colour image, one channel or
   page, or a **colour scale**: click along the legend of a rainbow (or any
-  other) element map and give the values at its ends, or pick the named colour
-  map it was drawn with. Pixels whose colour is not on the legend (black
+  other) element map and give the values at its ends. The legend can be in
+  the map itself or in a separate image file, as some microprobe software
+  saves it. If you know the named colour map it was drawn with, pick that
+  instead. Pixels whose colour is not on the legend (black
   cracks, white labels, epoxy) get no value.
 * **Cleaning.** Reject values below or above limits (cracks and holes are
   dark, oxide inclusions bright), grow those areas by a few pixels, draw

@@ -1066,6 +1066,14 @@ Cleaning and Result.
   Scale bar takes two clicks and asks for the bar's length, setting um per
   px; Legend takes the low-value end then the high end of a colour legend;
   Exclude area adds polygon vertices, right-click or Enter closes it.
+* **Legends.** The Colour legend card offers three sources: drawn on this
+  image (the Legend tool), on a separate image, or a named matplotlib map.
+  Microprobe software often saves the legend as its own file, so "On a
+  separate image" opens that file in `LegendPickerDialog`, where the low and
+  high ends are clicked (right-click undoes, the toolbar zooms on a small
+  legend; the button is enabled only once both ends are set);
+  `set_legend_image` keeps that image and its two points, and "Pick the ends
+  again" reopens it. The legend must be a colour image.
 * **Every change re-extracts** after a 120 ms debounce (`_schedule` →
   `recompute`), so what is saved is what is shown. The value map is computed
   once per image, mode and legend (`_values_changed`) and passed to
@@ -1080,6 +1088,8 @@ Cleaning and Result.
   from an earlier extraction (NIDIS's "use existing coordinates").
 * An unrecognised file offers `RawDialog` (width, height, type, byte order,
   header bytes, channels) and reads it with `load_raw`.
+* All three windows are sized with `widgets.fit_to_screen`, and the settings
+  column scrolls, so nothing is off screen on a small laptop display.
 * `save_workbook` proposes `<image>_profile<n>.xlsx` beside the image, as
   NIDIS names its output folders, and embeds `overlay_png()`.
   `use_in_diffusor` hands `table_from_extraction` to the main window.
@@ -1091,7 +1101,10 @@ raw mean) and which uncertainty (SE as NIDIS, SD across lines, none); and the
 value-to-composition map: linear through two reference points, fitted to
 anchor points (linear or quadratic, typed in or filled from a microprobe
 traverse with `anchors_from_microprobe` and an averaging window), or none.
-The calibration's `describe()` and notes show live. On accept it builds the
+The calibration's `describe()` and notes show live. A profile read through a
+colour legend starts on "none", since legends are usually drawn in
+composition units. The form scrolls and the buttons stay under it, so the
+dialog fits any screen. On accept it builds the
 table with `composition_table` and a `ProfileSpec` (mode A, distance in um),
 and `MainWindow.load_image_table` passes both to `_use_table`, the part of
 loading shared with ordinary files, after logging `summary()`.
@@ -1128,8 +1141,10 @@ citation keys into formatted entries.
 
 #### `gui/widgets.py`, `gui/theme.py`, `gui/format_help.py`, `gui/icons/`
 Layout helpers (`card`, `field`, `row`, `pair`, `callout`, `collapsible`,
-`page_columns`, and `WrapLabel`, which reserves the height a wrapped label
-actually needs); the palette and the Qt stylesheet, with the plot colours kept
+`page_columns`, `WrapLabel`, which reserves the height a wrapped label
+actually needs, and `fit_to_screen`, which opens a window at its preferred
+size or smaller so it fits the available screen with room for the title bar);
+the palette and the Qt stylesheet, with the plot colours kept
 in step with the interface; and the one place that describes what an input
 file has to look like, shared by the hint text and the Format dialog.
 
@@ -1195,7 +1210,7 @@ stops reproducing the number printed in its source.
 | `test_examples_roundtrip.py` | Each synthetic example is loaded, fitted and checked against its known time, plus the greyscale calibrate-then-fit path and the far-field warning. |
 | `test_datasets_and_ui.py` | Every dataset declares its provenance and never calls synthetic data measured; superseded entries are flagged and demoted; the window builds with one page per step; loading an example fills in the later steps; the Kizimen fit lands inside the Ostorero uncertainty; no label on any step is clipped and no page scrolls. |
 | `test_kfeldspar_and_interface.py` | The K-feldspar laws against their abstracts and the Sr-Ba gap; only the Grocolas entries carry a covariance; every example says where T, P and fO2 come from; boundary choices reach the model and closed ends hold the mass in; the Monte Carlo reports every draw and the worker batches them; the band on the profile is the spread of the refitted draws. |
-| `test_image_profiles.py` | Lines start on the right of the guideline as in NIDIS and recover a known error function; lines stay perpendicular to a curved guideline; samples off the image are not used; value limits with grown masks remove a crack and an inclusion; NIDIS's 1 SD test rejects about a third of clean Gaussian data and the MAD test almost none; exclusion polygons and whole-line dropping; PNG, BMP, JPEG, 8/16-bit and float TIFF, multi-page TIFF, NumPy, text grids with headers, ENVI and raw binary are read; ImageJ, FEI and JEOL pixel sizes are found; a jet map is inverted to under 1 % of its range with off-scale pixels flagged, from a named map and from a legend drawn in the image; the workbook round trip and the calibrated profile; the extractor window saves and loads into Diffusor through both paths. |
+| `test_image_profiles.py` | Lines start on the right of the guideline as in NIDIS and recover a known error function; lines stay perpendicular to a curved guideline; samples off the image are not used; value limits with grown masks remove a crack and an inclusion; NIDIS's 1 SD test rejects about a third of clean Gaussian data and the MAD test almost none; exclusion polygons and whole-line dropping; PNG, BMP, JPEG, 8/16-bit and float TIFF, multi-page TIFF, NumPy, text grids with headers, ENVI and raw binary are read; ImageJ, FEI and JEOL pixel sizes are found; a jet map is inverted to under 1 % of its range with off-scale pixels flagged, from a named map and from a legend drawn in the image; the workbook round trip and the calibrated profile; the extractor window saves and loads into Diffusor through both paths; a legend saved as a separate image is picked and used; the image windows fit the screen and their content can shrink. |
 | `test_writeup.py` | This document lists every module, coefficient key, citation key, dataset key and buffer that exists in the code. |
 
 ---

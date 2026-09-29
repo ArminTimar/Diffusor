@@ -354,3 +354,55 @@ def test_extractor_handles_a_colour_map_with_a_drawn_legend(app, tmp_path):
     mean = dlg.extraction.statistics()["Mean"]
     assert mean.iloc[0] > 35 and mean.iloc[-1] < 5
     dlg.close()
+
+
+def test_extractor_uses_a_legend_saved_as_a_separate_image(app, tmp_path):
+    from types import SimpleNamespace
+    from matplotlib import colormaps
+    from PIL import Image
+    from PySide6.QtWidgets import QDialogButtonBox
+    from diffusor.gui.image_extractor import ImageExtractorDialog, LegendPickerDialog
+    _, rgb = _rainbow_map()                                     # the map carries no legend
+    Image.fromarray((rgb * 255).round().astype(np.uint8)).save(tmp_path / "mg.png")
+    legend = np.ones((60, 240, 3))                              # white margin round the bar
+    legend[20:40, 20:220] = colormaps["jet"](np.linspace(0, 1, 200))[None, :, :3]
+    Image.fromarray((legend * 255).round().astype(np.uint8)).save(tmp_path / "legend.png")
+
+    from diffusor.dataio.images import load_image
+    leg = load_image(tmp_path / "legend.png")
+    picker = LegendPickerDialog(leg)
+    assert not picker.bb.button(QDialogButtonBox.Ok).isEnabled()
+    for x, y in ((20, 30), (219, 30)):
+        picker._on_click(SimpleNamespace(inaxes=picker.ax, xdata=x, ydata=y, button=1))
+    assert picker.points == [(20.0, 30.0), (219.0, 30.0)]
+    assert picker.bb.button(QDialogButtonBox.Ok).isEnabled()
+    picker.close()
+
+    dlg = ImageExtractorDialog()
+    dlg.open_image(str(tmp_path / "mg.png"))
+    dlg.cmb_mode.setCurrentIndex(dlg.cmb_mode.findData("colour_scale"))
+    dlg.sp_v1.setValue(40.0)
+    dlg.set_legend_image(leg, picker.points)
+    assert dlg.cmb_legend.currentData() == "file"
+    assert not dlg.tool_buttons["legend"].isEnabled()       # nothing to draw on the map itself
+    dlg.guideline = [START, END]
+    dlg.recompute()
+    cs = dlg.extraction.color_scale
+    assert "legend.png" in cs.source
+    truth = (_true(dlg.extraction.offset_px) - 100) / 80 * 40
+    assert np.nanmax(np.abs(dlg.extraction.statistics()["Mean"] - truth)) < 0.5
+    dlg.close()
+
+
+def test_image_windows_fit_the_screen(app):
+    from PySide6.QtGui import QGuiApplication
+    from diffusor.gui.image_calibration import ImageCalibrationDialog
+    from diffusor.gui.image_extractor import ImageExtractorDialog
+    avail = QGuiApplication.primaryScreen().availableGeometry()
+    img, _ = _edge()
+    ex = extract_profiles(_grey(img), ExtractionSettings([START, END]))
+    for dlg in (ImageExtractorDialog(), ImageCalibrationDialog(table_from_extraction(ex))):
+        assert dlg.width() <= avail.width() and dlg.height() <= avail.height()
+        # small screens: the content scrolls rather than pushing the buttons off screen
+        assert dlg.minimumSizeHint().height() < 450
+        dlg.close()

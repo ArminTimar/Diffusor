@@ -31,6 +31,36 @@ that shortcut to the desktop or taskbar if you like. If the folder is moved,
 start once with **Start Diffusor.bat** and the shortcut is remade. If the setup
 ever breaks, delete the `.venv` folder and run **Start Diffusor.bat** again.
 
+## Quick start on a Mac
+
+1. Install Python 3.10 or newer with the macOS installer from
+   [python.org](https://www.python.org/downloads/). The `python3` that comes
+   with macOS is too old.
+2. On this page, click **Code > Download ZIP**. Safari usually unpacks it;
+   otherwise double-click the ZIP in Downloads.
+3. In the Diffusor folder, double-click **Start Diffusor.command**. It opens in
+   Terminal.
+
+macOS blocks files downloaded from the internet that are not signed by a
+registered developer, so the first double-click may say the file cannot be
+opened or that Apple could not verify it. Allow it once:
+
+* **macOS 15 (Sequoia) and later:** click **Done**, open **System Settings >
+  Privacy & Security**, scroll down to the message about *Start
+  Diffusor.command* and click **Open Anyway**, then confirm.
+* **Earlier macOS:** right-click (or Control-click) the file, choose **Open**,
+  then **Open** again.
+* **Or, on any version:** open Terminal, type `bash ` (with a space), drag
+  **Start Diffusor.command** into the Terminal window and press Return.
+
+The first start sets Diffusor up in a `.venv` folder inside the Diffusor
+folder, like on Windows, and takes a few minutes with an internet connection.
+After that, **Start Diffusor.command** opens the app straight away; the
+Terminal window can be closed once Diffusor has started. To keep it in the
+Dock, right-click Diffusor's icon there while it runs and choose **Options >
+Keep in Dock**, or drag **Start Diffusor.command** to the Dock's right-hand
+side. On Linux, run `./Start\ Diffusor.command` from a terminal in the folder.
+
 ## Literature expansion and shared-duration studies
 
 The current source audit, mathematical corrections and remaining research roadmap

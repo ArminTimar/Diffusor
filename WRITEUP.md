@@ -150,6 +150,19 @@ with `icons/diffusor.ico` beside it (ignored by git), so the shortcut follows
 the folder when it is moved. `.gitattributes` keeps the file's Windows line
 endings, which cmd needs, in every checkout and GitHub ZIP.
 
+#### `Start Diffusor.command`
+The same for macOS (double-click in Finder, which runs it in Terminal) and
+Linux (run from a terminal). It looks for Python 3.10 or newer as
+`python3.14` down to `python3.10`, then `python3` and `python`, because the
+`python3` that ships with macOS is often 3.9; makes `.venv`, installs with
+`pip install -e .`, checks the import and writes the same ready marker. It
+then starts `python -m diffusor` with `nohup` in the background, so closing
+the Terminal window leaves Diffusor running. It also accepts a Windows-layout
+`.venv` (`Scripts/python.exe`), which lets it be tested in Git Bash. Git keeps
+it executable (mode 100755) and `.gitattributes` forces Unix line endings; the
+GitHub ZIP preserves both. It is not signed, so macOS Gatekeeper asks the user
+to allow it once (the README gives the steps).
+
 #### `diffusor/gui/app.py`
 Creates the `QApplication`, forces the matplotlib `QtAgg` backend before the
 window is imported, sets the application icon (`icons/diffusor.png`, which

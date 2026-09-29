@@ -16,7 +16,7 @@ published diffusion law.  It carries
 Uncertainty and Monte Carlo
 ---------------------------
 Diffusion laws are fitted as ``ln D = ln D0 - Q/RT (+ n ln fO2 + m X + ...)``.
-The fit parameters are *strongly anti-correlated*: a higher ln D0 always comes
+The fit parameters are typically *positively correlated*: a higher ln D0 comes
 with a higher Q.  Sampling them independently (as NIDIS does, Petrone et al.
 2016) inflates the uncertainty at the temperature of interest by a large
 factor.  Diffusor therefore offers three sampling modes, in order of
@@ -106,6 +106,8 @@ class Range:
     unit: str = ""
 
     def contains(self, v) -> bool:
+        if not np.all(np.isfinite(v)):
+            return False
         v = float(np.min(v)), float(np.max(v))
         if self.lo is not None and v[0] < self.lo:
             return False
@@ -152,6 +154,21 @@ class DiffusionCoefficient:
     secondary_citations: Sequence[str] = ()
     notes: str = ""
     recommended: bool = False
+    kind: str = "unspecified"  # tracer | self | chemical | interdiffusion | effective
+    model_family: str = "scalar_fickian"
+    transported_variable: str = ""
+    reference_state: str = ""
+    calibration_notes: Sequence[str] = ()
+    uncertainty_note: str = ""
+    # Independent principal laws, evaluated BEFORE projection. Ratios may vary with T.
+    principal_funcs: Dict[str, Callable] = field(default_factory=dict)
+    allowed_axes: Sequence[str] = ()
+    orientation_required: bool = False
+    fixed_temperature_K: Optional[float] = None
+
+    @property
+    def validation_level(self) -> str:
+        return "source_transcription_checked" if self.verified else "transcribed_unverified"
 
     # -- evaluation ---------------------------------------------------------
     def _values(self, overrides: Optional[Dict[str, float]] = None) -> Dict[str, float]:
@@ -162,7 +179,20 @@ class DiffusionCoefficient:
 
     def D_reference_axis(self, cond: Conditions, overrides=None):
         """D (m^2/s) along the law's reference axis, ignoring anisotropy."""
+        self._validate_conditions(cond)
         return self.func(self, cond, self._values(overrides))
+
+    def _validate_conditions(self, cond):
+        if not np.isfinite(cond.T_K) or cond.T_K <= 0:
+            raise ValueError("temperature must be finite and positive in kelvin")
+        if not np.isfinite(cond.P_Pa) or cond.P_Pa < 0:
+            raise ValueError("pressure must be finite and nonnegative in Pa")
+        if self.needs_fo2 and (cond.log_fo2_bar is None or not np.isfinite(cond.log_fo2_bar)):
+            raise ValueError(f"{self.key} requires a finite log10 fO2 (bar)")
+        if self.fixed_temperature_K is not None and not np.isclose(
+                cond.T_K, self.fixed_temperature_K, rtol=0, atol=1e-6):
+            raise ValueError(f"{self.key} is calibrated only at {self.fixed_temperature_K - 273.15:g} C; "
+                             "no temperature dependence was measured")
 
     def D(self, cond: Conditions, overrides=None):
         """D (m^2/s) along the traverse described by ``cond``.
@@ -172,6 +202,25 @@ class DiffusionCoefficient:
         Costa & Chakraborty (2004) is used.  With neither, the reference axis
         of the publication is used unchanged.
         """
+        self._validate_conditions(cond)
+        if cond.axis is not None and cond.angles_deg is not None:
+            raise ValueError("specify either an axis or direction angles, not both")
+        if self.orientation_required and cond.axis is None and cond.angles_deg is None:
+            raise ValueError(f"{self.key} requires an explicit traverse orientation")
+        if self.allowed_axes:
+            if cond.angles_deg is not None or (cond.axis and cond.axis not in self.allowed_axes):
+                raise ValueError(f"{self.key} is calibrated only for axes {tuple(self.allowed_axes)}; "
+                                 "a full diffusion tensor is unavailable")
+        if self.principal_funcs:
+            p = self._values(overrides)
+            if cond.angles_deg is not None:
+                from ..minerals.base import direction_factor
+                return direction_factor(*(self.principal_funcs[a](self, cond, p) for a in ("a", "b", "c")),
+                                        *cond.angles_deg)
+            axis = cond.axis or self.reference_axis
+            if axis not in self.principal_funcs:
+                raise ValueError(f"no principal diffusivity for axis {axis!r}")
+            return self.principal_funcs[axis](self, cond, p)
         D0 = self.D_reference_axis(cond, overrides)
         if cond.angles_deg is not None and self.axis_factors:
             from ..minerals.base import direction_factor
@@ -221,6 +270,8 @@ class DiffusionCoefficient:
             return "covariance"
         if self.sigma_logD is not None:
             return "logD_at_T"
+        if not any(p.sigma > 0 for p in self.params.values()):
+            return "none"
         return "independent"
 
     def D_sampled(self, cond: Conditions, overrides: Dict[str, float]):
@@ -234,19 +285,22 @@ class DiffusionCoefficient:
     def check_conditions(self, cond: Conditions) -> List[str]:
         """Warnings for conditions outside the published calibration range."""
         w: List[str] = []
-        if self.T_range.lo is not None and not self.T_range.contains(cond.T_K):
+        if not self.T_range.contains(cond.T_K):
             w.append(f"T = {cond.T_K:.0f} K is outside the calibration range "
                      f"({self.T_range}) of {cite(self.citation)}")
-        if cond.log_fo2_bar is not None and self.fo2_range.lo is not None:
-            lf = cond.log_fo2_Pa if self.fo2_unit == "Pa" else cond.log_fo2_bar
+        if cond.log_fo2_bar is not None:
+            lf = (cond.log_fo2_Pa if self.fo2_unit == "Pa" else
+                  cond.log_fo2_bar - np.log10(1.01325) if self.fo2_unit == "atm" else cond.log_fo2_bar)
             if not self.fo2_range.contains(lf):
                 w.append(f"log fO2 = {lf:.2f} ({self.fo2_unit}) is outside the calibration "
                          f"range ({self.fo2_range}) of {cite(self.citation)}")
-        if self.P_range.hi is not None and not self.P_range.contains(cond.P_Pa):
+        if not self.P_range.contains(cond.P_Pa):
             w.append(f"P = {cond.P_Pa/1e9:.2f} GPa is outside the calibration range "
                      f"({self.P_range}) of {cite(self.citation)}")
         for key in self.requires:
-            if key in cond.X and self.X_range.lo is not None:
+            if key not in cond.X:
+                w.append(f"{self.key}: host composition {key} was not supplied; inspect the reference state before interpreting this fit.")
+            if key in cond.X and (self.X_range.lo is not None or self.X_range.hi is not None):
                 if not self.X_range.contains(cond.X[key]):
                     w.append(f"{key} is outside the calibration range ({self.X_range}) "
                              f"of {cite(self.citation)}")
@@ -256,6 +310,12 @@ class DiffusionCoefficient:
         if self.superseded_by:
             w.append(f"SUPERSEDED: a newer calibration exists -- {cite(self.superseded_by)}. "
                      f"{self.superseded_note}")
+        w.extend(self.calibration_notes)
+        if self.uncertainty_note:
+            w.append(self.uncertainty_note)
+        if self.reference_axis and not cond.axis and cond.angles_deg is None:
+            w.append(f"Orientation unspecified: using the published {self.reference_axis} direction; "
+                     "this is not an orientation average.")
         return w
 
     def describe(self) -> str:
@@ -266,6 +326,19 @@ class DiffusionCoefficient:
                  f"  equation        : {self.equation_number or '(unnumbered)'}",
                  f"     {self.equation_text}",
                  f"  D units         : m^2/s"]
+        lines.extend([f"  coefficient kind: {self.kind}", f"  model family    : {self.model_family}",
+                      f"  validation      : {self.validation_level}"])
+        if self.transported_variable:
+            lines.append(f"  state variable  : {self.transported_variable}")
+        if self.reference_state:
+            lines.append(f"  reference state : {self.reference_state}")
+        if self.principal_funcs:
+            lines.append("  anisotropy      : independent temperature-dependent principal laws")
+        if self.allowed_axes:
+            lines.append(f"  measured axes   : {', '.join(self.allowed_axes)} (no tensor inferred)")
+        lines.extend(f"  limitation      : {s}" for s in self.calibration_notes)
+        if self.uncertainty_note:
+            lines.append(f"  uncertainty     : {self.uncertainty_note}")
         if self.needs_fo2:
             lines.append(f"  fO2 unit in law : {self.fo2_unit}")
         if self.params:

@@ -16,8 +16,8 @@ Choosing the geometry is a petrological decision, not a numerical one.  A
 traverse from rim to core of a prismatic crystal that is long compared with
 the diffusion length is a plane-sheet problem; a small equant crystal that has
 equilibrated from all sides is better described as a sphere.  Modelling a 3-D
-crystal as 1-D always *over*-estimates the time, and sectioning effects add
-further bias (Costa et al. 2008; Shea et al. 2015; Krimer & Costa 2017).
+crystal as 1-D can bias the inferred time; neither the magnitude nor the sign
+is universal, and sectioning introduces further uncertainty (Costa et al. 2008; Shea et al. 2015; Krimer & Costa 2017).
 """
 from __future__ import annotations
 

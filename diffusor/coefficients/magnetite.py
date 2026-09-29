@@ -77,6 +77,7 @@ for _sp in ("Ti", "Fe", "Mn", "Co", "Cr", "Al"):
     _add(DiffusionCoefficient(
         key=f"mt_{_sp}_vanorman_crispin2010",
         mineral="magnetite", species=_sp,
+        kind="tracer", transported_variable=f"{_sp} tracer concentration",
         label=f"Magnetite {_sp} tracer diffusion, Van Orman & Crispin (2010) Table 12",
         citation="vanorman_crispin2010",
         equation_number="Table 12",
@@ -171,12 +172,20 @@ def _make_sievwright_func(species: str, scale_with_table12: bool):
     return _f
 
 
-for _sp in ("Ti", "Mn", "Co", "Cr", "Al", "Mg"):
+for _sp in SIEVWRIGHT_TABLE5:
     _scaled = _sp in TABLE12_PURE
     _lv, _li, _lfmin, _ldmin = SIEVWRIGHT_TABLE5[_sp]
     _add(DiffusionCoefficient(
         key=f"mt_{_sp}_sievwright2020",
         mineral="magnetite", species=_sp,
+        kind="effective" if _scaled else "chemical",
+        transported_variable=f"{_sp} concentration",
+        reference_state="1150 C, magnetite equilibrated with silicate melt, 1 bar",
+        fixed_temperature_K=None if _scaled else SIEVWRIGHT_T_K,
+        calibration_notes=(("HYPOTHESIS: temperature dependence borrowed from different tracer experiments. "
+                            "Sievwright et al. measured only 1150 C; use the 1150 C-only entry for the original law.",)
+                           if _scaled else ("Single-temperature law: only 1150 C is supported.",)),
+        uncertainty_note="The 0.2 log10 D sampling width is an assumed representative error, not a published fit covariance.",
         label=(f"Magnetite {_sp}, Sievwright et al. (2020) at 1150 C"
                + (", T-scaled with Table 12" if _scaled else ", 1150 C ONLY")),
         citation="sievwright2020",
@@ -191,8 +200,7 @@ for _sp in ("Ti", "Mn", "Co", "Cr", "Al", "Mg"):
         params={},
         sigma_logD=0.2,
         needs_fo2=True, fo2_unit="bar",
-        T_range=(Range(1273.15, 1573.15, "K (anchored at 1150 C. T dependence borrowed)")
-                 if _scaled else Range(1423.15, 1423.15, "K (1150 C only)")),
+        T_range=Range(1423.15, 1423.15, "K (1150 C only; other temperatures are hypothetical)"),
         P_range=Range(1.0e5, 1.0e5, "Pa (1 bar)"),
         fo2_range=Range(-9.9, -4.0, "log10 bar (FMQ-1 to FMQ+4.89 at 1150 C)"),
         verified=True,
@@ -216,11 +224,25 @@ for _sp in ("Ti", "Mn", "Co", "Cr", "Al", "Mg"):
                   "to within 0.5 log units for Ti, Mn and Co and within 0.4 for Cr above "
                   "FMQ+2. Al differs by up to 2 log units at FMQ-1. Far from 1150 C the result "
                   "rests on the borrowed energies." if _scaled else
-                  "There is no published temperature dependence for Mg in magnetite, so this "
-                  "entry returns the 1150 C value at every temperature and Diffusor warns "
-                  "whenever T is not 1150 C. Use it only for experiments or checks at that "
-                  "temperature. Tomiya et al. (2013) instead set D_Mg = D_Fe.")),
+                  "No temperature dependence was measured; evaluating this entry away from "
+                  "1150 C raises an error. V3+ and V4+ rows describe the same fitted V data, "
+                  "not two independently calibrated transport fields.")),
     ))
+
+# Preserve the old hypothesis keys for reproducibility, but also expose the
+# measured fixed-temperature laws for the five species previously T-scaled.
+from dataclasses import replace as _replace
+for _c in list(COEFFICIENTS):
+    if _c.key.endswith("_sievwright2020") and _c.species in TABLE12_PURE:
+        _add(_replace(
+            _c, key=_c.key + "_1150", label=f"Magnetite {_c.species}, Sievwright (2020), 1150 C ONLY",
+            func=_make_sievwright_func(_c.species, False), fixed_temperature_K=SIEVWRIGHT_T_K,
+            kind="chemical", secondary_citations=(),
+            equation_text=_c.equation_text.split(". Away from")[0],
+            verified_from="Primary PDF eq. 5 and Table 5, measured at 1150 C only",
+            calibration_notes=("Single-temperature law; no activation energy was measured.",),
+            notes="Original fixed-temperature fit, without Diffusor's legacy temperature-scaling hypothesis.",
+        ))
 
 
 # --- Fe-Ti interdiffusion ---------------------------------------------------

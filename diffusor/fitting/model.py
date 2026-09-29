@@ -50,6 +50,8 @@ class DiffusionModel:
     x_grid: Optional[np.ndarray] = None
     composition_dependent: bool = True
     comp_key: Optional[str] = None       # which X key the profile itself is
+    comp_scale: float = 1.0             # C -> coefficient's composition coordinate
+    comp_offset: float = 0.0
     an_profile: Optional[np.ndarray] = None       # plagioclase X_An on the grid
     activity_theta: float = 0.0                   # A_i/(RT) for the plag term
     force_numerical: bool = False
@@ -57,6 +59,13 @@ class DiffusionModel:
     # the closed-form step solution assumes (Crank 1975 eq. 2.14). False when an end
     # is a real crystal rim or centre and its boundary condition matters.
     boundaries_far: bool = True
+
+    def __post_init__(self):
+        if self.coefficient.model_family != "scalar_fickian":
+            raise ValueError("DiffusionModel requires a scalar Fickian coefficient; use the appropriate coupled solver")
+
+    def _composition(self, C):
+        return self.comp_offset + self.comp_scale * np.asarray(C, dtype=float)
 
     # -- grid ---------------------------------------------------------------
     def grid(self, x_data) -> np.ndarray:
@@ -70,7 +79,7 @@ class DiffusionModel:
         cond = self.conditions.replace(T_K=T_K)
         if self.composition_dependent and self.comp_key:
             X = dict(cond.X)
-            X[self.comp_key] = C_nodes
+            X[self.comp_key] = self._composition(C_nodes)
             cond = cond.replace(X=X)
         D = self.coefficient.D_sampled(cond, overrides or {})
         return np.asarray(D, dtype=float) * M2_PER_S_TO_UM2_PER_S
@@ -80,7 +89,7 @@ class DiffusionModel:
         cond = self.conditions
         if self.composition_dependent and self.comp_key and C_ref is not None:
             X = dict(cond.X)
-            X[self.comp_key] = C_ref
+            X[self.comp_key] = self._composition(C_ref)
             cond = cond.replace(X=X)
         return float(np.mean(np.atleast_1d(self.coefficient.D_sampled(cond, overrides or {}))))
 
@@ -88,6 +97,8 @@ class DiffusionModel:
     def can_use_analytical(self) -> Tuple[bool, str]:
         if self.force_numerical:
             return False, "you asked for the numerical solver"
+        if callable(self.bc_left.value) or callable(self.bc_right.value):
+            return False, "boundary concentrations vary with time"
         if not self.boundaries_far:
             return False, "an end of the profile is a crystal rim or centre"
         if self.composition_dependent and self.comp_key:
@@ -125,7 +136,7 @@ class DiffusionModel:
 
     def _effective_Dt(self, t_seconds: float, overrides=None, C_ref=None) -> float:
         """Dt in um^2, integrating over the thermal history if there is one."""
-        if self.history is None or self.history.is_isothermal:
+        if self.history is None:
             return self.D_bulk(overrides, C_ref) * M2_PER_S_TO_UM2_PER_S * t_seconds
         hist = self.history.shifted_to_end(t_seconds)
 
@@ -133,9 +144,9 @@ class DiffusionModel:
             out = []
             for T in np.atleast_1d(T_array):
                 cond = self.conditions.replace(T_K=float(T))
-                if self.comp_key and C_ref is not None:
+                if self.composition_dependent and self.comp_key and C_ref is not None:
                     X = dict(cond.X)
-                    X[self.comp_key] = C_ref
+                    X[self.comp_key] = self._composition(C_ref)
                     cond = cond.replace(X=X)
                 out.append(float(np.mean(np.atleast_1d(
                     self.coefficient.D_sampled(cond, overrides or {})))))
@@ -164,6 +175,9 @@ class DiffusionModel:
     # -- diagnostics ---------------------------------------------------------
     def warnings(self, t_seconds: Optional[float] = None) -> List[str]:
         w = list(self.coefficient.check_conditions(self.conditions))
+        if self.history is not None:
+            for T in np.unique(self.history.temps_K):
+                w.extend(self.coefficient.check_conditions(self.conditions.replace(T_K=float(T))))
         if t_seconds is not None and self.beam_sigma_um > 0:
             Dt = self._effective_Dt(t_seconds)
             msg = resolution_warning(Dt, self.beam_sigma_um)
@@ -182,7 +196,6 @@ class DiffusionModel:
                         "assumption is breaking down. Measure a longer traverse or model the "
                         "whole crystal with an explicit geometry.")
         if self.geometry.kind == "plane":
-            w.append("1-D modelling of a 3-D crystal gives a maximum estimate of the time. "
-                     "Sectioning can bias it further (Shea et al. 2015, "
-                     "Krimer & Costa 2017).")
-        return w
+            w.append("1-D modelling can be biased by 3-D geometry and section orientation; "
+                     "it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017).")
+        return list(dict.fromkeys(w))

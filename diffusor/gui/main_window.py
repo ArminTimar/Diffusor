@@ -93,6 +93,7 @@ SAMPLING_MODES = [
     ("covariance", "Correlated D0 and Q"),
     ("logD_at_T", "Scatter of log D at the temperature"),
     ("independent", "Each parameter independently"),
+    ("none", "Hold coefficient parameters fixed"),
 ]
 
 
@@ -386,6 +387,7 @@ class MainWindow(QMainWindow):
         for text, fn in (("Load profile...", self.load_file),
                          ("Extract profile from image...", self.show_image_extractor),
                          ("Export results...", self.export_results),
+                         ("Shared-duration study...", self.show_joint_study),
                          (None, None),
                          ("Quit", self.close)):
             if text is None:
@@ -555,6 +557,14 @@ class MainWindow(QMainWindow):
         self.chk_comp_dep.setChecked(True)
         self.chk_comp_dep.toggled.connect(self._update_solver_note)
         xbody.addWidget(self.chk_comp_dep)
+        self.cmb_ol_coordinate = QComboBox()
+        for text, data in (("Fe fraction: XFe", (1., 0.)),
+                           ("Forsterite fraction: XFo", (-1., 1.)),
+                           ("Forsterite mol%: Fo", (-.01, 1.))):
+            self.cmb_ol_coordinate.addItem(text, data)
+        self.cmb_ol_coordinate.setToolTip("Defines how measured olivine Fe-Mg values map to XFe in the diffusion law.")
+        self.cmb_ol_coordinate.currentIndexChanged.connect(self._update_solver_note)
+        xbody.addWidget(self.cmb_ol_coordinate)
         self.lbl_comp = note("", "Hint")
         xbody.addWidget(self.lbl_comp)
         return page_columns([c, x], [o], top=[self._prefill_bar(1)])
@@ -757,6 +767,7 @@ class MainWindow(QMainWindow):
                           "reports about its fit. D0 and Q stay on the published line."),
             "independent": ("Ignores the correlation between D0 and Q and overstates the "
                             "uncertainty. Use it only to reproduce older estimates."),
+            "none": "Coefficient parameters are held fixed. Their uncertainty is not propagated.",
         }
         if mode == "auto":
             if coef is None:
@@ -764,9 +775,10 @@ class MainWindow(QMainWindow):
             else:
                 best = coef.default_sampling_mode()
                 detail = {"covariance": "correlated D0 and Q",
-                          "logD_at_T": f"the scatter of log D, {coef.sigma_logD:g} log units",
+                          "logD_at_T": f"the scatter of log D, {coef.sigma_logD} log units",
                           "independent": "each parameter independently, because the paper "
-                                         "gives neither a covariance nor a scatter"}[best]
+                                         "gives neither a covariance nor a scatter",
+                          "none": "fixed coefficient parameters; coefficient uncertainty is not quantified"}[best]
                 text = f"For {name} this is {detail}."
         else:
             text = texts[mode]
@@ -1158,6 +1170,7 @@ class MainWindow(QMainWindow):
             i = cmb.findData(s.get(key, "far"))
             cmb.setCurrentIndex(i if i >= 0 else 0)
         self.chk_comp_dep.setChecked(bool(s.get("composition_dependent", False)))
+        self.cmb_ol_coordinate.setCurrentIndex(s.get("olivine_coordinate", 0))
         if "x_composition" in s:
             self.sp_xcomp.setValue(s["x_composition"])
         want = s.get("coefficient")
@@ -1215,7 +1228,8 @@ class MainWindow(QMainWindow):
         mineral = get_mineral(self.cmb_mineral.currentData())
         self.cmb_species.blockSignals(True)
         self.cmb_species.clear()
-        self.cmb_species.addItems(mineral.species_keys())
+        self.cmb_species.addItems([sp for sp in mineral.species_keys()
+                                   if list_coefficients(mineral.key, sp)])
         self.cmb_species.blockSignals(False)
         self.cmb_axis.setEnabled(not mineral.isotropic)
         self.lbl_axis.setText("Treated as isotropic, so the direction does not matter."
@@ -1296,6 +1310,11 @@ class MainWindow(QMainWindow):
         self.lbl_comp.setText("" if needed else
                               f"{cite(coef.citation)} has no composition term, so this value "
                               "does not enter the model.")
+        ol_exchange = coef is not None and coef.mineral == "olivine" and coef.species == "Fe-Mg"
+        self.cmb_ol_coordinate.setVisible(ol_exchange)
+        if needed and coef:
+            self.lbl_comp.setText("Host composition required by this law: " + ", ".join(coef.requires) +
+                                 ". Use mole fractions. Trace-element concentration is a separate variable.")
 
     def _update_unused_note(self):
         keys = self._checked_keys() if self.lst_coef.count() else []
@@ -1455,7 +1474,7 @@ class MainWindow(QMainWindow):
         lf = (log_fo2_from_delta(self.cmb_buffer.currentText(), self.sp_dbuf.value(), T, P)
               if self.cmb_fo2_mode.currentIndex() == 0 else self.sp_dbuf.value())
         mineral = get_mineral(self.cmb_mineral.currentData())
-        X = {mineral.composition_variable.key: self.sp_xcomp.value()}
+        X = {}
         for k in coef.requires:
             X.setdefault(k, self.sp_xcomp.value())
         axis = {1: "a", 2: "b", 3: "c"}.get(self.cmb_axis.currentIndex())
@@ -1496,7 +1515,12 @@ class MainWindow(QMainWindow):
         bcr = self._boundary(self.cmb_bcr, c_right)
         hist = (ThermalHistory.linear(cond.T_K, self.sp_Tend.value() + 273.15, 1.0)
                 if self.chk_cooling.isChecked() else None)
-        comp_key = mineral.composition_variable.key if self.chk_comp_dep.isChecked() else None
+        exchange = species in ("Fe-Mg", "Fe-Ti", "NaSi-CaAl", "Na-K")
+        comp_key = mineral.composition_variable.key if self.chk_comp_dep.isChecked() and exchange else None
+        comp_scale, comp_offset = 1.0, 0.0
+        if mineral.key == "olivine" and species == "Fe-Mg":
+            comp_scale, comp_offset = self.cmb_ol_coordinate.currentData()
+            comp_key = "XFe" if self.chk_comp_dep.isChecked() else None
         if comp_key and comp_key not in coef.requires:
             comp_key = None
 
@@ -1516,6 +1540,7 @@ class MainWindow(QMainWindow):
             bc_left=bcl, bc_right=bcr, history=hist,
             beam_sigma_um=self.sp_beam.value(), n_nodes=n_nodes, x_grid=x_grid,
             comp_key=comp_key, composition_dependent=bool(comp_key),
+            comp_scale=comp_scale, comp_offset=comp_offset,
             an_profile=an_grid, activity_theta=theta if an_grid is not None else 0.0,
             force_numerical=self.cmb_solver.currentIndex() == 1,
             boundaries_far=self._boundaries_far())
@@ -1586,6 +1611,11 @@ class MainWindow(QMainWindow):
         self._log("stop requested")
 
     def closeEvent(self, event):
+        if hasattr(self, "joint_study") and self.joint_study.thread is not None and self.joint_study.thread.isRunning():
+            self.joint_study.abort()
+            self._status("Cancelling the joint study. Close once its current calculation finishes.")
+            event.ignore()
+            return
         self.stop_work()
         for t, _ in self._jobs:
             t.quit()
@@ -1810,6 +1840,13 @@ class MainWindow(QMainWindow):
             return
         c = get_coefficient(it.data(Qt.UserRole))
         richtext.show(self, c.label, richtext.coefficient_html(c), 860, 700)
+
+    def show_joint_study(self):
+        from .joint_study import JointStudyDialog
+        if not hasattr(self, "joint_study"):
+            self.joint_study = JointStudyDialog(self)
+        self.joint_study.show()
+        self.joint_study.raise_()
 
     def export_results(self):
         if self.fit_result is None:

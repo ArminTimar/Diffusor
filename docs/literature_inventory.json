@@ -1,0 +1,638 @@
+[
+  {
+    "file": "aragon_etal_1984_titanomagnetite_cation.pdf",
+    "sha256": "1a810357e9c981182c0d6fe1e2ca27da9ed0081af8097b388dc22fa39aa5603d",
+    "pages": 12,
+    "extracted_characters": 128622
+  },
+  {
+    "file": "audedat_grocolas_mutch_2025_manuscript_ti_quartz_sr_ba_mg_feldspars.pdf",
+    "sha256": "be661dc73d6cf78d0103153ece2d102ed3ac084a4f8b5bc5d964ee73997c6cca",
+    "pages": 79,
+    "extracted_characters": 171182
+  },
+  {
+    "file": "barton_etal_1982_vulsini_cpx_zoning.pdf",
+    "sha256": "59382c0a466a412ed5f679132df500d61d5e51447afff1bc799dc5b93918af27",
+    "pages": 28,
+    "extracted_characters": 84225
+  },
+  {
+    "file": "bernard_costa_2024_magma_ascent_diffusion.pdf",
+    "sha256": "8356f87272b98707987e884468a231a4aba272f64dff4f48556570050815ce3f",
+    "pages": 13,
+    "extracted_characters": 123982
+  },
+  {
+    "file": "blackburn_etal_2012_rutile_zr.pdf",
+    "sha256": "8ebf6fd84443e18a89335e1da81a9ab75228195531fb580e6d0b830d036c8f1d",
+    "pages": 10,
+    "extracted_characters": 170783
+  },
+  {
+    "file": "bloch_etal_2022_zircon_ti_anisotropy.pdf",
+    "sha256": "b1153024a052d8e2c7394bd0accda11737fedd2f3d9fcab6066126b71078b8aa",
+    "pages": 15,
+    "extracted_characters": 173608
+  },
+  {
+    "file": "borinski_etal_2012_garnet_multicomponent_femg.pdf",
+    "sha256": "ad9a5cabefb559684632ea181e9332a170ee46aa20be4ccd29ad6183eba813b5",
+    "pages": 16,
+    "extracted_characters": 331893
+  },
+  {
+    "file": "bradshaw_kent_2017_analytical_limits_short_timescales.pdf",
+    "sha256": "8bf342a13108ee2c8327bf9d917a21daa6d80c3850413cba79c6122c121d3ae7",
+    "pages": 11,
+    "extracted_characters": 226698
+  },
+  {
+    "file": "brady_mccallister_1983_cpx_self_diffusion.pdf",
+    "sha256": "f2623e1f44b1d31e5a4ab31756e6b95e15fc4e8a1c42d3e22211a4a61f40f04b",
+    "pages": 11,
+    "extracted_characters": 63374
+  },
+  {
+    "file": "burgisser_bergantz_2011_magma_remobilization.pdf",
+    "sha256": "fd9cea76ccd03e0812dafb189eda15497efc61c8bf95562a6f8e9f49e2103fa4",
+    "pages": 6,
+    "extracted_characters": 133976
+  },
+  {
+    "file": "carlson_2006_garnet_fe_mg_mn_ca.pdf",
+    "sha256": "a2658b1db03ee9ba9f9ef65c1f898c1a1b0072cdc4eb6968b207487896f24a8f",
+    "pages": 11,
+    "extracted_characters": 99809
+  },
+  {
+    "file": "chakraborty_1997_femg_olivine.pdf",
+    "sha256": "14012600643c88d01c7a261b8781c526f9341862a2c8d1ecd37f5b7210388363",
+    "pages": 15,
+    "extracted_characters": 116927
+  },
+  {
+    "file": "chakraborty_dohmen_2022_looking_forward.pdf",
+    "sha256": "bfacfb82938fabb30c73908206e612fc35cc987dd1bf507a96fdc1c831e0b5b9",
+    "pages": 9,
+    "extracted_characters": 76747
+  },
+  {
+    "file": "chakraborty_ganguly_1992_aluminosilicate_garnet_cation.pdf",
+    "sha256": "da19fab41d23e561606ed119c56fb3821699825268b7fc5ed44008bb88e91298",
+    "pages": 13,
+    "extracted_characters": 125603
+  },
+  {
+    "file": "chamberlain_etal_2014_bishop_tuff_diffusion.pdf",
+    "sha256": "65a20d646e0336d86aafcb9345ab10f59af454f1340061ec6d99c5be983da586",
+    "pages": 24,
+    "extracted_characters": 425120
+  },
+  {
+    "file": "chen_chu_2024_garnet_low_t_calibration.pdf",
+    "sha256": "746ce504305f8b24a81d835bd0b6f4ed0c5c2fd31dc8843720cad073073235cc",
+    "pages": 23,
+    "extracted_characters": 279956
+  },
+  {
+    "file": "cherniak_1993_titanite_pb.pdf",
+    "sha256": "5ce7871fa6c2a1a0cb5fa7406e239ebc45a8cf5be024ccbd5f7a972af252b973",
+    "pages": 18,
+    "extracted_characters": 106841
+  },
+  {
+    "file": "cherniak_1995_titanite_sr_nd.pdf",
+    "sha256": "4da74e78edffacec3052ba2a2700e3afdaf280216e6747e6995c7877dfd7f13a",
+    "pages": 14,
+    "extracted_characters": 100732
+  },
+  {
+    "file": "cherniak_1996_sr_feldspar.pdf",
+    "sha256": "2b707f4be2999c0f13dce087b40b650fe5ed960b1a93c704bca1477d65ed2f0d",
+    "pages": 7,
+    "extracted_characters": 58981
+  },
+  {
+    "file": "cherniak_2000_apatite_ree.pdf",
+    "sha256": "15026c8c82778cc818a2d27631a0de83c691b86f4058f2a6a93678310c448df7",
+    "pages": 15,
+    "extracted_characters": 337462
+  },
+  {
+    "file": "cherniak_2002_ba_feldspar.pdf",
+    "sha256": "f96fa4caf8c49d710cd6e1d724500d2453bc6c76f00645bddb0e83ce9cdb5462",
+    "pages": 10,
+    "extracted_characters": 220644
+  },
+  {
+    "file": "cherniak_2006_titanite_zr.pdf",
+    "sha256": "6f1d9db0d20077292df94ab95db8a878928d3076613fb1b53f80e4e935ec33d5",
+    "pages": 9,
+    "extracted_characters": 184166
+  },
+  {
+    "file": "cherniak_2006_xenotime_pb_ree.pdf",
+    "sha256": "2143f81d95bf0a8992b2b4317acd6176e24db23446711ff6b6c1632745ec8b50",
+    "pages": 14,
+    "extracted_characters": 210023
+  },
+  {
+    "file": "cherniak_2010_cation_diffusion_feldspar.pdf",
+    "sha256": "0b790031fa904f8be597238ff1e7e53beab42e616cfcc53a33d54eae24b734b8",
+    "pages": 44,
+    "extracted_characters": 733635
+  },
+  {
+    "file": "cherniak_etal_1991_apatite_zircon_pb_ion_rutherford.pdf",
+    "sha256": "b4d676b9cad4858b4b08c2f81352e4143e12d5a0a51d62f069a9570d09e8fdea",
+    "pages": 11,
+    "extracted_characters": 104705
+  },
+  {
+    "file": "cherniak_etal_1997_zircon_ree.pdf",
+    "sha256": "d6504977d5214a892c5b1c6c0d4a560a1e5240a8ee3ff66c043b7e2d5913b21e",
+    "pages": 13,
+    "extracted_characters": 84581
+  },
+  {
+    "file": "cherniak_etal_2004_monazite_pb.pdf",
+    "sha256": "734982972bc6c3c44c2945bbf7a8f0d880ad1bdefbb697888f8849b6b8d28f82",
+    "pages": 12,
+    "extracted_characters": 273205
+  },
+  {
+    "file": "cherniak_etal_2007_quartz_ti.pdf",
+    "sha256": "37ba5a21b1a4d5a28d31953952198fdb2f74e767db55f4f8448b7f4c468f7c84",
+    "pages": 10,
+    "extracted_characters": 139236
+  },
+  {
+    "file": "cherniak_etal_2007_rutile_zr_hf.pdf",
+    "sha256": "552aa78db0cd76ed5c09529f022f8519b0a3f0bacadc1c30526444bceac9a26e",
+    "pages": 13,
+    "extracted_characters": 224937
+  },
+  {
+    "file": "cherniak_ryerson_1993_apatite_sr_rutherford.pdf",
+    "sha256": "e71ad6b531fd90ef23f33e8b7b030b2a3067da9a1e1f1b2d64b8e82c896ac0c7",
+    "pages": 10,
+    "extracted_characters": 87589
+  },
+  {
+    "file": "cherniak_watson_1994_sr_plagioclase.pdf",
+    "sha256": "d7ed02b8ca8cf31c85aee9f617ec9864cd3afb0398273358f3e4a596f1dc657d",
+    "pages": 12,
+    "extracted_characters": 109929
+  },
+  {
+    "file": "cherniak_watson_2001_zircon_pb.pdf",
+    "sha256": "00ec39a554363baed98fc856bc79fe3929c7af3cf1f4123aa51fa353e20b20b3",
+    "pages": 20,
+    "extracted_characters": 349582
+  },
+  {
+    "file": "cherniak_watson_2007_zircon_ti.pdf",
+    "sha256": "4cbefc41c5b1371b4be04b928d53b7e7d405496cd279d3bc3b0fd404385cdc37",
+    "pages": 14,
+    "extracted_characters": 219469
+  },
+  {
+    "file": "cherniak_watson_2010_zircon_li.pdf",
+    "sha256": "372b3b31f4917d631448751a2a7d6e55a1dc5684d17621378be850ac2a6224e7",
+    "pages": 8,
+    "extracted_characters": 182972
+  },
+  {
+    "file": "cherniak_watson_2020_ti_feldspar.pdf",
+    "sha256": "ea645bc6f485ad0461902829e9a3d90a08460687d6e294ddf5e99b548cbacf06",
+    "pages": 12,
+    "extracted_characters": 172924
+  },
+  {
+    "file": "coogan_etal_2005_olivine_ca.pdf",
+    "sha256": "82be823d9c5d5d2eac2e522cb89a47c39b36806846ac904941f358c250ac10d6",
+    "pages": 12,
+    "extracted_characters": 268766
+  },
+  {
+    "file": "costa_2021_clocks_magmatic_rocks.pdf",
+    "sha256": "ed7269d1d06727065da4fdc30a75a3ba070941561b90bb4e85f479b50738da46",
+    "pages": 22,
+    "extracted_characters": 145154
+  },
+  {
+    "file": "costa_chakraborty_2004_olivine_mafic_silicic.pdf",
+    "sha256": "c3d8c946e170852aa756a9ab6a0f922941d6aac56783d01b2b4d4efe5642783a",
+    "pages": 14,
+    "extracted_characters": 243074
+  },
+  {
+    "file": "costa_chakraborty_dohmen_2003_diffusion_coupling_major_trace.pdf",
+    "sha256": "eda951e98078c70525f6f4fbc2365b629b60b84dde6fa288397cceed8b8d6f23",
+    "pages": 12,
+    "extracted_characters": 212797
+  },
+  {
+    "file": "costa_etal_2008_time_scales.pdf",
+    "sha256": "ea01c51a69d5d9d6c09beb0e3d91bfe0da757d7ccfb9785f6245253b3200c317",
+    "pages": 50,
+    "extracted_characters": 449462
+  },
+  {
+    "file": "crank_1975_mathematics_of_diffusion.pdf",
+    "sha256": "b63c03dea8b20512db38cd7cd987f251e8a1818b59086f3b8a41054aa31b5270",
+    "pages": 421,
+    "extracted_characters": 1036698
+  },
+  {
+    "file": "dias_dohmen_2024_opx_fe_content_diffusion.pdf",
+    "sha256": "59594022e22a3dddb23cdc4288a7bb9b768cea09f9545ff60576db19c7599ac9",
+    "pages": 21,
+    "extracted_characters": 402285
+  },
+  {
+    "file": "dias_dohmen_2025_opx_eu_ce_lu.pdf",
+    "sha256": "21e184f54251dc729fb5178764e41dd7147394dd4a614b9feae693f07828630d",
+    "pages": 16,
+    "extracted_characters": 168836
+  },
+  {
+    "file": "dias_dohmen_2025_opx_femg_interdependencies.pdf",
+    "sha256": "6df90568b9027b51c3617149216e60e4cf7b0c25086cc14ac6c466428367f904",
+    "pages": 17,
+    "extracted_characters": 202670
+  },
+  {
+    "file": "Diffusor helpers/deer_howie_zussman_2013_rock_forming_minerals.pdf",
+    "sha256": "1799703dd2ba54ffa12a26485cb95db71b06b92868500dfd06b6695f47d4beef",
+    "pages": 506,
+    "extracted_characters": 10906843
+  },
+  {
+    "file": "Diffusor helpers/ganguly_battacharya_chakraborty_1988_convolution.pdf",
+    "sha256": "c3dffd641e794a1c3cffd2466f2a4da9c75f42f672b1ebb8bf5622dcf69135a3",
+    "pages": 9,
+    "extracted_characters": 49742
+  },
+  {
+    "file": "Diffusor helpers/lindsley_etal_1991_oxides_significance_fo2.pdf",
+    "sha256": "12cd27a32f2041c1fb1b7e1ef4f16cc06b0d775f640fcd9bd622d81a4fb37f45",
+    "pages": 524,
+    "extracted_characters": 13514
+  },
+  {
+    "file": "Diffusor helpers/oneill_1987_fo2.pdf",
+    "sha256": "0a39f3466cbb641b26456fff2372f0590217b524133a1fa8476ba09b129f509b",
+    "pages": 9,
+    "extracted_characters": 66450
+  },
+  {
+    "file": "Diffusor helpers/oneill_pownceby_1993_redox1.pdf",
+    "sha256": "289dcb651efe4a9debd23df9b8ad34daeb3a17616cb5e8eb1f046860c64d3244",
+    "pages": 19,
+    "extracted_characters": 178032
+  },
+  {
+    "file": "Diffusor helpers/oneill_pownceby_1993_redox2.pdf",
+    "sha256": "8f2a7d2bf841ba459c77521d6cc4914574b203afc6f476d36d4cc63f96b3c708",
+    "pages": 6,
+    "extracted_characters": 52778
+  },
+  {
+    "file": "Diffusor helpers/oneill_wall_1987_upper_mantle_fo2.pdf",
+    "sha256": "012a46d4e334014ecd586cf37b453333e69ee542d027dcf50e344a6bf997e1a7",
+    "pages": 23,
+    "extracted_characters": 101905
+  },
+  {
+    "file": "dimanov_sautter_2000_femg_interdiffusion_diopside.pdf",
+    "sha256": "55c64fdfb583fa24600a3d6210382b6a4bbd7ec21c15f319e34da09d3fdd835b",
+    "pages": 12,
+    "extracted_characters": 77299
+  },
+  {
+    "file": "dohmen_chakraborty_2007_olivine_2_tamed_ped.pdf",
+    "sha256": "6fcf66bca2134f4e3110260203ecb4c887abc5731f9d06663225809e5e528d1d",
+    "pages": 22,
+    "extracted_characters": 514725
+  },
+  {
+    "file": "dohmen_chakraborty_becker_2007_olivine_1.pdf",
+    "sha256": "47eed7bd78ea5e404e5a7403a3a05e0fd834d35eca2cf17a2792dc9b67fdccf9",
+    "pages": 19,
+    "extracted_characters": 460900
+  },
+  {
+    "file": "dohmen_etal_2010_olivine_li.pdf",
+    "sha256": "f98932dee10b5e5b72e66ceadb7a50c4adf5cbb0c6e6003389c126f890dcfa18",
+    "pages": 19,
+    "extracted_characters": 343247
+  },
+  {
+    "file": "dohmen_etal_2016_fe-mg_orthopyroxene.pdf",
+    "sha256": "17c1c4f941e01ec484fa4b01b7efff6e7985bd8896c762f2523128be7884ba13",
+    "pages": 12,
+    "extracted_characters": 185028
+  },
+  {
+    "file": "dohmen_faak_blundy_2017_oliv_px_plag.pdf",
+    "sha256": "4b69fdaf96b82c9600b32ad57b2e9b4361955e055931d7866b7ac37f65b0a0af",
+    "pages": 42,
+    "extracted_characters": 260677
+  },
+  {
+    "file": "druitt_etal_2012_santorini_diffusion.pdf",
+    "sha256": "7478b242e3bc978780de635775bb3e58a2fe94ae207723d330ee6f370333374c",
+    "pages": 6,
+    "extracted_characters": 144544
+  },
+  {
+    "file": "druitt_etal_2012_santorini_diffusion_supp.pdf",
+    "sha256": "6b71eb058a3704abf92b7f437c235baaafd673afda3a8713151977e107787aee",
+    "pages": 9,
+    "extracted_characters": 35505
+  },
+  {
+    "file": "ellis_etal_2018_lithium_volcanic_rocks.pdf",
+    "sha256": "0fdcbc6990710f7b15bab14f5315160008c85bf4ce684906e9b74e4a5c1aef1c",
+    "pages": 9,
+    "extracted_characters": 205069
+  },
+  {
+    "file": "faryad_jezek_2019_garnet_metamorphic.pdf",
+    "sha256": "c4631270598a8eb7e14e6f5e2c5b5d934e317d6fb1429440549c852288e4a6b5",
+    "pages": 9,
+    "extracted_characters": 111034
+  },
+  {
+    "file": "freer_hauptman_1978_magnetite_titanomagnetite_interdiffusion.pdf",
+    "sha256": "b109e926956163341ee17b583809bbe68a8c1b2e470f021407035b47ab21b6e2",
+    "pages": 9,
+    "extracted_characters": 50826
+  },
+  {
+    "file": "ganguly_tazzoli_1994_femg_opx.pdf",
+    "sha256": "d902142afe2902e1605ca4421b4c0e8dd954d42cecc517985218a05c985d243c",
+    "pages": 8,
+    "extracted_characters": 48880
+  },
+  {
+    "file": "giletti_casserly_1994_sr_plagioclase_kinetics.pdf",
+    "sha256": "7e99cf8d9f352fe99db4ed8d371b00d157691123cacdc45555d296beb2deee7d",
+    "pages": 9,
+    "extracted_characters": 92758
+  },
+  {
+    "file": "giletti_shanahan_1997_alkali_in_plagioclase.pdf",
+    "sha256": "29ed88d2cb12687321aed040151ee4714c787ff991689ef9a766024aa1d00af3",
+    "pages": 18,
+    "extracted_characters": 102578
+  },
+  {
+    "file": "grocolas_etal_2025_plagioclase_sr_ba.pdf",
+    "sha256": "70b48af2cf6d6ffd3bcb8cf28f4a17d80617e43248c66a790a76526259be39d0",
+    "pages": 15,
+    "extracted_characters": 139362
+  },
+  {
+    "file": "grove_etal_1984_caal_nasi_plagioclase.pdf",
+    "sha256": "38b6e40406063fd4e6e7e2b17bc4fb89f7258629b49be482e302f5bc8273241c",
+    "pages": 9,
+    "extracted_characters": 64829
+  },
+  {
+    "file": "holzapfel_etal_2007_olivine_pressure_dependency.pdf",
+    "sha256": "13d90fe6201d609c06d1d7de46702ae532ac56a0987ff6da45e3dd7e0135a8cb",
+    "pages": 13,
+    "extracted_characters": 214311
+  },
+  {
+    "file": "hughes_etal_2021_colima_mush_recharge.pdf",
+    "sha256": "c08c254b2b4f51a4f99a3d29bcb73258f4a0437979193c4230adcb019b0d5bf0",
+    "pages": 21,
+    "extracted_characters": 303367
+  },
+  {
+    "file": "jollands_etal_2016_olivine_be.pdf",
+    "sha256": "06137032922df32bc0c30e2e302930f272b59fe5630a47e00238027c031679ba",
+    "pages": 12,
+    "extracted_characters": 118596
+  },
+  {
+    "file": "jollands_etal_2018_olivine_cr.pdf",
+    "sha256": "9a6f8f4a9543f0a0ec5b40186cdc3fbed4f8cdcc4eca3e05e647b37299ef9764",
+    "pages": 78,
+    "extracted_characters": 131739
+  },
+  {
+    "file": "jollands_etal_2022_quartz_h_li.pdf",
+    "sha256": "781ba1238e3a31067951ad127beeffca3ec4aa880193372588a04ab565811b8d",
+    "pages": 15,
+    "extracted_characters": 362728
+  },
+  {
+    "file": "krimer_costa_2017_3d_opx_femg.pdf",
+    "sha256": "3621d89d0eb870aa6465e68dd9fce68043bef99d328b476c3443f3b0256265f4",
+    "pages": 18,
+    "extracted_characters": 223045
+  },
+  {
+    "file": "lasaga_1983_geospeedometry.pdf",
+    "sha256": "84455c453008b65920b0c3650649000ede21631c1bd1fa340f27673decdac416",
+    "pages": 279,
+    "extracted_characters": 1870689
+  },
+  {
+    "file": "li_ge_zhang_2018_garnet_review.pdf",
+    "sha256": "13643decd7e9ed1a7add42dd4c4a0bcd903da92cfb7a16b68a6b5bcd4c8bbd18",
+    "pages": 13,
+    "extracted_characters": 245393
+  },
+  {
+    "file": "liermann_ganguly_2002_spinel_femg.pdf",
+    "sha256": "2d59c51e0061d7737e9acdeb8ea05ee69a5ad07ee8cd42bb104293381ee506ba",
+    "pages": 11,
+    "extracted_characters": 227546
+  },
+  {
+    "file": "mangler_etal_2022_popocatepetl_opx_diffusion.pdf",
+    "sha256": "0eaf2afff0f2ffc68a419436cdc3e89cdae12fdbcbed171497a6c2ab712b74bd",
+    "pages": 5,
+    "extracted_characters": 63506
+  },
+  {
+    "file": "mourey_mutch_2026_3d_modelling.pdf",
+    "sha256": "53cf5bf69b17d6bb466914438d91dc316f6366ce1a1241242315a08a3f65ccba",
+    "pages": 16,
+    "error": "Limit reached while decompressing. 4470595 bytes remaining."
+  },
+  {
+    "file": "muller_etal_2013_fe-mg_clinopyroxene.pdf",
+    "sha256": "5c15ffcf8ab2b5b9d6e64d120195e66e00272ce2641b8e918df725b1181328c7",
+    "pages": 14,
+    "extracted_characters": 355393
+  },
+  {
+    "file": "mutch_etal_2021_dfens.pdf",
+    "sha256": "9cd9f0825448c6e276f2e84d46b4eaef1ef68cf1c54f6c001e223b169a1cca78",
+    "pages": 28,
+    "extracted_characters": 189463
+  },
+  {
+    "file": "oeser_dohmen_weyer_2026_olivine_femg_isotopes.pdf",
+    "sha256": "0e8f0064d329fb78e992ba8f8157ca067676c444d80c19126308e9d4405f4862",
+    "pages": 19,
+    "extracted_characters": 178101
+  },
+  {
+    "file": "ostorero_etal_2022_kizimen_seismicity_petrology.pdf",
+    "sha256": "4225581fa0c148b7b9eac9c3eb34abcec9677e90a72dc2499602771bfcdbabfb",
+    "pages": 14,
+    "extracted_characters": 288976
+  },
+  {
+    "file": "petrone_etal_2016_nidis_diffusion.pdf",
+    "sha256": "934d8c1594564448921a1903dbb29a56253c9371725443d11c3a65eb8cd36991",
+    "pages": 11,
+    "extracted_characters": 293108
+  },
+  {
+    "file": "petrone_etal_2018_stromboli_cpx_diffusion.pdf",
+    "sha256": "4af6724bcedb5061ea538362f3d9a14471c2ca5394ecb128c462d170a9c46800",
+    "pages": 16,
+    "extracted_characters": 121612
+  },
+  {
+    "file": "petry_etal_2004_olivine_ni.pdf",
+    "sha256": "a9e607981a1894fb56116efa0e497a75f518d0b4f4995cf071e8d765b7f44ea4",
+    "pages": 10,
+    "extracted_characters": 255026
+  },
+  {
+    "file": "pohl_etal_2024_plagioclase_li.pdf",
+    "sha256": "097bad7747c26ff639b975aafe878dec64838d5a10a6ccead9aaa0305a430235",
+    "pages": 19,
+    "extracted_characters": 112939
+  },
+  {
+    "file": "polo-sanchez_etal_2023_santorini_pyroxene_diffusion.pdf",
+    "sha256": "52ea4c9fad8eaab281958f0062762fbd2f48fc8f3b46bd9244580f14398e7c75",
+    "pages": 18,
+    "extracted_characters": 374193
+  },
+  {
+    "file": "richter_etal_2014_pyroxene_li.pdf",
+    "sha256": "4acd126e98afbabea1efe881c3f676a7967cbb251477d542c175659e98ee20a7",
+    "pages": 19,
+    "extracted_characters": 356421
+  },
+  {
+    "file": "richter_etal_2017_olivine_li_isotopes.pdf",
+    "sha256": "7317b1acbaa928f294a586a56ab4dddc6976d6ea85175692557ed590f950b6f1",
+    "pages": 19,
+    "extracted_characters": 359825
+  },
+  {
+    "file": "rout_etal_2020_halogen_diffusion_melts.pdf",
+    "sha256": "1c4ec73232bd74deb65f99462f7004cc663595eeae4cb4fd5bfde60f1c4a5641",
+    "pages": 12,
+    "extracted_characters": 141943
+  },
+  {
+    "file": "sato_etal_2022_zao_opx_diffusion.pdf",
+    "sha256": "712e5c4bbb7068801830023a1960d1b058ba54a65beb4b262a9a95acfda2b535",
+    "pages": 14,
+    "extracted_characters": 103400
+  },
+  {
+    "file": "saunders_etal_2012_mount_st_helens.pdf",
+    "sha256": "99a363273f45b3aaebc7e212967c0e82548cf75704aa67843c7f26bb26958e84",
+    "pages": 6,
+    "extracted_characters": 154957
+  },
+  {
+    "file": "schaffer_etal_2014_na-k_interdiffusion_kfeldspar.pdf",
+    "sha256": "640a5a2b9b024375a3c29d485a76be01c10b59812f6322313916c2abfc3bf0cc",
+    "pages": 19,
+    "extracted_characters": 169152
+  },
+  {
+    "file": "schwandt_etal_1998_mg_diffusion_orthoenstatite.pdf",
+    "sha256": "c0e3a774783548ff89b30af4d242f7b96fd668603fab1cb61bac3be261dcb243",
+    "pages": 7,
+    "extracted_characters": 152646
+  },
+  {
+    "file": "shea_etal_2015_3d_olivine.pdf",
+    "sha256": "a48e76e181b1f25883d2a1d802b0a959e450b633a8694ebfca4a80a02fd15e11",
+    "pages": 17,
+    "extracted_characters": 125649
+  },
+  {
+    "file": "shea_etal_2015_olivine_diffusion_vs_growth.pdf",
+    "sha256": "c3bcdb86810f377e3bb20df21c8add92b6016a867e3721d473de738dd9dc27ee",
+    "pages": 5,
+    "extracted_characters": 52247
+  },
+  {
+    "file": "sievwright_etal_2020_magnetite_trace_diffusion.pdf",
+    "sha256": "40b11612407fedf55d737305fb2abd7c35ad555e6e4e1967c7f8e1841f67b871",
+    "pages": 21,
+    "extracted_characters": 253164
+  },
+  {
+    "file": "tang_etal_2017_zircon_li_multimode.pdf",
+    "sha256": "c16f4df03509c6b6bd22113148d80d91dfcf1af540bf5c47a2c86b2c98669a07",
+    "pages": 10,
+    "extracted_characters": 101553
+  },
+  {
+    "file": "teng_etal_2011_olivine_fe_mg_isotopes.pdf",
+    "sha256": "08e6def8d418718936b8f6d07130e2bba6e090659d439d70fdc4f2637d0e20c8",
+    "pages": 8,
+    "extracted_characters": 234157
+  },
+  {
+    "file": "turner_costa_2007_timescales_magmatic.pdf",
+    "sha256": "0138fe47a74c54a9a15fa1b99e214391ca609d864645e0b66a83f797d17c82c7",
+    "pages": 6,
+    "extracted_characters": 52450
+  },
+  {
+    "file": "vanorman_cherniak_kita_2014_mg_plagioclase.pdf",
+    "sha256": "afa86d51cc945ee43400f309a6f0cf20ef67827a544f3a8f835a560c20c4fd0c",
+    "pages": 10,
+    "extracted_characters": 171727
+  },
+  {
+    "file": "vanorman_crispin_2010_diffusion_in_oxides.pdf",
+    "sha256": "c0e693826cfeab0cbb7adda2fa33b2c24721cb30c2fb1dff255a4a9fb7b030f5",
+    "pages": 70,
+    "extracted_characters": 466075
+  },
+  {
+    "file": "vogt_dohmen_chakraborty_2015_spinel_femg.pdf",
+    "sha256": "ffd0431b0c03a5c7d9ec08c670af004fe6cf71f294e35df5375e5f91e9383d16",
+    "pages": 11,
+    "extracted_characters": 100215
+  },
+  {
+    "file": "watson_etal_1985_apatite_sm_sr_pb.pdf",
+    "sha256": "f813cd46e12224194704a3fab436f5d34fcc0b8fff044123743984f0f9cf4e5e",
+    "pages": 11,
+    "extracted_characters": 84630
+  },
+  {
+    "file": "watson_etal_2015_olivine_phosphorus.pdf",
+    "sha256": "d87c82fcba8cb4241c3c42ab4d0f4641f1c63d20182ac2f5df09932fb67f9ba2",
+    "pages": 13,
+    "extracted_characters": 139724
+  },
+  {
+    "file": "wu_etal_2025_garnet_finite_elements.pdf",
+    "sha256": "679fe4bd9eadd46cc976dbda30100e0f992d15d6712c4fafcb30520f8f742fb8",
+    "pages": 15,
+    "extracted_characters": 171622
+  }
+]

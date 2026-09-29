@@ -3,13 +3,35 @@
 A local desktop application for diffusion chronometry. It solves 1-D diffusion
 problems analytically and numerically, carries a registry of literature
 diffusion coefficients for olivine, orthopyroxene, clinopyroxene, plagioclase
-and magnetite, fits the diffusion time to a measured profile, and propagates
+K-feldspar, magnetite, quartz, rutile, titanite, apatite, zircon, monazite
+and xenotime, fits the diffusion time to a measured profile, and propagates
 uncertainties by Monte Carlo without pretending that temperature, oxygen
 fugacity and the Arrhenius parameters are independent.
 
 Everything is traceable. Every equation, coefficient, constant and convention
 carries a citation key, the test suite fails if a key does not resolve, and
 every run exports a methods block listing the sources it actually used.
+
+## Literature expansion and shared-duration studies
+
+The current source audit, mathematical corrections and remaining research roadmap
+are in [LITERATURE_AUDIT.md](LITERATURE_AUDIT.md). Source verification does not imply
+that a coefficient is valid for every natural sample or has a complete uncertainty model.
+
+Use **File → Shared-duration study** to collect configured profiles from the main
+window and fit a common duration. Each profile retains its own model and requires
+measurement uncertainties in its own units. Only duration is fitted. Inspect the
+individual residuals before interpreting a common event. This supports several
+independent elemental clocks; garnet diffusion matrices, multisite reactions and
+Bayesian posterior inference remain future work.
+
+Exports include an Excel workbook with numeric results, profile/residual charts,
+calibration metadata and methods, alongside CSV, JSON and PNG/SVG figures. Joint
+exports include a study workbook and complete reports for each profile.
+
+Olivine Fe–Mg profiles have an explicit XFe/XFo/Fo-percent selector. The corrected
+2007 equation uses +3 XFe. Fo percent maps to coefficient XFe=1-C/100.
+The erratum still needs verification, so the entry is not recommended by default.
 
 ## Install
 
@@ -237,7 +259,7 @@ parameters that are not independent:
 - Oxygen fugacity is normally known as an offset from a mineral buffer, and the
   buffer is itself a function of temperature. Diffusor re-evaluates the buffer
   at every sampled temperature, so the correlation is exact by construction.
-- The Arrhenius parameters ln D0 and Q are strongly anti-correlated by the
+- The Arrhenius parameters ln D0 and Q are typically positively correlated by the
   regression that produced them. Sampling them independently inflates the
   spread of D at the temperature of interest by a large factor. Only the Sr and
   Ba laws of Grocolas et al. (2025) come with anything like a covariance: the
@@ -259,8 +281,9 @@ temperature and the diffusion coefficient hardly move the curve. They convert
 that length into a time, so their uncertainty belongs to t and is shown in the
 histogram and the reported interval.
 
-Every draw re-runs the whole fit, so all of this is honoured automatically.
-Times are log-normally distributed, so the median and the 16th, 84th, 2.5th and
+Every draw re-runs the fit using the encoded uncertainty model. Correlations
+not explicitly supplied and unmodelled systematic errors remain unquantified.
+The empirical median and the 16th, 84th, 2.5th and
 97.5th percentiles are reported rather than a symmetric standard deviation.
 A variance decomposition re-runs the Monte Carlo with one source active at a
 time, which ranks what is worth measuring better.
@@ -324,8 +347,7 @@ Kizimen traverse is extracted from the published spreadsheet by
 
 ## Coefficient registry
 
-Fifty-four entries across six minerals, 47 of them read from the primary
-publication or from a named re-fit. The recommended ones are:
+103 entries across 13 minerals; 96 carry source-transcription checks. The recommended ones are:
 
 | mineral | species | recommended source |
 | --- | --- | --- |
@@ -338,7 +360,7 @@ publication or from a named re-fit. The recommended ones are:
 | K-feldspar | Ba | Cherniak (2002), same crystal as the Sr law |
 | K-feldspar | Ti | Cherniak & Watson (2020) |
 | Magnetite | Ti, Fe | Van Orman & Crispin (2010), Table 12 |
-| Olivine | Fe-Mg | Dohmen & Chakraborty (2007), **unverified transcription** |
+
 
 Sr and Ba in sanidine were measured on the same Or61 crystal by the same
 method, so the pair can be compared directly: Ba is about 1.7 log units slower
@@ -353,10 +375,10 @@ Arrhenius law, so it is not in the registry.
 Also available: the rare earth elements Lu, Ce and Eu in orthopyroxene from
 Dias, Dohmen & Hartmann (2025), and magnetite Ti, Mn, Co, Cr, Al and Mg from
 Sievwright et al. (2020). Sievwright et al. measured only at 1150 °C, so
-Diffusor scales those entries to other temperatures with the Table 12
-activation energies of the same element. Mg has no such energies and is valid
-at 1150 °C only. The entry notes say plainly that the scaling is Diffusor's
-construction, not the authors'.
+All 21 table rows now have fixed-temperature entries. Five legacy temperature-scaled
+variants remain explicitly labelled as hypotheses. Borrowed activation energies are
+not measurements from Sievwright et al. Thermal Monte Carlo is rejected for
+fixed-temperature laws.
 
 Older calibrations are kept alongside them so published timescales can be
 reproduced and compared: Dohmen et al. (2016) and Ganguly & Tazzoli (1994) for

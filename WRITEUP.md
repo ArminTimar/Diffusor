@@ -1,5 +1,7 @@
 # Diffusor — code and sources writeup
 
+> **Current implementation:** section 5 and [LITERATURE_AUDIT.md](LITERATURE_AUDIT.md) supersede conflicting baseline descriptions below. Sections 1–4 retain the earlier audit as historical context.
+
 A single reference that answers three questions for every part of Diffusor:
 
 1. **What does this script do, and when does the application call it?**
@@ -19,11 +21,11 @@ already known.
 
 | | |
 | --- | --- |
-| Covers | commit `6a69d22`, 2026-09-18 |
+| Covers | September 29 working tree; section 5 updates the September 18 baseline |
 | Package version | 0.1.0 |
-| Modules documented | 57 Python modules: 43 in `diffusor/`, 4 in `scripts/`, 10 in `tests/` |
-| Coefficients | 54 entries, 6 minerals, 47 verified against a primary source |
-| References | 80 keys in `diffusor/references.py` |
+| Modules documented | 67 Python modules |
+| Coefficients | 103 entries, 13 minerals, 96 with source-transcription checks |
+| References | 95 keys in `diffusor/references.py` |
 
 ---
 
@@ -339,7 +341,7 @@ The framework. No diffusion law lives here.
   * `describe()` and `methods_sentence()` feed the reading panes and the
     exported methods block.
 * **Sampling modes, and the argument behind them.** Arrhenius fits give
-  strongly anti-correlated `ln D0` and `Q`; drawing them independently
+  typically positively correlated `ln D0` and `Q`; drawing them independently
   inflates the spread of D at the temperature of interest by a large factor.
   * `covariance`: multivariate normal over `cov_order`. The approach of
     Mutch et al. (2021), DFENS. Only the two Grocolas et al. (2025) laws
@@ -2405,3 +2407,110 @@ Ordered by how much it would change a published answer, not by effort:
    traceable in an export.
 7. Register the remaining Sievwright elements and the olivine Ni and Ca laws
    (items 22, 23).
+
+## 5. September 29 implementation update
+
+The current registry has 103 entries across 13 minerals. The earlier counts, recommended olivine flag, olivine reference subtraction, partial magnetite registration, missing workbook export and independent-only fitting statements are historical. Source-transcription verification does not establish natural-sample suitability or complete uncertainty validation.
+
+### New modules
+
+| Module | Responsibility |
+| --- | --- |
+| `diffusor/coefficients/literature.py` | Scalar and independent principal-axis laws with calibration/uncertainty metadata. |
+| `diffusor/coefficients/accessories.py` | Accessory lattice laws separated by experimental mechanism and direction. |
+| `diffusor/dataio/workbook.py` | Numeric Excel reports, profile/residual charts and provenance sheets. |
+| `diffusor/dataio/figures.py` | Headless profile/residual and shared-duration PNG/SVG layouts. |
+| `diffusor/dataio/joint.py` | Aggregate shared-duration export plus full per-profile provenance. |
+| `diffusor/fitting/joint.py` | Shared-duration likelihood, strict uncertainties and joint degrees of freedom. |
+| `diffusor/gui/joint_study.py` | Nonmodal study collection, background fitting, cancellation, plot and export. |
+| `scripts/index_literature.py` | Hashes and extracts local PDFs into an ignored working index. |
+| `tests/test_literature_expansion.py` | Equations, units, directions, coordinate mapping, conservative fluxes and exports. |
+| `tests/test_joint_study.py` | Duration recovery, unit invariance, inconsistent profiles, cancellation and exports. |
+| `diffusor/dataio/images.py` | Image and map readers (Pillow, optional tifffile, text grids, ENVI, raw), pixel size from metadata, grey/channel/colour-legend values. |
+| `diffusor/dataio/image_profiles.py` | Perpendicular profiles after NIDIS `greyvalues.m`, cleaning with reason codes, statistics, Excel workbook out and back, composition table. |
+| `diffusor/gui/image_extractor.py` | The image window: drawing tools, live extraction, overlays, workbook, hand-over to the main window. |
+| `diffusor/gui/image_calibration.py` | Pixel size and value-to-composition map for an image profile. |
+| `scripts/make_example_images.py` | Synthetic BSE TIFF and jet element map in examples/images/. |
+| `tests/test_image_profiles.py` | Readers, geometry, cleaning, colour legends, workbook round trip and the window. |
+
+### New coefficient keys
+
+| Key | Citation | Source location |
+| --- | --- | --- |
+| `ap_Dy_cherniak2000_in` | `cherniak2000apatite` | abstract p. 3871, REE silicate oxyapatite source |
+| `ap_La_cherniak2000_in` | `cherniak2000apatite` | abstract p. 3871, REE silicate oxyapatite source |
+| `ap_Nd_cherniak2000_in` | `cherniak2000apatite` | abstract p. 3871, REE silicate oxyapatite source |
+| `ap_Nd_cherniak2000_out` | `cherniak2000apatite` | abstract p. 3871, synthetic Nd-doped apatite out-diffusion |
+| `ap_Pb_cherniak1991` | `cherniak1991apatite` | abstract p. 1663; cm2/s and kcal/mol converted to SI |
+| `ap_Sm_cherniak2000_implant` | `cherniak2000apatite` | abstract p. 3871, ion-implantation relaxation |
+| `ap_Sr_cherniak1993` | `cherniak1993apatite` | p. 4657; abstract; D0 converted from cm2/s |
+| `ap_Yb_cherniak2000_in` | `cherniak2000apatite` | abstract p. 3871, REE silicate oxyapatite source |
+| `mnz_Pb_cherniak2004` | `cherniak2004monazite` | abstract p. 829 |
+| `mt_Al_sievwright2020_1150` | `sievwright2020` | 5 and Table 5 |
+| `mt_Co_sievwright2020_1150` | `sievwright2020` | 5 and Table 5 |
+| `mt_Cr_sievwright2020_1150` | `sievwright2020` | 5 and Table 5 |
+| `mt_Ga_sievwright2020` | `sievwright2020` | 5 and Table 5 |
+| `mt_Hf_sievwright2020` | `sievwright2020` | 5 and Table 5 |
+| `mt_In_sievwright2020` | `sievwright2020` | 5 and Table 5 |
+| `mt_Lu_sievwright2020` | `sievwright2020` | 5 and Table 5 |
+| `mt_Mn_sievwright2020_1150` | `sievwright2020` | 5 and Table 5 |
+| `mt_Mo_sievwright2020` | `sievwright2020` | 5 and Table 5 |
+| `mt_Nb_sievwright2020` | `sievwright2020` | 5 and Table 5 |
+| `mt_Ni_sievwright2020` | `sievwright2020` | 5 and Table 5 |
+| `mt_Sc_sievwright2020` | `sievwright2020` | 5 and Table 5 |
+| `mt_Ta_sievwright2020` | `sievwright2020` | 5 and Table 5 |
+| `mt_Ti_sievwright2020_1150` | `sievwright2020` | 5 and Table 5 |
+| `mt_U_sievwright2020` | `sievwright2020` | 5 and Table 5 |
+| `mt_V3+_sievwright2020` | `sievwright2020` | 5 and Table 5 |
+| `mt_V4+_sievwright2020` | `sievwright2020` | 5 and Table 5 |
+| `mt_Y_sievwright2020` | `sievwright2020` | 5 and Table 5 |
+| `mt_Zn_sievwright2020` | `sievwright2020` | 5 and Table 5 |
+| `mt_Zr_sievwright2020` | `sievwright2020` | 5 and Table 5 |
+| `ol_Be_jollands2016` | `jollands2016be` | abstract and Arrhenius fits |
+| `ol_Ca_coogan2005` | `coogan2005ca` | abstract and Arrhenius fits |
+| `ol_Ni_petry2004` | `petry2004` | p. 4184, Fig. 6 fixed-fO2 fit |
+| `ol_P_watson2015` | `watson2015p` | abstract p. 2053 |
+| `qz_Ti_cherniak2007` | `cherniak2007quartz` | abstract p. 65; fitted c-direction |
+| `rt_Hf_cherniak2007_a` | `cherniak2007rutile` | abstract p. 267 |
+| `rt_Hf_cherniak2007_c` | `cherniak2007rutile` | abstract p. 267 |
+| `rt_Zr_cherniak2007_c` | `cherniak2007rutile` | abstract p. 267 |
+| `ttn_Sr_cherniak1995` | `cherniak1995titanite` | abstract p. 219 (visually checked) |
+| `ttn_Zr_cherniak2006_c` | `cherniak2006titanite` | abstract p. 639 |
+| `xtm_Dy_cherniak2006` | `cherniak2006xenotime` | abstract pp. 1-2; Table 1 for per-species temperature ranges |
+| `xtm_Pb_cherniak2006` | `cherniak2006xenotime` | abstract pp. 1-2; Table 1 for per-species temperature ranges |
+| `xtm_Sm_cherniak2006` | `cherniak2006xenotime` | abstract pp. 1-2; Table 1 for per-species temperature ranges |
+| `xtm_Yb_cherniak2006` | `cherniak2006xenotime` | abstract pp. 1-2; Table 1 for per-species temperature ranges |
+| `zrn_Dy_cherniak1997` | `cherniak1997zircon` | abstract p. 289, low-temperature RBS fits |
+| `zrn_Pb_cherniak2001` | `cherniak2001zircon` | abstract p. 5 |
+| `zrn_Sm_cherniak1997` | `cherniak1997zircon` | abstract p. 289, low-temperature RBS fits |
+| `zrn_Ti_bloch2022_c` | `bloch2022zircon` | abstract p. 1 |
+| `zrn_Ti_cherniak2007_perp_c` | `cherniak2007zircon` | abstract p. 470, 1-atm fit |
+| `zrn_Yb_cherniak1997` | `cherniak1997zircon` | abstract p. 289, low-temperature RBS fits |
+
+### Additional reference keys
+
+- `cherniak1993apatite`: Cherniak, D. J. and Ryerson, F. J. (1993) A study of strontium diffusion in apatite using Rutherford backscattering spectroscopy and ion implantation. Geochimica et Cosmochimica Acta 57:4653-4662. https://doi.org/10.1016/0016-7037(93)90190-8 Used for the named calibration above.
+- `cherniak1991apatite`: Cherniak, D. J. and Lanford, W. A. and Ryerson, F. J. (1991) Lead diffusion in apatite and zircon using ion implantation and Rutherford Backscattering techniques. Geochimica et Cosmochimica Acta 55:1663-1673. https://doi.org/10.1016/0016-7037(91)90137-T Used for the named calibration above.
+- `cherniak2000apatite`: Cherniak, D. J. (2000) Rare earth element diffusion in apatite. Geochimica et Cosmochimica Acta 64:3871-3885. https://doi.org/10.1016/S0016-7037(00)00467-1 Used for the named calibration above.
+- `cherniak2001zircon`: Cherniak, D. J. and Watson, E. B. (2001) Pb diffusion in zircon. Chemical Geology 172:5-24. https://doi.org/10.1016/S0009-2541(00)00233-3 Used for the named calibration above.
+- `cherniak1997zircon`: Cherniak, D. J. and Hanchar, J. M. and Watson, E. B. (1997) Rare-earth diffusion in zircon. Chemical Geology 134:289-301. https://doi.org/10.1016/S0009-2541(96)00098-8 Used for the named calibration above.
+- `cherniak2007zircon`: Cherniak, D. J. and Watson, E. B. (2007) Ti diffusion in zircon. Chemical Geology 242:470-483. https://doi.org/10.1016/j.chemgeo.2007.05.005 Used for the named calibration above.
+- `bloch2022zircon`: Bloch, E. M. and Jollands, M. C. and Tollan, P. and others (2022) Diffusion anisotropy of Ti in zircon and implications for Ti-in-zircon thermometry. Earth and Planetary Science Letters 578:117317. https://doi.org/10.1016/j.epsl.2021.117317 Used for the named calibration above.
+- `cherniak2004monazite`: Cherniak, D. J. and Watson, E. B. and Grove, M. and Harrison, T. M. (2004) Pb diffusion in monazite: A combined RBS/SIMS study. Geochimica et Cosmochimica Acta 68:829-840. https://doi.org/10.1016/j.gca.2003.07.012 Used for the named calibration above.
+- `cherniak2006xenotime`: Cherniak, D. J. (2006) Pb and rare earth element diffusion in xenotime. Lithos 88:1-14. https://doi.org/10.1016/j.lithos.2005.08.002 Used for the named calibration above.
+- `watson2015p`: Watson, E. B. and Cherniak, D. J. and Holycross, M. E. (2015) Diffusion of phosphorus in olivine and molten basalt. American Mineralogist 100:2053-2065. https://doi.org/10.2138/am-2015-5416 Used for the named calibration above.
+- `jollands2016be`: Jollands, M. C. and Burnham, A. D. and O'Neill, H. St. C. and Hermann, J. and Qian, Q. (2016) Beryllium diffusion in olivine: A new tool to investigate timescales of magmatic processes. Earth and Planetary Science Letters 450:71-82. https://doi.org/10.1016/j.epsl.2016.06.028 Used for the named calibration above.
+- `cherniak2007quartz`: Cherniak, D. J. and Watson, E. B. and Wark, D. A. (2007) Ti diffusion in quartz. Chemical Geology 236:65-74. https://doi.org/10.1016/j.chemgeo.2006.09.001 Used for the named calibration above.
+- `cherniak2007rutile`: Cherniak, D. J. and Manchester, J. and Watson, E. B. (2007) Zr and Hf diffusion in rutile. Earth and Planetary Science Letters 261:267-279. https://doi.org/10.1016/j.epsl.2007.06.027 Used for the named calibration above.
+- `cherniak1995titanite`: Cherniak, D. J. (1995) Sr and Nd diffusion in titanite. Chemical Geology 125:219-232. https://doi.org/10.1016/0009-2541(95)00074-V Used for the named calibration above.
+- `cherniak2006titanite`: Cherniak, D. J. (2006) Zr diffusion in titanite. Contributions to Mineralogy and Petrology 152:639-647. https://doi.org/10.1007/s00410-006-0133-0 Used for the named calibration above.
+
+### Mathematical and reporting changes
+
+Olivine Fo-percent profiles map to coefficient XFe=1-C/100. Dohmen & Chakraborty equations 27–28 use +3 XFe. The erratum remains unchecked, so those entries stay unverified and TaMED is no longer recommended. Ca/Be principal functions are evaluated before direction-cosine projection. Fixed-temperature tables reject other temperatures and thermal Monte Carlo. No unmeasured tensor or parameter covariance is invented.
+
+The numerical operator uses exact node-centred control volumes in plane/cylinder/sphere geometry and includes activity fluxes at boundary-adjacent faces. Mass uses the same weights. Zero external total flux conserves mass. Invalid grids, diffusivity arrays and exhausted step budgets raise errors. Callable boundaries force numerical integration; an isothermal supplied history uses its own temperature.
+
+The joint objective is sum over profiles/points of ((observed-model)/sigma)^2, with one shared duration and N-1 joint degrees of freedom. All other settings remain fixed. Independent Gaussian errors are assumed. This is independent scalar transport with a common parameter, not coupled transport or posterior sampling. Per-profile chi-squared values are contributions to the joint objective.
+
+Excel workbooks are numeric snapshots with charts and source/caveat sheets. JSON retains mechanism, ranges and coordinate transform. PNG/SVG reports show data, model, initial state and residuals. Joint studies export aggregate and complete individual reports. The corrected olivine synthetic example is regenerated with a documented fixed seed. Remaining roadmap items and library evidence are in LITERATURE_AUDIT.md.

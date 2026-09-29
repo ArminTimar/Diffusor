@@ -20,12 +20,23 @@ these keys, and the test suite fails if a citation key does not resolve.
 | `plag_Mg_audetat2026` | plagioclase | Mg | Audetat et al. (2026) | yes |
 | `plag_Mg_vanorman2014` | plagioclase | Mg | Van Orman et al. (2014) | yes |
 | `plag_Sr_grocolas2025` | plagioclase | Sr | Grocolas et al. (2025) | yes |
-| `ol_FeMg_dohmen_chakraborty2007_tamed` | olivine | Fe-Mg | Dohmen & Chakraborty (2007) | **NO** |
+| `ap_Dy_cherniak2000_in` | apatite | Dy | Cherniak (2000) | yes |
+| `ap_La_cherniak2000_in` | apatite | La | Cherniak (2000) | yes |
+| `ap_Nd_cherniak2000_in` | apatite | Nd | Cherniak (2000) | yes |
+| `ap_Nd_cherniak2000_out` | apatite | Nd | Cherniak (2000) | yes |
+| `ap_Pb_cherniak1991` | apatite | Pb | Cherniak et al. (1991) | yes |
+| `ap_Sm_cherniak2000_implant` | apatite | Sm | Cherniak (2000) | yes |
+| `ap_Sr_cherniak1993` | apatite | Sr | Cherniak & Ryerson (1993) | yes |
+| `ap_Yb_cherniak2000_in` | apatite | Yb | Cherniak (2000) | yes |
+| `mnz_Pb_cherniak2004` | monazite | Pb | Cherniak et al. (2004) | yes |
 | `mt_Al_sievwright2020` | magnetite | Al | Sievwright et al. (2020) | yes |
+| `mt_Al_sievwright2020_1150` | magnetite | Al | Sievwright et al. (2020) | yes |
 | `mt_Al_vanorman_crispin2010` | magnetite | Al | Van Orman & Crispin (2010) | yes |
 | `mt_Co_sievwright2020` | magnetite | Co | Sievwright et al. (2020) | yes |
+| `mt_Co_sievwright2020_1150` | magnetite | Co | Sievwright et al. (2020) | yes |
 | `mt_Co_vanorman_crispin2010` | magnetite | Co | Van Orman & Crispin (2010) | yes |
 | `mt_Cr_sievwright2020` | magnetite | Cr | Sievwright et al. (2020) | yes |
+| `mt_Cr_sievwright2020_1150` | magnetite | Cr | Sievwright et al. (2020) | yes |
 | `mt_Cr_vanorman_crispin2010` | magnetite | Cr | Van Orman & Crispin (2010) | yes |
 | `mt_FeTi_aragon1984` | magnetite | Fe-Ti | Aragon et al. (1984) | yes |
 | `mt_FeTi_freer_hauptman1978` | magnetite | Fe-Ti | Freer & Hauptman (1978) | yes |
@@ -33,14 +44,35 @@ these keys, and the test suite fails if a citation key does not resolve.
 | `mt_Fe_aggarwal2002_MH_xti02` | magnetite | Fe | Van Orman & Crispin (2010) | yes |
 | `mt_Fe_aggarwal2002_WM` | magnetite | Fe | Van Orman & Crispin (2010) | yes |
 | `mt_Fe_aggarwal2002_WM_xti02` | magnetite | Fe | Van Orman & Crispin (2010) | yes |
+| `mt_Ga_sievwright2020` | magnetite | Ga | Sievwright et al. (2020) | yes |
+| `mt_Hf_sievwright2020` | magnetite | Hf | Sievwright et al. (2020) | yes |
+| `mt_In_sievwright2020` | magnetite | In | Sievwright et al. (2020) | yes |
+| `mt_Lu_sievwright2020` | magnetite | Lu | Sievwright et al. (2020) | yes |
 | `mt_Mg_sievwright2020` | magnetite | Mg | Sievwright et al. (2020) | yes |
 | `mt_Mn_sievwright2020` | magnetite | Mn | Sievwright et al. (2020) | yes |
+| `mt_Mn_sievwright2020_1150` | magnetite | Mn | Sievwright et al. (2020) | yes |
 | `mt_Mn_vanorman_crispin2010` | magnetite | Mn | Van Orman & Crispin (2010) | yes |
+| `mt_Mo_sievwright2020` | magnetite | Mo | Sievwright et al. (2020) | yes |
+| `mt_Nb_sievwright2020` | magnetite | Nb | Sievwright et al. (2020) | yes |
+| `mt_Ni_sievwright2020` | magnetite | Ni | Sievwright et al. (2020) | yes |
+| `mt_Sc_sievwright2020` | magnetite | Sc | Sievwright et al. (2020) | yes |
+| `mt_Ta_sievwright2020` | magnetite | Ta | Sievwright et al. (2020) | yes |
 | `mt_Ti_aggarwal2002_MH` | magnetite | Ti | Van Orman & Crispin (2010) | yes |
 | `mt_Ti_aggarwal2002_MH_xti02` | magnetite | Ti | Van Orman & Crispin (2010) | yes |
 | `mt_Ti_aggarwal2002_WM` | magnetite | Ti | Van Orman & Crispin (2010) | yes |
 | `mt_Ti_aggarwal2002_WM_xti02` | magnetite | Ti | Van Orman & Crispin (2010) | yes |
 | `mt_Ti_sievwright2020` | magnetite | Ti | Sievwright et al. (2020) | yes |
+| `mt_Ti_sievwright2020_1150` | magnetite | Ti | Sievwright et al. (2020) | yes |
+| `mt_U_sievwright2020` | magnetite | U | Sievwright et al. (2020) | yes |
+| `mt_V3+_sievwright2020` | magnetite | V3+ | Sievwright et al. (2020) | yes |
+| `mt_V4+_sievwright2020` | magnetite | V4+ | Sievwright et al. (2020) | yes |
+| `mt_Y_sievwright2020` | magnetite | Y | Sievwright et al. (2020) | yes |
+| `mt_Zn_sievwright2020` | magnetite | Zn | Sievwright et al. (2020) | yes |
+| `mt_Zr_sievwright2020` | magnetite | Zr | Sievwright et al. (2020) | yes |
+| `ol_Be_jollands2016` | olivine | Be | Jollands et al. (2016) | yes |
+| `ol_Ca_coogan2005` | olivine | Ca | Coogan et al. (2005) | yes |
+| `ol_Ni_petry2004` | olivine | Ni | Petry et al. (2004) | yes |
+| `ol_P_watson2015` | olivine | P | Watson et al. (2015) | yes |
 | `opx_Ce_dias2025` | opx | Ce | Dias et al. (2025) | yes |
 | `opx_Eu_dias2025` | opx | Eu | Dias et al. (2025) | yes |
 | `opx_FeMg_dias_dohmen2024` | opx | Fe-Mg | Dias & Dohmen (2024) | yes |
@@ -56,10 +88,27 @@ these keys, and the test suite fails if a citation key does not resolve.
 | `plag_Mg_costa2003` | plagioclase | Mg | Costa et al. (2003) | yes |
 | `plag_Sr_cherniak_watson1994` | plagioclase | Sr | Cherniak & Watson (1994) | yes |
 | `plag_Sr_giletti_casserly1994` | plagioclase | Sr | Giletti & Casserly (1994) | yes |
+| `qz_Ti_cherniak2007` | quartz | Ti | Cherniak et al. (2007) | yes |
+| `rt_Hf_cherniak2007_a` | rutile | Hf | Cherniak et al. (2007) | yes |
+| `rt_Hf_cherniak2007_c` | rutile | Hf | Cherniak et al. (2007) | yes |
+| `rt_Zr_cherniak2007_c` | rutile | Zr | Cherniak et al. (2007) | yes |
+| `ttn_Sr_cherniak1995` | titanite | Sr | Cherniak (1995) | yes |
+| `ttn_Zr_cherniak2006_c` | titanite | Zr | Cherniak (2006) | yes |
+| `xtm_Dy_cherniak2006` | xenotime | Dy | Cherniak (2006) | yes |
+| `xtm_Pb_cherniak2006` | xenotime | Pb | Cherniak (2006) | yes |
+| `xtm_Sm_cherniak2006` | xenotime | Sm | Cherniak (2006) | yes |
+| `xtm_Yb_cherniak2006` | xenotime | Yb | Cherniak (2006) | yes |
+| `zrn_Dy_cherniak1997` | zircon | Dy | Cherniak et al. (1997) | yes |
+| `zrn_Pb_cherniak2001` | zircon | Pb | Cherniak & Watson (2001) | yes |
+| `zrn_Sm_cherniak1997` | zircon | Sm | Cherniak et al. (1997) | yes |
+| `zrn_Ti_bloch2022_c` | zircon | Ti | Bloch et al. (2022) | yes |
+| `zrn_Ti_cherniak2007_perp_c` | zircon | Ti | Cherniak & Watson (2007) | yes |
+| `zrn_Yb_cherniak1997` | zircon | Yb | Cherniak et al. (1997) | yes |
 | `cpx_CaMg_brady1983` | cpx | Ca-Mg | Brady & McCallister (1983) | **NO** |
 | `cpx_FeMg_dimanov_sautter2000` | cpx | Fe-Mg | Dimanov & Sautter (2000) | **NO** |
 | `ol_FeMg_chakraborty1997` | olivine | Fe-Mg | Chakraborty (1997) | **NO** |
 | `ol_FeMg_dohmen_chakraborty2007_ped` | olivine | Fe-Mg | Dohmen & Chakraborty (2007) | **NO** |
+| `ol_FeMg_dohmen_chakraborty2007_tamed` | olivine | Fe-Mg | Dohmen & Chakraborty (2007) | **NO** |
 | `opx_Lu_dias2025` | opx | Lu | Dias et al. (2025) | **NO** |
 | `plag_NaSiCaAl_grove1984` | plagioclase | NaSi-CaAl | Grove et al. (1984) | **NO** |
 
@@ -84,6 +133,8 @@ every exported methods block. Check them against the primary paper before publis
 - **`audetat2026`** Audetat, A. and Grocolas, T. and Mutch, E. J. F. (2026) Ti-in-quartz and Sr-Ba-Mg-in-feldspars diffusion chronometry: a review of available diffusion data, and a critical evaluation of applications to natural samples. Journal of Petrology:egag078. https://doi.org/10.1093/petrology/egag078 [accepted manuscript (advance article), page numbers not yet assigned. Local library copy: audedat_grocolas_mutch_2025_manuscript_ti_quartz_sr_ba_mg_feldspars.pdf. Eq. 1 parameterises Mg diffusion in plagioclase from Faak et al. (2013) and Van Orman et al. (2014)]
   - used by: kfs_Ba_cherniak2002 (secondary), kfs_Sr_cherniak1996 (secondary), plag_Ba_cherniak2002 (secondary), plag_Ba_grocolas2025 (secondary), plag_Mg_audetat2026, plag_Sr_grocolas2025 (secondary)
 - **`bindeman1998`** Bindeman, I. N. and Davis, A. M. and Drake, M. J. (1998) Ion microprobe study of plagioclase-basalt partition experiments at natural concentration levels of trace elements. Geochimica et Cosmochimica Acta 62:1175-1193. https://doi.org/10.1016/S0016-7037(98)00047-7
+- **`bloch2022zircon`** Bloch, E. M. and Jollands, M. C. and Tollan, P. and others (2022) Diffusion anisotropy of Ti in zircon and implications for Ti-in-zircon thermometry. Earth and Planetary Science Letters 578:117317. https://doi.org/10.1016/j.epsl.2021.117317
+  - used by: zrn_Ti_bloch2022_c
 - **`bradshaw_kent2017`** Bradshaw, R. W. and Kent, A. J. R. (2017) The analytical limits of modeling short diffusion timescales. Chemical Geology 466:667-677. https://doi.org/10.1016/j.chemgeo.2017.07.018
 - **`brady_mccallister1983`** Brady, J. B. and McCallister, R. H. (1983) Diffusion data for clinopyroxenes from homogenization and self-diffusion experiments. American Mineralogist 68:95-105.
   - used by: cpx_CaMg_brady1983
@@ -93,10 +144,34 @@ every exported methods block. Check them against the primary paper before publis
   - used by: ol_FeMg_dohmen_chakraborty2007_tamed (secondary)
 - **`chamberlain2014`** Chamberlain, K. J. and Morgan, D. J. and Wilson, C. J. N. (2014) Timescales of mixing and mobilisation in the Bishop Tuff magma body: perspectives from diffusion chronometry. Contributions to Mineralogy and Petrology 168:1034. https://doi.org/10.1007/s00410-014-1034-2 [local library copy: chamberlain_etal_2014_bishop_tuff_diffusion.pdf. Feldspar microprobe traverses with a 5 um defocused beam]
   - used by: kfs_Ba_cherniak2002 (secondary), kfs_Sr_cherniak1996 (secondary)
+- **`cherniak1991apatite`** Cherniak, D. J. and Lanford, W. A. and Ryerson, F. J. (1991) Lead diffusion in apatite and zircon using ion implantation and Rutherford Backscattering techniques. Geochimica et Cosmochimica Acta 55:1663-1673. https://doi.org/10.1016/0016-7037(91)90137-T
+  - used by: ap_Pb_cherniak1991
+- **`cherniak1993apatite`** Cherniak, D. J. and Ryerson, F. J. (1993) A study of strontium diffusion in apatite using Rutherford backscattering spectroscopy and ion implantation. Geochimica et Cosmochimica Acta 57:4653-4662. https://doi.org/10.1016/0016-7037(93)90190-8
+  - used by: ap_Sr_cherniak1993
+- **`cherniak1995titanite`** Cherniak, D. J. (1995) Sr and Nd diffusion in titanite. Chemical Geology 125:219-232. https://doi.org/10.1016/0009-2541(95)00074-V
+  - used by: ttn_Sr_cherniak1995
 - **`cherniak1996`** Cherniak, D. J. (1996) Strontium diffusion in sanidine and albite, and general comments on strontium diffusion in alkali feldspars. Geochimica et Cosmochimica Acta 60:5037-5043. https://doi.org/10.1016/S0016-7037(96)00293-1
   - used by: kfs_Sr_cherniak1996
+- **`cherniak1997zircon`** Cherniak, D. J. and Hanchar, J. M. and Watson, E. B. (1997) Rare-earth diffusion in zircon. Chemical Geology 134:289-301. https://doi.org/10.1016/S0009-2541(96)00098-8
+  - used by: zrn_Dy_cherniak1997, zrn_Sm_cherniak1997, zrn_Yb_cherniak1997
+- **`cherniak2000apatite`** Cherniak, D. J. (2000) Rare earth element diffusion in apatite. Geochimica et Cosmochimica Acta 64:3871-3885. https://doi.org/10.1016/S0016-7037(00)00467-1
+  - used by: ap_Dy_cherniak2000_in, ap_La_cherniak2000_in, ap_Nd_cherniak2000_in, ap_Nd_cherniak2000_out, ap_Sm_cherniak2000_implant, ap_Yb_cherniak2000_in
+- **`cherniak2001zircon`** Cherniak, D. J. and Watson, E. B. (2001) Pb diffusion in zircon. Chemical Geology 172:5-24. https://doi.org/10.1016/S0009-2541(00)00233-3
+  - used by: zrn_Pb_cherniak2001
 - **`cherniak2002`** Cherniak, D. J. (2002) Ba diffusion in feldspar. Geochimica et Cosmochimica Acta 66:1641-1650. https://doi.org/10.1016/S0016-7037(01)00866-3
   - used by: kfs_Ba_cherniak2002, plag_Ba_cherniak2002, plag_Ba_grocolas2025 (secondary)
+- **`cherniak2004monazite`** Cherniak, D. J. and Watson, E. B. and Grove, M. and Harrison, T. M. (2004) Pb diffusion in monazite: A combined RBS/SIMS study. Geochimica et Cosmochimica Acta 68:829-840. https://doi.org/10.1016/j.gca.2003.07.012
+  - used by: mnz_Pb_cherniak2004
+- **`cherniak2006titanite`** Cherniak, D. J. (2006) Zr diffusion in titanite. Contributions to Mineralogy and Petrology 152:639-647. https://doi.org/10.1007/s00410-006-0133-0
+  - used by: ttn_Zr_cherniak2006_c
+- **`cherniak2006xenotime`** Cherniak, D. J. (2006) Pb and rare earth element diffusion in xenotime. Lithos 88:1-14. https://doi.org/10.1016/j.lithos.2005.08.002
+  - used by: xtm_Dy_cherniak2006, xtm_Pb_cherniak2006, xtm_Sm_cherniak2006, xtm_Yb_cherniak2006
+- **`cherniak2007quartz`** Cherniak, D. J. and Watson, E. B. and Wark, D. A. (2007) Ti diffusion in quartz. Chemical Geology 236:65-74. https://doi.org/10.1016/j.chemgeo.2006.09.001
+  - used by: qz_Ti_cherniak2007
+- **`cherniak2007rutile`** Cherniak, D. J. and Manchester, J. and Watson, E. B. (2007) Zr and Hf diffusion in rutile. Earth and Planetary Science Letters 261:267-279. https://doi.org/10.1016/j.epsl.2007.06.027
+  - used by: rt_Hf_cherniak2007_a, rt_Hf_cherniak2007_c, rt_Zr_cherniak2007_c
+- **`cherniak2007zircon`** Cherniak, D. J. and Watson, E. B. (2007) Ti diffusion in zircon. Chemical Geology 242:470-483. https://doi.org/10.1016/j.chemgeo.2007.05.005
+  - used by: zrn_Ti_cherniak2007_perp_c
 - **`cherniak2010`** Cherniak, D. J. (2010) Cation diffusion in feldspars. Reviews in Mineralogy and Geochemistry 72:691-733. https://doi.org/10.2138/rmg.2010.72.15
   - used by: plag_Sr_giletti_casserly1994 (secondary)
 - **`cherniak_dimanov2010`** Cherniak, D. J. and Dimanov, A. (2010) Diffusion in pyroxene, mica and amphibole. Reviews in Mineralogy and Geochemistry 72:641-690. https://doi.org/10.2138/rmg.2010.72.14
@@ -106,6 +181,7 @@ every exported methods block. Check them against the primary paper before publis
   - used by: kfs_Ti_cherniak_watson2020
 - **`codata2018`** Tiesinga, E. and Mohr, P. J. and Newell, D. B. and Taylor, B. N. (2021) CODATA recommended values of the fundamental physical constants: 2018. Reviews of Modern Physics 93:025010. https://doi.org/10.1103/RevModPhys.93.025010
 - **`coogan2005ca`** Coogan, L. A. and Hain, A. and Stahl, S. and Chakraborty, S. (2005) Experimental determination of the diffusion coefficient for calcium in olivine between 900 C and 1500 C. Geochimica et Cosmochimica Acta 69:3683-3694. https://doi.org/10.1016/j.gca.2005.03.002
+  - used by: ol_Ca_coogan2005
 - **`coogan2005li`** Coogan, L. A. and Kasemann, S. A. and Chakraborty, S. (2005) Rates of hydrothermal cooling of new oceanic upper crust derived from lithium-geospeedometry. Earth and Planetary Science Letters 240:415-424. https://doi.org/10.1016/j.epsl.2005.09.020
 - **`costa2003`** Costa, F. and Chakraborty, S. and Dohmen, R. (2003) Diffusion coupling between trace and major elements and a model for calculation of magma residence times using plagioclase. Geochimica et Cosmochimica Acta 67:2189-2200. https://doi.org/10.1016/S0016-7037(02)01345-5
   - used by: plag_Mg_costa2003
@@ -161,6 +237,8 @@ every exported methods block. Check them against the primary paper before publis
 - **`huebner1971`** Huebner, J. S. (1971) Buffering techniques for hydrostatic systems at elevated pressures. In: Ulmer, G. C. (ed) Research Techniques for High Pressure and High Temperature. Springer:123-177. [buffer equations used by Van Orman & Crispin (2010) to compute their Tables 10 and 11]
 - **`iau_julian_year`** International Astronomical Union (1976) Resolution on the Julian year of 365.25 days (IAU General Assembly XVI, Grenoble).
 - **`iupac2021`** Prohaska, T. and Irrgeher, J. and Benefield, J. and others (2022) Standard atomic weights of the elements 2021 (IUPAC Technical Report). Pure and Applied Chemistry 94:573-600. https://doi.org/10.1515/pac-2019-0603
+- **`jollands2016be`** Jollands, M. C. and Burnham, A. D. and O'Neill, H. St. C. and Hermann, J. and Qian, Q. (2016) Beryllium diffusion in olivine: A new tool to investigate timescales of magmatic processes. Earth and Planetary Science Letters 450:71-82. https://doi.org/10.1016/j.epsl.2016.06.028
+  - used by: ol_Be_jollands2016
 - **`kress_carmichael1991`** Kress, V. C. and Carmichael, I. S. E. (1991) The compressibility of silicate liquids containing Fe2O3 and the effect of composition, temperature, oxygen fugacity and pressure on their redox states. Contributions to Mineralogy and Petrology 108:82-92. https://doi.org/10.1007/BF00307328
 - **`krimer_costa2017`** Krimer, D. and Costa, F. (2017) Evaluation of the effects of 3D diffusion, crystal geometry, and initial conditions on retrieved time-scales from Fe-Mg zoning in natural oriented orthopyroxene crystals. Geochimica et Cosmochimica Acta 196:271-288. https://doi.org/10.1016/j.gca.2016.09.037
 - **`lasaga1983`** Lasaga, A. C. (1983) Geospeedometry: an extension of geothermometry. In: Saxena, S. K. (ed) Kinetics and Equilibrium in Mineral Reactions. Springer, New York:81-114. https://doi.org/10.1007/978-1-4612-5587-1_3
@@ -178,6 +256,7 @@ every exported methods block. Check them against the primary paper before publis
 - **`petrone2016`** Petrone, C. M. and Bugatti, G. and Braschi, E. and Tommasini, S. (2016) Pre-eruptive magmatic processes re-timed using a non-isothermal approach to magma chamber dynamics. Nature Communications 7:12946. https://doi.org/10.1038/ncomms12946
   - used by: cpx_FeMg_dimanov_sautter2000 (secondary)
 - **`petry2004`** Petry, C. and Chakraborty, S. and Palme, H. (2004) Experimental determination of Ni diffusion coefficients in olivine and their dependence on temperature, composition, oxygen fugacity, and crystallographic orientation. Geochimica et Cosmochimica Acta 68:4179-4188. https://doi.org/10.1016/j.gca.2004.02.024
+  - used by: ol_Ni_petry2004
 - **`pohl2024`** Pohl, F. and Behrens, H. and Oeser, M. and Marxer, F. and Dohmen, R. (2024) Li diffusion in plagioclase crystals and glasses - implications for timescales of geological processes. European Journal of Mineralogy 36:985-1003. https://doi.org/10.5194/ejm-36-985-2024 [open access, local library copy: pohl_etal_2024_plagioclase_li.pdf]
   - used by: plag_Li_pohl2024_interstitial, plag_Li_pohl2024_vacancy
 - **`polo_sanchez2023`** Polo-Sanchez, A. and Druitt, T. H. and Cluzel, N. and Devidal, J.-L. (2023) Pyroxene diffusion chronometry of the magmatic plumbing system of Santorini volcano. Frontiers in Earth Science 11:1149446. [local library copy: polo-sanchez_etal_2023_santorini_pyroxene_diffusion.pdf]
@@ -190,7 +269,7 @@ every exported methods block. Check them against the primary paper before publis
   - used by: opx_Mg_schwandt1998_a, opx_Mg_schwandt1998_b, opx_Mg_schwandt1998_c
 - **`shea2015`** Shea, T. and Lynn, K. J. and Garcia, M. O. (2015) Cracking the olivine zoning code: Distinguishing between crystal growth and diffusion. Geology 43:935-938. https://doi.org/10.1130/G37082.1
 - **`sievwright2020`** Sievwright, R. H. and O'Neill, H. St. C. and Tolley, J. and Wilkinson, J. J. and Berry, A. J. (2020) Diffusion and partition coefficients of minor and trace elements in magnetite as a function of oxygen fugacity at 1150 C. Contributions to Mineralogy and Petrology 175:40. https://doi.org/10.1007/s00410-020-01679-z [local library copy: sievwright_etal_2020_magnetite_trace_diffusion.pdf. Table 5 gives the vacancy and interstitial constants at 1150 C]
-  - used by: mt_Al_sievwright2020, mt_Co_sievwright2020, mt_Cr_sievwright2020, mt_FeTi_aragon1984 (secondary), mt_FeTi_freer_hauptman1978 (secondary), mt_Mg_sievwright2020, mt_Mn_sievwright2020, mt_Ti_sievwright2020
+  - used by: mt_Al_sievwright2020, mt_Al_sievwright2020_1150, mt_Co_sievwright2020, mt_Co_sievwright2020_1150, mt_Cr_sievwright2020, mt_Cr_sievwright2020_1150, mt_FeTi_aragon1984 (secondary), mt_FeTi_freer_hauptman1978 (secondary), mt_Ga_sievwright2020, mt_Hf_sievwright2020, mt_In_sievwright2020, mt_Lu_sievwright2020, mt_Mg_sievwright2020, mt_Mn_sievwright2020, mt_Mn_sievwright2020_1150, mt_Mo_sievwright2020, mt_Nb_sievwright2020, mt_Ni_sievwright2020, mt_Sc_sievwright2020, mt_Ta_sievwright2020, mt_Ti_sievwright2020, mt_Ti_sievwright2020_1150, mt_U_sievwright2020, mt_V3+_sievwright2020, mt_V4+_sievwright2020, mt_Y_sievwright2020, mt_Zn_sievwright2020, mt_Zr_sievwright2020
 - **`sneeringer1984`** Sneeringer, M. and Hart, S. R. and Shimizu, N. (1984) Strontium and samarium diffusion in diopside. Geochimica et Cosmochimica Acta 48:1589-1608. https://doi.org/10.1016/0016-7037(84)90415-6
 - **`tomiya2013`** Tomiya, A. and Miyagi, I. and Saito, G. and Geshi, N. (2013) Short time scales of magma-mixing processes prior to the 2011 eruption of Shinmoedake volcano, Kirishima volcanic group, Japan. Bulletin of Volcanology 75:750. https://doi.org/10.1007/s00445-013-0750-1
   - used by: mt_Al_vanorman_crispin2010 (secondary), mt_Co_vanorman_crispin2010 (secondary), mt_Cr_vanorman_crispin2010 (secondary), mt_Fe_vanorman_crispin2010 (secondary), mt_Mn_vanorman_crispin2010 (secondary), mt_Ti_vanorman_crispin2010 (secondary)
@@ -199,4 +278,6 @@ every exported methods block. Check them against the primary paper before publis
   - used by: plag_Mg_audetat2026 (secondary), plag_Mg_costa2003 (secondary), plag_Mg_vanorman2014
 - **`vanorman_crispin2010`** Van Orman, J. A. and Crispin, K. L. (2010) Diffusion in oxides. Reviews in Mineralogy and Geochemistry 72:757-825. https://doi.org/10.2138/rmg.2010.72.17
   - used by: mt_Al_sievwright2020 (secondary), mt_Al_vanorman_crispin2010, mt_Co_sievwright2020 (secondary), mt_Co_vanorman_crispin2010, mt_Cr_sievwright2020 (secondary), mt_Cr_vanorman_crispin2010, mt_Fe_aggarwal2002_MH, mt_Fe_aggarwal2002_MH_xti02, mt_Fe_aggarwal2002_WM, mt_Fe_aggarwal2002_WM_xti02, mt_Fe_vanorman_crispin2010, mt_Mn_sievwright2020 (secondary), mt_Mn_vanorman_crispin2010, mt_Ti_aggarwal2002_MH, mt_Ti_aggarwal2002_MH_xti02, mt_Ti_aggarwal2002_WM, mt_Ti_aggarwal2002_WM_xti02, mt_Ti_sievwright2020 (secondary), mt_Ti_vanorman_crispin2010
+- **`watson2015p`** Watson, E. B. and Cherniak, D. J. and Holycross, M. E. (2015) Diffusion of phosphorus in olivine and molten basalt. American Mineralogist 100:2053-2065. https://doi.org/10.2138/am-2015-5416
+  - used by: ol_P_watson2015
 - **`zellmer1999`** Zellmer, G. F. and Blake, S. and Vance, D. and Hawkesworth, C. and Turner, S. (1999) Plagioclase residence times at two island arc volcanoes (Kameni Islands, Santorini, and Soufriere, St. Vincent) determined by Sr diffusion systematics. Contributions to Mineralogy and Petrology 136:345-357. https://doi.org/10.1007/s004100050543

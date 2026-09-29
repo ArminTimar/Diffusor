@@ -222,7 +222,8 @@ DATASETS: List[ExampleDataset] = [
         settings=dict(T_C=1150.0, sigma_T_K=30.0, P_MPa=0.1, sigma_P_MPa=0.0,
                       buffer="FMQ", delta_buffer=-1.0, sigma_delta=0.5,
                       coefficient="ol_FeMg_dohmen_chakraborty2007_tamed", axis="c",
-                      geometry="plane"),
+                      geometry="plane", composition_dependent=True, olivine_coordinate=2,
+                      x_composition=0.15),
         expected=(
             'True time 120 days, set when the file was made.'),
         notes=(

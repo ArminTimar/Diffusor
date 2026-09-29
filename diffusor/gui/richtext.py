@@ -186,6 +186,11 @@ def coefficient_html(c) -> str:
             msg += " " + esc(c.superseded_note)
         d.box(msg, "danger")
     d.h("Equation")
+    d.kv([("Transport kind", esc(c.kind)), ("Model family", esc(c.model_family)),
+          ("Validation", esc(c.validation_level)), ("State variable", esc(c.transported_variable)),
+          ("Reference state", esc(c.reference_state))])
+    if c.calibration_notes:
+        d.box("<br>".join(esc(s) for s in c.calibration_notes), "warn")
     d.equation(c.equation_text)
     d.p(f"<span class='muted'>Equation {esc(c.equation_number or 'unnumbered')} in the source. "
         f"D in m²/s.{' The fO2 term takes fO2 in ' + esc(c.fo2_unit) + '.' if c.needs_fo2 else ''}"
@@ -199,6 +204,8 @@ def coefficient_html(c) -> str:
                          esc(p.unit), esc(p.description)))
         d.table(["Name", "Value", "Uncertainty", "Unit", "Meaning"], rows)
     d.h("Uncertainty in the Monte Carlo")
+    if c.uncertainty_note:
+        d.box(esc(c.uncertainty_note), "warn")
     items = []
     if c.covariance is not None:
         items.append("Correlated D0 and Q over " + esc(", ".join(c.cov_order)) + ".")
@@ -210,7 +217,8 @@ def coefficient_html(c) -> str:
         items.append("No scatter of log D is published. Only the individual parameters can be varied.")
     items.append("Best available: " + {"covariance": "correlated D0 and Q",
                                        "logD_at_T": "scatter of log D at T",
-                                       "independent": "each parameter independently"}[
+                                       "independent": "each parameter independently",
+                                       "none": "held fixed; coefficient uncertainty not propagated"}[
         c.default_sampling_mode()] + ".")
     d.ul(items)
     d.h("Calibration range")
@@ -220,6 +228,11 @@ def coefficient_html(c) -> str:
         d.h("Anisotropy")
         d.ul(f"D along {esc(k)} = {v:g} × D along {esc(c.reference_axis)}"
              for k, v in c.axis_factors.items())
+    if c.principal_funcs:
+        d.h("Anisotropy")
+        d.p("Independent Arrhenius laws for each principal direction; projected diffusivity varies with temperature.")
+    if c.allowed_axes:
+        d.p("Supported directions: " + esc(", ".join(c.allowed_axes)) + ". No unmeasured tensor components are inferred.")
     d.h("Verification")
     d.p(("Checked against " if c.verified else "Not yet checked against the original paper. ")
         + esc(c.verified_from or "") + ("." if c.verified_from and not c.verified_from.endswith(".") else ""))
@@ -391,7 +404,7 @@ def mc_html(res, coefficient=None) -> str:
           ("68% interval", esc(f"{human_time(res.p16)} to {human_time(res.p84)}")),
           ("95% interval", esc(f"{human_time(res.p2_5)} to {human_time(res.p97_5)}")),
           ("Scatter", f"{res.sigma_log10:.3f} log10 units (1σ)")])
-    d.p("Times are close to log-normal, so percentiles are reported instead of a mean and a "
+    d.p("Empirical percentiles are reported without assuming a distribution shape, instead of a mean and a "
         "symmetric error.", "faint")
     b = res.budget
     d.h("What was varied")

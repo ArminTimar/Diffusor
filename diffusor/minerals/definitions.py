@@ -1,4 +1,4 @@
-"""The five minerals supported in version 1.
+"""Minerals available in the coefficient registry.
 
 Sources for the structural/compositional conventions: Deer, Howie & Zussman
 (1992); the diffusion papers themselves define the composition variable used
@@ -36,6 +36,8 @@ OLIVINE = Mineral(
         "Ni": Species("Ni", "Ni", "tracer"),
         "Mn": Species("Mn", "Mn", "tracer"),
         "Ca": Species("Ca", "Ca", "tracer"),
+        "P": Species("P", "P", "trace"),
+        "Be": Species("Be", "Be", "trace"),
     },
     notes=("Diffusion is strongly anisotropic: D[001] is about 6x D[100] and D[010] "
            "(Dohmen & Chakraborty 2007). Hartley et al. (2016) confirm the factor of 6 in "
@@ -128,6 +130,22 @@ MAGNETITE = Mineral(
 
 MINERALS = {m.key: m for m in (OLIVINE, ORTHOPYROXENE, CLINOPYROXENE, PLAGIOCLASE, KFELDSPAR,
                                    MAGNETITE)}
+
+TRACE = CompositionVariable("none", "concentration", "measured trace-element concentration", default_mode="A")
+for _key, _name, _formula, _system, _species in (
+        ("quartz", "Quartz", "SiO2", "trigonal", ("Ti",)),
+        ("rutile", "Rutile", "TiO2", "tetragonal", ("Zr", "Hf")),
+        ("titanite", "Titanite", "CaTiSiO5", "monoclinic", ("Sr", "Zr")),
+        ("apatite", "Fluorapatite", "Ca5(PO4)3F", "hexagonal", ("Sr", "Pb", "La", "Nd", "Sm", "Dy", "Yb")),
+        ("zircon", "Zircon", "ZrSiO4", "tetragonal", ("Pb", "Sm", "Dy", "Yb", "Ti")),
+        ("monazite", "Monazite", "CePO4", "monoclinic", ("Pb",)),
+        ("xenotime", "Xenotime", "YPO4", "tetragonal", ("Sm", "Dy", "Yb", "Pb"))):
+    MINERALS[_key] = Mineral(_key, _name, _formula, _system, ("a", "b", "c"),
+                            {s: Species(s, s, "trace") for s in _species}, TRACE,
+                            notes="Direction restrictions are specific to the selected experimental law.")
+
+for _sp in ("Ni", "Zn", "Sc", "Ga", "In", "Y", "Lu", "V3+", "V4+", "Zr", "Hf", "U", "Nb", "Ta", "Mo"):
+    MAGNETITE.species[_sp] = Species(_sp, _sp, "trace")
 
 
 def get_mineral(key: str) -> Mineral:

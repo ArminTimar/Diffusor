@@ -11,7 +11,7 @@ parameters through a strongly non-linear function, and those parameters are
   independently is wrong -- their correlation is fixed by the buffer equation.
   Diffusor re-evaluates the buffer at each sampled temperature, which builds
   the correlation in exactly.
-* The Arrhenius parameters ln D0 and Q are strongly anti-correlated by the
+* The Arrhenius parameters ln D0 and Q are typically positively correlated by the
   regression that produced them.  Sampling them independently inflates the
   spread of D at the temperature of interest enormously.  Diffusor samples
   from the published covariance when it exists, and otherwise samples ln D
@@ -23,13 +23,15 @@ parameters through a strongly non-linear function, and those parameters are
 The linear-propagation formula used by NIDIS (Petrone et al. 2016, Methods)
 treats sqrt(4Dt) and T as independent, which neither captures the
 buffer-temperature correlation nor the D0-Q correlation.  Each draw here
-re-runs the *whole* fit, so every correlation is honoured automatically.
+re-runs the *whole* fit. Only correlations explicitly encoded by the input
+model (such as buffer-temperature coupling or a supplied covariance) are
+propagated; unmodelled systematic errors remain unquantified.
 
 Reported statistics
 -------------------
-Diffusion times are approximately log-normal (as Mutch et al. 2021 also find),
-so the median and the 16th/84th percentiles are reported rather than a mean
-and a symmetric sigma.
+The empirical median and percentiles describe the sampled times without
+assuming a distribution shape. Skewness and multiple modes can matter; these
+are propagated-input ensembles, not Bayesian posterior samples.
 """
 from __future__ import annotations
 
@@ -209,6 +211,10 @@ def run(model: DiffusionModel, x_data, C_data, sigma=None, *,
     profile. The interface uses it to draw the Monte Carlo while it runs.
     """
     budget = budget or UncertaintyBudget()
+    if (model.coefficient.fixed_temperature_K is not None and budget.sigma_T_K > 0
+            and only_source in (None, "temperature")):
+        raise ValueError("This coefficient has measurements at one temperature only. "
+                         "Set temperature uncertainty to zero or select a calibrated temperature-dependent law.")
     rng = np.random.default_rng(seed)
     x_data = np.asarray(x_data, dtype=float)
     C_data = np.asarray(C_data, dtype=float)

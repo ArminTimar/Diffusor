@@ -23,9 +23,11 @@ composition-dependent D the time step is kept small enough that this is
 accurate (default Courant-like number dt D/dx^2 <= 0.5, the explicit stability
 limit, Crank eq. 8.33).
 
-Boundary rows: Dirichlet -> identity row with the boundary value at t^{j+1};
-zero flux at a node with x > 0 -> mirror ghost node; symmetry at x = 0 for
-m > 0 -> limit  dC/dt = (m+1) D d2C/dx2  (L'Hopital, Crank section 8.5 eq. 8.45).
+Boundary rows use exact half-cell volumes and zero total external flux for
+closed boundaries. Dirichlet rows are replaced by the prescribed boundary value.
+Radial cell volumes are integrals of r**m; mass diagnostics use the same weights.
+This retains the 2(m+1)D/dx**2 centre coefficient and conserves mass including
+activity-driven fluxes at boundary-adjacent faces.
 """
 from __future__ import annotations
 
@@ -52,69 +54,41 @@ class NumericalResult:
     warnings: List[str] = field(default_factory=list)
 
 
+def _cell_volumes(x, m):
+    """Exact control volumes with node-centred half cells at both ends.
+
+    Common geometric factors (2*pi for cylinders, 4*pi for spheres) cancel.
+    The same weights are used by the flux operator and mass diagnostics.
+    """
+    edges = np.r_[x[0], .5*(x[:-1]+x[1:]), x[-1]]
+    return np.diff(edges**(m+1))/(m+1)
+
+
 def _operator(x, D_nodes, m, an_profile=None, theta_act=0.0):
-    """Tridiagonal operator L (lower, diag, upper) for interior nodes."""
+    """Conservative face-flux divergence, including closed boundary cells."""
     n = x.size
-    dx = x[1] - x[0]
-    Dh = 0.5 * (D_nodes[:-1] + D_nodes[1:])            # D at i+1/2, length n-1
-    xh = 0.5 * (x[:-1] + x[1:])                         # x at i+1/2
-    lower = np.zeros(n)
-    diag = np.zeros(n)
-    upper = np.zeros(n)
-    i = np.arange(1, n - 1)
-    if m == 0:
-        gp = np.ones(n - 1)
-        gm = np.ones(n - 1)
-    else:
-        gp = np.empty(n - 1)
-        gm = np.empty(n - 1)
-        # factors (x_{i+1/2}/x_i)^m and (x_{i-1/2}/x_i)^m applied per interior node
-        gp[:] = (xh / np.where(x[:-1] > 0, x[:-1], 1.0)) ** m       # for node i using xh[i]
-        gm[:] = (xh / np.where(x[1:] > 0, x[1:], 1.0)) ** m         # for node i using xh[i-1]
-    # coefficients for interior nodes
-    cp = Dh[i] * (gp[i] if m else 1.0) / dx ** 2          # multiplies C_{i+1}
-    cm = Dh[i - 1] * (gm[i - 1] if m else 1.0) / dx ** 2  # multiplies C_{i-1}
-    upper[i] = cp
-    lower[i] = cm
-    diag[i] = -(cp + cm)
-    if an_profile is not None and theta_act != 0.0:
-        dAn = np.diff(an_profile)                        # An_{i+1} - An_i, length n-1
-        # Dohmen et al. 2017 App. eq. A20 (explicit form) coefficients of the activity term
-        ap = Dh[i] * (gp[i] if m else 1.0) * theta_act * 0.5 * dAn[i] / dx ** 2
-        am = Dh[i - 1] * (gm[i - 1] if m else 1.0) * theta_act * 0.5 * dAn[i - 1] / dx ** 2
-        upper[i] -= ap
-        diag[i] -= (ap - am)
-        lower[i] += am
+    dx = x[1]-x[0]
+    volumes = _cell_volumes(x, m)
+    face_area = (.5*(x[:-1]+x[1:]))**m
+    conductance = .5*(D_nodes[:-1]+D_nodes[1:])*face_area/dx
+    # F = D*dC/dx - theta*D*C*dAn/dx, with centred face concentration.
+    drift = np.zeros(n-1) if an_profile is None else .5*theta_act*np.diff(an_profile)
+    left = conductance*(1+drift)
+    right = conductance*(1-drift)
+    lower, diag, upper = np.zeros(n), np.zeros(n), np.zeros(n)
+    upper[:-1] = right/volumes[:-1]
+    diag[:-1] -= left/volumes[:-1]
+    lower[1:] = left/volumes[1:]
+    diag[1:] -= right/volumes[1:]
     return lower, diag, upper
 
 
 def _apply_bc_rows(lower, diag, upper, x, D_nodes, m, bc_left, bc_right):
-    n = x.size
-    dx = x[1] - x[0]
-    # left node 0
-    if bc_left.kind == "dirichlet":
-        lower[0] = diag[0] = upper[0] = 0.0
-    else:
-        Dh = 0.5 * (D_nodes[0] + D_nodes[1])
-        if m > 0 and x[0] <= 0.0:
-            c = 2.0 * (m + 1) * Dh / dx ** 2          # symmetry at r = 0
-        else:
-            c = 2.0 * Dh / dx ** 2                     # mirror ghost node
-        upper[0] = c
-        diag[0] = -c
-        lower[0] = 0.0
-    # right node n-1
-    if bc_right.kind == "dirichlet":
-        lower[-1] = diag[-1] = upper[-1] = 0.0
-    else:
-        Dh = 0.5 * (D_nodes[-2] + D_nodes[-1])
-        c = 2.0 * Dh / dx ** 2
-        if m > 0:
-            xh = 0.5 * (x[-2] + x[-1])
-            c *= (xh / x[-1]) ** m
-        lower[-1] = c
-        diag[-1] = -c
-        upper[-1] = 0.0
+    # A closed boundary has zero *total* external flux, including activity.
+    # Interior-face contributions already appear in the half-cell rows.
+    for i, bc in ((0, bc_left), (-1, bc_right)):
+        if bc.kind == "dirichlet":
+            lower[i] = diag[i] = upper[i] = 0.0
     return lower, diag, upper
 
 
@@ -125,8 +99,7 @@ def _trapz(y, x):
 
 
 def _mass(x, C, m):
-    w = x ** m if m else np.ones_like(x)
-    return float(_trapz(C * w, x))
+    return float(np.dot(C, _cell_volumes(x, m)))
 
 
 def solve_1d(x: np.ndarray, C0: np.ndarray, D_func: Callable[[np.ndarray, float], np.ndarray],
@@ -159,6 +132,22 @@ def solve_1d(x: np.ndarray, C0: np.ndarray, D_func: Callable[[np.ndarray, float]
     """
     x = np.asarray(x, dtype=float)
     C = np.asarray(C0, dtype=float).copy()
+    if (x.ndim != 1 or x.size < 3 or C.shape != x.shape
+            or not np.all(np.isfinite(x)) or not np.all(np.isfinite(C))
+            or np.any(np.diff(x) <= 0)):
+        raise ValueError("x and C0 must be finite paired arrays on an increasing grid with at least three nodes")
+    if m not in (0, 1, 2) or (m and x[0] < 0):
+        raise ValueError("geometry index must be 0, 1 or 2; radial coordinates must be nonnegative")
+    if not np.isfinite(t_total) or t_total < 0 or not 0 <= theta_time <= 1 or courant <= 0:
+        raise ValueError("invalid duration, theta_time or courant")
+    if theta_activity and an_profile is None:
+        raise ValueError("activity-driven transport requires an anorthite profile")
+    if an_profile is not None:
+        an_profile = np.asarray(an_profile, dtype=float)
+        if an_profile.shape != x.shape or not np.all(np.isfinite(an_profile)):
+            raise ValueError("anorthite profile must be finite and match the grid")
+        if np.max(np.abs(theta_activity*np.diff(an_profile))) >= 2:
+            raise ValueError("activity gradient is unresolved; refine the spatial grid")
     n = x.size
     dx = x[1] - x[0]
     if not np.allclose(np.diff(x), dx, rtol=1e-6):
@@ -172,6 +161,7 @@ def solve_1d(x: np.ndarray, C0: np.ndarray, D_func: Callable[[np.ndarray, float]
     snaps = sorted(set(float(s) for s in (snapshot_times or []) if 0.0 < s <= t_total))
     result = NumericalResult(x=x, C_final=C, t_final=0.0, mass_initial=_mass(x, C, m))
     if t_total <= 0:
+        result.mass_final = result.mass_initial
         result.C_final = C
         return result
 
@@ -185,7 +175,7 @@ def solve_1d(x: np.ndarray, C0: np.ndarray, D_func: Callable[[np.ndarray, float]
     # a cap set by ``min_steps``, which keeps a 100 kyr run to a few hundred
     # steps instead of millions.
     Dmax0 = float(np.max(D_func(C, float(history.T(0.0)))))
-    if Dmax0 <= 0:
+    if not np.isfinite(Dmax0) or Dmax0 <= 0:
         raise ValueError("D must be positive")
     dt_explicit = courant * dx ** 2 / Dmax0
     if theta_time < 0.5:
@@ -195,6 +185,8 @@ def solve_1d(x: np.ndarray, C0: np.ndarray, D_func: Callable[[np.ndarray, float]
         dt_start = min(dt_explicit, t_total)
         dt_cap = max(dt_start, t_total / max(min_steps, 2))
         growth = float(dt_growth)
+    if t_total / dt_cap > max_steps and theta_time < 0.5:
+        raise ValueError("Explicit stability requires more than max_steps; use an implicit method or increase max_steps")
     if t_total / dt_cap > max_steps:
         result.warnings.append(
             f"{t_total/dt_cap:.3g} steps would be needed at the stability limit "
@@ -209,10 +201,14 @@ def solve_1d(x: np.ndarray, C0: np.ndarray, D_func: Callable[[np.ndarray, float]
     ab = np.zeros((3, n))
     next_snap_idx = 0
     while t < t_total * (1 - 1e-12):
+        if step >= max_steps:
+            raise RuntimeError("max_steps reached before the requested duration; no partial solution returned")
         T_now = float(history.T(t))
         D_nodes = np.asarray(D_func(C, T_now), dtype=float)
-        if D_nodes.shape != (n,):
-            D_nodes = np.full(n, float(np.ravel(D_nodes)[0]))
+        if D_nodes.size == 1:
+            D_nodes = np.full(n, float(D_nodes.item()))
+        if D_nodes.shape != (n,) or not np.all(np.isfinite(D_nodes)) or np.any(D_nodes < 0):
+            raise ValueError("D must be finite, nonnegative and scalar or match the grid")
         Dmax = float(D_nodes.max())
         if theta_time < 0.5:
             dt = courant * dx ** 2 / Dmax if Dmax > 0 else dt_nominal
@@ -224,6 +220,12 @@ def solve_1d(x: np.ndarray, C0: np.ndarray, D_func: Callable[[np.ndarray, float]
             dt = min(dt, snaps[next_snap_idx] - t)
         lower, diag, upper = _operator(x, D_nodes, m, an_profile, theta_activity)
         lower, diag, upper = _apply_bc_rows(lower, diag, upper, x, D_nodes, m, bc_left, bc_right)
+        if theta_time < 0.5:
+            # The radial centre and drift can have a larger exit rate than
+            # the planar dx²/(2D) estimate. Keep the explicit RHS nonnegative.
+            exit_rate = float(np.max(-diag))
+            if exit_rate > 0:
+                dt = min(dt, .95/((1-theta_time)*exit_rate))
         # explicit part: rhs = C + (1-theta) dt L C
         LC = diag * C
         LC[:-1] += upper[:-1] * C[1:]

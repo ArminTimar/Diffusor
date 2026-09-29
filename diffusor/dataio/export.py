@@ -31,6 +31,18 @@ def _fmt(v):
     return v
 
 
+def _model_input(value):
+    """Preserve array-valued settings and identify non-serializable callables."""
+    if callable(value):
+        return {"type": "callable", "name": getattr(value, "__qualname__", type(value).__name__),
+                "reproducibility": "Function code is not embedded. Retain the originating model script."}
+    if isinstance(value, dict):
+        return {key: _model_input(v) for key, v in value.items()}
+    if isinstance(value, (tuple, list)):
+        return [_model_input(v) for v in value]
+    return _fmt(value)
+
+
 def collect_citations(fit_result, mc_result=None, extra: Sequence[str] = ()) -> List[str]:
     """Every citation key used by this run, in a stable order."""
     keys: List[str] = ["crank1975", "costa2008"]
@@ -114,6 +126,8 @@ def methods_paragraph(fit_result, mc_result=None, profile=None) -> str:
     if cond.angles_deg:
         L.append(f"Traverse at {cond.angles_deg} degrees to a, b, c. The direction-cosine "
                  f"relation of Costa & Chakraborty (2004) was applied.")
+    if model.history is not None and model.history.is_isothermal:
+        L.append(f"Supplied isothermal history: {model.history.temps_K[0]:.2f} K; this overrides the nominal temperature above.")
     if model.history is not None and not model.history.is_isothermal:
         L.append(f"Non-isothermal history ({model.history.label}). The diffusion integral "
                  f"int D(T(t)) dt was evaluated numerically (Crank 1975 eq. 7.7, Lasaga 1983).")
@@ -123,10 +137,12 @@ def methods_paragraph(fit_result, mc_result=None, profile=None) -> str:
     L.append("-" * 70)
     L.append(f"Geometry: {model.geometry.kind}. {model.geometry.describe()}")
     L.append(f"Initial condition: {model.initial.describe()}")
+    if model.composition_dependent and model.comp_key:
+        L.append(f"Coefficient composition coordinate: {model.comp_key} = {model.comp_offset:g} + ({model.comp_scale:g}) * C, where C is the plotted profile variable.")
     L.append(f"Boundaries: left {model.bc_left.describe()}, right {model.bc_right.describe()}")
     L.append(f"Solver: {'analytical, ' + why if ok else 'numerical Crank-Nicolson (theta = 1/2), ' + why}")
     if not ok:
-        L.append(f"  Finite-difference scheme after Crank (1975) section 8.4 with D evaluated at "
+        L.append(f"  Conservative finite-volume scheme for the equations in Crank (1975) section 8.4 with D evaluated at "
                  f"half-nodes (Dohmen et al. 2017, Appendix eqs A17-A21), {model.n_nodes} grid nodes.")
     if model.beam_sigma_um:
         L.append(f"Model profiles were convolved with a Gaussian of sigma = "
@@ -150,7 +166,9 @@ def methods_paragraph(fit_result, mc_result=None, profile=None) -> str:
         if "temperature" in b.active_sources():
             L.append(f"  T: 1 sigma = {b.sigma_T_K:.1f} K")
         if "fo2" in b.active_sources():
-            L.append(f"  fO2: 1 sigma = {b.sigma_delta_buffer:.2f} log units on the buffer offset")
+            sigma_fo2 = b.sigma_delta_buffer if b.fo2_mode == "buffer" else b.sigma_log_fo2
+            target = "buffer offset" if b.fo2_mode == "buffer" else "absolute log10 fugacity"
+            L.append(f"  fO2: 1 sigma = {sigma_fo2:.2f} log units on {target}")
         if "pressure" in b.active_sources():
             L.append(f"  P: 1 sigma = {b.sigma_P_Pa/1e6:.1f} MPa")
         if "diffusion_coefficient" in b.active_sources():
@@ -159,13 +177,14 @@ def methods_paragraph(fit_result, mc_result=None, profile=None) -> str:
                     "logD_at_T": "ln D sampled at the working temperature from the scatter "
                                  "reported by the source, so ln D0 and Q stay correlated",
                     "independent": "each Arrhenius parameter sampled independently. This "
-                                   "ignores the strong ln D0 - Q correlation and overstates "
-                                   "the uncertainty"}[mode]
+                                   "omits the ln D0 - Q covariance and can misestimate "
+                                   "the uncertainty",
+                    "none": "held fixed; coefficient uncertainty was not propagated"}[mode]
             L.append(f"  Diffusion coefficient: {expl}.")
         L.append(f"Median time {human_time(mc_result.median)}. 68% interval "
                  f"{human_time(mc_result.p16)} to {human_time(mc_result.p84)}, 95% interval "
-                 f"{human_time(mc_result.p2_5)} to {human_time(mc_result.p97_5)}. Times are "
-                 f"log-normally distributed, so percentiles are reported.")
+                 f"{human_time(mc_result.p2_5)} to {human_time(mc_result.p97_5)}. Empirical "
+                 f"percentiles are reported without assuming a distribution shape.")
         if mc_result.contributions:
             L.append("Contribution of each source to sigma(log10 t), one at a time:")
             for k, v in sorted(mc_result.contributions.items(), key=lambda kv: -kv[1]):
@@ -198,6 +217,18 @@ def result_dict(fit_result, mc_result=None, profile=None) -> Dict:
             "key": c.key, "label": c.label, "citation": c.citation,
             "equation_number": c.equation_number, "equation": c.equation_text,
             "verified": c.verified, "verified_from": c.verified_from,
+            "kind": c.kind, "model_family": c.model_family,
+            "validation_level": c.validation_level,
+            "transported_variable": c.transported_variable,
+            "reference_state": c.reference_state,
+            "calibration_notes": list(c.calibration_notes),
+            "uncertainty_note": c.uncertainty_note,
+            "calibration_ranges": {k: asdict(getattr(c, k)) for k in
+                                   ("T_range", "P_range", "fo2_range", "X_range")},
+            "principal_axes": list(c.principal_funcs), "allowed_axes": list(c.allowed_axes),
+            "axis_factors": c.axis_factors, "fixed_temperature_K": c.fixed_temperature_K,
+            "covariance": _model_input(c.covariance), "covariance_order": list(c.cov_order),
+            "sigma_log10_D": c.sigma_logD,
             "parameters": {k: {"value": p.value, "sigma": p.sigma, "unit": p.unit,
                                "sigma_level": p.sigma_level}
                            for k, p in c.params.items()},
@@ -205,17 +236,25 @@ def result_dict(fit_result, mc_result=None, profile=None) -> Dict:
         "conditions": {
             "T_K": cond.T_K, "T_C": cond.T_K - 273.15, "P_Pa": cond.P_Pa,
             "log_fo2_bar": cond.log_fo2_bar,
-            "X": {k: _fmt(v) for k, v in cond.X.items() if np.ndim(v) == 0},
+            "X": _model_input(cond.X),
             "axis": cond.axis, "angles_deg": cond.angles_deg,
         },
         "model": {
             "geometry": model.geometry.kind,
             "initial_condition": {"kind": model.initial.kind,
-                                  "params": {k: _fmt(v) for k, v in model.initial.params.items()
-                                             if np.ndim(v) == 0}},
+                                  "params": _model_input(model.initial.params)},
             "bc_left": model.bc_left.kind, "bc_right": model.bc_right.kind,
             "beam_sigma_um": model.beam_sigma_um, "n_nodes": model.n_nodes,
+            "comp_key": model.comp_key, "comp_scale": model.comp_scale, "comp_offset": model.comp_offset,
             "route": fit_result.route,
+            "composition_dependent": model.composition_dependent,
+            "boundaries_far": model.boundaries_far,
+            "boundary_values": {"left": _model_input(model.bc_left.value), "right": _model_input(model.bc_right.value)},
+            "x_grid_um": _model_input(model.x_grid),
+            "anorthite_profile": _model_input(model.an_profile), "activity_theta": model.activity_theta,
+            "thermal_history": None if model.history is None else {
+                "times_s": model.history.times.tolist(), "temperatures_K": model.history.temps_K.tolist(),
+                "label": model.history.label, "time_axis_rescaled_to_fitted_duration": True},
         },
         "fit": {
             "t_seconds": fit_result.t_seconds,
@@ -271,7 +310,10 @@ def save_results(directory, fit_result, mc_result=None, profile=None,
         pass
     if mc_result is not None and mc_result.profiles is not None:
         lo, hi = mc_result.envelope()
-        df["C_model_p16"], df["C_model_p84"] = lo, hi
+        xp = np.asarray(mc_result.x_profiles, dtype=float)
+        order = np.argsort(xp)
+        df["C_model_p16"] = np.interp(fit_result.x_data, xp[order], lo[order])
+        df["C_model_p84"] = np.interp(fit_result.x_data, xp[order], hi[order])
     p = out / f"{basename}_profile.csv"
     df.to_csv(p, index=False)
     written["profile"] = str(p)
@@ -280,12 +322,20 @@ def save_results(directory, fit_result, mc_result=None, profile=None,
     m.write_text(methods_paragraph(fit_result, mc_result, profile), encoding="utf-8")
     written["methods"] = str(m)
 
+    from .workbook import save_workbook
+    written["workbook"] = save_workbook(
+        out / f"{basename}_results.xlsx", fit_result, df,
+        result_dict(fit_result, mc_result, profile), m.read_text(encoding="utf-8"), mc_result)
+
     if mc_result is not None:
         t = out / f"{basename}_montecarlo_times.csv"
         pd.DataFrame({"t_seconds": mc_result.times,
                       "t_years": mc_result.times / 3.15576e7}).to_csv(t, index=False)
         written["montecarlo"] = str(t)
 
+    if figure is None:
+        from .figures import report_figure
+        figure = report_figure(fit_result, mc_result)
     if figure is not None:
         f = out / f"{basename}_figure.png"
         figure.savefig(f, dpi=300, bbox_inches="tight")

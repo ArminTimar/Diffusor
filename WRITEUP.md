@@ -21,7 +21,7 @@ already known.
 | --- | --- |
 | Covers | commit `6a69d22`, 2026-09-18 |
 | Package version | 0.1.0 |
-| Modules documented | 51 Python modules: 39 in `diffusor/`, 3 in `scripts/`, 9 in `tests/` |
+| Modules documented | 57 Python modules: 43 in `diffusor/`, 4 in `scripts/`, 10 in `tests/` |
 | Coefficients | 54 entries, 6 minerals, 47 verified against a primary source |
 | References | 80 keys in `diffusor/references.py` |
 
@@ -99,6 +99,16 @@ single fit, which is the spine of everything else:
 8. **Export** calls `dataio.export.save_results`, which calls
    `methods_paragraph` and `collect_citations`, which walk back through the
    model and pull citation keys out of `references.REFERENCES`.
+
+**A profile from an image.** File > Extract profile from image (or "From an
+image..." on the Data step) opens `gui/image_extractor.ImageExtractorDialog`:
+`dataio.images.load_image` → `value_map` (grey, channel or inverted colour
+legend) → the user draws a guideline → `dataio.image_profiles.extract_profiles`
+→ `write_workbook`. Loading that workbook, or pressing "Use in Diffusor",
+goes through `MainWindow.load_image_table` →
+`gui/image_calibration.ImageCalibrationDialog` (pixel size, value-to-composition
+map from `dataio.greyscale.calibrate`) → `image_profiles.composition_table` →
+the same `build_profile` as step 1 above.
 
 **Internal units.** The library works in **micrometres and seconds** inside
 the model layer: `fitting.model.M2_PER_S_TO_UM2_PER_S = 1e12` converts D from
@@ -778,6 +788,118 @@ Calibrating BSE grey values to composition.
   of each probe spot, which should be comparable to the interaction volume so
   the two measurements sample the same material.
 
+#### `dataio/images.py`
+Reads any micrograph or element map into one float array, finds the pixel
+size if the instrument wrote it, and turns a pixel into one number.
+
+* **Called by** `gui/image_extractor.py` and the tests.
+* **`load_image(path, raw=None)`** dispatches on the suffix. PNG, JPEG, BMP,
+  GIF, WebP, PNM and TIFF go through Pillow; TIFF goes through `tifffile`
+  first **when it is installed** (optional; it reads BigTIFF and compressed
+  scientific TIFFs Pillow cannot). Multi-page TIFFs of equal size become
+  channels (`page 1`, `page 2`, ...), which is how multi-element map stacks
+  are usually saved. `load_text_grid` reads the matrices of counts that
+  microprobe software exports (tab, space, comma or semicolon separated,
+  decimal commas allowed), dropping header lines, label columns and a leading
+  row-number column. `load_envi` reads an ENVI `.hdr` and its binary file.
+  `load_raw` reads a headerless binary dump of given width, height, type,
+  byte order, header length and band interleave; the extractor offers it for
+  any file no other reader recognises. Values are **never rescaled**: a 16-bit
+  image keeps 0-65535 and a float map keeps its units; `value_range` records
+  the storage type's nominal full scale. Alpha channels are dropped with a note.
+* **Pixel size** (`pixel_size_from_tags`, `pixel_size_from_sidecar`): Zeiss
+  SmartSEM tag 34118 (`Image Pixel Size = 24.39 nm`), Thermo Fisher/FEI tag
+  34682 (`PixelWidth` in m), Tescan tag 50431 (`PixelSizeX` in m), ImageJ
+  calibration (description `unit=micron` plus XResolution in pixels per
+  unit), a JEOL `.txt` sidecar (`$$SM_MICRON_BAR` px labelled
+  `$$SM_MICRON_MARKER`), a Hitachi sidecar (`PixelSize` in nm). With
+  `tifffile` the vendor tags are still read through Pillow, because
+  `tifffile` pre-parses them into dictionaries. The value is shown to the user
+  as a suggestion with its source; plain TIFF resolution tags are ignored
+  because most software writes a meaningless 72 dpi.
+* **`value_map(image, mode, channel, color_scale)`** returns values, a mask of
+  pixels without a value, and a label. `luminance` is Rec. 601
+  (0.299 R + 0.587 G + 0.114 B, Pillow's greyscale conversion), `mean` the
+  unweighted mean ImageJ uses by default, `channel` one channel or page
+  (NIDIS reads only the first channel), `colour_scale` a legend inversion.
+* **`ColorScale`** holds an ordered run of legend colours and their values,
+  built `from_legend` (sampled along a line the user draws through the legend
+  bar, averaged over 3 px across it, values linear or logarithmic between the
+  two end values), `from_colormap` (a named matplotlib map with vmin and vmax,
+  for when the scheme is known but no legend is in the image) or `from_table`
+  (value, R, G, B). `to_values` converts colours to CIELAB (`srgb_to_lab`,
+  D65) so "nearest" means "looks most alike", finds the nearest legend colour
+  with a k-d tree, refines the value by projecting onto the segment to the
+  closer neighbouring legend colour, and gives **no value** to colours farther
+  than `max_distance` (Delta E, default 20) from the whole legend: cracks,
+  epoxy, labels and the scale bar. Unique colours are looked up once, so a
+  full map is quick. A legend with discrete colour steps returns stepped
+  values; a cyclic map such as `hsv` is ambiguous at its ends.
+
+#### `dataio/image_profiles.py`
+Profiles perpendicular to a guideline drawn on an image, cleaned and
+averaged, written to and read back from Excel. The method is that of
+`greyvalues.m` in NIDIS (Petrone et al. 2016, code at github.com/cpetrone/NIDIS).
+
+* **Called by** `gui/image_extractor.py` (extraction, workbook),
+  `gui/image_calibration.py` (`composition_table`), `gui/main_window.py`
+  (`is_extraction_workbook`, `read_extraction`) and the tests.
+* **Geometry** (`stations`, `line_geometry`). The guideline is a polyline of
+  (x, y) pixel coordinates, x right and y down. Lines are placed every
+  `line_spacing_px` (1 px, as NIDIS) along its arc length, each perpendicular
+  to the local direction, which is taken over +/- 2 px of guideline so a
+  vertex turns the lines gradually. The right-hand normal of direction
+  (dx, dy) in image coordinates is (-dy, dx). Each line runs
+  `length_before_px` on the right and `length_after_px` on the left (both 50,
+  NIDIS's `hp`), sampled every `sample_step_px`. **Distance 0 is the
+  right-hand end, looking from the first guideline point to the last**, as
+  NIDIS; `flip` starts on the left. `Offset` is distance from the guideline.
+* **`extract_profiles(image, settings, color_scale, values)`** samples the
+  value map with `scipy.ndimage.map_coordinates`, bilinear (default) or
+  nearest (MATLAB `improfile`'s default). Samples off the image are NaN.
+* **Cleaning, in the image** (`impurity_masks`): values below `low` (cracks,
+  holes) or above `high` (bright inclusions), pixels inside drawn
+  `exclusions` polygons, and pixels with no value. Each mask can be grown by
+  `grow_px` with a disk, because the edge of a crack is a blend of crack and
+  crystal. A sample is flagged if **any** flagged pixel contributes to it
+  (the mask is interpolated like the values), so a flagged pixel never leaks
+  into a bilinear value. **Across the lines** (`_clip`), at each position:
+  `nidis` rejects values outside mean +/- k SD once (k = 1 in NIDIS);
+  `mad` (default) rejects outside median +/- k 1.4826 MAD, k = 3, repeated
+  up to 5 times; `none`. **Whole lines** with more than
+  `max_rejected_fraction` (50 %) of their values rejected are dropped, since a
+  lamella lying along a line spoils all of it.
+* **Reason codes**: every value keeps why it was not used (`KEPT`, `OUTSIDE`,
+  `THRESHOLD`, `EXCLUDED`, `OFF_SCALE`, `OUTLIER`, `LINE_DROPPED`); `REASONS`
+  describes them and the workbook records them.
+* **`ProfileExtraction.statistics("raw"|"clean")`** gives NIDIS's columns at
+  each position: N, min, max, mean, median, SD (n - 1), relative SD and
+  SE = SD / sqrt(N). "Raw" is every value inside the image, as NIDIS's
+  first CSV; "clean" is what survived. `profile_table` joins both with the
+  distances in px and, if a pixel size is set, um.
+* **`write_workbook`** writes `Profile` (first, so any reader sees the
+  averaged profile; with a chart of raw and cleaned means), `Summary`
+  (source, methods text, rejection counts, notes, how to load it, and the
+  picture of the lines drawn over the image), `Raw lines` and `Clean lines`
+  (every value, NIDIS's `Line_1 ... Line_N` columns), `Rejection codes`,
+  `Reason key`, `Geometry` (each line's station and end points, values used,
+  dropped or not, plus the guideline vertices), `Colour scale` when a legend
+  was used, and `Settings` (a `format` marker and `settings_json`, the whole
+  `ExtractionSettings`, so the extraction can be repeated exactly; NIDIS saves
+  its guideline coordinates in a `.mat` file for the same purpose). More than
+  16380 lines do not fit an Excel sheet and are refused.
+* **Back into Diffusor.** `is_extraction_workbook` checks the marker,
+  `read_extraction` returns an `ExtractionTable`, `table_from_extraction` the
+  same without a file. `composition_table(table, pixel_size_um, statistic,
+  uncertainty, calibration, name)` multiplies pixel distances by the pixel
+  size, maps the chosen statistic (cleaned mean by default) to composition
+  through a `GreyscaleCalibration` with `apply_calibration` (so the
+  uncertainty combines the chosen scatter, SE by default, with the
+  calibration's own), or passes it through unchanged when `calibration` is
+  None (a quantitative map, or a legend already in composition units).
+  **Without a pixel size it refuses**, rather than modelling pixels as
+  micrometres.
+
 #### `dataio/export.py`
 The point of the whole citation machinery.
 
@@ -928,6 +1050,52 @@ create a worker and hand it to `_launch`, which refuses to start a second job
 while one is running. Worker signals are connected only to `@Slot` methods of
 the window, never to lambdas, so Qt delivers them on the interface thread.
 
+#### `gui/image_extractor.py`
+`ImageExtractorDialog`, the nonmodal window that draws profiles on images;
+opened by `MainWindow.show_image_extractor` from File > Extract profile from
+image, from "From an image..." on the Data step, and when an image file is
+picked in File > Load profile (`IMAGE_ONLY_SUFFIXES`). The image fills the
+left with a matplotlib toolbar for zoom and pan; the averaged profile (raw
+mean, cleaned mean +/- 1 SD, the guideline as a dashed line) sits under it;
+the settings are on the right in cards: Image (file, value mode, channel),
+Draw (tools), Scale, Colour legend (only in colour-scale mode), Profile lines,
+Cleaning and Result.
+
+* **Tools** (mouse, only while the plot toolbar's pan and zoom are off):
+  Boundary adds guideline points, right-click or Backspace removes the last;
+  Scale bar takes two clicks and asks for the bar's length, setting um per
+  px; Legend takes the low-value end then the high end of a colour legend;
+  Exclude area adds polygon vertices, right-click or Enter closes it.
+* **Every change re-extracts** after a 120 ms debounce (`_schedule` →
+  `recompute`), so what is saved is what is shown. The value map is computed
+  once per image, mode and legend (`_values_changed`) and passed to
+  `extract_profiles`, so moving a slider does not redo a colour inversion.
+  Up to 40 of the lines, the start-side and far-side ends, the rejected
+  samples (red, at most 20000 drawn) and the exclusion areas are drawn over
+  the image. A colour map is shown in colour so the legend can be found;
+  anything else is shown as the grey values the profile reads.
+* **Opening a second image of the same size keeps the guideline and
+  exclusion areas**, so a Mg map and a Fe map of the same area give profiles
+  along the same line. "Reuse settings from a workbook" loads every setting
+  from an earlier extraction (NIDIS's "use existing coordinates").
+* An unrecognised file offers `RawDialog` (width, height, type, byte order,
+  header bytes, channels) and reads it with `load_raw`.
+* `save_workbook` proposes `<image>_profile<n>.xlsx` beside the image, as
+  NIDIS names its output folders, and embeds `overlay_png()`.
+  `use_in_diffusor` hands `table_from_extraction` to the main window.
+
+#### `gui/image_calibration.py`
+`ImageCalibrationDialog`: what the image cannot tell Diffusor. Pixel size
+(prefilled from the workbook); which statistic (cleaned mean, cleaned median,
+raw mean) and which uncertainty (SE as NIDIS, SD across lines, none); and the
+value-to-composition map: linear through two reference points, fitted to
+anchor points (linear or quadratic, typed in or filled from a microprobe
+traverse with `anchors_from_microprobe` and an averaging window), or none.
+The calibration's `describe()` and notes show live. On accept it builds the
+table with `composition_table` and a `ProfileSpec` (mode A, distance in um),
+and `MainWindow.load_image_table` passes both to `_use_table`, the part of
+loading shared with ordinary files, after logging `summary()`.
+
 #### `gui/workers.py`
 `FitWorker`, `CompareWorker` and `MonteCarloWorker`, each a `QObject` moved
 onto a fresh `QThread` by `start()`. `CompareWorker` fits the same profile with
@@ -991,6 +1159,16 @@ Mg), 120 d (olivine), 8 d (magnetite), 3 yr (greyscale) and 5 kyr (sanidine
 Ba). **Re-running it changes the files, so the round-trip test tolerances
 should be re-checked afterwards.**
 
+#### `scripts/make_example_images.py`
+Writes the two SYNTHETIC images in `examples/images/` for trying the image
+extractor (`default_rng(20260929)`). `cpx_bse_zoned.tif` is 16-bit with an
+ImageJ calibration of 0.05 um/px, a curved Fe-rich rim with X_Fe 0.16 to
+0.26 as grey = 60 + 400 X_Fe (8-bit scale, x 257), an error-function
+boundary of half-width 0.8 um 6 um inside the crystal face, plus a crack, an
+oxide inclusion and a darker lamella. `opx_mg_map_jet.png` is a 'jet' MgO
+map with a drawn legend (16 to 30 wt%) and a 20 um scale bar of 40 px, but no
+pixel size in its metadata, as a microprobe export would be.
+
 #### `scripts/extract_kizimen.py`
 Rebuilds `examples/opx_kizimen_ostorero2022.csv` from the published
 spreadsheet. Reads Supplementary Data 2, sheet "Opx profiles - compositions
@@ -1017,6 +1195,7 @@ stops reproducing the number printed in its source.
 | `test_examples_roundtrip.py` | Each synthetic example is loaded, fitted and checked against its known time, plus the greyscale calibrate-then-fit path and the far-field warning. |
 | `test_datasets_and_ui.py` | Every dataset declares its provenance and never calls synthetic data measured; superseded entries are flagged and demoted; the window builds with one page per step; loading an example fills in the later steps; the Kizimen fit lands inside the Ostorero uncertainty; no label on any step is clipped and no page scrolls. |
 | `test_kfeldspar_and_interface.py` | The K-feldspar laws against their abstracts and the Sr-Ba gap; only the Grocolas entries carry a covariance; every example says where T, P and fO2 come from; boundary choices reach the model and closed ends hold the mass in; the Monte Carlo reports every draw and the worker batches them; the band on the profile is the spread of the refitted draws. |
+| `test_image_profiles.py` | Lines start on the right of the guideline as in NIDIS and recover a known error function; lines stay perpendicular to a curved guideline; samples off the image are not used; value limits with grown masks remove a crack and an inclusion; NIDIS's 1 SD test rejects about a third of clean Gaussian data and the MAD test almost none; exclusion polygons and whole-line dropping; PNG, BMP, JPEG, 8/16-bit and float TIFF, multi-page TIFF, NumPy, text grids with headers, ENVI and raw binary are read; ImageJ, FEI and JEOL pixel sizes are found; a jet map is inverted to under 1 % of its range with off-scale pixels flagged, from a named map and from a legend drawn in the image; the workbook round trip and the calibrated profile; the extractor window saves and loads into Diffusor through both paths. |
 | `test_writeup.py` | This document lists every module, coefficient key, citation key, dataset key and buffer that exists in the code. |
 
 ---
@@ -1296,7 +1475,13 @@ the error-function step with free x0 and 2 sqrt(Dt); the Dimanov & Sautter
 `cpx_FeMg_dimanov_sautter2000` entry and the test that checks it; the "BSE
 profiles resolve better than 0.5 um" resolution preset; and, throughout the
 uncertainty documentation, as the example of propagating errors as if T and
-sqrt(4Dt) were independent.
+sqrt(4Dt) were independent. Its `greyvalues.m` (github.com/cpetrone/NIDIS) is
+the model for `dataio/image_profiles.py`: a guideline along the feature, one
+perpendicular line per guideline pixel, 50 px either side, the first value to
+the right of the guideline looking from its first point, averaging position
+by position, the mean +/- 1 SD outlier test offered as the `nidis` preset, raw
+and cleaned outputs with min, max, mean, SD, relative SD and SE, and saving
+the guideline so the extraction can be repeated.
 
 **`bindeman1998`** — Bindeman, Davis & Drake (1998) Ion microprobe study of
 plagioclase-basalt partition experiments at natural concentration levels of
@@ -2056,6 +2241,30 @@ what Diffusor currently does, and what would settle it.
 10. **Pohl et al. (2024) Li is approximated.** The paper fits a multispecies
     model with interstitial and A1-site Li in exchange; Diffusor applies each
     mechanism as one effective coefficient.
+
+**Image profiles depart from NIDIS `greyvalues.m`** (`dataio/image_profiles.py`):
+
+* Sampling is **bilinear** by default; MATLAB `improfile` defaults to nearest
+  neighbour, which is offered as an option.
+* NIDIS's guideline is straight; Diffusor's may be a **polyline**, with each
+  line perpendicular to the smoothed local direction. On the concave side of
+  a tight curve, neighbouring lines converge and share pixels.
+* NIDIS reads `2 hp` values over `2 hp` px (a step slightly over 1 px) and
+  `int32(len)` lines; Diffusor reads `2 hp + 1` values including both ends,
+  and `round(len / spacing) + 1` lines including both guideline ends.
+* The default outlier test is **median +/- 3 MAD, repeated**, not NIDIS's
+  single mean +/- 1 SD, which removes about 32 % of perfectly good Gaussian
+  values and, without value limits, lets a crack inflate the SD so much that
+  the crack itself survives. NIDIS's condition
+  `v > m + s || v < m - s && v ~= 0` exempts zeros only on the low side (in
+  MATLAB `&&` binds before `||`); Diffusor has no zero exemption and relies on
+  the value limits for zero-valued pixels.
+* **The standard error understates the uncertainty.** Lines 1 px apart share
+  pixels through bilinear sampling and the electron interaction volume, so
+  they are not independent, and SE = SD / sqrt(N) with N of several hundred
+  is too small. NIDIS exports it and Diffusor uses it by default for
+  continuity, but the calibration dialog offers the SD across lines, and the
+  Monte Carlo measurement-noise term is the safer place for the real scatter.
 
 #### Disagreements with published numbers
 

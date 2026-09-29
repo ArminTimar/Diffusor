@@ -31,7 +31,9 @@ RULES = [
 
 GREYSCALE = (
     "BSE grey values need at least two microprobe anchor points to convert grey value "
-    "to composition.")
+    "to composition. Profiles drawn on an image with File > Extract profile from image "
+    "are saved as a workbook that loads here like any file; Diffusor then asks for the "
+    "pixel size and the grey-to-composition map.")
 
 
 def as_plain_text() -> str:

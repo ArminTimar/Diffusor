@@ -18,7 +18,9 @@ python -m pip install -e .
 ```
 
 Needs Python 3.10 or later. Dependencies are numpy, scipy, pandas, matplotlib,
-openpyxl and PySide6.
+Pillow, openpyxl and PySide6. `python -m pip install -e .[images]` adds
+`tifffile`, which reads BigTIFF and compressed scientific TIFFs that Pillow
+cannot. The image extractor works without it.
 
 ## Run
 
@@ -83,6 +85,55 @@ anorthite column can be carried along and used to drive the activity term. An
 optional fit window leaves points out of the fit without deleting them from the
 file, for example a later overgrowth at the very rim. Any extra column such as
 anorthite follows the same window.
+
+## Profiles from images
+
+**File > Extract profile from image** (or *From an image...* on the Data step)
+reads profiles straight off a BSE image or an element map, in the manner of
+the `greyvalues.m` script of NIDIS (Petrone et al. 2016). Draw a guideline
+along the zone boundary; values are read along parallel lines perpendicular to
+it, one line per pixel of guideline and 50 px either side by default, and
+averaged position by position. As in NIDIS the first value of each line is on
+the right of the guideline, looking from its first point. The guideline may
+have any number of points, so a curved boundary can be followed.
+
+* **Formats.** TIFF (8, 16 and 32-bit, float, multi-page stacks read as
+  channels), PNG, JPEG, BMP, GIF, WebP, ENVI `.hdr` with its data file, NumPy
+  `.npy`, text grids of counts as exported by microprobe software, and any
+  headerless binary dump once you give its width, height and data type.
+  Values are never rescaled.
+* **Scale.** Read from Zeiss, Thermo Fisher (FEI), Tescan and ImageJ TIFF
+  tags or JEOL and Hitachi text sidecars when present; otherwise type it, or
+  click both ends of the scale bar and give its length.
+* **Values.** Grey value, luminance or mean of a colour image, one channel or
+  page, or a **colour scale**: click along the legend of a rainbow (or any
+  other) element map and give the values at its ends, or pick the named colour
+  map it was drawn with. Pixels whose colour is not on the legend (black
+  cracks, white labels, epoxy) get no value.
+* **Cleaning.** Reject values below or above limits (cracks and holes are
+  dark, oxide inclusions bright), grow those areas by a few pixels, draw
+  polygons around inclusions or lamellae, reject outliers across the lines at
+  each position (median +/- k MAD by default, or NIDIS's mean +/- 1 SD), and
+  drop lines with too many rejected values. Rejected values are drawn on the
+  image as you go, and the averaged profile updates underneath.
+* **Output.** An Excel workbook: the averaged profile (raw and cleaned
+  statistics: N, min, max, mean, median, SD, relative SD, SE), every raw and
+  cleaned line, a code saying why each rejected value was rejected, the line
+  geometry, the colour legend if one was used, the picture of the lines on the
+  image, and every setting, so the extraction can be repeated (*Reuse
+  settings from a workbook*).
+* **Into Diffusor.** Load the workbook with File > Load profile, or press
+  *Use in Diffusor*. Diffusor asks for the pixel size if the workbook has none
+  and for the map from value to composition: a straight line through two
+  reference points, a linear or quadratic fit to microprobe anchor points
+  (typed in, or taken from a microprobe traverse along the same line), or none
+  when the values already are compositions. The uncertainty combines the
+  scatter across lines with the calibration's own.
+
+The standard error of the mean over hundreds of lines is small, and
+neighbouring lines share pixels, so it understates the real uncertainty. The
+dialog also offers the standard deviation across lines. Two synthetic images to
+try it on are in `examples/images/` (made by `scripts/make_example_images.py`).
 
 ## Example datasets
 

@@ -25,6 +25,8 @@ from .. import datasets as ds
 from ..coefficients import Conditions, get as get_coefficient, list_coefficients
 from ..coefficients.plagioclase import ACTIVITY_A, activity_theta
 from ..dataio import ProfileSpec, build_profile, read_table, save_results, suggest_spec
+from ..dataio.image_profiles import is_extraction_workbook, read_extraction
+from ..dataio.images import PILLOW_SUFFIXES, RAW_SUFFIXES
 from ..fitting import DiffusionModel, UncertaintyBudget
 from ..fitting.fit import T_MAX_DEFAULT as T_MAX, T_MIN_DEFAULT as T_MIN
 from ..minerals import MINERALS, get_mineral
@@ -43,6 +45,9 @@ from .workers import CompareWorker, FitWorker, MonteCarloWorker, start
 
 STEPS = ["Data", "Mineral", "Conditions", "Model", "Coefficient", "Uncertainty", "Results"]
 RESULTS = len(STEPS) - 1
+
+# picked in "Load profile", these open the image extractor instead
+IMAGE_ONLY_SUFFIXES = set(PILLOW_SUFFIXES + RAW_SUFFIXES + (".hdr", ".npy"))
 
 # Analytical resolution presets: (label, width kind, default width in um, sigma for a
 # fixed preset, hint). Width kind is "spot" (sigma = d / 4 for an evenly lit round
@@ -379,6 +384,7 @@ class MainWindow(QMainWindow):
     def _build_menu(self):
         m = self.menuBar().addMenu("&File")
         for text, fn in (("Load profile...", self.load_file),
+                         ("Extract profile from image...", self.show_image_extractor),
                          ("Export results...", self.export_results),
                          (None, None),
                          ("Quit", self.close)):
@@ -420,9 +426,13 @@ class MainWindow(QMainWindow):
         load_card, body = card("Load a profile")
         btn = primary_button("Choose a file...")
         btn.clicked.connect(self.load_file)
+        img = QPushButton("From an image...")
+        img.setToolTip("Draw a boundary on a BSE image or element map and read profiles "
+                       "perpendicular to it")
+        img.clicked.connect(self.show_image_extractor)
         fmt = ghost_button("File format")
         fmt.clicked.connect(self.show_format)
-        body.addWidget(row(btn, fmt))
+        body.addWidget(row(btn, img, fmt))
         body.addWidget(note(format_help.SHORT, "Hint"))
 
         data_card, dbody = card("Loaded data")
@@ -1016,7 +1026,11 @@ class MainWindow(QMainWindow):
     def load_file(self):
         path, _ = QFileDialog.getOpenFileName(
             self, "Load profile", "",
-            "Tables (*.csv *.txt *.tsv *.xlsx *.xls);;All files (*)")
+            "Tables and image profiles (*.csv *.txt *.tsv *.xlsx *.xls);;All files (*)")
+        if path and Path(path).suffix.lower() in IMAGE_ONLY_SUFFIXES:
+            self.show_image_extractor()
+            self.image_extractor.open_image(path)
+            return
         if path:
             self._load(Path(path), dataset=None)
 
@@ -1032,6 +1046,14 @@ class MainWindow(QMainWindow):
         self._load(d.path, dataset=d)
 
     def _load(self, path: Path, dataset: Optional[ds.ExampleDataset]):
+        if dataset is None and is_extraction_workbook(path):
+            try:
+                table = read_extraction(path)
+            except Exception:
+                QMessageBox.critical(self, "Could not load the file", traceback.format_exc())
+                return
+            self.load_image_table(table)
+            return
         try:
             df = read_table(path)
             an = (None, True)
@@ -1043,6 +1065,34 @@ class MainWindow(QMainWindow):
                     return
                 spec = dlg.spec()
                 an = dlg.an_column()
+        except Exception:
+            self._log(traceback.format_exc(), "error")
+            QMessageBox.critical(self, "Could not load the file", traceback.format_exc())
+            return
+        self._use_table(df, spec, path, dataset, an)
+
+    def load_image_table(self, table) -> bool:
+        """Ask for pixel size and value-to-composition map, then load the profile."""
+        from .image_calibration import ImageCalibrationDialog
+        dlg = ImageCalibrationDialog(table, self)
+        if dlg.exec() != QDialog.Accepted:
+            return False
+        self._log(dlg.summary())
+        path = Path(table.path or table.source or "image profile")
+        self._use_table(dlg.frame, dlg.spec, path, None, (None, True))
+        self.raise_()
+        self.activateWindow()
+        return self.profile is not None
+
+    def show_image_extractor(self):
+        from .image_extractor import ImageExtractorDialog
+        if not hasattr(self, "image_extractor"):
+            self.image_extractor = ImageExtractorDialog(self)
+        self.image_extractor.show()
+        self.image_extractor.raise_()
+
+    def _use_table(self, df, spec, path: Path, dataset: Optional[ds.ExampleDataset], an):
+        try:
             self.profile = build_profile(df, spec, source=str(path))
             self.dataset = dataset
             self.an_values = None

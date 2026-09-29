@@ -35,15 +35,28 @@ are propagated-input ensembles, not Bayesian posterior samples.
 """
 from __future__ import annotations
 
+import copy
+import multiprocessing as mp
+import os
+import pickle
+import time
+from concurrent.futures import ProcessPoolExecutor, as_completed
+from concurrent.futures.process import BrokenProcessPool
 from dataclasses import dataclass, field
 from typing import Callable, Dict, List, Optional, Sequence
 
 import numpy as np
 
+from ..solvers.history import ThermalHistory
 from ..thermo.buffers import log_fo2_from_delta
 from ..thermo.units import human_time
 from .fit import T_MAX_DEFAULT, T_MIN_DEFAULT, fit_time
 from .model import DiffusionModel
+
+# expected run time below which the draws stay in this process (starting workers
+# costs about a second each)
+PARALLEL_THRESHOLD_S = 6.0
+BLAS_THREAD_VARIABLES = ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS")
 
 SOURCES = ("temperature", "fo2", "pressure", "diffusion_coefficient",
            "measurement_noise", "distance_scale", "boundary_compositions")
@@ -98,6 +111,7 @@ class MonteCarloResult:
     x_profiles: Optional[np.ndarray] = None
     contributions: Dict[str, float] = field(default_factory=dict)
     warnings: List[str] = field(default_factory=list)
+    workers: int = 1                            # processes that fitted the draws
 
     # -- statistics ---------------------------------------------------------
     @property
@@ -156,7 +170,11 @@ class MonteCarloResult:
 # ---------------------------------------------------------------------------
 def _draw_conditions(model: DiffusionModel, budget: UncertaintyBudget,
                      rng: np.random.Generator, only: Optional[str] = None):
-    """One sampled Conditions object, with T-fO2 correlation built in."""
+    """One sampled Conditions object, with T-fO2 correlation built in.
+
+    Returns the conditions and the sampled buffer offset (None when fO2 is given
+    as an absolute value), which a cooling path needs to follow the buffer down.
+    """
     cond = model.conditions
     active = budget.active_sources() if only is None else ([only] if only in budget.active_sources() else [])
 
@@ -168,6 +186,7 @@ def _draw_conditions(model: DiffusionModel, budget: UncertaintyBudget,
         P = max(0.0, float(rng.normal(cond.P_Pa, budget.sigma_P_Pa)))
 
     log_fo2 = cond.log_fo2_bar
+    delta = None
     if budget.fo2_mode == "buffer":
         delta = budget.delta_buffer
         if "fo2" in active:
@@ -178,7 +197,7 @@ def _draw_conditions(model: DiffusionModel, budget: UncertaintyBudget,
     elif "fo2" in active and log_fo2 is not None:
         log_fo2 = float(rng.normal(cond.log_fo2_bar, budget.sigma_log_fo2))
 
-    return cond.replace(T_K=T, P_Pa=P, log_fo2_bar=log_fo2)
+    return cond.replace(T_K=T, P_Pa=P, log_fo2_bar=log_fo2), delta
 
 
 def _draw_data(x_data, C_data, sigma, budget: UncertaintyBudget,
@@ -193,6 +212,126 @@ def _draw_data(x_data, C_data, sigma, budget: UncertaintyBudget,
     return x, C
 
 
+@dataclass
+class _Draw:
+    """Everything random about one draw.
+
+    Draws are sampled in the calling process, in draw order, so the seed alone
+    fixes every result however many processes then fit them.
+    """
+    index: int
+    conditions: object
+    fo2_buffer: Optional[tuple]
+    history: Optional[ThermalHistory]
+    initial: object                 # None keeps the model's initial condition
+    overrides: dict
+    x: np.ndarray
+    C: np.ndarray
+
+
+def _sample_draw(i: int, model: DiffusionModel, budget: UncertaintyBudget,
+                 rng: np.random.Generator, x_data, C_data, sigma,
+                 only_source: Optional[str], active: Sequence[str]) -> _Draw:
+    cond, delta = _draw_conditions(model, budget, rng, only_source)
+    xd, Cd = _draw_data(x_data, C_data, sigma, budget, rng, only_source)
+    overrides = {}
+    if ("diffusion_coefficient" in active
+            and (only_source is None or only_source == "diffusion_coefficient")):
+        try:
+            overrides = model.coefficient.sample(rng, budget.coefficient_mode)
+        except ValueError:
+            overrides = {}
+    initial = None
+    if "boundary_compositions" in active and budget.sigma_boundary > 0 \
+            and (only_source is None or only_source == "boundary_compositions"):
+        initial = copy.deepcopy(model.initial)
+        for k in ("C_left", "C_right", "C_core", "C_rim"):
+            if k in initial.params:
+                initial.params[k] = float(rng.normal(initial.params[k], budget.sigma_boundary))
+    fo2_buffer = model.fo2_buffer
+    if delta is not None and budget.fo2_mode == "buffer":
+        fo2_buffer = (budget.buffer, delta)
+    history = model.history
+    if history is not None and cond.T_K != model.conditions.T_K:
+        # a cooling path moves as a whole with the sampled temperature: the
+        # uncertainty is on where the path sits, its shape is kept
+        dT = cond.T_K - model.conditions.T_K
+        history = ThermalHistory(history.times.copy(), history.temps_K + dT, history.label)
+    return _Draw(i, cond, fo2_buffer, history, initial, overrides, xd, Cd)
+
+
+def _evaluate(model: DiffusionModel, d: _Draw, sigma, free_parameters, t_min, t_max,
+              t_guess: float, refit: bool, x_data) -> Optional[dict]:
+    """Fit one draw. Returns what ``on_draw`` receives, or None when the draw fails."""
+    try:
+        m = copy.copy(model)
+        m.conditions, m.fo2_buffer, m.history = d.conditions, d.fo2_buffer, d.history
+        if d.initial is not None:
+            m.initial = d.initial
+        if refit:
+            r = fit_time(m, d.x, d.C, sigma, free_parameters, t_min, t_max,
+                         overrides=d.overrides, t_guess=t_guess)
+            t, prof = r.t_seconds, r.C_model
+        else:
+            t = t_guess
+            prof = m.profile(t, x_data, d.overrides)
+        if not np.isfinite(t) or t <= 0:
+            return None
+        try:
+            logD = float(np.log10(m.D_bulk(d.overrides, C_ref=float(np.mean(d.C)))))
+        except Exception:
+            logD = float("nan")
+        return {"index": d.index, "t": float(t), "T_K": float(d.conditions.T_K),
+                "log_fo2_bar": (None if d.conditions.log_fo2_bar is None
+                                else float(d.conditions.log_fo2_bar)),
+                "log10_D": logD, "x": np.asarray(d.x, dtype=float),
+                "C": np.asarray(d.C, dtype=float), "C_model": np.asarray(prof, dtype=float)}
+    except Exception:
+        return None
+
+
+# --- parallel evaluation --------------------------------------------------------
+# Worker processes receive the base model once, when they start, and then batches
+# of draws. The coefficient travels as its registry key: many laws are closures
+# (the magnetite tables, for example), which cannot be pickled, and every worker
+# rebuilds the same registry on import anyway.
+_WORKER: dict = {}
+
+
+def _worker_init(payload: bytes, coefficient_key: Optional[str]) -> None:
+    context = pickle.loads(payload)
+    if coefficient_key is not None:
+        from ..coefficients import get
+        context["model"].coefficient = get(coefficient_key)
+    _WORKER.clear()
+    _WORKER.update(context)
+
+
+def _worker_batch(draws: List[_Draw]) -> List[Optional[dict]]:
+    w = _WORKER
+    return [_evaluate(w["model"], d, w["sigma"], w["free"], w["t_min"], w["t_max"],
+                      w["t_guess"], w["refit"], w["x_data"]) for d in draws]
+
+
+def _portable(model: DiffusionModel):
+    """The model with its coefficient replaced by a registry key, if it is one."""
+    from ..coefficients import get
+    try:
+        if get(model.coefficient.key) is model.coefficient:
+            light = copy.copy(model)
+            light.coefficient = None
+            return light, model.coefficient.key
+    except KeyError:
+        pass
+    pickle.dumps(model)            # raises when the model cannot go to another process
+    return model, None
+
+
+def default_workers() -> int:
+    """All cores but one, so the computer stays usable while a run goes on."""
+    return max(1, (os.cpu_count() or 2) - 1)
+
+
 def run(model: DiffusionModel, x_data, C_data, sigma=None, *,
         budget: Optional[UncertaintyBudget] = None,
         n_draws: int = 1000, seed: int = 12345,
@@ -201,7 +340,9 @@ def run(model: DiffusionModel, x_data, C_data, sigma=None, *,
         keep_profiles: int = 200,
         progress: Optional[Callable[[int, int], bool]] = None,
         only_source: Optional[str] = None,
-        on_draw: Optional[Callable[[dict], None]] = None) -> MonteCarloResult:
+        on_draw: Optional[Callable[[dict], None]] = None,
+        workers: Optional[int] = 1,
+        parallel_threshold_s: float = PARALLEL_THRESHOLD_S) -> MonteCarloResult:
     """Run the Monte Carlo, re-fitting the time for every draw.
 
     ``progress(i, n)`` may return True to abort.  ``only_source`` restricts the
@@ -209,6 +350,12 @@ def run(model: DiffusionModel, x_data, C_data, sigma=None, *,
     computed.  ``on_draw(info)`` receives every successful draw: the fitted time,
     the sampled temperature, fO2 and log10 D, the perturbed data and the fitted
     profile. The interface uses it to draw the Monte Carlo while it runs.
+
+    ``workers`` above 1 fits the draws in that many processes (None or 0: all
+    cores but one). A run expected to take less than ``parallel_threshold_s``
+    stays in this process, because starting workers costs about a second each.
+    The draws are sampled here either way, so the result for a given seed does
+    not depend on the number of workers.
     """
     budget = budget or UncertaintyBudget()
     if (model.coefficient.fixed_temperature_K is not None and budget.sigma_T_K > 0
@@ -219,70 +366,101 @@ def run(model: DiffusionModel, x_data, C_data, sigma=None, *,
     x_data = np.asarray(x_data, dtype=float)
     C_data = np.asarray(C_data, dtype=float)
 
+    started = time.perf_counter()
     base = fit_time(model, x_data, C_data, sigma, free_parameters, t_min, t_max)
-    times: List[float] = []
-    kept: List[np.ndarray] = []
-    n_failed = 0
+    # a draw is seeded from the best fit and scans a narrower range: about 2.5x faster
+    per_draw = (time.perf_counter() - started) / 2.5
     active = budget.active_sources()
+    draws = [_sample_draw(i, model, budget, rng, x_data, C_data, sigma, only_source, active)
+             for i in range(n_draws)]
 
-    for i in range(n_draws):
-        cond = _draw_conditions(model, budget, rng, only_source)
-        xd, Cd = _draw_data(x_data, C_data, sigma, budget, rng, only_source)
-        overrides = {}
-        if ("diffusion_coefficient" in active
-                and (only_source is None or only_source == "diffusion_coefficient")):
-            try:
-                overrides = model.coefficient.sample(rng, budget.coefficient_mode)
-            except ValueError:
-                overrides = {}
-        import copy
-        m = copy.copy(model)
-        m.conditions = cond
-        if "boundary_compositions" in active and budget.sigma_boundary > 0 \
-                and (only_source is None or only_source == "boundary_compositions"):
-            m.initial = copy.deepcopy(model.initial)
-            for k in ("C_left", "C_right", "C_core", "C_rim"):
-                if k in m.initial.params:
-                    m.initial.params[k] = float(rng.normal(m.initial.params[k], budget.sigma_boundary))
+    n_workers = default_workers() if not workers else int(workers)
+    n_workers = min(n_workers, n_draws, 61)          # 61: the Windows process limit
+    if per_draw * n_draws < parallel_threshold_s:
+        n_workers = 1
+
+    results: Dict[int, dict] = {}
+    notes: List[str] = []
+    state = {"done": 0, "aborted": False}
+
+    def collect(r: Optional[dict]) -> None:
+        state["done"] += 1
+        if r is None:
+            return
+        results[r["index"]] = r
+        if on_draw is not None:
+            on_draw({k: v for k, v in r.items() if k != "index"})
+
+    def run_here(pending: List[_Draw]) -> None:
+        for d in pending:
+            collect(_evaluate(model, d, sigma, free_parameters, t_min, t_max,
+                              base.t_seconds, budget.refit_each_draw, x_data))
+            if progress is not None and (state["done"] % 5 == 0 or state["done"] == n_draws):
+                if progress(state["done"], n_draws):
+                    state["aborted"] = True
+                    return
+
+    if n_workers > 1:
         try:
-            if budget.refit_each_draw:
-                r = fit_time(m, xd, Cd, sigma, free_parameters, t_min, t_max,
-                             overrides=overrides, t_guess=base.t_seconds)
-                t = r.t_seconds
-                prof = r.C_model
-            else:
-                t = base.t_seconds
-                prof = m.profile(t, x_data, overrides)
-            if not np.isfinite(t) or t <= 0:
-                raise ValueError("non-finite time")
-            times.append(float(t))
-            if len(kept) < keep_profiles:
-                kept.append(np.asarray(prof, dtype=float))
-            if on_draw is not None:
-                try:
-                    logD = float(np.log10(m.D_bulk(overrides, C_ref=float(np.mean(Cd)))))
-                except Exception:
-                    logD = float("nan")
-                on_draw({"t": float(t), "T_K": float(cond.T_K),
-                         "log_fo2_bar": (None if cond.log_fo2_bar is None
-                                         else float(cond.log_fo2_bar)),
-                         "log10_D": logD, "x": np.asarray(xd, dtype=float),
-                         "C": np.asarray(Cd, dtype=float),
-                         "C_model": np.asarray(prof, dtype=float)})
-        except Exception:
-            n_failed += 1
-        if progress is not None and (i % 5 == 0):
-            if progress(i + 1, n_draws):
-                break
+            light, key = _portable(model)
+            payload = pickle.dumps(dict(model=light, sigma=sigma, free=tuple(free_parameters),
+                                        t_min=t_min, t_max=t_max, t_guess=base.t_seconds,
+                                        refit=budget.refit_each_draw, x_data=x_data))
+        except Exception as exc:
+            notes.append(f"the draws ran on one core: the model cannot be sent to other "
+                         f"processes ({type(exc).__name__})")
+            n_workers = 1
+    if n_workers > 1:
+        # batches of about half a second each, and several per worker for balance
+        size = max(1, min(int(0.5 / max(per_draw, 1e-3)),
+                          int(np.ceil(n_draws / (4 * n_workers)))))
+        batches = [draws[i:i + size] for i in range(0, n_draws, size)]
+        pool = ProcessPoolExecutor(max_workers=n_workers, mp_context=mp.get_context("spawn"),
+                                   initializer=_worker_init, initargs=(payload, key))
+        finished = set()
+        # one BLAS thread per worker: the workers are the parallelism, and each
+        # starting its own thread pool would oversubscribe the cores. Workers
+        # start when the batches are submitted and copy the environment then.
+        saved = {v: os.environ.get(v) for v in BLAS_THREAD_VARIABLES}
+        os.environ.update({v: "1" for v in BLAS_THREAD_VARIABLES})
+        try:
+            try:
+                futures = {pool.submit(_worker_batch, b): n for n, b in enumerate(batches)}
+            finally:
+                for v, old in saved.items():
+                    if old is None:
+                        os.environ.pop(v, None)
+                    else:
+                        os.environ[v] = old
+            for f in as_completed(futures):
+                for r in f.result():
+                    collect(r)
+                finished.add(futures[f])
+                if progress is not None and progress(state["done"], n_draws):
+                    state["aborted"] = True
+                    break
+        except BrokenProcessPool:
+            left = [d for n, b in enumerate(batches) if n not in finished for d in b]
+            notes.append(f"the worker processes stopped; {len(left)} draws were finished "
+                         "on one core")
+            run_here(left)
+        finally:
+            pool.shutdown(wait=not state["aborted"], cancel_futures=True)
+    else:
+        run_here(draws)
 
-    if not times:
+    kept = [results[i] for i in sorted(results)]
+    if not kept:
         raise RuntimeError("every Monte Carlo draw failed. Check the model set-up.")
-
+    n_run = state["done"] if state["aborted"] else n_draws
+    n_failed = max(0, n_run - len(kept))
+    times = np.array([r["t"] for r in kept])
+    profiles = [r["C_model"] for r in kept[:keep_profiles]]
     res = MonteCarloResult(
-        times=np.array(times), t_best=base.t_seconds, n_draws=len(times),
+        times=times, t_best=base.t_seconds, n_draws=len(kept),
         n_failed=n_failed, seed=seed, budget=budget,
-        profiles=np.array(kept) if kept else None,
-        x_profiles=x_data, warnings=list(base.warnings))
+        profiles=np.array(profiles) if profiles else None,
+        x_profiles=x_data, warnings=list(base.warnings) + notes, workers=n_workers)
     if n_failed > 0.1 * n_draws:
         res.warnings.append(f"{n_failed} of {n_draws} draws failed. The result may be biased.")
     at_bound = int(np.sum(res.times >= 0.95 * t_max) + np.sum(res.times <= 1.05 * t_min))
@@ -298,7 +476,8 @@ def contributions(model: DiffusionModel, x_data, C_data, sigma=None, *,
                   budget: Optional[UncertaintyBudget] = None,
                   n_draws: int = 200, seed: int = 12345,
                   free_parameters: Sequence[str] = ("t",),
-                  progress: Optional[Callable[[int, int], bool]] = None) -> Dict[str, float]:
+                  progress: Optional[Callable[[int, int], bool]] = None,
+                  workers: Optional[int] = 1) -> Dict[str, float]:
     """Variance decomposition: sigma(log10 t) with one source active at a time.
 
     This is a one-at-a-time sensitivity analysis, so the individual values do
@@ -310,6 +489,6 @@ def contributions(model: DiffusionModel, x_data, C_data, sigma=None, *,
     for src in budget.active_sources():
         r = run(model, x_data, C_data, sigma, budget=budget, n_draws=n_draws, seed=seed,
                 free_parameters=free_parameters, keep_profiles=0, only_source=src,
-                progress=progress)
+                progress=progress, workers=workers)
         out[src] = r.sigma_log10
     return out

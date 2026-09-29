@@ -1,6 +1,7 @@
 """Matplotlib canvas: measured profile, initial condition, fit, Monte Carlo envelope."""
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Dict, Optional, Sequence
 
 import numpy as np
@@ -14,13 +15,38 @@ from ..thermo.units import human_time
 from . import theme
 
 
+class SaveToolbar(NavigationToolbar2QT):
+    """Matplotlib's toolbar, whose save dialog opens in the data's own folder.
+
+    Matplotlib starts the dialog in ``savefig.directory``, which it overwrites
+    with wherever the last figure went, and proposes a name taken from the
+    window title. Set ``start_dir`` and ``default_name`` when data are loaded.
+    """
+
+    def __init__(self, canvas, parent=None):
+        super().__init__(canvas, parent)
+        self.start_dir: Optional[Path] = None
+        self.default_name: Optional[str] = None
+
+    def save_figure(self, *args):
+        import matplotlib as mpl
+        if self.start_dir is not None and Path(self.start_dir).is_dir():
+            mpl.rcParams["savefig.directory"] = str(self.start_dir)
+        if self.default_name:
+            self.canvas.get_default_filename = lambda: self.default_name
+        try:
+            return super().save_figure(*args)
+        finally:
+            self.canvas.__dict__.pop("get_default_filename", None)
+
+
 class ProfilePlot(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.figure = Figure(figsize=(7, 5.5), layout="constrained",
                              facecolor=theme.SURFACE)
         self.canvas = FigureCanvasQTAgg(self.figure)
-        self.toolbar = NavigationToolbar2QT(self.canvas, self)
+        self.toolbar = SaveToolbar(self.canvas, self)
         self.toolbar.setStyleSheet(
             f"QToolBar {{ background:{theme.SURFACE}; border:none; "
             f"border-bottom:1px solid {theme.BORDER}; padding:3px; }}")

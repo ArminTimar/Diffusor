@@ -28,6 +28,7 @@ from ..solvers.convolution import gaussian_convolve, resolution_warning
 from ..solvers.geometry import Geometry, suggest_grid
 from ..solvers.history import ThermalHistory, effective_Dt
 from ..solvers.initial import InitialCondition
+from ..thermo.buffers import log_fo2_from_delta
 from ..solvers.numerical import solve_1d
 
 # Diffusor works internally in micrometres and seconds: D is converted from
@@ -59,6 +60,10 @@ class DiffusionModel:
     # the closed-form step solution assumes (Crank 1975 eq. 2.14). False when an end
     # is a real crystal rim or centre and its boundary condition matters.
     boundaries_far: bool = True
+    # fO2 set as an offset from a buffer: (buffer name, offset in log units). Along a
+    # cooling path the buffer moves with temperature, and fO2 moves with it; without
+    # this the fO2 of the starting temperature would be kept all the way down.
+    fo2_buffer: Optional[Tuple[str, float]] = None
 
     def __post_init__(self):
         if self.coefficient.model_family != "scalar_fickian":
@@ -66,6 +71,27 @@ class DiffusionModel:
 
     def _composition(self, C):
         return self.comp_offset + self.comp_scale * np.asarray(C, dtype=float)
+
+    def conditions_at(self, T_K: float) -> Conditions:
+        """The model's conditions at another temperature, fO2 following its buffer."""
+        cond = self.conditions.replace(T_K=T_K)
+        if self.fo2_buffer is not None and T_K != self.conditions.T_K:
+            buffer, delta = self.fo2_buffer
+            cond = cond.replace(log_fo2_bar=log_fo2_from_delta(buffer, delta, T_K, cond.P_Pa))
+        return cond
+
+    def reference_C(self) -> Optional[float]:
+        """A representative profile composition: midway between the two plateaus.
+
+        Used wherever one D stands for the whole profile (the closed-form route,
+        diffusion lengths in warnings), so a composition-dependent law is
+        evaluated at the profile's own composition, not at a placeholder.
+        """
+        p = self.initial.params
+        for a, b in (("C_left", "C_right"), ("C_core", "C_rim")):
+            if a in p and b in p:
+                return 0.5 * (float(p[a]) + float(p[b]))
+        return None
 
     # -- grid ---------------------------------------------------------------
     def grid(self, x_data) -> np.ndarray:
@@ -76,7 +102,7 @@ class DiffusionModel:
     # -- diffusivity --------------------------------------------------------
     def _D_um2s(self, C_nodes, T_K: float, overrides=None):
         """D in um^2/s at the given nodal compositions."""
-        cond = self.conditions.replace(T_K=T_K)
+        cond = self.conditions_at(T_K)
         if self.composition_dependent and self.comp_key:
             X = dict(cond.X)
             X[self.comp_key] = self._composition(C_nodes)
@@ -143,7 +169,7 @@ class DiffusionModel:
         def D_of_T(T_array):
             out = []
             for T in np.atleast_1d(T_array):
-                cond = self.conditions.replace(T_K=float(T))
+                cond = self.conditions_at(float(T))
                 if self.composition_dependent and self.comp_key and C_ref is not None:
                     X = dict(cond.X)
                     X[self.comp_key] = self._composition(C_ref)
@@ -173,13 +199,31 @@ class DiffusionModel:
         return np.interp(np.asarray(x_out, dtype=float), x, C)
 
     # -- diagnostics ---------------------------------------------------------
+    def _range_conditions(self, T_K: Optional[float] = None) -> Conditions:
+        """Conditions to test against the calibration ranges.
+
+        For a composition-dependent law the profile's own compositions (both
+        plateaus) are tested, not the single placeholder composition that the
+        numerical solver replaces node by node.
+        """
+        cond = self.conditions if T_K is None else self.conditions_at(T_K)
+        if self.composition_dependent and self.comp_key:
+            ends = [float(v) for k, v in self.initial.params.items()
+                    if k in ("C_left", "C_right", "C_core", "C_rim")]
+            if ends:
+                X = dict(cond.X)
+                X[self.comp_key] = self._composition(np.array(ends))
+                cond = cond.replace(X=X)
+        return cond
+
     def warnings(self, t_seconds: Optional[float] = None) -> List[str]:
-        w = list(self.coefficient.check_conditions(self.conditions))
+        w = list(self.coefficient.check_conditions(self._range_conditions()))
         if self.history is not None:
             for T in np.unique(self.history.temps_K):
-                w.extend(self.coefficient.check_conditions(self.conditions.replace(T_K=float(T))))
+                w.extend(self.coefficient.check_conditions(self._range_conditions(float(T))))
+        C_ref = self.reference_C() if self.composition_dependent and self.comp_key else None
         if t_seconds is not None and self.beam_sigma_um > 0:
-            Dt = self._effective_Dt(t_seconds)
+            Dt = self._effective_Dt(t_seconds, C_ref=C_ref)
             msg = resolution_warning(Dt, self.beam_sigma_um)
             if msg:
                 w.append(msg)
@@ -187,7 +231,7 @@ class DiffusionModel:
             x0 = self.initial.params.get("x0", self.initial.params.get("rim_start"))
             if x0 is not None and self.x_grid is not None:
                 half = min(abs(float(self.x_grid[-1]) - x0), abs(x0 - float(self.x_grid[0])))
-                L = 2.0 * np.sqrt(max(self._effective_Dt(t_seconds), 0.0))
+                L = 2.0 * np.sqrt(max(self._effective_Dt(t_seconds, C_ref=C_ref), 0.0))
                 if L > 0.6 * half:
                     w.append(
                         f"the diffusion length 2*sqrt(Dt) = {L:.1f} um is a large fraction of "

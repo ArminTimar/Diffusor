@@ -31,13 +31,18 @@ class WrapLabel(QLabel):
         # asks for far more than it needs. Once it has a real width, use that.
         s = super().sizeHint()
         if self.width() > 0:
-            s.setHeight(self.heightForWidth(self.width()))
+            s.setHeight(self._height_for(self.width()))
         return s
+
+    def _height_for(self, width: int) -> int:
+        # Qt answers -1 ("no preference") for a label with no text yet; a minimum
+        # height of -1 is refused with a "Negative sizes" warning, so use 0
+        return max(self.heightForWidth(width), 0)
 
     def _sync(self):
         w = self.width()
         if w > 0:
-            h = self.heightForWidth(w)
+            h = self._height_for(w)
             if h != self.minimumHeight():
                 # shrink as well as grow, and tell the layout, or a label first laid
                 # out narrow keeps the tall height it needed then

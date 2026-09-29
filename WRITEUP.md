@@ -136,8 +136,11 @@ Package docstring and `__version__ = "0.1.0"`. The version string is written
 into every exported JSON and methods block by `dataio/export.py`.
 
 #### `diffusor/__main__.py`
-Two lines: `from .gui.app import main; raise SystemExit(main())`. Makes
-`python -m diffusor` start the window.
+`from .gui.app import main`, then `raise SystemExit(main())` under an
+`if __name__ == "__main__"` guard. Makes `python -m diffusor` start the window.
+The guard is required by the parallel Monte Carlo: on Windows and macOS each
+worker process re-imports the main module under another name, and without the
+guard every worker would open its own window.
 
 #### `Start Diffusor.bat`
 The double-click start for someone who downloaded the ZIP. On the first run
@@ -654,7 +657,17 @@ Carlo draw.
 * **Fields.** `coefficient`, `conditions`, `initial`, `geometry`, `bc_left`,
   `bc_right`, `history`, `beam_sigma_um`, `n_nodes` (default 401), `x_grid`,
   `composition_dependent`, `comp_key`, `an_profile`, `activity_theta`,
-  `force_numerical`, `boundaries_far`.
+  `force_numerical`, `boundaries_far`, `fo2_buffer`.
+* **`fo2_buffer`** is `(buffer name, offset)` when fO2 was given relative to a
+  buffer (the interface sets it). `conditions_at(T)` then recomputes fO2 from
+  the buffer at every temperature, so along a cooling path fO2 falls with the
+  buffer instead of staying at its starting value. The numerical solver
+  (`_D_um2s`) and the effective-Dt integral both evaluate D through it.
+* **`reference_C()`** is the midpoint of the two plateaus. Wherever one D
+  stands for the whole profile (the closed form, the diffusion lengths in the
+  warnings) a composition-dependent law is evaluated there, never at the
+  single placeholder composition in `conditions.X`, which the numerical solver
+  replaces node by node.
 * **`M2_PER_S_TO_UM2_PER_S = 1e12`.** D is converted from m^2/s to um^2/s once
   in `_D_um2s`, which is what keeps the linear algebra well conditioned.
 * **`can_use_analytical()`** returns a decision **and a reason**, and the
@@ -671,9 +684,13 @@ Carlo draw.
   if a beam sigma is set it re-evaluates on the model grid, convolves, and
   interpolates back. On the numerical route it evaluates the initial condition
   on the grid, runs `solve_1d`, convolves, and interpolates.
-* **`warnings(t)`** collects the coefficient's range and provenance warnings,
+* **`warnings(t)`** collects the coefficient's range and provenance warnings
+  (ranges tested at the profile's own plateau compositions through
+  `_range_conditions`, and at every temperature of a cooling path with its
+  own fO2),
   the beam-resolution warning, a **far-field warning** when
-  `2 sqrt(Dt) > 0.6 x` the distance from the interface to the end of the
+  `2 sqrt(Dt) > 0.6 x` (Dt at `reference_C()`) the distance from the interface
+  to the end of the
   traverse (the semi-infinite assumption is breaking down), and, for plane
   geometry, the standing caveat that 1-D modelling of a 3-D crystal gives a
   maximum estimate and that sectioning biases it further (Shea et al. 2015;
@@ -728,12 +745,34 @@ Error propagation, and the reason the project exists.
   interface, the plot panels and the methods block all read.
 * **What one draw does.** `_draw_conditions` samples T and P, then either
   re-evaluates the buffer at the **sampled** temperature (the correlation that
-  independent sampling misses) or samples an absolute log fO2.
+  independent sampling misses) or samples an absolute log fO2. It returns the
+  sampled buffer offset too, which becomes the draw's `fo2_buffer`. With a
+  cooling path, the **whole path is shifted** by the sampled temperature minus
+  the nominal one, keeping its shape; before 29 September 2026 the path stayed
+  fixed and sampled temperatures acted only through fO2, so temperature
+  uncertainty was largely lost with cooling on.
   `_draw_data` adds Gaussian measurement noise to C and a multiplicative
   scale error to x. `coefficient.sample()` supplies parameter overrides.
   Plateau compositions are perturbed if asked. Then the **whole fit is re-run**
   on the perturbed data with the perturbed conditions, seeded from the base
   time.
+* **Parallel draws.** `run(..., workers=N)` fits the draws in `N` processes
+  (`default_workers()`: all cores but one). Everything random is drawn first,
+  in draw order, in the calling process (`_sample_draw` into `_Draw` records),
+  so a given seed gives identical times on any number of workers; only
+  `_evaluate` (the fit) runs in the workers. Each worker gets the base model
+  once through `_worker_init`, with the coefficient sent as its registry key
+  (`_portable`), because many laws are closures that cannot be pickled, then
+  batches of draws sized to about half a second (`_worker_batch`). Processes
+  are started with `spawn` everywhere, each with one BLAS thread
+  (`BLAS_THREAD_VARIABLES`) so the workers do not oversubscribe the cores.
+  On a 4-core, 8-thread laptop (i7-10510U) 7 workers fit olivine draws
+  about 2.6 times faster than one. A run expected to take less than
+  `PARALLEL_THRESHOLD_S = 6` s stays in the calling process, since each worker
+  costs about a second to start. If the workers cannot start or die, the
+  remaining draws are finished on one core and a note says so. Stopping cancels
+  the batches not yet started. `MonteCarloResult.workers` records how many
+  processes were used.
 * **Reported statistics.** Times are log-normal, so the median and the 16th,
   84th, 2.5th and 97.5th percentiles are reported rather than a symmetric
   sigma; `sigma_log10` is the standard deviation of log10 t. Mutch et al.
@@ -1054,8 +1093,9 @@ of the library sees.
 5. **Coefficient.** `_refresh_coefficients` lists everything registered for
    that mineral and species, tagged recommended, unverified or superseded.
    Ticking two or more enables Compare.
-6. **Uncertainty.** Draws, seed, which sources to sample, the coefficient
-   sampling mode and whether to run the variance decomposition.
+6. **Uncertainty.** Draws, seed, processor cores (`sp_cores`, default all but
+   one), which sources to sample, the coefficient sampling mode and whether to
+   run the variance decomposition.
    `_on_dmode_changed` greys out a mode the chosen law cannot support and
    names the one that will actually be used.
 7. **Results.** A narrow summary of every setting with an *edit* link beside
@@ -1148,10 +1188,15 @@ several coefficients and reports progress per coefficient.
 `MonteCarloWorker` buffers the `on_draw` callbacks and emits them in batches
 at most once a second (`BATCH_SECONDS = 1.0`), so the live plot can grow
 without flooding the event loop, and runs the variance decomposition
-afterwards if asked. Both long workers support `abort()`.
+afterwards if asked. Both long workers support `abort()`. `MonteCarloWorker`
+passes the core count from the Uncertainty step to `run` and `contributions`,
+which fit the draws in worker processes; the `QThread` only waits for them.
 
 #### `gui/plot_widget.py`
-The matplotlib canvas. `show_data`, `show_fit` (profile plus residual panel),
+The matplotlib canvas, with `SaveToolbar`: matplotlib's toolbar whose save
+dialog opens in `start_dir` with `default_name` (the main window sets both to
+the loaded profile's folder and `<profile>_diffusor.png`; matplotlib on its own
+starts wherever the last figure went). `show_data`, `show_fit` (profile plus residual panel),
 `show_comparison`, `show_histogram`, and the live Monte Carlo view:
 `start_monte_carlo` lays out the panels, `add_monte_carlo_draws` adds each
 batch as a faint fitted curve plus the perturbed points (capped at 250
@@ -1174,7 +1219,8 @@ citation keys into formatted entries.
 #### `gui/widgets.py`, `gui/theme.py`, `gui/format_help.py`, `gui/icons/`
 Layout helpers (`card`, `field`, `row`, `pair`, `callout`, `collapsible`,
 `page_columns`, `WrapLabel`, which reserves the height a wrapped label
-actually needs, and `fit_to_screen`, which opens a window at its preferred
+actually needs (0 while it is empty: Qt reports -1, and a -1 minimum height
+prints a "Negative sizes" warning), and `fit_to_screen`, which opens a window at its preferred
 size or smaller so it fits the available screen with room for the title bar);
 the palette and the Qt stylesheet, with the plot colours kept
 in step with the interface; and the one place that describes what an input

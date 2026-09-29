@@ -88,11 +88,13 @@ class MonteCarloWorker(QObject):
 
     def __init__(self, model: DiffusionModel, x, C, sigma, budget: UncertaintyBudget,
                  n_draws: int, seed: int, free_parameters, t_min: float, t_max: float,
-                 do_contributions: bool = False, contribution_draws: int = 100):
+                 do_contributions: bool = False, contribution_draws: int = 100,
+                 workers: int = 1):
         super().__init__()
         self.args = (model, x, C, sigma, budget, n_draws, seed, free_parameters, t_min, t_max)
         self.do_contributions = do_contributions
         self.contribution_draws = contribution_draws
+        self.workers = workers
         self._abort = False
         self._buffer: List[dict] = []
         self._last_emit = 0.0
@@ -122,13 +124,15 @@ class MonteCarloWorker(QObject):
             self.stage.emit("Monte Carlo")
             res = run_montecarlo(model, x, C, sigma, budget=budget, n_draws=n_draws,
                                  seed=seed, free_parameters=free, t_min=t_min, t_max=t_max,
-                                 progress=self._cb, on_draw=self._on_draw)
+                                 progress=self._cb, on_draw=self._on_draw,
+                                 workers=self.workers)
             self._flush()
             if self.do_contributions and not self._abort:
                 self.stage.emit("variance contributions")
                 res.contributions = contributions(
                     model, x, C, sigma, budget=budget, n_draws=self.contribution_draws,
-                    seed=seed + 1, free_parameters=free, progress=self._cb)
+                    seed=seed + 1, free_parameters=free, progress=self._cb,
+                    workers=self.workers)
             self.finished.emit(res)
         except Exception:
             self.failed.emit(traceback.format_exc())

@@ -34,6 +34,7 @@ from PySide6.QtWidgets import (QButtonGroup, QCheckBox, QComboBox, QDialog, QDia
                                QVBoxLayout, QWidget)
 
 from ..dataio import images as imgio
+from .plot_widget import SaveToolbar
 from ..dataio.image_profiles import (CLIP_METHODS, KEPT, OUTSIDE, CleaningSettings,
                                      ExtractionSettings, extract_profiles, is_extraction_workbook,
                                      suggest_limits, table_from_extraction, write_workbook)
@@ -223,7 +224,7 @@ class ImageExtractorDialog(QDialog):
         self.fig = Figure(figsize=(8, 6), layout="constrained", facecolor=theme.SURFACE)
         self.canvas = FigureCanvasQTAgg(self.fig)
         self.canvas.setFocusPolicy(Qt.StrongFocus)
-        self.toolbar = NavigationToolbar2QT(self.canvas, w)
+        self.toolbar = SaveToolbar(self.canvas, w)
         lay.addWidget(self.toolbar)
         lay.addWidget(self.canvas, 1)
         self.ax = self.fig.add_subplot(111)
@@ -439,6 +440,8 @@ class ImageExtractorDialog(QDialog):
     def set_image(self, image: imgio.LoadedImage):
         same_size = (self.image is not None and self.image.data.shape[:2] == image.data.shape[:2])
         self.image = image
+        self.toolbar.start_dir = Path(image.source).parent
+        self.toolbar.default_name = f"{Path(image.source).stem}_lines.png"
         if not same_size:
             self.guideline, self.exclusions, self.legend_pts = [], [], None
         self.current_poly, self.clicks = [], []

@@ -156,7 +156,8 @@ class JointStudyDialog(QDialog):
     def export_study(self):
         if self.result is None:
             return
-        directory = QFileDialog.getExistingDirectory(self, "Export shared-duration study")
+        start = self.owner.output_dir() if hasattr(self.owner, "output_dir") else ""
+        directory = QFileDialog.getExistingDirectory(self, "Export shared-duration study", start)
         if directory:
             try:
                 save_joint_results(directory, self.result)

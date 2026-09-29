@@ -6,6 +6,7 @@ and change it. Pages never scroll. Only lists and reading panes do.
 """
 from __future__ import annotations
 
+import os
 import traceback
 from datetime import datetime
 from pathlib import Path
@@ -29,6 +30,7 @@ from ..dataio.image_profiles import is_extraction_workbook, read_extraction
 from ..dataio.images import PILLOW_SUFFIXES, RAW_SUFFIXES
 from ..fitting import DiffusionModel, UncertaintyBudget
 from ..fitting.fit import T_MAX_DEFAULT as T_MAX, T_MIN_DEFAULT as T_MIN
+from ..fitting.montecarlo import default_workers
 from ..minerals import MINERALS, get_mineral
 from ..references import cite
 from ..solvers import Geometry, InitialCondition, dirichlet, zero_flux
@@ -724,6 +726,12 @@ class MainWindow(QMainWindow):
         self.sp_seed.setLocale(number_locale())
         body.addWidget(pair(field("Draws", self.sp_draws), field("Random seed", self.sp_seed)))
         body.addWidget(note("500 for a quick look, 1000 for a paper.", "Hint"))
+        cores = os.cpu_count() or 1
+        self.sp_cores = QSpinBox(); self.sp_cores.setRange(1, max(1, min(cores, 61)))
+        self.sp_cores.setValue(default_workers())
+        body.addWidget(field("Processor cores", self.sp_cores,
+                             f"Draws are fitted in parallel on this many of the {cores} cores. "
+                             "The seed gives the same answer on any number. Short runs use one."))
 
         s, sbody = card("Sample")
         self.chk_mc_T = QCheckBox("Temperature"); self.chk_mc_T.setChecked(True)
@@ -1128,6 +1136,9 @@ class MainWindow(QMainWindow):
                 self._refresh_ic_options()
             self.lbl_data.setText(msg)
             _repolish(self.lbl_data, "Good")
+            # graphs saved from the plot toolbar go beside the data, like exports
+            self.plot.toolbar.start_dir = Path(self.output_dir()) if self.output_dir() else None
+            self.plot.toolbar.default_name = f"{Path(p.source).stem or 'profile'}_diffusor.png"
             self._log(f"loaded {path}\n{p.spec.describe()}"
                       + "".join(f"\nnote: {n}" for n in p.notes))
             self._guess_initial()
@@ -1543,7 +1554,9 @@ class MainWindow(QMainWindow):
             comp_scale=comp_scale, comp_offset=comp_offset,
             an_profile=an_grid, activity_theta=theta if an_grid is not None else 0.0,
             force_numerical=self.cmb_solver.currentIndex() == 1,
-            boundaries_far=self._boundaries_far())
+            boundaries_far=self._boundaries_far(),
+            fo2_buffer=((self.cmb_buffer.currentText(), self.sp_dbuf.value())
+                        if self.cmb_fo2_mode.currentIndex() == 0 else None))
 
     def _free_parameters(self):
         free = ["t"]
@@ -1713,7 +1726,8 @@ class MainWindow(QMainWindow):
         w = MonteCarloWorker(model, p.x, p.C, p.sigma, budget, n,
                              self.sp_seed.value(), self._free_parameters(), T_MIN, T_MAX,
                              do_contributions=self.chk_contrib.isChecked(),
-                             contribution_draws=max(40, n // 5))
+                             contribution_draws=max(40, n // 5),
+                             workers=self.sp_cores.value())
         w.progress.connect(self._mc_progress)
         w.stage.connect(self._mc_stage)
         w.draws.connect(self._mc_draws_arrived)
@@ -1731,7 +1745,8 @@ class MainWindow(QMainWindow):
             self._mc_meta = dict(x=p.x, C=p.C, sigma=p.sigma, y_label=self._y_label(),
                                  n_total=n, sampled=active, fixed=fixed)
             self.plot.start_monte_carlo(**self._mc_meta)
-            self._log(f"Monte Carlo: {n} draws, seed {self.sp_seed.value()}, varying "
+            self._log(f"Monte Carlo: {n} draws, seed {self.sp_seed.value()}, "
+                      f"up to {self.sp_cores.value()} cores, varying "
                       + ", ".join(SOURCE_NAMES.get(a, a) for a in active))
 
     def _fo2_text(self) -> str:
@@ -1766,7 +1781,8 @@ class MainWindow(QMainWindow):
         self.plot.finish_monte_carlo(res, self._best_curve(res))
         self._rebuild_summary()
         self._log(f"Monte Carlo complete: median {human_time(res.median)}, 68% "
-                  f"{human_time(res.p16)} to {human_time(res.p84)}")
+                  f"{human_time(res.p16)} to {human_time(res.p84)}, "
+                  f"{res.workers} {'core' if res.workers == 1 else 'cores'}")
         self._status("Monte Carlo done. Details shows the numbers.")
 
     def _best_curve(self, res):
@@ -1852,7 +1868,7 @@ class MainWindow(QMainWindow):
         if self.fit_result is None:
             QMessageBox.information(self, "Nothing to export", "Run a fit first.")
             return
-        d = QFileDialog.getExistingDirectory(self, "Export into folder")
+        d = QFileDialog.getExistingDirectory(self, "Export into folder", self.output_dir())
         if not d:
             return
         try:
@@ -1862,6 +1878,14 @@ class MainWindow(QMainWindow):
             QMessageBox.information(self, "Exported", "Written:\n" + "\n".join(written.values()))
         except Exception:
             QMessageBox.critical(self, "Export failed", traceback.format_exc())
+
+    def output_dir(self) -> str:
+        """The loaded profile's folder: where save and export dialogs open."""
+        if self.profile is not None and self.profile.source:
+            folder = Path(self.profile.source).parent
+            if folder.is_dir():
+                return str(folder)
+        return ""
 
     def show_about(self):
         from .. import __version__

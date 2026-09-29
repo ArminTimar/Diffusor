@@ -124,7 +124,9 @@ The window walks through six steps and then opens a results view.
    use and why.
 5. **Coefficient** lists everything published for that mineral and species,
    tagged *recommended*, *unverified* or *superseded*.
-6. **Uncertainty** chooses the Monte Carlo draws, the seed and what to sample.
+6. **Uncertainty** chooses the Monte Carlo draws, the seed, what to sample and
+   how many processor cores to use. Draws are fitted in parallel, and the same
+   seed gives the same answer on any number of cores.
 
 The results view puts the fitted time and its interval at the top of a narrow
 summary of every setting, with an *edit* link beside each group that jumps back

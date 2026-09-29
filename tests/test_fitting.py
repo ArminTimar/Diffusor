@@ -142,7 +142,7 @@ def test_temperature_and_fo2_stay_correlated_through_the_buffer():
     rng = np.random.default_rng(0)
     Ts, fs = [], []
     for _ in range(300):
-        c = _draw_conditions(m, budget, rng)
+        c, _ = _draw_conditions(m, budget, rng)
         Ts.append(c.T_K)
         fs.append(c.log_fo2_bar)
     r = np.corrcoef(Ts, fs)[0, 1]
@@ -182,3 +182,138 @@ def test_fit_reports_the_solver_route_and_caveats():
     r = fit_time(m, x, C)
     assert "Crank-Nicolson" in r.route
     assert any("1-D modelling" in w for w in r.warnings)
+
+
+# --- cooling paths and the far-field warning -------------------------------------
+def test_far_field_warning_uses_the_profile_composition_not_a_placeholder():
+    """The olivine example once warned of a 1400 um diffusion length for a 20 um one:
+    D was evaluated at the Conditions placeholder XFe = 1 instead of the profile."""
+    T = 1150 + 273.15
+    coef = get("ol_FeMg_dohmen_chakraborty2007_tamed")
+    cond = Conditions(T_K=T, P_Pa=1e8, log_fo2_bar=log_fo2_from_delta("FMQ", 0.0, T),
+                      X={"XFe": 1.0}, axis="c")              # placeholder, as the GUI passes
+    m = DiffusionModel(coefficient=coef, conditions=cond,
+                       initial=InitialCondition("step", {"x0": 150.0, "C_left": 88.0,
+                                                         "C_right": 80.0}),
+                       bc_left=dirichlet(88.0), bc_right=dirichlet(80.0),
+                       comp_key="XFe", composition_dependent=True,
+                       comp_scale=-0.01, comp_offset=1.0,              # Fo mol% -> XFe
+                       x_grid=np.linspace(0, 300, 201))
+    assert m.reference_C() == pytest.approx(84.0)
+    far = [w for w in m.warnings(1.0e6) if "diffusion length" in w]   # about 31 um
+    assert not far, far
+    assert any("diffusion length" in w for w in m.warnings(1.0e11))
+
+
+def _cooling_model(**kw):
+    m = make_model(comp_dependent=False)
+    from diffusor.solvers.history import ThermalHistory
+    m.history = ThermalHistory.linear(m.conditions.T_K, m.conditions.T_K - 150.0, 1.0)
+    m.fo2_buffer = ("NNO", 1.0)
+    for k, v in kw.items():
+        setattr(m, k, v)
+    return m
+
+
+def test_fo2_follows_the_buffer_down_a_cooling_path():
+    m = _cooling_model()
+    T_end = m.conditions.T_K - 150.0
+    assert m.conditions_at(T_end).log_fo2_bar == pytest.approx(
+        log_fo2_from_delta("NNO", 1.0, T_end, m.conditions.P_Pa))
+    assert m.conditions_at(m.conditions.T_K).log_fo2_bar == m.conditions.log_fo2_bar
+    fixed = _cooling_model(fo2_buffer=None)
+    # opx Fe-Mg rises with fO2, and the buffer falls on cooling: D ends lower
+    t = 3.0 * SEC_PER_YEAR
+    assert m._effective_Dt(t) < fixed._effective_Dt(t)
+
+
+def test_monte_carlo_temperature_moves_a_cooling_path():
+    """With cooling on, sampled temperatures used to change only fO2, not the path."""
+    m = _cooling_model()
+    x = np.linspace(-40, 40, 41)
+    C = m.profile(3.0 * SEC_PER_YEAR, x)
+    budget = UncertaintyBudget(sigma_T_K=30.0, buffer="NNO", delta_buffer=1.0,
+                               sample_coefficient=False, sample_measurement_noise=False)
+    draws = []
+    res = run_montecarlo(m, x, C, budget=budget, n_draws=40, seed=3, on_draw=draws.append)
+    T = np.array([d["T_K"] for d in draws])
+    logt = np.log10(res.times)
+    assert np.std(logt) > 0.05
+    assert np.corrcoef(T, logt)[0, 1] < -0.95
+
+
+def test_calibration_ranges_are_checked_at_the_profile_composition():
+    """A composition-dependent law is checked at the plateaus, not the placeholder."""
+    T = 1150 + 273.15
+    coef = get("ol_FeMg_dohmen_chakraborty2007_tamed")
+    cond = Conditions(T_K=T, P_Pa=1e5, log_fo2_bar=log_fo2_from_delta("FMQ", -1.0, T),
+                      X={"XFe": 1.0}, axis="c")
+
+    def model(fo_left, fo_right):
+        return DiffusionModel(coefficient=coef, conditions=cond,
+                              initial=InitialCondition("step", {"x0": 150.0, "C_left": fo_left,
+                                                                "C_right": fo_right}),
+                              comp_key="XFe", composition_dependent=True,
+                              comp_scale=-0.01, comp_offset=1.0)
+    assert not any("XFe is outside" in w for w in model(88.0, 80.0).warnings())
+    assert any("XFe is outside" in w for w in model(88.0, 40.0).warnings())   # Fo40: XFe 0.6
+
+
+# --- parallel Monte Carlo ----------------------------------------------------------
+def _quick_setup(key="opx_FeMg_dohmen2016"):
+    m = make_model(comp_dependent=False) if key.startswith("opx") else None
+    if m is None:
+        T = 950 + 273.15
+        m = DiffusionModel(coefficient=get(key),
+                           conditions=Conditions(T_K=T, P_Pa=1e8, log_fo2_bar=-11.0,
+                                                 X={"xTi": 0.1}),
+                           initial=InitialCondition("step", {"x0": 0.0, "C_left": 0.30,
+                                                             "C_right": 0.18}),
+                           bc_left=dirichlet(0.30), bc_right=dirichlet(0.18),
+                           composition_dependent=False)
+    x = np.linspace(-40, 40, 41)
+    C = m.profile(8 * 86400.0, x) + np.random.default_rng(1).normal(0, 0.003, x.size)
+    budget = UncertaintyBudget(sigma_T_K=20.0, buffer="NNO", delta_buffer=1.0,
+                               sigma_delta_buffer=0.3)
+    return m, x, C, np.full(x.size, 0.003), budget
+
+
+def test_parallel_monte_carlo_gives_the_same_draws_as_one_core():
+    """The draws are sampled before they are shared out, so the seed alone fixes them."""
+    m, x, C, s, budget = _quick_setup()
+    one = run_montecarlo(m, x, C, s, budget=budget, n_draws=24, seed=9, workers=1)
+    two = run_montecarlo(m, x, C, s, budget=budget, n_draws=24, seed=9, workers=2,
+                         parallel_threshold_s=0.0)
+    assert one.workers == 1 and two.workers == 2
+    assert np.array_equal(one.times, two.times)
+    assert np.allclose(one.profiles, two.profiles)
+
+
+def test_parallel_monte_carlo_handles_laws_that_cannot_be_pickled():
+    """Magnetite laws are closures; workers look them up in the registry by key."""
+    import pickle
+    m, x, C, s, budget = _quick_setup("mt_Ti_vanorman_crispin2010")
+    with pytest.raises(Exception):
+        pickle.dumps(m.coefficient)
+    budget.sample_coefficient = False
+    res = run_montecarlo(m, x, C, s, budget=budget, n_draws=12, seed=2, workers=2,
+                         parallel_threshold_s=0.0)
+    assert res.workers == 2 and res.n_draws == 12
+
+
+def test_parallel_monte_carlo_can_be_stopped():
+    m, x, C, s, budget = _quick_setup()
+    seen = []
+
+    def stop_early(i, n):
+        seen.append(i)
+        return i >= 4
+    res = run_montecarlo(m, x, C, s, budget=budget, n_draws=200, seed=4, workers=2,
+                         parallel_threshold_s=0.0, progress=stop_early)
+    assert res.n_draws < 200 and seen
+
+
+def test_short_runs_stay_on_one_core():
+    m, x, C, s, budget = _quick_setup()
+    res = run_montecarlo(m, x, C, s, budget=budget, n_draws=10, seed=1, workers=4)
+    assert res.workers == 1

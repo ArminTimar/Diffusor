@@ -61,6 +61,21 @@ Dock, right-click Diffusor's icon there while it runs and choose **Options >
 Keep in Dock**, or drag **Start Diffusor.command** to the Dock's right-hand
 side. On Linux, run `./Start\ Diffusor.command` from a terminal in the folder.
 
+## Updates
+
+When a new version is published on GitHub, Diffusor shows a bar under the
+title: *Diffusor 0.2.0 is available*. **Download** opens the release page in
+your browser, where you download the ZIP as you did the first time; **Later**
+hides the bar until the next check. To update, extract the new ZIP into a new
+folder and start it with **Start Diffusor.bat** (or **.command**); the first
+start sets up again, which takes a few minutes. Your own data files are never
+touched, because Diffusor changes nothing itself.
+
+Diffusor checks about once a day, when it starts, and does nothing if the
+computer is offline. The only thing sent is the request for the newest release
+to `api.github.com`. Turn the automatic check off under **Help > Check for
+updates at startup**, or check by hand with **Help > Check for updates...**.
+
 ## Literature expansion and shared-duration studies
 
 The current source audit, mathematical corrections and remaining research roadmap

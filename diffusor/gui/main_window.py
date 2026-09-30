@@ -8,13 +8,13 @@ from __future__ import annotations
 
 import os
 import traceback
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 import numpy as np
-from PySide6.QtCore import QLocale, Qt, QTimer, Slot
-from PySide6.QtGui import QAction, QFont, QGuiApplication
+from PySide6.QtCore import QLocale, QSettings, Qt, QTimer, QUrl, Slot
+from PySide6.QtGui import QAction, QDesktopServices, QFont, QGuiApplication
 from PySide6.QtWidgets import (QApplication, QCheckBox, QComboBox, QDialog, QDialogButtonBox,
                                QDoubleSpinBox, QFileDialog, QFrame, QHBoxLayout, QHeaderView,
                                QLabel, QLineEdit, QListWidget, QListWidgetItem, QMainWindow,
@@ -23,6 +23,7 @@ from PySide6.QtWidgets import (QApplication, QCheckBox, QComboBox, QDialog, QDia
                                QVBoxLayout, QWidget)
 
 from .. import datasets as ds
+from .. import updates
 from ..coefficients import Conditions, get as get_coefficient, list_coefficients
 from ..coefficients.plagioclase import ACTIVITY_A, activity_theta
 from ..dataio import ProfileSpec, build_profile, read_table, save_results, suggest_spec
@@ -43,7 +44,7 @@ from .plot_widget import DataPreview, ProfilePlot
 from .widgets import (WrapLabel, callout, card, collapsible, divider, field, ghost_button,
                       install_no_wheel, note, page_columns, pair, primary_button, row,
                       scrollable)
-from .workers import CompareWorker, FitWorker, MonteCarloWorker, start
+from .workers import CompareWorker, FitWorker, MonteCarloWorker, UpdateWorker, start
 
 STEPS = ["Data", "Mineral", "Conditions", "Model", "Coefficient", "Uncertainty", "Results"]
 RESULTS = len(STEPS) - 1
@@ -301,6 +302,9 @@ class MainWindow(QMainWindow):
         self.mc_result = None
         self.compare_results = None
         self._jobs: List = []           # (thread, worker) pairs kept alive until finished
+        self._update_job = None         # the (thread, worker) of a running update check
+        self._update_manual = False     # the user asked for it, so say the outcome
+        self._update_release: Optional[updates.ReleaseInfo] = None
         self._log_entries: List[Tuple[datetime, str, str]] = []
         self._prefill: Dict[int, QLabel] = {}
         self._mc_draws: List[dict] = []
@@ -316,6 +320,7 @@ class MainWindow(QMainWindow):
         outer.setSpacing(0)
         outer.addWidget(self._build_header())
         outer.addWidget(divider())
+        outer.addWidget(self._build_update_banner())
         self.pages = QStackedWidget()
         for builder in (self._page_data, self._page_mineral, self._page_conditions,
                         self._page_model, self._page_coefficient, self._page_uncertainty,
@@ -356,6 +361,30 @@ class MainWindow(QMainWindow):
             rh.addWidget(lab)
         h.addWidget(rail)
         return w
+
+    def _build_update_banner(self) -> QWidget:
+        """A strip under the header, hidden until a newer release is found."""
+        wrap = QWidget(); wrap.setObjectName("Page")
+        lay = QHBoxLayout(wrap)
+        lay.setContentsMargins(24, 8, 24, 0)
+        box = QFrame(); box.setObjectName("InfoBox")
+        h = QHBoxLayout(box)
+        h.setContentsMargins(11, 6, 11, 6)
+        h.setSpacing(10)
+        self.lbl_update = WrapLabel("")
+        self.lbl_update.setObjectName("CalloutText")
+        self.lbl_update.setAlignment(Qt.AlignVCenter | Qt.AlignLeft)
+        h.addWidget(self.lbl_update, 1)
+        self.btn_update_get = primary_button("Download")
+        self.btn_update_get.clicked.connect(self._open_update_page)
+        h.addWidget(self.btn_update_get, 0, Qt.AlignVCenter)
+        self.btn_update_later = ghost_button("Later")
+        self.btn_update_later.clicked.connect(lambda: self.update_banner.setVisible(False))
+        h.addWidget(self.btn_update_later, 0, Qt.AlignVCenter)
+        lay.addWidget(box)
+        wrap.setVisible(False)
+        self.update_banner = wrap
+        return wrap
 
     def _build_footer(self) -> QWidget:
         w = QWidget(); w.setObjectName("Page")
@@ -406,6 +435,17 @@ class MainWindow(QMainWindow):
                          ("Choosing the boundaries", self.show_boundary_help),
                          ("About", self.show_about)):
             a = QAction(text, self); a.triggered.connect(fn); h.addAction(a)
+        h.addSeparator()
+        a = QAction("Check for updates...", self)
+        a.triggered.connect(lambda: self.check_for_updates(manual=True))
+        h.addAction(a)
+        self.act_update_startup = QAction("Check for updates at startup", self)
+        self.act_update_startup.setCheckable(True)
+        self.act_update_startup.setChecked(self._settings().value(
+            "updates/check_at_startup", True, type=bool))
+        self.act_update_startup.toggled.connect(
+            lambda on: self._settings().setValue("updates/check_at_startup", bool(on)))
+        h.addAction(self.act_update_startup)
 
     def _prefill_bar(self, step: int, with_sources: bool = False) -> QWidget:
         """A one-line note saying what a loaded example set on this step."""
@@ -1633,6 +1673,9 @@ class MainWindow(QMainWindow):
         for t, _ in self._jobs:
             t.quit()
             t.wait(3000)
+        if self._update_job is not None:
+            # a web request cannot be interrupted; it ends within its own timeout
+            self._update_job[0].wait(int(updates.TIMEOUT_SECONDS * 1000) + 1000)
         super().closeEvent(event)
 
     def _ready(self) -> bool:
@@ -1886,6 +1929,69 @@ class MainWindow(QMainWindow):
             if folder.is_dir():
                 return str(folder)
         return ""
+
+    # ================================================================ updates
+    # The check asks GitHub for the newest release and, if it is newer than this
+    # one, shows the banner. It never downloads or changes anything itself.
+    @staticmethod
+    def _settings() -> QSettings:
+        return QSettings("Diffusor", "Diffusor")
+
+    def startup_update_check(self):
+        """Check quietly, if the user allows it and none succeeded in the last day."""
+        s = self._settings()
+        if not s.value("updates/check_at_startup", True, type=bool):
+            return
+        if not updates.due(str(s.value("updates/last_check", "") or "")):
+            return
+        self.check_for_updates(manual=False)
+
+    def check_for_updates(self, manual: bool = False):
+        if self._update_job is not None and self._update_job[0].isRunning():
+            if manual:
+                self._status("Already checking for updates.")
+            return
+        from .. import __version__
+        self._update_manual = manual
+        worker = UpdateWorker(__version__)
+        worker.finished.connect(self._update_found)
+        worker.failed.connect(self._update_failed)
+        self._update_job = (start(worker), worker)
+        if manual:
+            self._status("Checking for updates...")
+
+    @Slot(object)
+    def _update_found(self, info):
+        from .. import __version__
+        self._settings().setValue("updates/last_check",
+                                  datetime.now(timezone.utc).isoformat())
+        manual, self._update_manual = self._update_manual, False
+        if updates.is_newer(info.version, __version__):
+            self._update_release = info
+            self.lbl_update.setText(f"Diffusor {info.version} is available. "
+                                    f"This is {__version__}.")
+            self.lbl_update.setToolTip(info.notes[:800])
+            self.update_banner.setVisible(True)
+            self._log(f"update available: {info.version}")
+            if manual:
+                self._status("")
+        elif manual:
+            self._status("")
+            QMessageBox.information(self, "Check for updates",
+                                    f"Diffusor {__version__} is the newest version.")
+
+    @Slot(str)
+    def _update_failed(self, message: str):
+        manual, self._update_manual = self._update_manual, False
+        self._log(f"update check: {message}")
+        if manual:
+            self._status("")
+            QMessageBox.information(self, "Check for updates", message)
+
+    def _open_update_page(self):
+        if self._update_release is not None:
+            QDesktopServices.openUrl(QUrl(self._update_release.url))
+        self.update_banner.setVisible(False)
 
     def show_about(self):
         from .. import __version__

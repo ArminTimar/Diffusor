@@ -18,6 +18,7 @@ def _own_taskbar_entry() -> None:
 
 
 def main(argv=None) -> int:
+    from PySide6.QtCore import QTimer
     from PySide6.QtGui import QIcon
     from PySide6.QtWidgets import QApplication
     import matplotlib
@@ -30,6 +31,8 @@ def main(argv=None) -> int:
     app.setWindowIcon(QIcon(str(ICON)))
     win = MainWindow()
     win.show()
+    # after the window is up, so a slow network never delays the start
+    QTimer.singleShot(1500, win.startup_update_check)
     return app.exec()
 
 

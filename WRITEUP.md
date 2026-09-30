@@ -23,7 +23,7 @@ already known.
 | --- | --- |
 | Covers | September 29 working tree; section 5 updates the September 18 baseline |
 | Package version | 0.1.0 |
-| Modules documented | 68 Python modules |
+| Modules documented | 70 Python modules |
 | Coefficients | 103 entries, 13 minerals, 98 with source-transcription checks |
 | References | 95 keys in `diffusor/references.py` |
 
@@ -133,7 +133,12 @@ in a normal run.
 
 #### `diffusor/__init__.py`
 Package docstring and `__version__ = "0.1.0"`. The version string is written
-into every exported JSON and methods block by `dataio/export.py`.
+into every exported JSON and methods block by `dataio/export.py`, shown in
+Help > About, and compared with the newest GitHub release by `updates.py`.
+It is the only place the version is written: `pyproject.toml` declares it
+`dynamic` and reads it with `[tool.setuptools.dynamic] version = { attr =
+"diffusor.__version__" }`. To release, change it here, commit, tag `vX.Y.Z` and
+publish a GitHub release with that tag.
 
 #### `diffusor/__main__.py`
 `from .gui.app import main`, then `raise SystemExit(main())` under an
@@ -173,7 +178,28 @@ every window inherits) and shows a `MainWindow`. On Windows it first sets an
 explicit AppUserModelID, so the taskbar shows Diffusor's icon instead of
 grouping the window under `pythonw.exe`. Also the `diffusor` launcher, declared
 under `[project.gui-scripts]` in `pyproject.toml` so it opens no console window;
-a desktop shortcut to it can use `icons/diffusor.ico`.
+a desktop shortcut to it can use `icons/diffusor.ico`. 1.5 s after the window
+is shown it calls `MainWindow.startup_update_check`, so a slow network never
+delays the start. `MainWindow` itself never checks on construction, which keeps
+the tests off the network.
+
+#### `diffusor/updates.py`
+Finds out whether a newer Diffusor has been released. Standard library only,
+no Qt. `fetch_latest` GETs `https://api.github.com/repos/ArminTimar/Diffusor/releases/latest`
+(the newest published release; drafts and pre-releases are not returned) with a
+6 s timeout, a `User-Agent` (GitHub refuses requests without one) and a 1 MB
+cap on the reply, and returns a `ReleaseInfo(version, tag, url, notes)`. Every
+failure (no release yet, rate limit, offline, timeout, unreadable or oversized
+reply) raises `UpdateError` with a sentence fit to show the user.
+`parse_version` reads `v0.2.0` as `(0, 2, 0)` and rejects anything else,
+including `0.2.0rc1`; `is_newer` compares as numbers, padded with zeros, so
+`0.10.0 > 0.9.0` and `1.0 == 1.0.0`; a tag it cannot read gives no notice.
+The `html_url` from the reply is opened in the user's browser, so it is used
+only if it starts with `https://github.com/ArminTimar/Diffusor/releases/`;
+otherwise the page is rebuilt from the tag. `due` is true when no check has
+succeeded in the last 20 hours (`CHECK_EVERY`). The module downloads and
+changes nothing: the user reads the release page and downloads the ZIP as at
+the first install.
 
 ---
 
@@ -1049,7 +1075,7 @@ the T, P and fO2 of the example come from.
 Six steps and a results view. Pages never scroll; only lists and reading panes
 do, and scrolling never changes a number (`widgets.NoWheelOnInputs`).
 
-#### `gui/main_window.py` (1786 lines)
+#### `gui/main_window.py` (2003 lines)
 The whole flow. Everything the user chooses ends up in `_model()`,
 `_free_parameters()` and `_budget()`, which are the three functions the rest
 of the library sees.
@@ -1122,6 +1148,23 @@ create a worker and hand it to `_launch`, which refuses to start a second job
 while one is running. Worker signals are connected only to `@Slot` methods of
 the window, never to lambdas, so Qt delivers them on the interface thread.
 
+**Updates.** `_build_update_banner` adds a hidden strip under the header:
+"Diffusor X is available. This is Y." with **Download** (opens the release page
+in the browser, then hides the strip) and **Later** (hides it; nothing is
+remembered, so the next check shows it again). `check_for_updates(manual)`
+starts an `UpdateWorker` kept in `_update_job`, separate from `_jobs` so an
+update check never blocks or disables Fit, Compare and Monte Carlo.
+`_update_found` records the time in `QSettings("Diffusor", "Diffusor")` under
+`updates/last_check` (only on success, so an offline start is retried at the
+next launch) and shows the strip when `updates.is_newer`; the release notes are
+its tooltip. A check the user asked for (Help > Check for updates...) always
+answers, with a message box saying "newest version" or why the check failed; a
+startup check is silent apart from a line in the log. `startup_update_check`
+runs the silent check unless Help > Check for updates at startup is unticked
+(`updates/check_at_startup`, default on) or the last success was under 20 hours
+ago. `closeEvent` waits for a running check, which ends within its own 6 s
+timeout.
+
 #### `gui/image_extractor.py`
 `ImageExtractorDialog`, the nonmodal window that draws profiles on images;
 opened by `MainWindow.show_image_extractor` from File > Extract profile from
@@ -1182,13 +1225,16 @@ and `MainWindow.load_image_table` passes both to `_use_table`, the part of
 loading shared with ordinary files, after logging `summary()`.
 
 #### `gui/workers.py`
-`FitWorker`, `CompareWorker` and `MonteCarloWorker`, each a `QObject` moved
+`FitWorker`, `CompareWorker`, `MonteCarloWorker` and `UpdateWorker`, each a `QObject` moved
 onto a fresh `QThread` by `start()`. `CompareWorker` fits the same profile with
 several coefficients and reports progress per coefficient.
 `MonteCarloWorker` buffers the `on_draw` callbacks and emits them in batches
 at most once a second (`BATCH_SECONDS = 1.0`), so the live plot can grow
 without flooding the event loop, and runs the variance decomposition
-afterwards if asked. Both long workers support `abort()`. `MonteCarloWorker`
+afterwards if asked. `UpdateWorker` calls `updates.fetch_latest` and emits the
+`ReleaseInfo` or the failure sentence; it has no `abort()`, because a web
+request cannot be interrupted, and relies on the 6 s timeout. Both long
+workers support `abort()`. `MonteCarloWorker`
 passes the core count from the Uncertainty step to `run` and `contributions`,
 which fit the draws in worker processes; the `QThread` only waits for them.
 
@@ -1296,6 +1342,7 @@ stops reproducing the number printed in its source.
 | `test_datasets_and_ui.py` | Every dataset declares its provenance and never calls synthetic data measured; superseded entries are flagged and demoted; the window builds with one page per step; loading an example fills in the later steps; the Kizimen fit lands inside the Ostorero uncertainty; no label on any step is clipped and no page scrolls. |
 | `test_kfeldspar_and_interface.py` | The K-feldspar laws against their abstracts and the Sr-Ba gap; only the Grocolas entries carry a covariance; every example says where T, P and fO2 come from; boundary choices reach the model and closed ends hold the mass in; the Monte Carlo reports every draw and the worker batches them; the band on the profile is the spread of the refitted draws. |
 | `test_image_profiles.py` | Lines start on the right of the guideline as in NIDIS and recover a known error function; lines stay perpendicular to a curved guideline; samples off the image are not used; value limits with grown masks remove a crack and an inclusion; NIDIS's 1 SD test rejects about a third of clean Gaussian data and the MAD test almost none; exclusion polygons and whole-line dropping; PNG, BMP, JPEG, 8/16-bit and float TIFF, multi-page TIFF, NumPy, text grids with headers, ENVI and raw binary are read; ImageJ, FEI and JEOL pixel sizes are found; a jet map is inverted to under 1 % of its range with off-scale pixels flagged, from a named map and from a legend drawn in the image; the workbook round trip and the calibrated profile; the extractor window saves and loads into Diffusor through both paths; a legend saved as a separate image is picked and used; the image windows fit the screen and their content can shrink. |
+| `test_updates.py` | Versions compare as numbers (`0.10.0 > 0.9.0`, `1.0 == 1.0.0`) and a pre-release or unreadable tag never triggers a notice; the version is written only in `diffusor/__init__.py`; a release link that does not point at this project's own release pages is replaced; every failure (404, rate limit, offline, timeout, bad JSON, oversized or non-UTF-8 reply) becomes a readable `UpdateError`; the request carries a User-Agent; the worker reports a release or a reason; the banner appears only for a newer release, **Later** hides it and **Download** opens the release page; a silent check never opens a dialog and a manual one always does; only a successful check is remembered; the startup switch and the daily limit are respected and the switch survives a restart. The network is faked and the settings live in a temporary file, so the suite never goes online or touches the real settings. |
 | `test_writeup.py` | This document lists every module, coefficient key, citation key, dataset key and buffer that exists in the code. |
 
 ---

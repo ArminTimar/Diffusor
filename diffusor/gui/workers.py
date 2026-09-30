@@ -13,6 +13,7 @@ from typing import Dict, List, Optional, Sequence
 import numpy as np
 from PySide6.QtCore import QObject, QThread, Signal
 
+from .. import updates
 from ..fitting import (DiffusionModel, UncertaintyBudget, contributions, fit_time,
                        run_montecarlo)
 
@@ -136,6 +137,24 @@ class MonteCarloWorker(QObject):
             self.finished.emit(res)
         except Exception:
             self.failed.emit(traceback.format_exc())
+
+
+class UpdateWorker(QObject):
+    """Ask GitHub for the newest release without freezing the window."""
+    finished = Signal(object)       # updates.ReleaseInfo
+    failed = Signal(str)
+
+    def __init__(self, current: str):
+        super().__init__()
+        self.current = current
+
+    def run(self):
+        try:
+            self.finished.emit(updates.fetch_latest(self.current))
+        except updates.UpdateError as exc:
+            self.failed.emit(str(exc))
+        except Exception:
+            self.failed.emit("The update check failed unexpectedly.")
 
 
 def start(worker: QObject) -> QThread:

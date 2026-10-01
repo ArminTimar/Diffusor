@@ -1,5 +1,8 @@
 # Diffusor
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23074989.svg)](https://doi.org/10.5281/zenodo.23074989)
+[![tests](https://github.com/ArminTimar/Diffusor/actions/workflows/tests.yml/badge.svg)](https://github.com/ArminTimar/Diffusor/actions/workflows/tests.yml)
+
 A local desktop application for diffusion chronometry. It solves 1-D diffusion
 problems analytically and numerically, carries a registry of literature
 diffusion coefficients for olivine, orthopyroxene, clinopyroxene, plagioclase
@@ -528,6 +531,9 @@ Those are the recommended entries. At 1150 °C they agree with Sievwright et al.
 ## Citing Diffusor
 
 If Diffusor contributes to published work, cite it with the version you used.
+Every release is archived on Zenodo:
+[doi:10.5281/zenodo.23074989](https://doi.org/10.5281/zenodo.23074989) always
+points to the newest one, and each version's Zenodo page gives its own DOI.
 GitHub's **Cite this repository** button (from [CITATION.cff](CITATION.cff))
 gives the citation in APA and BibTeX. Cite the diffusion coefficients too:
 every exported methods block lists the sources the run actually used, and

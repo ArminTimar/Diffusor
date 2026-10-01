@@ -1,10 +1,12 @@
 # How to cite Diffusor. GitHub shows this as "Cite this repository", and
 # Zenodo reads it when it archives a release. The version is deliberately not
 # written here: it lives only in diffusor/__init__.py, and Zenodo takes it from
-# the release tag. Add the concept DOI under "doi" once Zenodo has minted it.
+# the release tag. The DOI is Zenodo's concept DOI, which always resolves to
+# the newest release; each release also gets its own DOI on its Zenodo page.
 cff-version: 1.2.0
 message: "If you use Diffusor in published work, please cite it as below, give the version you used (it is in every exported methods block), and cite the diffusion coefficients listed in that methods block."
 type: software
+doi: 10.5281/zenodo.23074989
 title: "Diffusor: diffusion chronometry with traceable coefficients and correlated uncertainties"
 authors:
   - family-names: Timar

@@ -29,6 +29,8 @@ these keys, and the test suite fails if a citation key does not resolve.
 | `ap_Sm_cherniak2000_implant` | apatite | Sm | Cherniak (2000) | yes |
 | `ap_Sr_cherniak1993` | apatite | Sr | Cherniak & Ryerson (1993) | yes |
 | `ap_Yb_cherniak2000_in` | apatite | Yb | Cherniak (2000) | yes |
+| `cpx_CaMg_brady1983` | cpx | Ca-Mg | Brady & McCallister (1983) | yes |
+| `cpx_FeMg_dimanov_sautter2000` | cpx | Fe-Mg | Dimanov & Sautter (2000) | yes |
 | `mnz_Pb_cherniak2004` | monazite | Pb | Cherniak et al. (2004) | yes |
 | `mt_Al_sievwright2020` | magnetite | Al | Sievwright et al. (2020) | yes |
 | `mt_Al_sievwright2020_1150` | magnetite | Al | Sievwright et al. (2020) | yes |
@@ -72,6 +74,7 @@ these keys, and the test suite fails if a citation key does not resolve.
 | `mt_Zr_sievwright2020` | magnetite | Zr | Sievwright et al. (2020) | yes |
 | `ol_Be_jollands2016` | olivine | Be | Jollands et al. (2016) | yes |
 | `ol_Ca_coogan2005` | olivine | Ca | Coogan et al. (2005) | yes |
+| `ol_FeMg_chakraborty1997` | olivine | Fe-Mg | Chakraborty (1997) | yes |
 | `ol_FeMg_dohmen_chakraborty2007_ped` | olivine | Fe-Mg | Dohmen & Chakraborty (2007) | yes |
 | `ol_Ni_petry2004` | olivine | Ni | Petry et al. (2004) | yes |
 | `ol_P_watson2015` | olivine | P | Watson et al. (2015) | yes |
@@ -82,12 +85,14 @@ these keys, and the test suite fails if a citation key does not resolve.
 | `opx_FeMg_dohmen2016_fs1` | opx | Fe-Mg | Dohmen et al. (2016) | yes |
 | `opx_FeMg_ganguly_tazzoli1994` | opx | Fe-Mg | Ganguly & Tazzoli (1994) | yes |
 | `opx_FeMg_ganguly_tazzoli1994_nofo2` | opx | Fe-Mg | Ganguly & Tazzoli (1994) | yes |
+| `opx_Lu_dias2025` | opx | Lu | Dias et al. (2025) | yes |
 | `opx_Mg_schwandt1998_a` | opx | Mg | Schwandt et al. (1998) | yes |
 | `opx_Mg_schwandt1998_b` | opx | Mg | Schwandt et al. (1998) | yes |
 | `opx_Mg_schwandt1998_c` | opx | Mg | Schwandt et al. (1998) | yes |
 | `plag_Ba_cherniak2002` | plagioclase | Ba | Cherniak (2002) | yes |
 | `plag_Li_pohl2024_vacancy` | plagioclase | Li | Pohl et al. (2024) | yes |
 | `plag_Mg_costa2003` | plagioclase | Mg | Costa et al. (2003) | yes |
+| `plag_NaSiCaAl_grove1984` | plagioclase | NaSi-CaAl | Grove et al. (1984) | yes |
 | `plag_Sr_cherniak_watson1994` | plagioclase | Sr | Cherniak & Watson (1994) | yes |
 | `plag_Sr_giletti_casserly1994` | plagioclase | Sr | Giletti & Casserly (1994) | yes |
 | `qz_Ti_cherniak2007` | quartz | Ti | Cherniak et al. (2007) | yes |
@@ -106,11 +111,6 @@ these keys, and the test suite fails if a citation key does not resolve.
 | `zrn_Ti_bloch2022_c` | zircon | Ti | Bloch et al. (2022) | yes |
 | `zrn_Ti_cherniak2007_perp_c` | zircon | Ti | Cherniak & Watson (2007) | yes |
 | `zrn_Yb_cherniak1997` | zircon | Yb | Cherniak et al. (1997) | yes |
-| `cpx_CaMg_brady1983` | cpx | Ca-Mg | Brady & McCallister (1983) | **NO** |
-| `cpx_FeMg_dimanov_sautter2000` | cpx | Fe-Mg | Dimanov & Sautter (2000) | **NO** |
-| `ol_FeMg_chakraborty1997` | olivine | Fe-Mg | Chakraborty (1997) | **NO** |
-| `opx_Lu_dias2025` | opx | Lu | Dias et al. (2025) | **NO** |
-| `plag_NaSiCaAl_grove1984` | plagioclase | NaSi-CaAl | Grove et al. (1984) | **NO** |
 
 Entries marked **NO** were transcribed from a secondary source because the primary
 publication was not available offline. Each one records where its numbers came from

@@ -215,8 +215,7 @@ DATASETS: List[ExampleDataset] = [
         provenance=(
             "SYNTHETIC. Made with Diffusor's forward model and the Dohmen & Chakraborty "
             '(2007) TaMED coefficient, with noise added. The conditions (1150 C, FMQ-1, 1 '
-            'atm, along [001]) resemble the Laki olivines of Hartley et al. (2016). The '
-            'coefficient itself is flagged as unverified.'),
+            'atm, along [001]) resemble the Laki olivines of Hartley et al. (2016).'),
         spec=dict(distance_column="Distance_um", column_a="Fo_mol", column_b=None,
                   sigma_a_column="Fo_err", mode="A", distance_unit="um"),
         settings=dict(T_C=1150.0, sigma_T_K=30.0, P_MPa=0.1, sigma_P_MPa=0.0,

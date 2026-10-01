@@ -161,7 +161,9 @@ def test_opx_ree_laws():
     at_iw = logD("opx_Lu_dias2025", 1000, log_fo2_bar=iw)
     assert at_iw == pytest.approx(np.log10(1.51e-9) - 263000.0 / (LN10 * R_GAS * T), abs=1e-6)
     assert logD("opx_Lu_dias2025", 1000, log_fo2_bar=iw + 7) == pytest.approx(at_iw + 1.0, abs=1e-6)
-    assert not get("opx_Lu_dias2025").verified, "the Lu reference fO2 is an interpretation"
+    lu = get("opx_Lu_dias2025")
+    assert lu.verified, "the printed equation is transcribed and checked"
+    assert "interpretation" in lu.verified_from, "the IW reference fO2 must stay labelled as ours"
 
 
 # --- magnetite: Sievwright et al. (2020) ------------------------------------------

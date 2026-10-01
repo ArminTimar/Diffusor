@@ -292,13 +292,14 @@ for _el, _D0, _Q, _sQ, _eq, _inv_n in [
         T_range=Range(1223.15, 1373.15, "K (950-1100 C)"),
         P_range=Range(1.0e5, 1.0e5, "Pa (1 atm)"),
         fo2_range=Range(None, None, "near the IW buffer"),
-        verified=not _is_lu,
+        verified=True,
         verified_from=(
             f"read from the paper PDF: abstract and eq. {_eq} (p. 93)"
-            + (". The reference fugacity fO2[Pa]_0 is not defined in the text. The law is "
-               "stated for 'fO2 close to the iron-wustite (IW) buffer', so Diffusor takes "
-               "fO2_0 as the IW buffer at T. Check this against the paper before relying on "
-               "the fO2 term" if _is_lu else "")),
+            + (". The equation is transcribed as printed, but the paper never defines the "
+               "reference fugacity fO2[Pa]_0. It states the laws for 'fO2 close to the "
+               "iron-wustite (IW) buffer' and the abstract calls them laws 'along the IW "
+               "buffer', so Diffusor takes fO2_0 as the IW buffer at T. That choice is an "
+               "interpretation, not part of the source" if _is_lu else "")),
         notes=(("Along [001] in natural opx (Opx31), measured by TOF-SIMS on thin-film "
                 "diffusion couples. " )
                + ("Lu diffusion appears to depend on fO2 (exponent about 1/7 at 1080-1100 C) and "

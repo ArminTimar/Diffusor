@@ -167,21 +167,33 @@ _add(DiffusionCoefficient(
     mineral="olivine", species="Fe-Mg",
     label="Olivine Fe-Mg // [001], Chakraborty (1997) -- older calibration",
     citation="chakraborty1997",
-    equation_number="(Arrhenius fit at fO2 = 1e-7 Pa, Fo86)",
-    equation_text="D = D0 exp(-Q / R T) m2/s with D0 = 1.0e-9 m2/s and Q = 226 kJ/mol",
+    equation_number="Arrhenius fit at Fo86, // [001], fO2 = 1e-12 bar (abstract p. 12,317 and p. 12,325)",
+    equation_text=("D = D0 exp(-Q / R T) with D0 = (5.38 +/- 0.89) x 10^-9 m2/s and "
+                   "Q = 226 +/- 18.5 kJ/mol (54 +/- 4.4 kcal/mol), for Fo86 // [001] at "
+                   "fO2 = 1e-12 bar (1e-7 Pa)"),
     func=_chakraborty1997,
     params={
-        "D0": Parameter("D0", 1.0e-9, 0.0, "m2/s", "1s", "pre-exponential factor"),
-        "Q": Parameter("Q", 226.0, 0.0, "kJ/mol", "1s", "activation energy"),
+        "D0": Parameter("D0", 5.38e-9, 0.89e-9, "m2/s", "1s", "pre-exponential factor"),
+        "Q": Parameter("Q", 226.0, 18.5, "kJ/mol", "1s", "activation energy"),
     },
     sigma_logD=0.3,
-    axis_factors=_OLIVINE_ANISO,
     reference_axis="c",
+    allowed_axes=("c",),
+    reference_state="Fo86, // [001], fO2 = 1e-12 bar, 1 atm",
     needs_fo2=False,
+    fo2_unit="Pa",
+    fo2_range=Range(-7.0, -7.0, "log10 Pa (fO2 = 1e-12 bar)"),
     T_range=Range(1253.15, 1573.15, "K (980-1300 C)"),
     X_range=Range(0.12, 0.16, "XFe (around Fo86)"),
-    verified=False,
-    verified_from="approximate transcription from secondary summaries. NOT checked against the primary paper",
+    verified=True,
+    verified_from=("read from the paper PDF: abstract (p. 12,317) and p. 12,325. The abstract "
+                   "rounds the Q uncertainty to 18 kJ/mol. Before 1 October 2026 this entry used "
+                   "D0 = 1.0e-9 m2/s from a secondary summary, which made D 5.4 times too low"),
     notes=("Superseded by Dohmen & Chakraborty (2007) but retained so that older published "
-           "timescales can be reproduced and compared. Treat the numbers as provisional."),
+           "timescales can be reproduced and compared. The fit holds for one composition "
+           "(Fo86), one direction ([001]) and one oxygen fugacity (1e-12 bar). The paper "
+           "measured no other direction, so no anisotropy is applied and other axes are "
+           "refused. It gives no fO2 term either, so other fO2 values raise a range warning. "
+           "For Fo92 the paper gives D0 = 6.59e-9 m2/s and Q = 229 +/- 18 kJ/mol. sigma_logD "
+           "is Diffusor's judgement, not a published scatter."),
 ))

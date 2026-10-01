@@ -297,9 +297,12 @@ _add(DiffusionCoefficient(
     P_range=Range(1.0e5, 1.0e5, "Pa (1 atm)"),
     X_range=Range(0.2, 0.9, "X_An"),
     verified=True,
-    verified_from=("transcribed from the DMG Short Course 2025 supplementary script "
-                   "Diff_Model_Sr_in_Plag_implicit.m, which implements it as "
-                   "8.3176e-5*exp(-276000/(temp*8.314))*10^(-4.1*an_conc). Grocolas et al. "
+    verified_from=("read from the paper PDF: eq. 1 on p. 3791, log10 D0 [m2/s] = -8.18 + "
+                   "0.041 [Ab] with Q = 276 kJ/g-atom, and Table 4 (p. 3790). With [Ab] = "
+                   "100 (1 - X_An), which neglects Or, this is log10 D0 = -4.08 - 4.1 X_An, "
+                   "the form used here. The DMG Short Course 2025 script "
+                   "Diff_Model_Sr_in_Plag_implicit.m implements the same expression "
+                   "(8.3176e-5*exp(-276000/(temp*8.314))*10^(-4.1*an_conc)). Grocolas et al. "
                    "(2025) eq. 12 re-fit the same data independently as log10 D = -3.76 X_An "
                    "- 4.52 - 270,607/(2.303 R T). The test suite checks that the two agree"),
     secondary_citations=("dmg2025", "cherniak2010", "grocolas2025"),
@@ -499,21 +502,28 @@ _add(DiffusionCoefficient(
     mineral="plagioclase", species="NaSi-CaAl",
     label="Plagioclase coupled NaSi-CaAl interdiffusion, Grove et al. (1984)",
     citation="grove1984",
-    equation_number="(cooling-rate speedometry calibration)",
-    equation_text="D = 1.1 x 10^-4 exp(-520 kJ/mol / R T) m2/s (order-of-magnitude entry)",
+    equation_number="abstract (p. 2113) and regression on p. 2116",
+    equation_text=("D = 10.99 cm2/s exp(-123.4 kcal/mol / R T) = 1.099 x 10^-3 m2/s "
+                   "exp(-516.3 kJ/mol / R T), An80-81, 1 atm anhydrous, normal to the (03-1) "
+                   "lamellae. Regression error on Q: +/- 5 kcal/mol (20.9 kJ/mol)"),
     func=_grove1984,
     params={
-        "D0": Parameter("D0", 1.1e-4, 0.0, "m2/s", "1s", "pre-exponential factor"),
-        "Q": Parameter("Q", 520.0, 0.0, "kJ/mol", "1s", "activation energy"),
+        "D0": Parameter("D0", 1.099e-3, 0.0, "m2/s", "1s", "pre-exponential factor"),
+        "Q": Parameter("Q", 123.4 * 4.184, 5.0 * 4.184, "kJ/mol", "1s", "activation energy"),
     },
     sigma_logD=0.7,
     needs_fo2=False,
-    T_range=Range(1373.15, 1673.15, "K"),
-    verified=False,
-    verified_from="NOT verified: order-of-magnitude placeholder from secondary summaries",
-    notes=("Included only so that the 'is X_An frozen?' assumption can be checked "
-           "quantitatively: compare the NaSi-CaAl diffusion length with the trace-element "
-           "diffusion length over the fitted time. Do not report timescales from this entry "
-           "without first checking the numbers against Grove et al. (1984) and "
-           "Liu & Yund (1992)."),
+    T_range=Range(1373.15, 1673.15, "K (1100-1400 C)"),
+    P_range=Range(1.0e5, 1.0e5, "Pa (1 atm)"),
+    verified=True,
+    verified_from=("read from the paper PDF: abstract (p. 2113), p. 2116 and Fig. 3, which the "
+                   "line reproduces (ln D = -34.7 at 1400 C, cm2/s). Before 1 October 2026 this "
+                   "entry was a placeholder (1.1e-4 m2/s, 520 kJ/mol) about 15 times too slow"),
+    notes=("Average CaAl-NaSi interdiffusion coefficient from homogenising exsolution "
+           "lamellae in An80-81 Stillwater bytownite, dry, at 1 atm. The paper assumes a "
+           "composition-independent binary coefficient and says each D should be viewed as "
+           "correct to within a factor of 2 to 5, hence sigma_logD = 0.7. Useful to check "
+           "the 'is X_An frozen?' assumption: compare the NaSi-CaAl diffusion length with the "
+           "trace-element diffusion length over the fitted time. Hydrous and more sodic "
+           "plagioclase differ (compare Liu & Yund 1992)."),
 ))

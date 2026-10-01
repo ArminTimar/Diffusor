@@ -115,8 +115,7 @@ def olivine_example():
                  ).to_csv(OUT / "olivine_fo.csv", index=False)
     ANSWERS["olivine_fo.csv"] = (
         t, "Olivine Fe-Mg, Dohmen & Chakraborty (2007) TaMED, 1150 C, FMQ-1, //[001]. "
-           "Map Fo_mol with mode 'A' and remember that the coefficients of this entry are "
-           "flagged as UNVERIFIED.")
+           "Map Fo_mol with mode 'A'.")
 
 
 # --- 5. titanomagnetite Ti, the Shinmoedake case of Tomiya et al. (2013) --------

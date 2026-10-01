@@ -83,8 +83,11 @@ def test_cpx_muller2013_matches_the_abstract():
 def test_cpx_dimanov_sautter_reproduces_petrone2016_table2():
     """Petrone et al. (2016) Table 2 footnote: D = 3.26e-20 at 1098 C, 1.20e-19 at 1150 C."""
     c = get("cpx_FeMg_dimanov_sautter2000")
-    assert float(c.D(Conditions(T_K=1098 + 273.15))) == pytest.approx(3.26e-20, rel=0.02)
-    assert float(c.D(Conditions(T_K=1150 + 273.15))) == pytest.approx(1.20e-19, rel=0.02)
+    assert float(c.D(Conditions(T_K=1098 + 273.15))) == pytest.approx(3.26e-20, rel=0.005)
+    assert float(c.D(Conditions(T_K=1150 + 273.15))) == pytest.approx(1.20e-19, rel=0.005)
+    # Dimanov & Sautter (2000) p. 757: log D0 [cm2/s] = -0.02, abstract 0.955 cm2/s
+    assert c.params["D0"].value == pytest.approx(0.955e-4, rel=1e-12)
+    assert c.params["Q"].value == 406.0
 
 
 def test_schwandt1998_table3_values():
@@ -173,12 +176,50 @@ def test_olivine_fo2_exponent_is_one_sixth():
 
 
 def test_unverified_entries_are_flagged_in_their_warnings():
+    from dataclasses import replace
     cond = Conditions(T_K=1473.15, log_fo2_bar=-7.0, X={"XFe": 0.1})
-    w = get("ol_FeMg_chakraborty1997").check_conditions(cond)
-    assert any("NOT verified" in s for s in w)
-    # checked against the paper and its erratum, so no longer flagged
-    w = get("ol_FeMg_dohmen_chakraborty2007_tamed").check_conditions(cond)
-    assert not any("NOT verified" in s for s in w)
+    checked = get("ol_FeMg_dohmen_chakraborty2007_tamed")
+    assert not any("NOT verified" in s for s in checked.check_conditions(cond))
+    unchecked = replace(checked, verified=False, verified_from="a secondary summary")
+    assert any("NOT verified" in s for s in unchecked.check_conditions(cond))
+
+
+def test_every_entry_is_checked_against_its_primary_source():
+    # all five former secondary-source entries were read against their PDFs on 1 October 2026
+    assert [c.key for c in list_coefficients() if not c.verified] == []
+
+
+def test_chakraborty1997_is_the_printed_fo86_fit():
+    """Chakraborty (1997) p. 12,325: D0 = 5.38e-9 m2/s, Q = 226 kJ/mol, // [001], fO2 = 1e-12 bar."""
+    from diffusor.constants import R_GAS
+    c = get("ol_FeMg_chakraborty1997")
+    T = 1473.15
+    D = float(c.D(Conditions(T_K=T, axis="c")))
+    assert D == pytest.approx(5.38e-9 * np.exp(-226e3 / (R_GAS * T)), rel=1e-9)
+    with pytest.raises(ValueError):           # the paper measured [001] only
+        c.D(Conditions(T_K=T, axis="a"))
+    off = c.check_conditions(Conditions(T_K=T, log_fo2_bar=-8.0, axis="c"))
+    assert any("log fO2" in w for w in off)
+    on = c.check_conditions(Conditions(T_K=T, log_fo2_bar=-12.0, axis="c"))
+    assert not any("log fO2" in w for w in on)
+
+
+def test_brady_mccallister1983_eq5():
+    """Brady & McCallister (1983) eq. 5: D = 3.89e-7 exp(-360.87 kJ/mol / RT) m2/s."""
+    from diffusor.constants import R_GAS
+    c = get("cpx_CaMg_brady1983")
+    T = 1200 + 273.15
+    assert float(c.D(Conditions(T_K=T))) == pytest.approx(3.89e-7 * np.exp(-360.87e3 / (R_GAS * T)), rel=1e-9)
+    assert 86.25 * 4.184 == pytest.approx(360.87, abs=0.01)
+
+
+def test_grove1984_reproduces_its_figure3_line():
+    """Grove et al. (1984): D = 10.99 cm2/s exp(-123.4 kcal/mol / RT), ln D = -34.7 at 1400 C."""
+    c = get("plag_NaSiCaAl_grove1984")
+    lnD_cm2 = np.log(float(c.D(Conditions(T_K=1400 + 273.15))) * 1e4)
+    assert lnD_cm2 == pytest.approx(-34.7, abs=0.1)
+    lnD_cm2 = np.log(float(c.D(Conditions(T_K=1100 + 273.15))) * 1e4)
+    assert lnD_cm2 == pytest.approx(-42.8, abs=0.1)
 
 
 def test_out_of_range_conditions_produce_a_warning():

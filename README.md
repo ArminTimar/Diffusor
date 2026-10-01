@@ -390,7 +390,7 @@ The test suite checks the registry against numbers printed in the sources:
 | --- | --- | --- |
 | Opx Fe-Mg at 950 C, log fO2 = -7 Pa, //c (Dohmen et al. 2016, run OPXD_14) | log D = -19.49 ± 0.07 | -19.47 |
 | Opx anisotropy D//[001] / D//[100] (Dohmen et al. 2016) | 3.5 | 3.5 |
-| Cpx Fe-Mg at 1098 C and 1150 C (Petrone et al. 2016, Table 2 footnote) | 3.26e-20 and 1.20e-19 m²/s | 3.25e-20 and 1.19e-19 |
+| Cpx Fe-Mg at 1098 C and 1150 C (Petrone et al. 2016, Table 2 footnote) | 3.26e-20 and 1.20e-19 m²/s | 3.26e-20 and 1.20e-19 |
 | Titanomagnetite Ti at 950 C, log fO2 = -11, X_Usp = 0.3 (Tomiya et al. 2013, Shinmoedake) | 4.3e-16 m²/s | 4.35e-16 |
 | Titanomagnetite Ti at 900 C, same conditions | 6.9e-16 m²/s | 6.84e-16 |
 | Opx Fe-Mg for Fs9 at 950, 1050 and 1100 C, log fO2 = -7 Pa (Dias & Dohmen 2024, Table 1) | fitted D0 and m of each run | within 0.2 log units, for both the 2024 and 2025 laws |
@@ -421,7 +421,7 @@ Kizimen traverse is extracted from the published spreadsheet by
 
 ## Coefficient registry
 
-103 entries across 13 minerals; 96 carry source-transcription checks. The recommended ones are:
+103 entries across 13 minerals, all checked against their primary sources. The recommended ones are:
 
 | mineral | species | recommended source |
 | --- | --- | --- |
@@ -509,15 +509,16 @@ Those are the recommended entries. At 1150 °C they agree with Sievwright et al.
 - Version 1 is 1-D only. Modelling a 3-D crystal in 1-D returns a maximum
   estimate, and sectioning adds further bias (Shea et al. 2015, Krimer & Costa
   2017). The application says so on every fit.
-- The older Chakraborty (1997) olivine law is transcribed from secondary
-  sources and flagged unverified. The two Dohmen & Chakraborty (2007) entries
-  are checked against the paper and its erratum.
+- The older Chakraborty (1997) olivine law is a single fit for Fo86 along
+  [001] at fO2 = 1e-12 bar. Diffusor refuses other directions and warns at other
+  fO2 values. The two Dohmen & Chakraborty (2007) entries are checked against
+  the paper and its erratum.
 - Li in plagioclase is modelled with one effective coefficient per mechanism.
   Pohl et al. (2024) fitted a multispecies model with interstitial and
   lattice-site Li exchanging, which Diffusor does not implement.
 - The Lu law of Dias et al. (2025) quotes its fO2 term relative to an fO2_0 that
-  the paper does not define. Diffusor assumes the IW buffer and flags the entry
-  unverified until that is checked.
+  the paper does not define. Diffusor assumes the IW buffer and says in the
+  entry that this is its own reading of the paper.
 - The Audétat et al. (2026) Mg law is taken from the accepted manuscript. Its
   silica activity is fixed at 1 (quartz saturation) unless overridden from
   Python. The interface does not expose it yet.

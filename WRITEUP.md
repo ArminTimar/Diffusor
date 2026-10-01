@@ -24,7 +24,7 @@ already known.
 | Covers | September 29 working tree; section 5 updates the September 18 baseline |
 | Package version | 0.1.0 |
 | Modules documented | 71 Python modules |
-| Coefficients | 103 entries, 13 minerals, 98 with source-transcription checks |
+| Coefficients | 103 entries, 13 minerals, all 103 with source-transcription checks |
 | References | 95 keys in `diffusor/references.py` |
 
 ---
@@ -455,7 +455,9 @@ printed equations 27 and 28 (pp. 424-425) and the erratum (PCM 34:597-598),
 which corrects their composition term from `3 X_Fe` to `3 (X_Fe - 0.1)`; that
 reference is the `XFe_ref = 0.1` parameter. TaMED's `fo2_range` starts at the
 paper's 1e-10 Pa regime boundary and has no upper limit, as the paper gives
-none. Only `ol_FeMg_chakraborty1997` remains unverified.
+none. `ol_FeMg_chakraborty1997` was checked against its PDF on 1 October 2026: its D0
+is 5.38e-9 m2/s (it had carried 1.0e-9 from a secondary summary), and it is now
+restricted to the one direction and fO2 the paper measured.
 Diffusor does not switch between TaMED and PED automatically; the user picks.
 
 ##### `coefficients/opx.py`
@@ -478,8 +480,8 @@ The busiest module.
 Three plain Arrhenius laws through the shared `_plain_arrhenius`. The
 Mueller et al. (2013) entry documents an internal inconsistency in its own
 source (section 4.3). The Dimanov & Sautter (2000) entry exists to reproduce
-published NIDIS timescales and is marked unverified because the numbers come
-from a table footnote in Petrone et al. (2016).
+published NIDIS timescales. Its D0 is the primary paper's 9.55e-5 m2/s, which
+reproduces the Petrone et al. (2016) Table 2 values to the digits printed.
 
 ##### `coefficients/plagioclase.py`
 Also holds the plagioclase-specific physics that the solver needs.
@@ -1354,7 +1356,7 @@ stops reproducing the number printed in its source.
 
 | file | what it holds the code to |
 | --- | --- |
-| `test_coefficients.py` | Every coefficient reproduces a number printed in its source: Dohmen et al. (2016) run OPXD_14 and the 3.5 anisotropy, the Ganguly & Tazzoli form of Ostorero et al. (2022) eq. 1, the Mueller et al. (2013) abstract, the Dimanov & Sautter values quoted in Petrone et al. (2016) Table 2, Schwandt et al. (1998) Table 3, Van Orman et al. (2014) eq. 4, the course-script form of Giletti & Casserly (1994), the Tomiya et al. (2013) Shinmoedake diffusivity, the magnetite minimum and its 2/3 exponents, the olivine 1/6 fO2 exponent and 6x anisotropy. Also that unverified and out-of-range entries produce warnings, and that direction cosines must close. |
+| `test_coefficients.py` | Every coefficient reproduces a number printed in its source: Dohmen et al. (2016) run OPXD_14 and the 3.5 anisotropy, the Ganguly & Tazzoli form of Ostorero et al. (2022) eq. 1, the Mueller et al. (2013) abstract, the Dimanov & Sautter values quoted in Petrone et al. (2016) Table 2, Schwandt et al. (1998) Table 3, Van Orman et al. (2014) eq. 4, Giletti & Casserly (1994) eq. 1, the Chakraborty (1997) Fo86 fit, Brady & McCallister (1983) eq. 5, the Grove et al. (1984) Fig. 3 line, the Tomiya et al. (2013) Shinmoedake diffusivity, the magnetite minimum and its 2/3 exponents, the olivine 1/6 fO2 exponent and 6x anisotropy. Also that every entry is now checked against its primary source, that an unverified entry would still be flagged, that out-of-range entries produce warnings, and that direction cosines must close. |
 | `test_recent_literature.py` | The 2020-2026 calibrations: Grocolas et al. (2025) eqs 7, 8 and 12-14 and their covariance assumption, the Sr gap against the 1990s laws and how it widens as T falls, Audetat et al. (2026) eq. 1 and its silica-activity term, Pohl et al. (2024) Li, Dias & Dohmen (2024) m(T) against their Table 1, Dias et al. (2025) eq. 22 by hand and the regime switch, the opx REE laws, and the Sievwright et al. (2020) Table 5 transcription against the published minima. |
 | `test_solvers.py` | The numerical solver against Crank (1975) eqs 2.14, 4.17, 5.22 and 6.18; second-order convergence; mass conservation in a closed system, including with the radial weight; explicit against implicit; the fractional-uptake series; the non-isothermal integral; the convolution; the resolution warning. |
 | `test_fitting.py` | A known time is recovered with and without noise and with composition-dependent D; free x0 is recovered; ignoring the beam convolution lengthens the apparent time; the Monte Carlo spread grows with the temperature uncertainty and vanishes with a zero budget; **T and fO2 stay correlated through the buffer**; independent sampling overestimates relative to logD_at_T; the variance decomposition ranks temperature first for opx. |
@@ -1436,8 +1438,7 @@ everything from syn-eruptive ascent to long crustal residence
 wadsleyite and ringwoodite. *RiMG* 72:603-639.
 The compilation of olivine diffusion data, including the point-defect
 framework behind the TaMED and PED regimes.
-*Used for:* a secondary citation on the olivine TaMED entry, and one of the
-secondary sources the unverified olivine transcription was checked against.
+*Used for:* a secondary citation on the olivine TaMED entry.
 
 **`cherniak2010`** — Cherniak (2010) Cation diffusion in feldspars. *RiMG*
 72:691-733.
@@ -1702,8 +1703,11 @@ The experimental half of the pair.
 interdiffusion in olivine at 980-1300 C. *JGR* 102:12317-12331.
 The earlier calibration, a single Arrhenius law at fixed fO2 around Fo86.
 *Used for:* the `ol_FeMg_chakraborty1997` comparison entry,
-D0 = 1.0e-9 m2/s and Q = 226 kJ/mol. Unverified, and kept only so older
-published timescales can be reproduced.
+D0 = (5.38 +/- 0.89)e-9 m2/s and Q = 226 +/- 18.5 kJ/mol for Fo86 // [001] at
+fO2 = 1e-12 bar (abstract and p. 12,325). Kept only so older published
+timescales can be reproduced. Until 1 October 2026 it carried D0 = 1.0e-9 from
+a secondary summary, 5.4 times too low. The paper measured only [001] at one
+fO2, so other axes are refused and other fO2 values raise a range warning.
 
 **`holzapfel2007`** — Holzapfel, Chakraborty, Rubie & Frost (2007) Effect of
 pressure on Fe-Mg, Ni and Mn diffusion in olivine. *PEPI* 162:186-198.
@@ -1761,9 +1765,9 @@ energies than earlier opx and diopside data.
 *Used for:* the three REE entries — Lu (eq. 6,
 D0 = 1.51e-9 m2/s, Q = 263 +/- 52 kJ/mol, with an fO2 exponent of 1/7), Ce
 (eq. 7, 5.75e-14, 166 +/- 40) and Eu (eq. 8, 1.90e-14, 147 +/- 22, assumed
-trivalent). **The Lu entry is unverified** because the reference fugacity in
-its fO2 term is not defined in the paper; Diffusor assumes the IW buffer and
-says so.
+trivalent). All three are transcribed as printed. The reference fugacity in
+the Lu fO2 term is not defined in the paper; Diffusor assumes the IW buffer and
+labels that as its own interpretation (section 4.3, item 4).
 
 **`dohmen2016`** — Dohmen, ter Heege, Becker & Chakraborty (2016) Fe-Mg
 interdiffusion in orthopyroxene. *Am. Mineral.* 101:2210-2221.
@@ -1824,10 +1828,10 @@ the statement that Ca-Mg is slower than Fe-Mg in cpx.
 of (Fe,Mn)-Mg in natural diopside. *Eur. J. Mineral.* 12:749-760.
 The older diopside calibration, and the coefficient behind the published NIDIS
 timescales.
-*Used for:* the `cpx_FeMg_dimanov_sautter2000` entry, D0 = 9.5e-5 m2/s and
-dH = 406 kJ/mol. **Unverified**: the numbers come from the Table 2 footnote of
-Petrone et al. (2016), not the primary paper, and the NIDIS script itself uses
-9.55e-5.
+*Used for:* the `cpx_FeMg_dimanov_sautter2000` entry, D0 = 9.55e-5 m2/s
+(log D0 = -0.02 +/- 0.32 in cm2/s) and dH = 406 +/- 64 kJ/mol (p. 757), an
+apparent enthalpy because pO2 was not fixed. Until 1 October 2026 it carried
+9.5e-5 from the Table 2 footnote of Petrone et al. (2016).
 
 **`dimanov_wiedenbeck2006`** — Dimanov & Wiedenbeck (2006) (Fe,Mn)-Mg
 interdiffusion in natural diopside: effect of pO2. *Eur. J. Mineral.*
@@ -1842,8 +1846,9 @@ clinopyroxenes from homogenization and self-diffusion experiments.
 Ca-Mg interdiffusion from the homogenisation of (001) pigeonite lamellae in
 sub-calcic diopside at 25 kbar, with a stated uncertainty of a factor of 2.
 *Used for:* the `cpx_CaMg_brady1983` entry,
-`D = 3.89e-7 exp(-360.87 kJ/mol / RT)` m2/s, `sigma_logD = 0.30`.
-**Unverified**: from a secondary summary.
+`D = 3.89e-7 exp(-360.87 kJ/mol / RT)` m2/s (eq. 5, p. 100), `sigma_logD = 0.30`.
+Checked against the PDF on 1 October 2026; the earlier secondary transcription
+was correct.
 
 **`vanorman2001`**, **`sneeringer1984`**, **`coogan2005li`** — REE diffusion
 in diopside with an elastic model (*CMP* 141:687-703); Sr and Sm diffusion in
@@ -1916,8 +1921,10 @@ kinetics in plagioclase feldspars. *GCA* 58:3785-3793.
 The classic Sr calibration, with a strong anorthite dependence, used for
 decades of plagioclase timescales.
 *Used for:* the `plag_Sr_giletti_casserly1994` entry,
-`D = 8.3176e-5 exp(-276000/RT) 10^(-4.1 X_An)` m2/s, transcribed from the
-DMG 2025 course script and cross-checked against the Grocolas eq. 12 re-fit.
+`D = 8.3176e-5 exp(-276000/RT) 10^(-4.1 X_An)` m2/s, which is the paper's eq. 1
+(p. 3791, log D0 = -8.18 + 0.041 [Ab], Q = 276 kJ) with [Ab] = 100 (1 - X_An).
+The DMG 2025 course script implements the same expression, and the Grocolas
+eq. 12 re-fit agrees with it.
 Marked **superseded** by Grocolas et al. (2025).
 
 **`cherniak_watson1994`** — Cherniak & Watson (1994) A study of strontium
@@ -1960,10 +1967,11 @@ plagioclase feldspar. *GCA* 48:2113-2121.
 The coupled NaSi-CaAl exchange, which is what would relax an anorthite
 profile.
 *Used for:* the `plag_NaSiCaAl_grove1984` entry,
-`D = 1.1e-4 exp(-520 kJ/mol / RT)` m2/s, included **only** so the "is X_An
-frozen?" assumption can be checked quantitatively; it is unverified and an
-order-of-magnitude placeholder. Also the justification for treating X_An as
-frozen. Added to the citation list when the activity term is on.
+`D = 1.099e-3 exp(-516.3 kJ/mol / RT)` m2/s (10.99 cm2/s and 123.4 kcal/mol,
+An80-81, dry, 1 atm), so the "is X_An frozen?" assumption can be checked
+quantitatively. Until 1 October 2026 it was a placeholder
+(1.1e-4 m2/s, 520 kJ/mol) about 15 times too slow. Also the justification for
+treating X_An as frozen. Added to the citation list when the activity term is on.
 
 **`liu_yund1992`** — Liu & Yund (1992) NaSi-CaAl interdiffusion in
 plagioclase. *Am. Mineral.* 77:275-283.
@@ -2127,8 +2135,7 @@ Tracking timescales of short-term precursors to large basaltic fissure
 eruptions through Fe-Mg diffusion in olivine. *EPSL* 439:58-70.
 Olivine Fe-Mg chronometry of the Laki 1783-84 fissure eruption.
 *Used for:* independent confirmation of the ~6x olivine anisotropy in natural
-crystals (p. 60), which is part of the unverified olivine entry's
-`verified_from`; and the conditions of the `olivine_laki` example
+crystals (p. 60); and the conditions of the `olivine_laki` example
 (1150 +/- 30 C, FMQ-1 +/- 0.5).
 
 **`sato2022`** — Sato, Ban, Yuguchi & Adachi (2022) Pre-eruptive magmatic
@@ -2357,13 +2364,16 @@ what Diffusor currently does, and what would settle it.
    alone say `3 X_Fe`, which is why reading them without the erratum (as the
    20 September audit did) gives D twice too large.
 
-2. **Five entries are unverified.** Besides `ol_FeMg_chakraborty1997`:
-   `cpx_FeMg_dimanov_sautter2000` (numbers from a table footnote in
-   Petrone et al. 2016, whose own NIDIS script uses 9.55e-5 rather than
-   9.5e-5 m2/s, a 0.5 per cent difference); `cpx_CaMg_brady1983` (secondary
-   summary); `plag_NaSiCaAl_grove1984` (order-of-magnitude placeholder, and
-   the notes say not to report a timescale from it); `opx_Lu_dias2025` (see
-   item 4).
+2. **Settled: no entry is unverified any more** (1 October 2026). The five
+   former secondary-source entries were read against their PDFs.
+   `ol_FeMg_chakraborty1997` had D0 = 1.0e-9 instead of the paper's 5.38e-9
+   m2/s (D 5.4 times too low), and `plag_NaSiCaAl_grove1984` was a placeholder
+   about 15 times too slow (now 10.99 cm2/s and 123.4 kcal/mol).
+   `cpx_FeMg_dimanov_sautter2000` moved from 9.5e-5 to the paper's 9.55e-5
+   m2/s. `cpx_CaMg_brady1983` was already right. `opx_Lu_dias2025` is
+   transcribed as printed, with its fO2 reference still an interpretation
+   (item 4). `plag_Sr_giletti_casserly1994`, verified earlier from a course
+   script, was also checked against the paper's eq. 1 and agrees.
 
 3. **`sigma_logD` is often Diffusor's judgement.** Where a paper states no
    scatter, the value was chosen from what the paper says qualitatively (for
@@ -2378,7 +2388,9 @@ what Diffusor currently does, and what would settle it.
 4. **The Lu fO2 term has an undefined reference.** Dias, Dohmen & Hartmann
    (2025) eq. 6 writes `(fO2/fO2_0)^(1/7)` without defining fO2_0. Diffusor
    assumes the IW buffer, on the strength of the paper stating the law for
-   "fO2 close to the IW buffer", and flags the entry unverified.
+   "fO2 close to the IW buffer" and the abstract calling the laws "along the IW
+   buffer". The printed equation is verified; this reading of fO2_0 is labelled
+   as Diffusor's in the entry's provenance.
 
 5. **The Grocolas covariance is constructed.** The paper publishes no matrix;
    `_compensated_covariance` encodes their stated assumption that log10 D0 and
@@ -2545,13 +2557,20 @@ what Diffusor currently does, and what would settle it.
 
 | mineral | entries | verified | recommended |
 | --- | --- | --- | --- |
-| olivine | 3 | 2 | 1 |
-| orthopyroxene | 12 | 11 | 1 |
-| clinopyroxene | 3 | 1 | 1 |
-| plagioclase | 11 | 10 | 5 |
+| olivine | 7 | 7 | 1 |
+| orthopyroxene | 12 | 12 | 1 |
+| clinopyroxene | 3 | 3 | 1 |
+| plagioclase | 11 | 11 | 5 |
 | K-feldspar | 3 | 3 | 3 |
-| magnetite | 22 | 22 | 2 |
-| **total** | **54** | **49** | **13** |
+| magnetite | 42 | 42 | 2 |
+| quartz | 1 | 1 | 0 |
+| rutile | 3 | 3 | 0 |
+| titanite | 2 | 2 | 0 |
+| fluorapatite | 8 | 8 | 0 |
+| zircon | 6 | 6 | 0 |
+| monazite | 1 | 1 | 0 |
+| xenotime | 4 | 4 | 0 |
+| **total** | **103** | **103** | **13** |
 
 Checks the test suite makes against numbers printed in the sources:
 
@@ -2559,7 +2578,10 @@ Checks the test suite makes against numbers printed in the sources:
 | --- | --- | --- |
 | Opx Fe-Mg, 950 C, log fO2 = -7 Pa, //c (Dohmen et al. 2016, run OPXD_14) | log D = -19.49 +/- 0.07 | -19.47 |
 | Opx anisotropy D//[001] / D//[100] (Dohmen et al. 2016) | 3.5 | 3.5 |
-| Cpx Fe-Mg at 1098 and 1150 C (Petrone et al. 2016, Table 2 footnote) | 3.26e-20 and 1.20e-19 m2/s | 3.25e-20 and 1.19e-19 |
+| Cpx Fe-Mg at 1098 and 1150 C (Petrone et al. 2016, Table 2 footnote) | 3.26e-20 and 1.20e-19 m2/s | 3.26e-20 and 1.20e-19 |
+| Olivine Fe-Mg, Fo86 //[001], fO2 = 1e-12 bar (Chakraborty 1997, p. 12,325) | D0 = 5.38e-9 m2/s, Q = 226 kJ/mol | same |
+| Plagioclase NaSi-CaAl, 1400 C (Grove et al. 1984, Fig. 3) | ln D = -34.7 (cm2/s) | -34.72 |
+| Opx Mg tracer //[001], 884 C (Saunders et al. 2012, Fig. 2, using Schwandt et al. 1998) | 4.72e-21 m2/s | 4.76e-21 |
 | Titanomagnetite Ti, 950 C, log fO2 = -11, X_Usp = 0.3 (Tomiya et al. 2013) | 4.3e-16 m2/s | 4.35e-16 |
 | Titanomagnetite Ti, 900 C, same conditions | 6.9e-16 m2/s | 6.84e-16 |
 | Opx Fs9 at 950, 1050, 1100 C (Dias & Dohmen 2024, Table 1) | fitted D0 and m per run | within 0.2 log units, both laws |

@@ -4,7 +4,7 @@ What changed between releases, newest first. The text under a version heading
 is what goes into the GitHub release, so it is written for someone deciding
 whether to update. Commit messages hold the details.
 
-## 0.2.0 (unreleased)
+## 0.2.0 (1 October 2026)
 
 The first published release.
 

@@ -433,6 +433,7 @@ class MainWindow(QMainWindow):
         h = self.menuBar().addMenu("&Help")
         for text, fn in (("Input file format", self.show_format),
                          ("Choosing the boundaries", self.show_boundary_help),
+                         ("All references", self.show_all_references),
                          ("About", self.show_about)):
             a = QAction(text, self); a.triggered.connect(fn); h.addAction(a)
         h.addSeparator()
@@ -556,6 +557,10 @@ class MainWindow(QMainWindow):
 
     def show_boundary_help(self):
         richtext.show(self, "Choosing the boundaries", richtext.boundaries_html(), 860, 680)
+
+    def show_all_references(self):
+        from .reference_list import ReferenceListDialog
+        ReferenceListDialog(self).exec()
 
     # ================================================================ step 2
     def _page_mineral(self) -> QWidget:
@@ -2000,4 +2005,5 @@ class MainWindow(QMainWindow):
             "Diffusion chronometry with closed-form and Crank-Nicolson solvers, a registry "
             "of published diffusion coefficients, and Monte Carlo error propagation.<br><br>"
             "Every equation and coefficient carries its citation. View > Methods lists the "
-            "references used by the current run."))
+            "references used by the current run, and Help > All references lists every "
+            "source in the app."))

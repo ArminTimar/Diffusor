@@ -23,7 +23,7 @@ already known.
 | --- | --- |
 | Covers | September 29 working tree; section 5 updates the September 18 baseline |
 | Package version | 0.1.0 |
-| Modules documented | 70 Python modules |
+| Modules documented | 71 Python modules |
 | Coefficients | 103 entries, 13 minerals, 98 with source-transcription checks |
 | References | 95 keys in `diffusor/references.py` |
 
@@ -231,14 +231,16 @@ The single citation registry, and the reason the rest of the traceability
 machinery can work.
 
 * **Called by** `coefficients/base.py` (`cite`, `get`), `dataio/export.py`
-  (`format_reference`), `gui/richtext.py`, `scripts/build_references.py`, and
-  the test suite.
+  (`format_reference`), `gui/richtext.py`, `gui/reference_list.py`
+  (`bibtex_document`), `scripts/build_references.py`, and the test suite.
 * **Contents.** `Reference` is a frozen dataclass (`key, authors, year, title,
   journal, volume, pages, doi, note, kind`) with `short()` giving
-  "Author (year)" and `full()` a bibliographic line. `REFERENCES` holds 80
+  "Author (year)" and `full()` a bibliographic line. `REFERENCES` holds 95
   entries. `cite(key, where)` builds "Crank (1975), eq. 2.14". `to_bibtex`
   renders a BibTeX record, switching field names on `kind`
-  (`article` / `book` / `incollection` / `misc`).
+  (`article` / `book` / `incollection` / `misc`). `bibtex_document()` joins
+  every record, sorted by key, into the text of `references.bib`, so the
+  shipped file and the one saved from Help > All references are identical.
 * **Rule.** A key that does not resolve raises `KeyError` with the instruction
   to add it here, and the test suite fails. Nothing else in Diffusor is
   allowed to name a source in a machine-readable field without a key.
@@ -1075,7 +1077,7 @@ the T, P and fO2 of the example come from.
 Six steps and a results view. Pages never scroll; only lists and reading panes
 do, and scrolling never changes a number (`widgets.NoWheelOnInputs`).
 
-#### `gui/main_window.py` (2003 lines)
+#### `gui/main_window.py` (2009 lines)
 The whole flow. Everything the user chooses ends up in `_model()`,
 `_free_parameters()` and `_budget()`, which are the three functions the rest
 of the library sees.
@@ -1164,6 +1166,10 @@ runs the silent check unless Help > Check for updates at startup is unticked
 (`updates/check_at_startup`, default on) or the last success was under 20 hours
 ago. `closeEvent` waits for a running check, which ends within its own 6 s
 timeout.
+
+**Help menu.** Input file format, Choosing the boundaries, All references
+(`show_all_references`, which opens `gui/reference_list.ReferenceListDialog`),
+About, and the two update entries.
 
 #### `gui/image_extractor.py`
 `ImageExtractorDialog`, the nonmodal window that draws profiles on images;
@@ -1262,6 +1268,20 @@ dataset with its provenance; `methods_html` mirrors
 `format_html` and `boundaries_html` cover the rest. `reference_items` turns
 citation keys into formatted entries.
 
+#### `gui/reference_list.py`
+Help > All references. `ReferenceListDialog` shows every entry in
+`references.REFERENCES` with its DOI link, a search box and a **Save as
+BibTeX...** button that writes `references.bibtex_document()`. The structure
+comes from the code, not from a hand-kept list, so it cannot drift:
+`reference_groups()` puts each reference under every mineral whose
+coefficients cite it (primary or secondary), then the oxygen-buffer sources
+(`thermo.buffers.BUFFER_CITATIONS`), then everything else as "Methods,
+constants, reviews and applications". `reference_usage()` gives the "used by"
+line under each entry: coefficient keys, buffer parameterisations and example
+datasets. `references_html(query)` keeps the entries in which every query word
+starts a word (so "Ni" does not match "units"). Keys are searched both whole
+and split at underscores.
+
 #### `gui/widgets.py`, `gui/theme.py`, `gui/format_help.py`, `gui/icons/`
 Layout helpers (`card`, `field`, `row`, `pair`, `callout`, `collapsible`,
 `page_columns`, `WrapLabel`, which reserves the height a wrapped label
@@ -1280,8 +1300,9 @@ Nothing in `diffusor/` imports these. They are run by hand from the project
 root.
 
 #### `scripts/build_references.py`
-Regenerates `references.bib` and `REFERENCES.md` from `diffusor/references.py`
-plus `coefficients.list_coefficients()` and `thermo.buffers.BUFFER_CITATIONS`.
+Regenerates `references.bib` (the text of `references.bibtex_document()`) and
+`REFERENCES.md` from `diffusor/references.py` plus
+`coefficients.list_coefficients()` and `thermo.buffers.BUFFER_CITATIONS`.
 The Markdown file gets a table of every coefficient with its source and
 verification status, the buffer citations, and the full bibliography annotated
 with which coefficients use each key (primary or secondary).
@@ -2506,16 +2527,19 @@ what Diffusor currently does, and what would settle it.
 #### Validation against published studies
 
 26. **A list of reproducible published studies exists but has not been run.**
-    [docs/VALIDATION_STUDIES.md](docs/VALIDATION_STUDIES.md) lists, for each
-    mineral–element pair, up to ten studies with open profile data or complete
-    published inputs, plus experimental datasets and independent codes for
-    cross-checks. One check is done: Diffusor's `opx_FeMg_dohmen2016` gives
-    D = 10^-19.782 m2/s at 966 C, NNO, along [100], without the XFe term. That
-    matches the 10^-19.78 m2/s stated by Araya et al. (2024, Sakurajima) for
-    "perpendicular to c". Gaps that block exact reproduction (olivine Ni and
-    Mn, pressure in olivine Fe-Mg, Bayesian inversion, plagioclase Mg
-    partitioning variants, newer Ti-in-quartz laws, Mg in sanidine) are listed
-    there as G1-G8.
+    It is kept locally as `docs/VALIDATION_STUDIES.md`, which git ignores, as
+    is the `papers/` folder of source PDFs it was checked against. For each
+    mineral–element pair it lists up to ten studies with open profile data or
+    complete published inputs, plus experimental datasets and independent codes
+    for cross-checks. Two checks are done. `opx_FeMg_dohmen2016` gives
+    D = 10^-19.782 m2/s at 966 C, NNO, along [100], without the XFe term,
+    matching the 10^-19.78 m2/s stated by Araya et al. (2024, Sakurajima) for
+    "perpendicular to c". `opx_Mg_schwandt1998_c` gives 4.76e-21 m2/s at 884 C
+    against the 4.72e-21 of Saunders et al. (2012, Fig. 2), a 0.9 per cent
+    difference consistent with rounding of the published log D0. Gaps that
+    block exact reproduction: olivine Ni and Mn, pressure in olivine Fe-Mg,
+    Bayesian inversion, plagioclase Mg partitioning variants, newer
+    Ti-in-quartz laws, and Mg in sanidine.
 
 ### 4.4 Verification status
 

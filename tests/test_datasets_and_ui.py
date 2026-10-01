@@ -403,3 +403,56 @@ def test_interface_text_has_no_semicolons(app):
     for d in ds.DATASETS:
         assert ";" not in d.provenance + d.expected + d.notes, d.key
     w.close()
+
+
+# --- Help > All references ---------------------------------------------------------
+def test_all_references_lists_every_reference_once_or_more(app):
+    from diffusor.gui.reference_list import reference_groups, references_html
+    placed = {k for _, keys in reference_groups() for k in keys}
+    assert placed == set(REFERENCES)
+    text = references_html()
+    for key, ref in REFERENCES.items():
+        assert f">{key}<" in text, key
+        if ref.doi:
+            assert f"https://doi.org/{ref.doi}" in text, key
+    assert f"{len(REFERENCES)} references" in text
+
+
+def test_all_references_shows_what_uses_each_paper(app):
+    from diffusor.gui.reference_list import reference_usage
+    usage = reference_usage()
+    assert "ol_FeMg_dohmen_chakraborty2007_tamed" in usage["dohmen_chakraborty2007"]
+    assert "opx_FeMg_dohmen2016 (secondary)" in usage["sato2022"]
+    assert "example plag_santorini" in usage["druitt2012"]
+
+
+def test_all_references_search_narrows_the_list(app):
+    from diffusor.gui.reference_list import references_html
+    text = references_html("Sakurajima zzz-no-such-paper")
+    assert "No references match" in text
+    text = references_html("Polo-Sanchez Kameni")
+    assert ">polo_sanchez2023<" in text and ">crank1975<" not in text
+    assert f"1 of {len(REFERENCES)} references match" in text
+
+
+def test_all_references_saves_the_bibtex_file(app, tmp_path):
+    from pathlib import Path
+    from diffusor.gui.reference_list import ReferenceListDialog
+    from diffusor.references import bibtex_document
+    dlg = ReferenceListDialog()
+    out = dlg.save_bibtex(str(tmp_path / "refs.bib"))
+    saved = Path(out).read_text(encoding="utf-8")
+    assert saved == bibtex_document()
+    # the shipped file is the same document, so it has not drifted from the registry
+    shipped = Path(__file__).resolve().parents[1] / "references.bib"
+    assert shipped.read_text(encoding="utf-8") == saved
+    dlg.search.setText("Dohmen")
+    assert "Dohmen" in dlg.view.toPlainText()
+    dlg.close()
+
+
+def test_help_menu_opens_all_references(app):
+    w = _window(app)
+    help_menu = [a.menu() for a in w.menuBar().actions() if a.text() == "&Help"][0]
+    assert "All references" in [a.text() for a in help_menu.actions()]
+    w.close()

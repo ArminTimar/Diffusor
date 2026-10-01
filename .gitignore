@@ -13,3 +13,7 @@ venv/
 tmp/
 # made by Start Diffusor.bat, with paths of the machine it ran on
 /Diffusor.lnk
+
+# local working material, not distributed: source PDFs and the validation work list
+/papers/
+/docs/VALIDATION_STUDIES.md

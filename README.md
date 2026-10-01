@@ -447,12 +447,13 @@ about 0.6 log units slower again, but that work is a conference abstract with no
 Arrhenius law, so it is not in the registry.
 
 Also available: the rare earth elements Lu, Ce and Eu in orthopyroxene from
-Dias, Dohmen & Hartmann (2025), and magnetite Ti, Mn, Co, Cr, Al and Mg from
-Sievwright et al. (2020). Sievwright et al. measured only at 1150 °C, so
-All 21 table rows now have fixed-temperature entries. Five legacy temperature-scaled
-variants remain explicitly labelled as hypotheses. Borrowed activation energies are
-not measurements from Sievwright et al. Thermal Monte Carlo is rejected for
-fixed-temperature laws.
+Dias, Dohmen & Hartmann (2025), and 21 elements in magnetite from Sievwright
+et al. (2020). Sievwright et al. measured only at 1150 °C, so each row of their
+Table 5 is an entry that holds at that temperature alone, and a Monte Carlo
+that samples temperature is refused for it. Five older entries (Ti, Mn, Co, Cr
+and Al) carry those values to other temperatures with activation energies
+borrowed from Van Orman & Crispin (2010). They are labelled as Diffusor's
+hypothesis, because Sievwright et al. measured no activation energies.
 
 Older calibrations are kept alongside them so published timescales can be
 reproduced and compared: Dohmen et al. (2016) and Ganguly & Tazzoli (1994) for
@@ -524,6 +525,15 @@ Those are the recommended entries. At 1150 °C they agree with Sievwright et al.
   Python. The interface does not expose it yet.
 - Multi-component and isotopic diffusion are not implemented.
 
+## Citing Diffusor
+
+If Diffusor contributes to published work, cite it with the version you used.
+GitHub's **Cite this repository** button (from [CITATION.cff](CITATION.cff))
+gives the citation in APA and BibTeX. Cite the diffusion coefficients too:
+every exported methods block lists the sources the run actually used, and
+**Help > All references** saves them as BibTeX.
+
 ## Licence
 
-MIT.
+MIT, see [LICENSE](LICENSE). What changed between versions is in
+[CHANGELOG.md](CHANGELOG.md).

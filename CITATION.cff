@@ -1,0 +1,31 @@
+# How to cite Diffusor. GitHub shows this as "Cite this repository", and
+# Zenodo reads it when it archives a release. The version is deliberately not
+# written here: it lives only in diffusor/__init__.py, and Zenodo takes it from
+# the release tag. Add the concept DOI under "doi" once Zenodo has minted it.
+cff-version: 1.2.0
+message: "If you use Diffusor in published work, please cite it as below, give the version you used (it is in every exported methods block), and cite the diffusion coefficients listed in that methods block."
+type: software
+title: "Diffusor: diffusion chronometry with traceable coefficients and correlated uncertainties"
+authors:
+  - family-names: Timar
+    given-names: Armin
+    email: timar.armin@gmail.com
+    affiliation: "Department of Earth and Planetary Sciences, Kyushu University"
+repository-code: "https://github.com/ArminTimar/Diffusor"
+url: "https://github.com/ArminTimar/Diffusor"
+license: MIT
+abstract: >-
+  A desktop application and Python library for diffusion chronometry. It
+  solves 1-D diffusion problems analytically and numerically, carries a
+  registry of published diffusion coefficients for thirteen minerals, each
+  with its equation, calibration range and the place in the source where the
+  numbers were read, fits diffusion times to measured or image-derived
+  profiles, and propagates uncertainties by Monte Carlo while keeping
+  temperature, oxygen fugacity and the Arrhenius parameters correlated.
+keywords:
+  - diffusion chronometry
+  - geospeedometry
+  - magma residence time
+  - volcanology
+  - petrology
+  - Monte Carlo

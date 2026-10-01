@@ -22,8 +22,8 @@ already known.
 | | |
 | --- | --- |
 | Covers | September 29 working tree; section 5 updates the September 18 baseline |
-| Package version | 0.1.0 |
-| Modules documented | 71 Python modules |
+| Package version | 0.2.0 |
+| Modules documented | 72 Python modules |
 | Coefficients | 103 entries, 13 minerals, all 103 with source-transcription checks |
 | References | 95 keys in `diffusor/references.py` |
 
@@ -132,13 +132,16 @@ in a normal run.
 ### 2.1 Entry points
 
 #### `diffusor/__init__.py`
-Package docstring and `__version__ = "0.1.0"`. The version string is written
+Package docstring and `__version__ = "0.2.0"`. The version string is written
 into every exported JSON and methods block by `dataio/export.py`, shown in
 Help > About, and compared with the newest GitHub release by `updates.py`.
 It is the only place the version is written: `pyproject.toml` declares it
 `dynamic` and reads it with `[tool.setuptools.dynamic] version = { attr =
-"diffusor.__version__" }`. To release, change it here, commit, tag `vX.Y.Z` and
-publish a GitHub release with that tag.
+"diffusor.__version__" }`. To release, change it here, date the version's
+heading in `CHANGELOG.md`, commit, tag `vX.Y.Z` and publish a GitHub release
+with that tag and the changelog section as its text. `CITATION.cff` carries no
+version on purpose: Zenodo, once connected to the repository, archives each
+release and takes the version from the tag.
 
 #### `diffusor/__main__.py`
 `from .gui.app import main`, then `raise SystemExit(main())` under an
@@ -1367,6 +1370,14 @@ stops reproducing the number printed in its source.
 | `test_image_profiles.py` | Lines start on the right of the guideline as in NIDIS and recover a known error function; lines stay perpendicular to a curved guideline; samples off the image are not used; value limits with grown masks remove a crack and an inclusion; NIDIS's 1 SD test rejects about a third of clean Gaussian data and the MAD test almost none; exclusion polygons and whole-line dropping; PNG, BMP, JPEG, 8/16-bit and float TIFF, multi-page TIFF, NumPy, text grids with headers, ENVI and raw binary are read; ImageJ, FEI and JEOL pixel sizes are found; a jet map is inverted to under 1 % of its range with off-scale pixels flagged, from a named map and from a legend drawn in the image; the workbook round trip and the calibrated profile; the extractor window saves and loads into Diffusor through both paths; a legend saved as a separate image is picked and used; the image windows fit the screen and their content can shrink. |
 | `test_updates.py` | Versions compare as numbers (`0.10.0 > 0.9.0`, `1.0 == 1.0.0`) and a pre-release or unreadable tag never triggers a notice; the version is written only in `diffusor/__init__.py`; a release link that does not point at this project's own release pages is replaced; every failure (404, rate limit, offline, timeout, bad JSON, oversized or non-UTF-8 reply) becomes a readable `UpdateError`; the request carries a User-Agent; the worker reports a release or a reason; the banner appears only for a newer release, **Later** hides it and **Download** opens the release page; a silent check never opens a dialog and a manual one always does; only a successful check is remembered; the startup switch and the daily limit are respected and the switch survives a restart. The network is faked and the settings live in a temporary file, so the suite never goes online or touches the real settings. |
 | `test_writeup.py` | This document lists every module, coefficient key, citation key, dataset key and buffer that exists in the code. |
+| `conftest.py` | Not a test. After every test it closes and deletes any leftover window through Qt's event loop. A window that was only closed used to be destroyed by Python's garbage collector at an arbitrary later moment, while Qt could still have events queued for its children, and the suite then crashed on Windows about three runs in four (heap corruption, 0xc0000374, reported while the next window was being built). |
+
+`.github/workflows/tests.yml` runs the whole suite on GitHub for every push
+and pull request, on Linux, Windows and macOS with Python 3.10 and 3.13, with
+Qt drawing off screen. On one Linux job it also reruns
+`scripts/build_references.py` and fails if `REFERENCES.md` or
+`references.bib` changes, so the generated files cannot drift from
+`diffusor/references.py`.
 
 ---
 

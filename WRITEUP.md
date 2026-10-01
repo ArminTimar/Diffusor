@@ -1310,7 +1310,9 @@ Regenerates `references.bib` (the text of `references.bibtex_document()`) and
 `coefficients.list_coefficients()` and `thermo.buffers.BUFFER_CITATIONS`.
 The Markdown file gets a table of every coefficient with its source and
 verification status, the buffer citations, and the full bibliography annotated
-with which coefficients use each key (primary or secondary).
+with which coefficients use each key (primary or secondary). Both files are
+written with Unix line endings on every system, so regenerating them on
+Windows, macOS or Linux gives the same bytes and the CI check can compare them.
 **Run it after any change to the registry**, or the two generated files drift.
 
 #### `scripts/make_examples.py`

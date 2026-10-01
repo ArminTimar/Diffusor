@@ -63,8 +63,10 @@ def build_md() -> str:
 
 
 def main():
-    (ROOT / "references.bib").write_text(build_bib(), encoding="utf-8")
-    (ROOT / "REFERENCES.md").write_text(build_md(), encoding="utf-8")
+    # Unix line endings on every system, so the files are byte-identical
+    # whichever machine regenerates them and CI can compare them with git diff.
+    (ROOT / "references.bib").write_text(build_bib(), encoding="utf-8", newline="\n")
+    (ROOT / "REFERENCES.md").write_text(build_md(), encoding="utf-8", newline="\n")
     print(f"wrote references.bib and REFERENCES.md ({len(REFERENCES)} references, "
           f"{len(list_coefficients())} coefficients)")
 

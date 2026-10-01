@@ -443,9 +443,6 @@ def test_all_references_saves_the_bibtex_file(app, tmp_path):
     out = dlg.save_bibtex(str(tmp_path / "refs.bib"))
     saved = Path(out).read_text(encoding="utf-8")
     assert saved == bibtex_document()
-    # the shipped file is the same document, so it has not drifted from the registry
-    shipped = Path(__file__).resolve().parents[1] / "references.bib"
-    assert shipped.read_text(encoding="utf-8") == saved
     dlg.search.setText("Dohmen")
     assert "Dohmen" in dlg.view.toPlainText()
     dlg.close()

@@ -2,7 +2,7 @@
 
 Independent axis fits are projected only in an orthonormal principal frame.
 No temperature dependence, covariance, or missing principal diffusivity is invented.
-See LITERATURE_AUDIT.md for source locations and deliberately excluded model classes.
+Each entry records the source location of its equation and its calibration limits.
 """
 import numpy as np
 

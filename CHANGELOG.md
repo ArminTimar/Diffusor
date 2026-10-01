@@ -26,7 +26,7 @@ Refit anything computed with these before this release:
   fO2 and left the path itself at its nominal temperatures, so most of the
   temperature uncertainty was lost. Each draw now shifts the whole path.
 - **Profile band.** The band under the fit is now the spread of the profiles
-  the Monte Carlo actually fitted, not the model at the ends of the time
+  the Monte Carlo draws fitted, not the model at the ends of the time
   interval.
 
 ### New

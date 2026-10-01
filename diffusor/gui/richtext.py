@@ -355,7 +355,7 @@ def boundaries_html() -> str:
     d.p("Most published profiles, including Ostorero et al. (2022) and Chamberlain et al. "
         "(2014), use the error-function solution for a step between two plateaus. That "
         "solution assumes both plateaus extend to infinity, which is the same as holding them "
-        "fixed far away. The core is not truly held at a fixed composition. The assumption "
+        "fixed far away. Physically, the core composition is not fixed. The assumption "
         "only says that diffusion has not yet reached it.")
     d.p("While both plateaus survive in the data, the choice at the far ends makes no "
         "difference to the fitted time. When the diffusion front reaches the end of the "

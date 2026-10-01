@@ -14,6 +14,15 @@ tmp/
 # made by Start Diffusor.bat, with paths of the machine it ran on
 /Diffusor.lnk
 
-# local working material, not distributed: source PDFs and the validation work list
+# development material, kept locally and not distributed: source PDFs, the
+# literature audit and inventory, the code-to-paper writeup and its test, the
+# generated reference lists and the maintenance scripts
 /papers/
-/docs/VALIDATION_STUDIES.md
+/docs/
+/scripts/
+/LITERATURE_AUDIT.md
+/WRITEUP.md
+/REFERENCES.md
+/references.bib
+/examples/README.md
+/tests/test_writeup.py

@@ -43,10 +43,3 @@ jobs:
 
       - name: Test
         run: python -m pytest -q
-
-      # REFERENCES.md and references.bib are generated from diffusor/references.py
-      - name: Generated reference files are up to date
-        if: runner.os == 'Linux' && matrix.python == '3.13'
-        run: |
-          python scripts/build_references.py
-          git diff --exit-code -- REFERENCES.md references.bib

@@ -28,11 +28,11 @@ preference:
 ``logD_at_T``
     Sample ln D directly at the working temperature using the paper's stated
     scatter about the Arrhenius line (e.g. "reproduces the data within 1 log
-    unit", Mueller et al. 2013).  This is the honest fallback when no
-    covariance is published, and is what most papers actually constrain.
+    unit", Mueller et al. 2013).  This is the fallback when no covariance
+    is published; most papers constrain D at a given temperature in this form.
 ``independent``
-    Sample each parameter independently.  Provided only so the user can
-    reproduce the (over-)estimates of other software; never the default.
+    Sample each parameter independently.  Provided so that results of
+    software that samples this way can be reproduced; never the default.
 """
 from __future__ import annotations
 

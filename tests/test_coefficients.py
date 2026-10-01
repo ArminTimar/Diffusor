@@ -192,3 +192,26 @@ def test_direction_cosines_must_close():
     with pytest.raises(ValueError):
         direction_factor(1.0, 1.0, 1.0, 10.0, 10.0, 10.0)
     assert direction_factor(2.0, 4.0, 8.0, 90.0, 90.0, 0.0) == pytest.approx(8.0)
+
+
+# Corrected on 1 October 2026 after a Crossref check; each value was wrong before.
+@pytest.mark.parametrize("key, doi", [
+    ("sato2022", "10.1016/j.jvolgeores.2022.107686"),
+    ("polo_sanchez2023", "10.3389/feart.2023.1128083"),
+    ("aggarwal_dieckmann2002", "10.1007/s00269-002-0284-0"),
+    ("dohmen2017", "10.2138/rmg.2017.83.16"),
+    ("grove1984", "10.1016/0016-7037(84)90391-0"),
+    ("sneeringer1984", "10.1016/0016-7037(84)90329-6"),
+    ("dimanov_sautter2000", "10.1127/0935-1221/2000/0012-0749"),
+])
+def test_corrected_reference_dois(key, doi):
+    assert REFERENCES[key].doi == doi
+
+
+def test_corrected_reference_records():
+    sato = REFERENCES["sato2022"]
+    assert sato.authors.startswith("Sato, M. and Ban, M. and Yuguchi, T. and Adachi, T.")
+    assert (sato.volume, sato.pages) == ("432", "107686")
+    polo = REFERENCES["polo_sanchez2023"]
+    assert "Flaherty" in polo.authors and "Cluzel" not in polo.authors
+    assert polo.pages == "1128083"

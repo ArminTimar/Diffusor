@@ -2110,15 +2110,16 @@ crystals (p. 60), which is part of the unverified olivine entry's
 `verified_from`; and the conditions of the `olivine_laki` example
 (1150 +/- 30 C, FMQ-1 +/- 0.5).
 
-**`sato2022`** — Sato, Ban, Yoshida & Andrews (2022) Magma plumbing system and
-eruption processes of the Okama pyroclastics, Zao volcano, revealed by
-orthopyroxene Fe-Mg diffusion chronometry. *JVGR* 429:107607.
+**`sato2022`** — Sato, Ban, Yuguchi & Adachi (2022) Pre-eruptive magmatic
+processes of historical activities at Zao volcano, northeastern Japan: Insights
+from compositional zoning in orthopyroxene phenocrysts. *JVGR* 432:107686.
 An application of the Dohmen et al. (2016) opx law to a Japanese arc volcano.
 *Used for:* a secondary citation on the `opx_FeMg_dohmen2016` entry.
 
-**`polo_sanchez2023`** — Polo-Sanchez, Druitt, Cluzel & Devidal (2023)
-Pyroxene diffusion chronometry of the magmatic plumbing system of Santorini
-volcano. *Front. Earth Sci.* 11:1149446.
+**`polo_sanchez2023`** — Polo-Sánchez, Flaherty, Hervé, Druitt, Fabbro,
+Nomikou & Balcone-Boissard (2023) Tracking timescales of magma reservoir
+recharge through caldera cycles at Santorini (Greece). Emphasis on an explosive
+eruption of Kameni Volcano. *Front. Earth Sci.* 11:1128083.
 *Used for:* a secondary citation on the `opx_FeMg_dohmen2016` entry.
 
 **`zellmer1999`** — Zellmer, Blake, Vance, Hawkesworth & Turner (1999)
@@ -2492,6 +2493,29 @@ what Diffusor currently does, and what would settle it.
 24. **`3.15576e7` is hard-coded** in `dataio/export.py` for the Monte Carlo
     CSV instead of importing `SEC_PER_YEAR`. Same value today; two places to
     change tomorrow.
+
+25. **Settled: seven bibliographic records were wrong** (found and fixed
+    1 October 2026, checked against Crossref and the local PDFs). `sato2022` and
+    `polo_sanchez2023` had the wrong authors, titles and article numbers (and
+    `sato2022` the wrong volume and DOI). `aggarwal_dieckmann2002` pointed to
+    Part I instead of Part II, and `dohmen2017` to Engi (2017). The DOIs of
+    `grove1984`, `sneeringer1984` and `dimanov_sautter2000` did not resolve.
+    No calculation was affected; exported citations were. Every DOI in the
+    registry now resolves to the record it names.
+
+#### Validation against published studies
+
+26. **A list of reproducible published studies exists but has not been run.**
+    [docs/VALIDATION_STUDIES.md](docs/VALIDATION_STUDIES.md) lists, for each
+    mineral–element pair, up to ten studies with open profile data or complete
+    published inputs, plus experimental datasets and independent codes for
+    cross-checks. One check is done: Diffusor's `opx_FeMg_dohmen2016` gives
+    D = 10^-19.782 m2/s at 966 C, NNO, along [100], without the XFe term. That
+    matches the 10^-19.78 m2/s stated by Araya et al. (2024, Sakurajima) for
+    "perpendicular to c". Gaps that block exact reproduction (olivine Ni and
+    Mn, pressure in olivine Fe-Mg, Bayesian inversion, plagioclase Mg
+    partitioning variants, newer Ti-in-quartz laws, Mg in sanidine) are listed
+    there as G1-G8.
 
 ### 4.4 Verification status
 

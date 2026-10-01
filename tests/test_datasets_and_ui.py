@@ -1,5 +1,6 @@
 """The bundled dataset catalogue, the superseded-coefficient flags, and the interface."""
 import os
+from pathlib import Path
 
 import numpy as np
 import pytest
@@ -293,6 +294,145 @@ def _load_example(app, key):
     return w
 
 
+def test_magnetite_example_fits_its_plateaus_and_recovers_8_days(app):
+    """Two regressions. The initial-profile guess ran after the example settings
+    and replaced x_Ti = 0.1 by the mean TiO2 (5.3 wt%, clamped to 1), which made
+    D 250 times too large and the fit about 0.02 d. And the traverse ends before
+    the profile flattens: with the plateaus held at the outer points the fit gave
+    about 5.3 d for a true 8 d."""
+    from diffusor.constants import SEC_PER_DAY
+    from diffusor.fitting import fit_time
+    w = _load_example(app, "magnetite_shinmoedake")
+    assert w.sp_xcomp.value() == pytest.approx(0.1)
+    assert w.chk_free_plateaus.isChecked()
+    assert set(w._free_parameters()) == {"t", "x0", "C_left", "C_right"}
+    r = fit_time(w._model(w._checked_keys()[0]), w.profile.x, w.profile.C, w.profile.sigma,
+                 w._free_parameters())
+    assert 0.75 < r.t_seconds / (8 * SEC_PER_DAY) < 1.33
+    w.close()
+    w = _load_example(app, "opx_shinmoedake")
+    assert not w.chk_free_plateaus.isChecked(), "the next example must not inherit the setting"
+    w.close()
+
+
+def test_the_coefficient_is_chosen_before_the_conditions(app):
+    """The law decides what the later steps need, so it comes right after the
+    mineral; the resolution sits with the data, the cooling path and the host
+    composition with the conditions."""
+    from diffusor.gui import main_window as mw
+    assert mw.STEPS == ["Data", "Mineral", "Coefficient", "Conditions", "Model",
+                        "Uncertainty", "Results"]
+    w = _window(app)
+    page = w.pages.widget
+    assert page(mw.DATA).isAncestorOf(w.cmb_resolution)
+    assert page(mw.DATA).isAncestorOf(w.sp_xscale_sig)
+    assert page(mw.COEFFICIENT).isAncestorOf(w.lst_coef)
+    for wdg in (w.sp_T, w.chk_cooling, w.sp_Tend, w.sp_dbuf, w.sp_xcomp, w.chk_comp_dep,
+                w.box_unused):
+        assert page(mw.CONDITIONS).isAncestorOf(wdg), wdg
+    assert page(mw.MODEL).isAncestorOf(w.cmb_solver)
+    assert page(mw.MINERAL).isAncestorOf(w.cmb_axis)
+    w.close()
+
+
+def test_conditions_the_law_ignores_are_switched_off(app):
+    from PySide6.QtCore import Qt
+    from diffusor.gui.main_window import CONDITIONS
+
+    def tick(w, key):
+        for i in range(w.lst_coef.count()):
+            it = w.lst_coef.item(i)
+            it.setCheckState(Qt.Checked if it.data(Qt.UserRole) == key else Qt.Unchecked)
+        w._go(CONDITIONS)
+
+    w = _load_example(app, "cpx_stromboli")         # Mueller et al. (2013): no P, no fO2
+    tick(w, "cpx_FeMg_muller2013")
+    assert not w.sp_P.isEnabled() and not w.sp_dbuf.isEnabled() and not w.cmb_buffer.isEnabled()
+    assert w.box_unused.isVisibleTo(w)
+    w.close()
+
+    w = _load_example(app, "magnetite_shinmoedake")  # fO2 term, no pressure term
+    tick(w, "mt_Ti_vanorman_crispin2010")
+    assert w.sp_dbuf.isEnabled()
+    assert w.cmb_fo2_mode.currentIndex() == 1 and not w.sp_P.isEnabled(), \
+        "absolute fO2: pressure enters nowhere"
+    w.cmb_fo2_mode.setCurrentIndex(0)
+    assert w.sp_P.isEnabled() and w.cmb_buffer.isEnabled(), "a buffer moves with pressure"
+    w.close()
+
+
+def _load_own_file(w, filename, spec):
+    """Load a bundled file the way a user's own file comes in: no dataset settings."""
+    path = ds.EXAMPLES_DIR / filename
+    w._use_table(read_table(path), spec, path, None, (None, False))
+
+
+def _choose(w, mineral, species):
+    keys = [w.cmb_mineral.itemData(i) for i in range(w.cmb_mineral.count())]
+    w.cmb_mineral.setCurrentIndex(keys.index(mineral))
+    w.cmb_species.setCurrentText(species)
+
+
+TIO2 = ProfileSpec("Distance_um", "TiO2_wt", None, "TiO2_err", mode="A")
+FEMG = ProfileSpec("Distance_um", "FeO_wt", "MgO_wt", "FeO_err", "MgO_err",
+                   mode="A/(A+B)", oxide_a="FeO", oxide_b="MgO")
+
+
+def test_a_concentration_profile_never_becomes_the_host_composition(app):
+    """A TiO2 wt% mean (about 5) used to land in x_Ti, clamped to 1, with D then
+    about 250 times too large. The profile is usually loaded before the mineral
+    is chosen, so the value has to follow the mineral and species as well."""
+    w = _window(app)
+    before = w.sp_xcomp.value()
+    _load_own_file(w, "magnetite_ti.csv", TIO2)
+    _choose(w, "magnetite", "Ti")
+    assert w.sp_xcomp.value() == pytest.approx(before)
+    w.sp_xcomp.setValue(0.1)                     # typed in
+    w._guess_initial(from_button=True)
+    assert w.sp_xcomp.value() == pytest.approx(0.1)
+    m = w._model("mt_Ti_vanorman_crispin2010")
+    assert m.D_bulk() == pytest.approx(4.35e-16, rel=0.01)   # Tomiya et al. (2013)
+    w.close()
+
+
+def test_the_profile_mean_is_taken_back_when_the_species_changes(app):
+    w = _window(app)
+    _choose(w, "opx", "Fe-Mg")
+    before = w.sp_xcomp.value()
+    _load_own_file(w, "opx_femg_step.csv", FEMG)
+    xfe = float(np.mean(w.profile.C))
+    assert 0.2 < xfe < 0.35 and w.sp_xcomp.value() == pytest.approx(xfe, abs=1e-4)
+    _choose(w, "magnetite", "Ti")                # the X_Fe mean means nothing for x_Ti
+    assert w.sp_xcomp.value() == pytest.approx(before)
+    _choose(w, "opx", "Fe-Mg")
+    assert w.sp_xcomp.value() == pytest.approx(xfe, abs=1e-4)
+    w.close()
+
+
+def test_a_typed_composition_survives_a_mineral_change_but_not_guess(app):
+    w = _window(app)
+    _choose(w, "opx", "Fe-Mg")
+    _load_own_file(w, "opx_femg_step.csv", FEMG)
+    w.sp_xcomp.setValue(0.4)
+    _choose(w, "cpx", "Fe-Mg")
+    assert w.sp_xcomp.value() == pytest.approx(0.4)
+    w._guess_initial(from_button=True)           # asked for: the profile mean
+    assert w.sp_xcomp.value() == pytest.approx(float(np.mean(w.profile.C)), abs=1e-4)
+    w.close()
+
+
+def test_olivine_composition_goes_through_the_chosen_coordinate(app):
+    w = _window(app)
+    _choose(w, "olivine", "Fe-Mg")
+    before = w.sp_xcomp.value()
+    _load_own_file(w, "olivine_fo.csv", ProfileSpec("Distance_um", "Fo_mol", None, "Fo_err", mode="A"))
+    assert w.sp_xcomp.value() == pytest.approx(before), "Fo ~85 is no X_Fe"
+    w.cmb_ol_coordinate.setCurrentIndex(2)       # Forsterite mol%
+    xfe = 1.0 - float(np.mean(w.profile.C)) / 100.0
+    assert 0.1 < xfe < 0.25 and w.sp_xcomp.value() == pytest.approx(xfe, abs=1e-4)
+    w.close()
+
+
 def test_compare_runs_to_completion_and_ignores_a_second_click(app, monkeypatch):
     """Compare used to crash: its progress lambda touched widgets from the worker thread."""
     import inspect
@@ -324,8 +464,9 @@ def test_mouse_wheel_does_not_change_numbers(app):
     from PySide6.QtCore import QPoint, QPointF, Qt
     from PySide6.QtGui import QWheelEvent
     from PySide6.QtWidgets import QApplication
+    from diffusor.gui.main_window import CONDITIONS
     w = _load_example(app, "opx_kizimen")
-    w._go(2)
+    w._go(CONDITIONS)
     app.processEvents()
     before = w.sp_T.value()
     ev = QWheelEvent(QPointF(5, 5), QPointF(5, 5), QPoint(0, 0), QPoint(0, 120),
@@ -338,13 +479,14 @@ def test_mouse_wheel_does_not_change_numbers(app):
 
 
 def test_example_says_what_it_filled_in(app):
+    from diffusor.gui.main_window import COEFFICIENT, CONDITIONS, DATA, MINERAL, MODEL
     w = _load_example(app, "opx_kizimen")
-    assert w.lbl_data.isVisibleTo(w.pages.widget(0))
+    assert w.lbl_data.isVisibleTo(w.pages.widget(DATA))
     assert "filled in" in w.lbl_data.text()
-    for step in (1, 2, 3, 4):
+    for step in (MINERAL, COEFFICIENT, CONDITIONS, MODEL):
         assert not w._prefill[step].isHidden(), step
-    assert "850" in w._prefill[2].text()
-    assert "Ganguly" in w._prefill[4].text()
+    assert "850" in w._prefill[CONDITIONS].text()
+    assert "Ganguly" in w._prefill[COEFFICIENT].text()
     w.close()
 
 
@@ -452,4 +594,97 @@ def test_help_menu_opens_all_references(app):
     w = _window(app)
     help_menu = [a.menu() for a in w.menuBar().actions() if a.text() == "&Help"][0]
     assert "All references" in [a.text() for a in help_menu.actions()]
+    w.close()
+
+
+# --- recent profiles on the Data step --------------------------------------------------
+def _fake_column_dialog(monkeypatch, on_exec=None):
+    """Accept the column dialog without showing it; count the times it would open."""
+    from PySide6.QtWidgets import QDialog
+    from diffusor.gui import main_window as mw
+    seen = []
+
+    def fake_exec(dlg):
+        seen.append(dlg)
+        if on_exec:
+            on_exec(dlg, len(seen))
+        return QDialog.Accepted
+    monkeypatch.setattr(mw.ColumnDialog, "exec", fake_exec)
+    return seen
+
+
+def test_recent_profiles_remember_the_file_and_its_columns(app, tmp_path, monkeypatch):
+    import shutil
+    src = tmp_path / "mt.csv"
+    shutil.copy(ds.EXAMPLES_DIR / "magnetite_ti.csv", src)
+
+    def first_time(dlg, n):
+        if n == 1:
+            dlg.xmax.setText("60")          # a choice the guess would not make
+    seen = _fake_column_dialog(monkeypatch, first_time)
+    w = _window(app)
+    assert w.lst_recent.count() == 0 and w.data_stack.currentIndex() == 0
+    w._load(src, dataset=None)
+    assert len(seen) == 1 and w.profile.spec.x_max == 60
+    assert w.lst_recent.count() == 1 and w.data_stack.currentIndex() == 0, \
+        "after loading, the profile is in front"
+    w.btn_data_view.click()
+    assert w.data_stack.currentIndex() == 1 and w.lbl_data_title.text() == "Recent profiles"
+    w._load_recent_item(w.lst_recent.item(0))
+    assert len(seen) == 1, "an unchanged recent file loads without the column dialog"
+    assert w.profile.spec.x_max == 60 and w.data_stack.currentIndex() == 0
+    w.close()
+
+    # a new window opens on the recent list, and a changed file asks again,
+    # starting from last time's choices
+    df = read_table(src)
+    df["extra"] = 1.0
+    df.to_csv(src, index=False)
+    w = _window(app)
+    assert w.data_stack.currentIndex() == 1 and w.lst_recent.count() == 1
+    w._load_recent_item(w.lst_recent.item(0))
+    assert len(seen) == 2 and seen[-1].xmax.text() == "60"
+    w.close()
+
+
+def test_a_missing_recent_file_is_shown_but_not_loaded(app, tmp_path, monkeypatch):
+    import shutil
+    from PySide6.QtCore import Qt
+    src = tmp_path / "gone.csv"
+    shutil.copy(ds.EXAMPLES_DIR / "magnetite_ti.csv", src)
+    _fake_column_dialog(monkeypatch)
+    w = _window(app)
+    w._load(src, dataset=None)
+    src.unlink()
+    w._refresh_recent()
+    item = w.lst_recent.item(0)
+    assert "not found" in item.text() and not item.flags() & Qt.ItemIsEnabled
+    before = w.profile
+    w._load_recent_item(item)
+    assert w.profile is before
+    w.btn_recent_clear.click()
+    assert w.lst_recent.count() == 0
+    w.close()
+
+
+def test_the_file_dialog_opens_in_the_last_folder(app, tmp_path, monkeypatch):
+    import shutil
+    from diffusor.gui import main_window as mw
+    src = tmp_path / "mt.csv"
+    shutil.copy(ds.EXAMPLES_DIR / "magnetite_ti.csv", src)
+    _fake_column_dialog(monkeypatch)
+    asked = []
+    monkeypatch.setattr(mw.QFileDialog, "getOpenFileName",
+                        staticmethod(lambda parent, title, start, filt: asked.append(start)
+                                     or (str(src), "")))
+    w = _window(app)
+    w.load_file()
+    w.load_file()
+    assert Path(asked[1]) == tmp_path
+    w.close()
+
+
+def test_examples_do_not_enter_the_recent_list(app):
+    w = _load_example(app, "magnetite_shinmoedake")
+    assert w.lst_recent.count() == 0
     w.close()

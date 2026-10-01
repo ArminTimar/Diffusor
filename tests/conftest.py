@@ -6,10 +6,33 @@ arbitrary moment, possibly while Qt still has events queued for its children,
 which crashed the suite on Windows now and then (heap corruption, 0xc0000374).
 After each test every leftover top-level window is closed and deleted through
 Qt's own event loop instead, so destruction happens at a known point.
+
+The window keeps settings (recent files, the last folder, the update check).
+The suite points it at a scratch file, emptied after every test, so it never
+reads or writes the user's own settings and no test sees another's files.
 """
 import gc
+import os
+import tempfile
+from pathlib import Path
 
 import pytest
+
+_SETTINGS = Path(tempfile.mkdtemp(prefix="diffusor-tests-")) / "settings.ini"
+os.environ["DIFFUSOR_SETTINGS"] = str(_SETTINGS)
+
+
+@pytest.fixture(autouse=True)
+def _fresh_settings():
+    yield
+    import sys
+    if "PySide6.QtCore" in sys.modules:
+        # Qt caches a settings file in the process, so clear it through Qt as well
+        from PySide6.QtCore import QSettings
+        s = QSettings(str(_SETTINGS), QSettings.IniFormat)
+        s.clear()
+        s.sync()
+    _SETTINGS.unlink(missing_ok=True)
 
 
 @pytest.fixture(autouse=True)

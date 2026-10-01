@@ -108,20 +108,29 @@ The main window leads through six steps and then opens a results view.
 1. **Data.** Load a profile file or one of the bundled examples. Diffusor
    proposes the distance column, its unit and the composition columns from the
    column names; the assignment is confirmed by the user. Uncertainty columns,
-   oxide names and a fit window are set under *Advanced*. Loading an example
-   also fills in the following steps.
+   oxide names and a fit window are set under *Advanced*. Files loaded before
+   are listed under *Recent profiles*, which shares a panel with the profile
+   plot; a file from that list whose columns have not changed opens with the
+   mapping chosen last time, without the column dialog, and the file dialog
+   opens in the folder used last. The spatial resolution of the analysis is
+   set here as well: selecting an instrument fills in a beam width together
+   with the published convention it is based on. Loading an example also
+   fills in the following steps.
 2. **Mineral.** Phase, diffusing species and orientation of the traverse.
-3. **Conditions.** Temperature, pressure and oxygen fugacity with their
-   uncertainties, and the spatial resolution of the analysis. Selecting an
-   instrument fills in a beam width together with the published convention it
-   is based on.
-4. **Model.** Geometry (plane, cylinder or sphere), initial condition, an
-   optional linear cooling path, and the boundary condition at each end of the
-   profile (see [Numerical methods](#numerical-methods)). The panel states
-   which solver will be used and why.
-5. **Coefficient.** All diffusion laws in the registry for the chosen mineral
+3. **Coefficient.** All diffusion laws in the registry for the chosen mineral
    and species, marked as recommended or superseded. Several laws can be
-   selected and fitted side by side.
+   selected and fitted side by side. The law is chosen before the conditions
+   because it determines which of them enter the calculation.
+4. **Conditions.** Temperature with an optional linear cooling path, pressure
+   and oxygen fugacity with their uncertainties, and the host composition
+   (for example x<sub>Ti</sub> or X<sub>An</sub>) where the chosen law depends
+   on it. Inputs that the law does not use are disabled; pressure remains
+   active when oxygen fugacity is given relative to a buffer, because the
+   buffer depends on pressure.
+5. **Model.** Geometry (plane, cylinder or sphere), initial condition, and the
+   boundary condition at each end of the profile (see
+   [Numerical methods](#numerical-methods)). The panel states which solver
+   will be used and why.
 6. **Uncertainty.** Number of Monte Carlo draws, random seed, the sources to
    sample and the number of processor cores.
 
@@ -258,15 +267,19 @@ not use is labelled as a placeholder.
 | Orthopyroxene Fe-Mg | synthetic | Dias et al. (2025), 950 °C, NNO+1, arc andesite conditions | 1.5 yr | 1.39 yr |
 | Clinopyroxene Fe-Mg | synthetic | Mueller et al. (2013), 1100 °C, conditions after Petrone et al. (2016, 2018) | 45 d | 42 d |
 | Olivine Fe-Mg | synthetic | Dohmen & Chakraborty (2007), 1150 °C, FMQ−1, conditions after Hartley et al. (2016) | 120 d | 116 d |
-| Titanomagnetite Ti | synthetic | Van Orman & Crispin (2010), 950 °C, log fO2 = −11, the Shinmoedake conditions of Tomiya et al. (2013) | 8 d | 5.3 d |
+| Titanomagnetite Ti | synthetic | Van Orman & Crispin (2010), 950 °C, log fO2 = −11, the Shinmoedake conditions of Tomiya et al. (2013) | 8 d | 7.4 d |
 | Clinopyroxene BSE grey values | synthetic | Mueller et al. (2013), 1000 °C, linear grey-value response with five microprobe anchor points | 3 yr | 3.0 yr |
 | Sanidine Ba | synthetic | Cherniak (2002), 790 °C, within the Bishop Tuff range of Chamberlain et al. (2014) | 5 kyr | not tested |
 
 The fitted values of the synthetic sets are those of the round-trip tests
-(`tests/test_examples_roundtrip.py`), which fit each file with a constant
-diffusion coefficient and boundary values estimated from the plateaus. The
-deviations from the known time result from the added noise and from these
-simplifications.
+(`tests/test_examples_roundtrip.py`). Each file is fitted for the time and the
+interface position, with the plateaus taken from the outer points of the
+traverse. The titanomagnetite traverse ends before the profile has flattened,
+so plateaus taken from its outer points lie inside the true ones and shorten
+the time to 5.3 d; its plateaus are therefore fitted as well, and the example
+sets this option when loaded. The remaining deviations lie within the scatter
+produced by the added noise, one standard deviation of 3 to 13 % in the
+fitted time.
 
 The Kizimen conditions, 850 ± 57 °C and NNO +1.3 ± 0.35, are the mean and
 standard deviation of 21 magnetite-ilmenite pairs from the andesites in
@@ -454,7 +467,7 @@ with Sievwright et al. (2020) within half a log unit for Ti, Mn and Co.
 
 ## Verification
 
-The test suite contains 250 tests and runs on Windows, macOS and Linux
+The test suite contains 262 tests and runs on Windows, macOS and Linux
 with Python 3.10 and 3.13 on every change to the repository (see the badge at
 the top). It does not access the network. The tests cover the following.
 

@@ -252,12 +252,14 @@ DATASETS: List[ExampleDataset] = [
         settings=dict(T_C=950.0, sigma_T_K=20.0, P_MPa=0.1, sigma_P_MPa=0.0,
                       fo2_absolute=-11.0, sigma_delta=0.5,
                       coefficient="mt_Ti_vanorman_crispin2010", geometry="plane",
-                      x_composition=0.1),
+                      x_composition=0.1, fit_plateaus=True),
         expected=(
             'True time 8 days, set when the file was made.'),
         notes=(
             'Diffusion in magnetite has a minimum near 950-980 C, so the time depends '
-            'little on temperature here.'),
+            'little on temperature here. The traverse ends before the profile has '
+            'flattened, so the plateaus are fitted: held at the values of the outer '
+            'points they sit inside the true plateaus and the fit gives about 5.3 days.'),
         sources=dict(
             T=('Tomiya et al. (2013) used 950 C for Shinmoedake 2011. The uncertainty is '
                'illustrative.'),

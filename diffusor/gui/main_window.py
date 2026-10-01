@@ -6,8 +6,10 @@ and change it. Pages never scroll. Only lists and reading panes do.
 """
 from __future__ import annotations
 
+import json
 import os
 import traceback
+from dataclasses import asdict, fields
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
@@ -46,8 +48,19 @@ from .widgets import (WrapLabel, callout, card, collapsible, divider, field, gho
                       scrollable)
 from .workers import CompareWorker, FitWorker, MonteCarloWorker, UpdateWorker, start
 
-STEPS = ["Data", "Mineral", "Conditions", "Model", "Coefficient", "Uncertainty", "Results"]
-RESULTS = len(STEPS) - 1
+# The coefficient comes straight after the mineral because it decides what the later
+# steps need: which host composition, whether pressure and fO2 enter at all, and
+# whether the solver has to follow the composition along the profile.
+STEPS = ["Data", "Mineral", "Coefficient", "Conditions", "Model", "Uncertainty", "Results"]
+DATA, MINERAL, COEFFICIENT, CONDITIONS, MODEL, UNCERTAINTY, RESULTS = range(len(STEPS))
+
+# For these species the profile is the mineral's own composition variable (X_Fe, X_An,
+# ...). For every other species it is a concentration (TiO2 wt%, Sr ppm) that says
+# nothing about the host composition the law needs.
+EXCHANGE_SPECIES = ("Fe-Mg", "Fe-Ti", "NaSi-CaAl", "Na-K")
+
+# how many of the user's own profile files the Data step remembers
+RECENT_MAX = 10
 
 # picked in "Load profile", these open the image extractor instead
 IMAGE_ONLY_SUFFIXES = set(PILLOW_SUFFIXES + RAW_SUFFIXES + (".hdr", ".npy"))
@@ -145,7 +158,7 @@ def _repolish(w, name):
 class ColumnDialog(QDialog):
     """Confirm the guessed column mapping. Everything else sits under Advanced."""
 
-    def __init__(self, df, spec: ProfileSpec, parent=None):
+    def __init__(self, df, spec: ProfileSpec, parent=None, an=(None, True)):
         super().__init__(parent)
         self.df = df
         self.setWindowTitle("Check the columns")
@@ -208,8 +221,9 @@ class ColumnDialog(QDialog):
         av.addWidget(note("Points outside this range stay in the file but are left out of "
                           "the fit.", "Hint"))
         self.an = QComboBox(); self.an.addItems(["(none)"] + numeric)
+        self.an.setCurrentText(an[0] or "(none)")
         self.an_percent = QCheckBox("in mol%")
-        self.an_percent.setChecked(True)
+        self.an_percent.setChecked(bool(an[1]))
         av.addWidget(pair(field("Anorthite column (plagioclase)", self.an), self.an_percent))
         av.addStretch(1)
         area = scrollable(adv)
@@ -298,6 +312,12 @@ class MainWindow(QMainWindow):
         self.profile = None
         self.dataset: Optional[ds.ExampleDataset] = None
         self.an_values = None
+        # Where the representative composition came from: "default", "profile" (the
+        # profile mean, written by the program and taken back when it stops applying)
+        # or "explicit" (typed in, or set by an example or an anorthite column).
+        self._xcomp_source = "default"
+        self._xcomp_fallback = None     # the value before the profile mean replaced it
+        self._xcomp_writing = False
         self.fit_result = None
         self.mc_result = None
         self.compare_results = None
@@ -322,10 +342,17 @@ class MainWindow(QMainWindow):
         outer.addWidget(divider())
         outer.addWidget(self._build_update_banner())
         self.pages = QStackedWidget()
-        for builder in (self._page_data, self._page_mineral, self._page_conditions,
-                        self._page_model, self._page_coefficient, self._page_uncertainty,
-                        self._page_results):
-            self.pages.addWidget(builder())
+        # Built in this order because later pages call into widgets of earlier ones
+        # while they are made; added to the stack in the order of STEPS.
+        built = {}
+        for step, builder in ((DATA, self._page_data), (MINERAL, self._page_mineral),
+                              (CONDITIONS, self._page_conditions), (MODEL, self._page_model),
+                              (COEFFICIENT, self._page_coefficient),
+                              (UNCERTAINTY, self._page_uncertainty),
+                              (RESULTS, self._page_results)):
+            built[step] = builder()
+        for step in range(len(STEPS)):
+            self.pages.addWidget(built[step])
         outer.addWidget(self.pages, 1)
         outer.addWidget(divider())
         outer.addWidget(self._build_footer())
@@ -334,7 +361,7 @@ class MainWindow(QMainWindow):
         self._build_menu()
         self._on_mineral_changed()
         self._on_resolution_changed()
-        self._go(0)
+        self._go(DATA)
 
     # ================================================================ chrome
     def _build_header(self) -> QWidget:
@@ -480,12 +507,55 @@ class MainWindow(QMainWindow):
         body.addWidget(row(btn, img, fmt))
         body.addWidget(note(format_help.SHORT, "Hint"))
 
-        data_card, dbody = card("Loaded data")
+        # One card, two views: the loaded profile, or the recently loaded files.
+        # Loading anything brings the profile to the front; the button switches.
+        data_card, dbody = card()
+        self.lbl_data_title = QLabel("Loaded data")
+        self.lbl_data_title.setObjectName("H2")
+        self.btn_data_view = ghost_button("Recent profiles")
+        self.btn_data_view.clicked.connect(
+            lambda: self._show_data_view(recent=self.data_stack.currentIndex() == 0))
+        head = QWidget()
+        hh = QHBoxLayout(head)
+        hh.setContentsMargins(0, 0, 0, 0)
+        hh.addWidget(self.lbl_data_title)
+        hh.addStretch(1)
+        hh.addWidget(self.btn_data_view)
+        dbody.addWidget(head)
+        self.data_stack = QStackedWidget()
+        shown = QWidget()
+        sv = QVBoxLayout(shown)
+        sv.setContentsMargins(0, 0, 0, 0)
+        sv.setSpacing(8)
         self.lbl_data = note("Nothing loaded yet.", "Hint")
-        dbody.addWidget(self.lbl_data)
+        sv.addWidget(self.lbl_data)
         self.preview = DataPreview()
         self.preview.setMinimumHeight(180)
-        dbody.addWidget(self.preview, 1)
+        sv.addWidget(self.preview, 1)
+        self.data_stack.addWidget(shown)
+        recent = QWidget()
+        rv = QVBoxLayout(recent)
+        rv.setContentsMargins(0, 0, 0, 0)
+        rv.setSpacing(8)
+        self.lbl_recent = note("", "Hint")
+        rv.addWidget(self.lbl_recent)
+        self.lst_recent = QListWidget()
+        self.lst_recent.setMinimumHeight(120)
+        # long folder paths are shortened in the middle rather than scrolled sideways
+        self.lst_recent.setTextElideMode(Qt.ElideMiddle)
+        self.lst_recent.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.lst_recent.itemDoubleClicked.connect(self._load_recent_item)
+        rv.addWidget(self.lst_recent, 1)
+        self.btn_recent_open = QPushButton("Load")
+        self.btn_recent_open.clicked.connect(
+            lambda: self._load_recent_item(self.lst_recent.currentItem()))
+        self.btn_recent_clear = ghost_button("Clear the list")
+        self.btn_recent_clear.clicked.connect(self._clear_recent)
+        rv.addWidget(row(self.btn_recent_open, self.btn_recent_clear))
+        self.data_stack.addWidget(recent)
+        dbody.addWidget(self.data_stack, 1)
+        self._refresh_recent()
+        self._show_data_view(recent=bool(self._recent()))
 
         ex_card, ebody = card("Examples")
         self.lst_examples = QListWidget()
@@ -506,7 +576,25 @@ class MainWindow(QMainWindow):
         info = ghost_button("Where the data come from")
         info.clicked.connect(self.show_example_details)
         ebody.addWidget(row(b, info))
-        return page_columns([load_card, (data_card, 1)], [(ex_card, 1)])
+
+        # how the profile was measured belongs with the profile
+        r, rbody = card("Analytical resolution")
+        self.cmb_resolution = QComboBox()
+        for label, *_ in RESOLUTION_PRESETS:
+            self.cmb_resolution.addItem(label)
+        self.cmb_resolution.currentIndexChanged.connect(self._on_resolution_changed)
+        self.sp_width = _spin(0, 200, 5.0, 1, 0.5, " um")
+        self.sp_width.valueChanged.connect(self._update_beam_sigma)
+        self.sp_beam = _spin(0, 50, 0.0, 2, 0.1, " um")
+        self.sp_xscale_sig = _spin(0, 0.5, 0.0, 3, 0.005)
+        # two fields a row: this card shares the Data step with the preview
+        rbody.addWidget(pair(field("How the profile was measured", self.cmb_resolution),
+                             field("Distance scale error (relative, 1σ)", self.sp_xscale_sig)))
+        self._width_field = field("Spot or slit width", self.sp_width)
+        rbody.addWidget(pair(self._width_field, field("Beam σ", self.sp_beam)))
+        self.lbl_resolution = note("", "Hint")
+        rbody.addWidget(self.lbl_resolution)
+        return page_columns([load_card, (data_card, 1)], [(ex_card, 1), r])
 
     @staticmethod
     def _example_label(d, loaded: bool) -> str:
@@ -537,7 +625,7 @@ class MainWindow(QMainWindow):
     def show_example_details(self):
         d = None
         item = self.lst_examples.currentItem()
-        if self.step != 0 and self.dataset is not None:
+        if self.step != DATA and self.dataset is not None:
             d = self.dataset
         elif item is not None:
             d = ds.get(item.data(Qt.UserRole))
@@ -597,32 +685,21 @@ class MainWindow(QMainWindow):
         self._angle_row.setVisible(False)
         obody.addWidget(self._angle_row)
 
-        x, xbody = card("Composition")
-        self.sp_xcomp = _spin(0, 1, 0.15, 4, 0.01)
-        xbody.addWidget(field("Representative value", self.sp_xcomp))
-        self.chk_comp_dep = QCheckBox("D follows the composition along the profile")
-        self.chk_comp_dep.setChecked(True)
-        self.chk_comp_dep.toggled.connect(self._update_solver_note)
-        xbody.addWidget(self.chk_comp_dep)
-        self.cmb_ol_coordinate = QComboBox()
-        for text, data in (("Fe fraction: XFe", (1., 0.)),
-                           ("Forsterite fraction: XFo", (-1., 1.)),
-                           ("Forsterite mol%: Fo", (-.01, 1.))):
-            self.cmb_ol_coordinate.addItem(text, data)
-        self.cmb_ol_coordinate.setToolTip("Defines how measured olivine Fe-Mg values map to XFe in the diffusion law.")
-        self.cmb_ol_coordinate.currentIndexChanged.connect(self._update_solver_note)
-        xbody.addWidget(self.cmb_ol_coordinate)
-        self.lbl_comp = note("", "Hint")
-        xbody.addWidget(self.lbl_comp)
-        return page_columns([c, x], [o], top=[self._prefill_bar(1)])
+        return page_columns([c], [o], top=[self._prefill_bar(MINERAL)])
 
-    # ================================================================ step 3
+    # ================================================================ step 4
     def _page_conditions(self) -> QWidget:
         c, body = card("Temperature and pressure")
         self.sp_T = _spin(300, 2000, 950, 1, 5, " °C")
         self.sp_T.valueChanged.connect(self._update_fo2_label)
         self.sp_T_sig = _spin(0, 300, 20, 1, 1, " K")
         body.addWidget(pair(field("Temperature", self.sp_T), field("± 1σ", self.sp_T_sig)))
+        self.chk_cooling = QCheckBox("Linear cooling to")
+        self.sp_Tend = _spin(300, 2000, 900, 1, 5, " °C")
+        self.sp_Tend.setEnabled(False)
+        self.chk_cooling.toggled.connect(self.sp_Tend.setEnabled)
+        self.chk_cooling.toggled.connect(self._update_solver_note)
+        body.addWidget(row(self.chk_cooling, self.sp_Tend, spacing=10))
         self.sp_P = _spin(0, 5000, 200, 1, 10, " MPa")
         self.sp_P.valueChanged.connect(self._update_fo2_label)
         self.sp_P_sig = _spin(0, 2000, 100, 1, 10, " MPa")
@@ -648,25 +725,29 @@ class MainWindow(QMainWindow):
         self.lbl_unused = self.box_unused.label
         self.box_unused.setVisible(False)
 
-        r, rbody = card("Analytical resolution")
-        self.cmb_resolution = QComboBox()
-        for label, *_ in RESOLUTION_PRESETS:
-            self.cmb_resolution.addItem(label)
-        self.cmb_resolution.currentIndexChanged.connect(self._on_resolution_changed)
-        self.sp_width = _spin(0, 200, 5.0, 1, 0.5, " um")
-        self.sp_width.valueChanged.connect(self._update_beam_sigma)
-        self.sp_beam = _spin(0, 50, 0.0, 2, 0.1, " um")
-        rbody.addWidget(field("How the profile was measured", self.cmb_resolution))
-        self._width_field = field("Spot or slit width", self.sp_width)
-        rbody.addWidget(pair(self._width_field, field("Beam σ", self.sp_beam)))
-        self.lbl_resolution = note("", "Hint")
-        rbody.addWidget(self.lbl_resolution)
-        self.sp_xscale_sig = _spin(0, 0.5, 0.0, 3, 0.005)
-        rbody.addWidget(field("Distance scale error (relative, 1σ)", self.sp_xscale_sig))
-        return page_columns([c, f], [r, self.box_unused],
-                            top=[self._prefill_bar(2, with_sources=True)])
+        x, xbody = card("Composition")
+        self.sp_xcomp = _spin(0, 1, 0.15, 4, 0.01)
+        self.sp_xcomp.valueChanged.connect(self._on_xcomp_changed)
+        xbody.addWidget(field("Representative value", self.sp_xcomp))
+        self.chk_comp_dep = QCheckBox("D follows the composition along the profile")
+        self.chk_comp_dep.setChecked(True)
+        self.chk_comp_dep.toggled.connect(self._update_solver_note)
+        xbody.addWidget(self.chk_comp_dep)
+        self.cmb_ol_coordinate = QComboBox()
+        for text, data in (("Fe fraction: XFe", (1., 0.)),
+                           ("Forsterite fraction: XFo", (-1., 1.)),
+                           ("Forsterite mol%: Fo", (-.01, 1.))):
+            self.cmb_ol_coordinate.addItem(text, data)
+        self.cmb_ol_coordinate.setToolTip("Defines how measured olivine Fe-Mg values map to XFe in the diffusion law.")
+        self.cmb_ol_coordinate.currentIndexChanged.connect(self._update_solver_note)
+        self.cmb_ol_coordinate.currentIndexChanged.connect(lambda: self._sync_composition())
+        xbody.addWidget(self.cmb_ol_coordinate)
+        self.lbl_comp = note("", "Hint")
+        xbody.addWidget(self.lbl_comp)
+        return page_columns([c, f], [x, self.box_unused],
+                            top=[self._prefill_bar(CONDITIONS, with_sources=True)])
 
-    # ================================================================ step 4
+    # ================================================================ step 5
     def _page_model(self) -> QWidget:
         g, gbody = card("Geometry")
         self.cmb_geom = QComboBox()
@@ -710,13 +791,13 @@ class MainWindow(QMainWindow):
         sc.addWidget(pair(field("Left plateau", self.sp_cl), field("Right plateau", self.sp_cr)))
         ibody.addWidget(self._step_controls)
         bg = QPushButton("Guess from the data")
-        bg.clicked.connect(self._guess_initial)
+        bg.clicked.connect(lambda: self._guess_initial(from_button=True))
         self.chk_free_x0 = QCheckBox("Fit the step position")
         self.chk_free_x0.setChecked(True)
         self.chk_free_plateaus = QCheckBox("Fit the plateaus")
         ibody.addWidget(row(bg, self.chk_free_x0, self.chk_free_plateaus, spacing=14))
 
-        n, nbody = card("Solver and thermal history")
+        n, nbody = card("Solver")
         self.cmb_solver = QComboBox()
         self.cmb_solver.addItems(["Automatic", "Always numerical"])
         self.cmb_solver.currentIndexChanged.connect(self._update_solver_note)
@@ -726,17 +807,11 @@ class MainWindow(QMainWindow):
         box = callout("Info")
         self.lbl_solver = box.label
         nbody.addWidget(box)
-        self.chk_cooling = QCheckBox("Linear cooling to")
-        self.sp_Tend = _spin(300, 2000, 900, 1, 5, " °C")
-        self.sp_Tend.setEnabled(False)
-        self.chk_cooling.toggled.connect(self.sp_Tend.setEnabled)
-        self.chk_cooling.toggled.connect(self._update_solver_note)
-        nbody.addWidget(row(self.chk_cooling, self.sp_Tend, spacing=10))
         self._update_geometry_note()
         self._on_boundaries_changed()
-        return page_columns([g, n], [i, b], top=[self._prefill_bar(3)])
+        return page_columns([g, n], [i, b], top=[self._prefill_bar(MODEL)])
 
-    # ================================================================ step 5
+    # ================================================================ step 3
     def _page_coefficient(self) -> QWidget:
         c, body = card("Diffusion coefficient")
         body.addWidget(note("Tick one to fit. Tick several to compare them.", "Hint"))
@@ -760,7 +835,7 @@ class MainWindow(QMainWindow):
         b = ghost_button("Full details and references")
         b.clicked.connect(lambda: self.show_coefficient_info())
         dbody.addWidget(row(b))
-        return page_columns([(c, 1)], [d], top=[self._prefill_bar(4)])
+        return page_columns([(c, 1)], [d], top=[self._prefill_bar(COEFFICIENT)])
 
     # ================================================================ step 6
     def _page_uncertainty(self) -> QWidget:
@@ -977,7 +1052,7 @@ class MainWindow(QMainWindow):
             self.summary_layout.addSpacing(6)
             self.summary_layout.addWidget(divider())
 
-        self._summary_head("Data", 0)
+        self._summary_head("Data", DATA)
         if self.profile is not None:
             p = self.profile
             name = Path(p.source).name if p.source else "loaded profile"
@@ -988,14 +1063,29 @@ class MainWindow(QMainWindow):
                                    else "synthetic")
         else:
             self._summary_line("", "no data loaded")
+        if self.sp_beam.value() > 0:
+            self._summary_line("beam σ", f"{self.sp_beam.value():.2f} um "
+                               f"({self.cmb_resolution.currentText().lower()})")
 
-        self._summary_head("Mineral", 1)
+        self._summary_head("Mineral", MINERAL)
         self._summary_line(get_mineral(self.cmb_mineral.currentData()).name,
                            f"{self.cmb_species.currentText()}, "
                            f"{self.cmb_axis.currentText().lower()}")
 
-        self._summary_head("Conditions", 2)
+        self._summary_head("Coefficient", COEFFICIENT)
+        for k in self._checked_keys():
+            c = get_coefficient(k)
+            flag = ""
+            if not c.verified:
+                flag = "  [unverified]"
+            if c.superseded_by or c.superseded_note:
+                flag += "  [superseded]"
+            self._summary_line("", c.label + flag)
+
+        self._summary_head("Conditions", CONDITIONS)
         self._summary_line("temperature", f"{self.sp_T.value():.0f} °C ± {self.sp_T_sig.value():.0f}")
+        if self.chk_cooling.isChecked():
+            self._summary_line("cooling", f"linear to {self.sp_Tend.value():.0f} °C")
         self._summary_line("pressure", f"{self.sp_P.value():.0f} MPa ± {self.sp_P_sig.value():.0f}")
         if self.cmb_fo2_mode.currentIndex() == 0:
             self._summary_line("oxygen fugacity",
@@ -1003,11 +1093,15 @@ class MainWindow(QMainWindow):
                                f"± {self.sp_dbuf_sig.value():.2f}")
         else:
             self._summary_line("oxygen fugacity", f"log fO2 {self.sp_dbuf.value():.2f} bar")
-        if self.sp_beam.value() > 0:
-            self._summary_line("beam σ", f"{self.sp_beam.value():.2f} um "
-                               f"({self.cmb_resolution.currentText().lower()})")
+        keys = self._checked_keys()
+        needs = get_coefficient(keys[0]).requires if keys else ()
+        if needs:
+            self._summary_line("host composition",
+                               f"{', '.join(needs)} {self.sp_xcomp.value():.4g}"
+                               + (", following the profile" if self.chk_comp_dep.isChecked()
+                                  and self._model(keys[0]).comp_key else ""))
 
-        self._summary_head("Model", 3)
+        self._summary_head("Model", MODEL)
         self._summary_line("geometry", self.cmb_geom.currentText())
         if self._equilibrium_ic():
             self._summary_line("initial profile", "equilibrium with the anorthite zoning")
@@ -1020,17 +1114,7 @@ class MainWindow(QMainWindow):
                            f"{self.cmb_bcr.currentText().lower()}")
         self._summary_line("solver", self._solver_short())
 
-        self._summary_head("Coefficient", 4)
-        for k in self._checked_keys():
-            c = get_coefficient(k)
-            flag = ""
-            if not c.verified:
-                flag = "  [unverified]"
-            if c.superseded_by or c.superseded_note:
-                flag += "  [superseded]"
-            self._summary_line("", c.label + flag)
-
-        self._summary_head("Uncertainty", 5)
+        self._summary_head("Uncertainty", UNCERTAINTY)
         b = self._budget()
         self._summary_line(f"{self.sp_draws.value()} draws, seed {self.sp_seed.value()}",
                            ", ".join(SOURCE_NAMES.get(s, s) for s in b.active_sources())
@@ -1041,21 +1125,21 @@ class MainWindow(QMainWindow):
     # ================================================================ navigation
     def _go(self, index: int):
         height_before = self.height()
-        index = max(0, min(index, RESULTS))
-        if index > 0 and self.profile is None:
+        index = max(DATA, min(index, RESULTS))
+        if index > DATA and self.profile is None:
             self._status("Load a profile first")
-            index = 0
+            index = DATA
         self.step = index
         self.pages.setCurrentIndex(index)
         for i, lab in enumerate(self.step_labels):
             _repolish(lab, "StepDotActive" if i == index
                       else ("StepDotDone" if i < index else "StepDot"))
-        self.btn_back.setVisible(index > 0)
-        if index == 2:
+        self.btn_back.setVisible(index > DATA)
+        if index == CONDITIONS:
             self._update_unused_note()
-        if index == 3:
+        if index == MODEL:
             self._update_solver_note()
-        if index == 5:
+        if index == UNCERTAINTY:
             self._on_dmode_changed()
         if index == RESULTS:
             self.btn_next.setVisible(False)
@@ -1065,7 +1149,7 @@ class MainWindow(QMainWindow):
             self.btn_next.setVisible(True)
             self.btn_next.setText("Review and fit" if index == RESULTS - 1 else "Continue")
             self.lbl_footer.setText(f"Step {index + 1} of {RESULTS}")
-        self.btn_next.setEnabled(self.profile is not None or index == 0)
+        self.btn_next.setEnabled(self.profile is not None or index == DATA)
         if self.isVisible():
             QTimer.singleShot(60, lambda h=height_before: self._restore_height(h))
 
@@ -1082,16 +1166,19 @@ class MainWindow(QMainWindow):
             self.resize(self.width(), height)
 
     def _next(self):
-        if self.step == 0 and self.profile is None:
+        if self.step == DATA and self.profile is None:
             QMessageBox.information(self, "No data", "Load a file or an example first.")
             return
         self._go(self.step + 1)
 
     # ================================================================ data
     def load_file(self):
+        start = str(self._settings().value("recent/last_dir", "") or "")
         path, _ = QFileDialog.getOpenFileName(
-            self, "Load profile", "",
+            self, "Load profile", start if start and Path(start).is_dir() else "",
             "Tables and image profiles (*.csv *.txt *.tsv *.xlsx *.xls);;All files (*)")
+        if path:
+            self._settings().setValue("recent/last_dir", str(Path(path).resolve().parent))
         if path and Path(path).suffix.lower() in IMAGE_ONLY_SUFFIXES:
             self.show_image_extractor()
             self.image_extractor.open_image(path)
@@ -1110,14 +1197,16 @@ class MainWindow(QMainWindow):
             return
         self._load(d.path, dataset=d)
 
-    def _load(self, path: Path, dataset: Optional[ds.ExampleDataset]):
+    def _load(self, path: Path, dataset: Optional[ds.ExampleDataset],
+              from_recent: bool = False):
         if dataset is None and is_extraction_workbook(path):
             try:
                 table = read_extraction(path)
             except Exception:
                 QMessageBox.critical(self, "Could not load the file", traceback.format_exc())
                 return
-            self.load_image_table(table)
+            if self.load_image_table(table):
+                self._remember_file(path)
             return
         try:
             df = read_table(path)
@@ -1125,16 +1214,112 @@ class MainWindow(QMainWindow):
             if dataset is not None:
                 spec = ProfileSpec(**dataset.spec)
             else:
-                dlg = ColumnDialog(df, suggest_spec(df), self)
-                if dlg.exec() != QDialog.Accepted:
+                spec, an = self._column_mapping(df, path, from_recent)
+                if spec is None:
                     return
-                spec = dlg.spec()
-                an = dlg.an_column()
         except Exception:
             self._log(traceback.format_exc(), "error")
             QMessageBox.critical(self, "Could not load the file", traceback.format_exc())
             return
-        self._use_table(df, spec, path, dataset, an)
+        if self._use_table(df, spec, path, dataset, an) and dataset is None:
+            self._remember_file(path, df, spec, an)
+
+    # ---------------------------------------------------------------- recent profiles
+    def _recent(self) -> List[dict]:
+        """The remembered files, newest first: path, time, columns and mapping."""
+        try:
+            items = json.loads(str(self._settings().value("recent/profiles", "[]") or "[]"))
+        except (TypeError, ValueError):
+            return []
+        return [r for r in items if isinstance(r, dict) and r.get("path")][:RECENT_MAX]
+
+    @staticmethod
+    def _same_path(a: str, b: str) -> bool:
+        return os.path.normcase(os.path.abspath(a)) == os.path.normcase(os.path.abspath(b))
+
+    def _remembered(self, path) -> Optional[dict]:
+        return next((r for r in self._recent() if self._same_path(r["path"], str(path))), None)
+
+    def _remember_file(self, path, df=None, spec: Optional[ProfileSpec] = None, an=(None, True)):
+        entry = {"path": str(Path(path).resolve()),
+                 "loaded": datetime.now().strftime("%Y-%m-%d %H:%M")}
+        if df is not None and spec is not None:
+            entry["columns"] = [str(c) for c in df.columns]
+            entry["spec"] = asdict(spec)
+            entry["an"] = [an[0], bool(an[1])]
+        items = [r for r in self._recent() if not self._same_path(r["path"], entry["path"])]
+        s = self._settings()
+        s.setValue("recent/profiles", json.dumps([entry] + items[:RECENT_MAX - 1]))
+        s.setValue("recent/last_dir", str(Path(entry["path"]).parent))
+        self._refresh_recent()
+
+    def _column_mapping(self, df, path, from_recent: bool):
+        """The column mapping for a user's file: remembered, or confirmed in the dialog.
+
+        A file opened from the recent list whose columns are unchanged loads with
+        last time's mapping and no dialog. Otherwise the dialog opens, starting
+        from last time's mapping when every column it names is still there.
+        """
+        cols = [str(c) for c in df.columns]
+        known = self._remembered(path) or {}
+        spec, an = None, (None, True)
+        if known.get("spec"):
+            try:
+                names = {f.name for f in fields(ProfileSpec)}
+                spec = ProfileSpec(**{k: v for k, v in known["spec"].items() if k in names})
+                an = (known.get("an") or [None, True])[0], bool((known.get("an") or [None, True])[1])
+            except Exception:
+                spec, an = None, (None, True)
+        if spec is not None:
+            used = [spec.distance_column, spec.column_a, spec.column_b, spec.sigma_a_column,
+                    spec.sigma_b_column, an[0]]
+            if not all(c in cols for c in used if c):
+                spec, an = None, (None, True)
+        if spec is not None and from_recent and known.get("columns") == cols:
+            self._log(f"columns as last time: {spec.describe()}")
+            return spec, an
+        dlg = ColumnDialog(df, spec or suggest_spec(df), self, an=an)
+        if dlg.exec() != QDialog.Accepted:
+            return None, (None, True)
+        return dlg.spec(), dlg.an_column()
+
+    def _refresh_recent(self):
+        self.lst_recent.clear()
+        items = self._recent()
+        for r in items:
+            path = Path(r["path"])
+            here = path.exists()
+            it = QListWidgetItem(f"{path.name}   ·   {r.get('loaded', '')}"
+                                 + ("" if here else "   ·   not found") + f"\n{path.parent}")
+            it.setData(Qt.UserRole, str(path))
+            it.setToolTip(str(path))
+            if not here:
+                it.setFlags(it.flags() & ~Qt.ItemIsEnabled)
+            self.lst_recent.addItem(it)
+        self.lbl_recent.setText(
+            "Double-click to load. Each file opens with the columns chosen last time."
+            if items else "Files you load appear here, with the columns you chose for them.")
+        self.btn_recent_open.setEnabled(bool(items))
+        self.btn_recent_clear.setEnabled(bool(items))
+
+    def _load_recent_item(self, item):
+        if item is None or not (item.flags() & Qt.ItemIsEnabled):
+            return
+        path = Path(item.data(Qt.UserRole))
+        if not path.exists():
+            self._refresh_recent()
+            return
+        self._load(path, dataset=None, from_recent=True)
+
+    def _clear_recent(self):
+        self._settings().setValue("recent/profiles", "[]")
+        self._refresh_recent()
+
+    def _show_data_view(self, recent: bool):
+        """The profile, or the recent files, in the Data step's left card."""
+        self.data_stack.setCurrentIndex(1 if recent else 0)
+        self.lbl_data_title.setText("Recent profiles" if recent else "Loaded data")
+        self.btn_data_view.setText("Show the profile" if recent else "Recent profiles")
 
     def load_image_table(self, table) -> bool:
         """Ask for pixel size and value-to-composition map, then load the profile."""
@@ -1156,11 +1341,13 @@ class MainWindow(QMainWindow):
         self.image_extractor.show()
         self.image_extractor.raise_()
 
-    def _use_table(self, df, spec, path: Path, dataset: Optional[ds.ExampleDataset], an):
+    def _use_table(self, df, spec, path: Path, dataset: Optional[ds.ExampleDataset],
+                   an) -> bool:
         try:
             self.profile = build_profile(df, spec, source=str(path))
             self.dataset = dataset
             self.an_values = None
+            self._release_composition()     # the last profile's mean is not this one's
             for lab in self._prefill.values():
                 lab.setVisible(False)
             self.btn_sources.setVisible(False)
@@ -1193,9 +1380,12 @@ class MainWindow(QMainWindow):
             self._mc_draws = []
             self.btn_next.setEnabled(True)
             self._status(f"Loaded {len(p)} points")
+            self._show_data_view(recent=False)
+            return True
         except Exception:
             self._log(traceback.format_exc(), "error")
             QMessageBox.critical(self, "Could not load the file", traceback.format_exc())
+            return False
 
     def _apply_dataset_settings(self, d: ds.ExampleDataset, df):
         """Fill in the later steps from a bundled dataset and say so on each step."""
@@ -1226,9 +1416,10 @@ class MainWindow(QMainWindow):
             i = cmb.findData(s.get(key, "far"))
             cmb.setCurrentIndex(i if i >= 0 else 0)
         self.chk_comp_dep.setChecked(bool(s.get("composition_dependent", False)))
+        self.chk_free_plateaus.setChecked(bool(s.get("fit_plateaus", False)))
         self.cmb_ol_coordinate.setCurrentIndex(s.get("olivine_coordinate", 0))
         if "x_composition" in s:
-            self.sp_xcomp.setValue(s["x_composition"])
+            self._set_xcomp(s["x_composition"], "explicit")
         want = s.get("coefficient")
         self._refresh_coefficients()
         self.lst_coef.blockSignals(True)
@@ -1245,7 +1436,7 @@ class MainWindow(QMainWindow):
             if s.get("an_is_percent"):
                 vals = vals / 100.0
             self.an_values = vals
-            self.sp_xcomp.setValue(float(np.nanmean(vals)))
+            self._set_xcomp(float(np.nanmean(vals)), "explicit")
             self._log(f"anorthite read from '{an_col}' "
                       f"(X_An {np.nanmin(vals):.2f} to {np.nanmax(vals):.2f})")
         self._refresh_ic_options()
@@ -1254,9 +1445,9 @@ class MainWindow(QMainWindow):
 
         name = d.name.split(" (")[0]
         head = f"Set by the {name} example: "
-        self._show_prefill(1, head + f"{self.cmb_mineral.currentText()}, {d.species}, "
+        self._show_prefill(MINERAL, head + f"{self.cmb_mineral.currentText()}, {d.species}, "
                            f"{self.cmb_axis.currentText().lower()}.")
-        self._show_prefill(2, head + f"{s.get('T_C', 950):g} ± {s.get('sigma_T_K', 20):g} °C, "
+        self._show_prefill(CONDITIONS, head + f"{s.get('T_C', 950):g} ± {s.get('sigma_T_K', 20):g} °C, "
                            f"{s.get('P_MPa', 200):g} ± {s.get('sigma_P_MPa', 100):g} MPa, {fo2}.")
         self.btn_sources.setVisible(True)
         if self._boundaries_far():
@@ -1264,10 +1455,11 @@ class MainWindow(QMainWindow):
         else:
             ends = (f"left end {self.cmb_bcl.currentText().lower()}, right end "
                     f"{self.cmb_bcr.currentText().lower()}")
-        self._show_prefill(3, head + f"{s.get('geometry', 'plane')} geometry, "
-                           f"{self.cmb_ic.currentText().lower()}, {ends}.")
+        fitted = ", plateaus fitted" if s.get("fit_plateaus") else ""
+        self._show_prefill(MODEL, head + f"{s.get('geometry', 'plane')} geometry, "
+                           f"{self.cmb_ic.currentText().lower()}, {ends}{fitted}.")
         if want:
-            self._show_prefill(4, head + get_coefficient(want).label + ".")
+            self._show_prefill(COEFFICIENT, head + get_coefficient(want).label + ".")
 
     def _show_prefill(self, step: int, text: str):
         lab = self._prefill.get(step)
@@ -1327,6 +1519,7 @@ class MainWindow(QMainWindow):
         if self.lst_coef.count():
             self.lst_coef.setCurrentRow(0)
         self._on_coefficients_ticked()
+        self._sync_composition()
 
     def _on_coefficients_ticked(self):
         if not hasattr(self, "cmb_dmode"):
@@ -1374,9 +1567,28 @@ class MainWindow(QMainWindow):
 
     def _update_unused_note(self):
         keys = self._checked_keys() if self.lst_coef.count() else []
-        text = richtext.unused_conditions(get_coefficient(keys[0])) if keys else ""
+        coef = get_coefficient(keys[0]) if keys else None
+        text = richtext.unused_conditions(coef) if coef else ""
         self.lbl_unused.setText(text)
         self.box_unused.setVisible(bool(text))
+        self._unused_conditions = richtext.unused_condition_names(coef) if coef else []
+        self._update_condition_inputs()
+
+    def _update_condition_inputs(self):
+        """Switch off the pressure and fO2 inputs that the chosen law ignores.
+
+        Pressure stays on when fO2 is given relative to a buffer and the law uses
+        fO2, because the buffer itself moves with pressure.
+        """
+        unused = getattr(self, "_unused_conditions", [])
+        fo2_used = "oxygen fugacity" not in unused
+        buffer = self.cmb_fo2_mode.currentIndex() == 0
+        for wdg in (self.cmb_fo2_mode, self.sp_dbuf, self.sp_dbuf_sig):
+            wdg.setEnabled(fo2_used)
+        self.cmb_buffer.setEnabled(fo2_used and buffer)
+        p_used = "pressure" not in unused or (fo2_used and buffer)
+        for wdg in (self.sp_P, self.sp_P_sig):
+            wdg.setEnabled(p_used)
 
     # --- initial profile -----------------------------------------------------
     def _refresh_ic_options(self):
@@ -1500,20 +1712,91 @@ class MainWindow(QMainWindow):
                 lf = self.sp_dbuf.value()
                 txt = f"log fO2 = {lf:.2f} bar ({lf + 5:.2f} Pa)"
             self.lbl_fo2.setText(txt)
-            self.cmb_buffer.setEnabled(self.cmb_fo2_mode.currentIndex() == 0)
+            self._update_condition_inputs()
         except Exception as exc:
             self.lbl_fo2.setText(str(exc))
 
-    def _guess_initial(self):
+    def _guess_initial(self, from_button: bool = False):
+        """Step and plateaus from the data, and the composition if the profile is one.
+
+        Pressing **Guess** also replaces a typed-in composition; the guess made on
+        loading leaves a typed-in or example value alone.
+        """
         if self.profile is None:
             return
         ic = guess_step_from_data(self.profile.x, self.profile.C)
         self.sp_x0.setValue(ic.params["x0"])
         self.sp_cl.setValue(ic.params["C_left"])
         self.sp_cr.setValue(ic.params["C_right"])
-        if self.an_values is None:
-            self.sp_xcomp.setValue(float(np.mean(self.profile.C)))
         self._log("initial profile: " + ic.describe())
+        self._sync_composition(replace_explicit=from_button, report=True)
+
+    # -- representative composition --------------------------------------------
+    def _profile_as_composition(self) -> Optional[np.ndarray]:
+        """The loaded profile in the law's composition coordinate, or None.
+
+        Only for an exchange species is the profile the mineral's composition
+        variable; olivine Fe-Mg goes through the chosen coordinate (X_Fe, X_Fo or
+        Fo mol%). A TiO2 wt% or ppm profile is a concentration, and its mean put
+        into x_Ti or X_An would be nonsense (5 wt% TiO2 became x_Ti = 1, and D 250
+        times too large). Values outside 0-1 are refused for the same reason.
+        """
+        if self.profile is None or self.an_values is not None:
+            return None
+        mineral = get_mineral(self.cmb_mineral.currentData())
+        species = self.cmb_species.currentText()
+        if species not in EXCHANGE_SPECIES or mineral.composition_variable.key == "none":
+            return None
+        scale, offset = 1.0, 0.0
+        if mineral.key == "olivine" and species == "Fe-Mg":
+            scale, offset = self.cmb_ol_coordinate.currentData()
+        X = offset + scale * np.asarray(self.profile.C, dtype=float)
+        if not (np.all(np.isfinite(X)) and 0.0 <= X.min() and X.max() <= 1.0):
+            return None
+        return X
+
+    def _set_xcomp(self, value: float, source: str):
+        self._xcomp_writing = True
+        try:
+            self.sp_xcomp.setValue(float(value))
+        finally:
+            self._xcomp_writing = False
+        self._xcomp_source = source
+
+    def _on_xcomp_changed(self, _value):
+        if not self._xcomp_writing:
+            self._xcomp_source = "explicit"
+            self._xcomp_fallback = None
+
+    def _release_composition(self):
+        """Take back a value that came from the profile mean."""
+        if self._xcomp_source == "profile" and self._xcomp_fallback is not None:
+            self._set_xcomp(self._xcomp_fallback, "default")
+        self._xcomp_source = "default"
+        self._xcomp_fallback = None
+
+    def _sync_composition(self, replace_explicit: bool = False, report: bool = False):
+        """Keep the representative composition consistent with the profile.
+
+        Runs on loading and whenever the mineral, species or olivine coordinate
+        changes, because a profile is usually loaded before the mineral is chosen.
+        """
+        if self._xcomp_source == "explicit" and not replace_explicit:
+            return
+        X = self._profile_as_composition()
+        if X is not None:
+            if self._xcomp_source != "profile":
+                self._xcomp_fallback = self.sp_xcomp.value()
+            self._set_xcomp(float(np.mean(X)), "profile")
+            if report:
+                self._log(f"representative composition: {np.mean(X):.4g}, the profile mean")
+            return
+        if self._xcomp_source == "profile":
+            self._release_composition()
+        if report and self.profile is not None and self.an_values is None:
+            self._log("representative composition left at "
+                      f"{self.sp_xcomp.value():.4g}: the profile is not the host composition. "
+                      "Set it on the Conditions step if the law needs one.")
 
     # ================================================================ model
     def _checked_keys(self) -> List[str]:
@@ -1688,7 +1971,7 @@ class MainWindow(QMainWindow):
             QMessageBox.information(self, "No data", "Load a profile first.")
             return False
         if not self._checked_keys():
-            QMessageBox.information(self, "No coefficient", "Choose a coefficient on step 5.")
+            QMessageBox.information(self, "No coefficient", "Choose a coefficient on step 3.")
             return False
         return True
 
@@ -1725,7 +2008,7 @@ class MainWindow(QMainWindow):
         keys = self._checked_keys()
         if len(keys) < 2:
             QMessageBox.information(self, "Tick at least two",
-                                    "Tick two or more coefficients on step 5.")
+                                    "Tick two or more coefficients on step 3.")
             return
         try:
             models = {get_coefficient(k).label: self._model(k) for k in keys}
@@ -1940,6 +2223,11 @@ class MainWindow(QMainWindow):
     # one, shows the banner. It never downloads or changes anything itself.
     @staticmethod
     def _settings() -> QSettings:
+        # DIFFUSOR_SETTINGS names an .ini file to use instead, which keeps the test
+        # suite away from the user's own settings and recent files
+        path = os.environ.get("DIFFUSOR_SETTINGS")
+        if path:
+            return QSettings(path, QSettings.IniFormat)
         return QSettings("Diffusor", "Diffusor")
 
     def startup_update_check(self):

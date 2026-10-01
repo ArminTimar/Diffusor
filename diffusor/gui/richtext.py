@@ -280,8 +280,8 @@ def example_html(ds, coefficient=None) -> str:
     return d.html()
 
 
-def unused_conditions(coef, settings=None) -> str:
-    """Say which of pressure and fO2 the coefficient ignores."""
+def unused_condition_names(coef) -> list:
+    """Which of "pressure" and "oxygen fugacity" the coefficient ignores."""
     from ..coefficients.base import Conditions
     missing = []
 
@@ -300,7 +300,13 @@ def unused_conditions(coef, settings=None) -> str:
                 float(np.mean(coef.D(base.replace(log_fo2_bar=-8.0)))), d0):
             missing.append("oxygen fugacity")
     except Exception:
-        return ""
+        return []
+    return missing
+
+
+def unused_conditions(coef, settings=None) -> str:
+    """Say which of pressure and fO2 the coefficient ignores."""
+    missing = unused_condition_names(coef)
     if not missing:
         return ""
     who = cite(coef.citation)

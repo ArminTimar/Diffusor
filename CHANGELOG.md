@@ -4,6 +4,54 @@ What changed between releases, newest first. The text under a version heading
 is what goes into the GitHub release, so it is written for someone deciding
 whether to update. Commit messages hold the details.
 
+## Unreleased
+
+### Results that change
+
+- **Titanomagnetite example in the interface.** Loading the example replaced
+  its x_Ti of 0.1 by the mean of the TiO2 profile, clamped to 1, which made D
+  about 250 times too large: the fit gave about 0.02 days instead of 8. A
+  bundled example now keeps its own representative composition.
+- **Representative composition from your own profile.** Loading a file or
+  pressing *Guess* wrote the profile mean into the representative composition,
+  whatever the profile was. A TiO2 wt% traverse set x_Ti to 1 (D about 250
+  times too large), and a ppm profile did the same to X_An or x_Ti. The mean is
+  now used only when the profile is itself the host composition (Fe-Mg and the
+  other exchange pairs, olivine through the chosen coordinate), and it is
+  re-checked when you change the mineral or species. Refit any magnetite or
+  trace-element result whose law needs a composition, and check the
+  *Representative value* on the Conditions step.
+
+### New
+
+- **Recent profiles on the Data step.** The last ten files you loaded are
+  listed in the panel that shows the profile; one button switches between the
+  two, and loading a file brings the profile to the front. A recent file whose
+  columns have not changed opens with the columns you chose last time, without
+  the column dialog. If the columns changed, the dialog opens with your
+  previous choices filled in. Files that have moved are shown as not found.
+- **The file dialog opens in the folder you used last.**
+
+### Changed
+
+- **The coefficient is chosen before the conditions.** The steps are now Data,
+  Mineral, Coefficient, Conditions, Model, Uncertainty. The law decides which
+  host composition is needed and whether pressure and fO2 enter at all, so
+  those are now asked for after it, and inputs the law does not use are
+  disabled. Pressure stays active when fO2 is given relative to a buffer,
+  because the buffer moves with pressure.
+- **Settings moved to where they belong.** The analytical resolution (beam
+  width, distance scale error) is on the Data step with the profile it
+  describes. The linear cooling path is on the Conditions step next to the
+  temperature. The host composition and *D follows the composition* moved
+  from the Mineral step to the Conditions step.
+- **Titanomagnetite example, plateaus.** The traverse ends before the profile
+  has flattened, so the example now fits the plateaus. Held at the values of
+  the outer points they sit inside the true plateaus and the fit gave 5.3 days;
+  with the plateaus fitted it gives 7.4 days for a true 8. The same applies to
+  your own data: tick *Fit the plateaus* when a profile still slopes at the
+  ends of the traverse.
+
 ## 0.2.0 (1 October 2026)
 
 The first published release.

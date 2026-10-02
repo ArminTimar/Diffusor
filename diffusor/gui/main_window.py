@@ -27,7 +27,8 @@ from PySide6.QtWidgets import (QApplication, QCheckBox, QComboBox, QDialog, QDia
 from .. import datasets as ds
 from .. import updates
 from ..coefficients import Conditions, get as get_coefficient, list_coefficients
-from ..coefficients.plagioclase import ACTIVITY_A, activity_theta
+from ..coefficients.plagioclase import (ACTIVITY_SETS, ACTIVITY_SPECIES, DEFAULT_ACTIVITY_SET,
+                                         activity_A, activity_note)
 from ..dataio import ProfileSpec, build_profile, read_table, save_results, suggest_spec
 from ..dataio.image_profiles import is_extraction_workbook, read_extraction
 from ..dataio.images import PILLOW_SUFFIXES, RAW_SUFFIXES
@@ -446,6 +447,7 @@ class MainWindow(QMainWindow):
                          ("Extract profile from image...", self.show_image_extractor),
                          ("Export results...", self.export_results),
                          ("Shared-duration study...", self.show_joint_study),
+                         ("Multicomponent and isotope study...", self.show_multicomponent_study),
                          (None, None),
                          ("Quit", self.close)):
             if text is None:
@@ -777,6 +779,15 @@ class MainWindow(QMainWindow):
         ibody.addWidget(self.cmb_ic)
         self.lbl_ic = note("", "Hint")
         ibody.addWidget(self.lbl_ic)
+        # which published A_i set couples the trace element to the anorthite gradient
+        self.cmb_activity = QComboBox()
+        for key, s in ACTIVITY_SETS.items():
+            self.cmb_activity.addItem(s["label"], key)
+        self.cmb_activity.setCurrentIndex(self.cmb_activity.findData(DEFAULT_ACTIVITY_SET))
+        self.cmb_activity.currentIndexChanged.connect(self._on_ic_changed)
+        self._activity_field = field("Anorthite activity factors A_i", self.cmb_activity)
+        ibody.addWidget(self._activity_field)
+        self._activity_field.setVisible(False)
         self.sp_x0 = _spin(-1e5, 1e5, 0.0, 3, 1, " um")
         self.sp_cl = _spin(-1e6, 1e6, 0.3, 5, 0.01)
         self.sp_cr = _spin(-1e6, 1e6, 0.18, 5, 0.01)
@@ -904,9 +915,10 @@ class MainWindow(QMainWindow):
                 best = coef.default_sampling_mode()
                 detail = {"covariance": "correlated D0 and Q",
                           "logD_at_T": f"the scatter of log D, {coef.sigma_logD} log units",
-                          "independent": "each parameter independently, because the paper "
-                                         "gives neither a covariance nor a scatter",
-                          "none": "fixed coefficient parameters; coefficient uncertainty is not quantified"}[best]
+                          "independent": "each parameter independently",
+                          "none": ("fixed coefficient parameters. The paper gives neither a "
+                                   "covariance nor a scatter of log D, so the coefficient "
+                                   "uncertainty is not propagated")}[best]
                 text = f"For {name} this is {detail}."
         else:
             text = texts[mode]
@@ -1151,7 +1163,8 @@ class MainWindow(QMainWindow):
             self.lbl_footer.setText(f"Step {index + 1} of {RESULTS}")
         self.btn_next.setEnabled(self.profile is not None or index == DATA)
         if self.isVisible():
-            QTimer.singleShot(60, lambda h=height_before: self._restore_height(h))
+            # the window as context drops the call if the window is deleted first
+            QTimer.singleShot(60, self, lambda h=height_before: self._restore_height(h))
 
     def _restore_height(self, height: int):
         """Undo a growth caused by wrapped text measuring itself before it had a width.
@@ -1534,7 +1547,11 @@ class MainWindow(QMainWindow):
             return
         c = get_coefficient(item.data(Qt.UserRole))
         self.lbl_coef_name.setText(c.label)
-        self.lbl_coef_eq.setText(c.equation_text)
+        from ..coefficients.latex import coefficient_latex, equation_html
+        self.lbl_coef_eq.setTextFormat(Qt.RichText)
+        self.lbl_coef_eq.setText(equation_html(coefficient_latex(c),
+                                               max_width=max(self.lbl_coef_eq.width() - 8, 240)))
+        self.lbl_coef_eq.setToolTip(c.equation_text)
         parts = []
         if c.superseded_by:
             parts.append(f"Superseded by {cite(c.superseded_by)}.")
@@ -1614,13 +1631,20 @@ class MainWindow(QMainWindow):
         self._step_controls.setVisible(not equil)
         self.chk_free_x0.setEnabled(not equil)
         self.chk_free_plateaus.setEnabled(not equil)
+        plag_an = self.cmb_mineral.currentData() == "plagioclase" and self.an_values is not None
+        self._activity_field.setVisible(plag_an)
+        texts = []
         if equil:
-            self.lbl_ic.setText("The trace element starts in equilibrium with the measured "
-                                "anorthite profile, C = C0 exp(A X_An / RT) (Dohmen et al. "
-                                "2017, eq. A13).")
-        else:
-            self.lbl_ic.setText("")
-        self.lbl_ic.setVisible(equil)
+            texts.append("The trace element starts in equilibrium with the measured anorthite "
+                         "profile, C = C0 exp(A X_An / RT) (Dohmen et al. 2017, eq. A13). That is the "
+                         "state diffusion ends in, so it is an initial state only if the crystal had "
+                         "already equilibrated with one melt before the event being timed.")
+        if plag_an:
+            set_key = self.cmb_activity.currentData() or DEFAULT_ACTIVITY_SET
+            texts.append(activity_note(set_key, self.sp_T.value() + 273.15) + " The two published "
+                         "sets differ in sign for Mg (Dohmen et al. 2017, Table 1).")
+        self.lbl_ic.setText(" ".join(texts))
+        self.lbl_ic.setVisible(bool(texts))
         self._update_solver_note()
 
     def _update_geometry_note(self):
@@ -1835,6 +1859,7 @@ class MainWindow(QMainWindow):
                 {"x_an_x": np.asarray(self.profile.x, dtype=float),
                  "x_an_values": np.asarray(self.an_values, dtype=float),
                  "T_K": cond.T_K, "species": species,
+                 "activity_set": self.cmb_activity.currentData() or DEFAULT_ACTIVITY_SET,
                  "C_ref": float(self.sp_cl.value()),
                  "X_An_ref": float(self.an_values[0])},
                 description=("equilibrium profile C0 exp(A X_An / RT) anchored at "
@@ -1863,15 +1888,16 @@ class MainWindow(QMainWindow):
         if comp_key and comp_key not in coef.requires:
             comp_key = None
 
-        theta = 0.0
+        A_kJ = 0.0
         an_grid = None
-        if mineral.key == "plagioclase" and species in ACTIVITY_A and self.an_values is not None:
-            theta = activity_theta(species, cond.T_K)
+        activity_set = self.cmb_activity.currentData() or DEFAULT_ACTIVITY_SET
+        if mineral.key == "plagioclase" and species in ACTIVITY_SPECIES and self.an_values is not None:
+            A_kJ = activity_A(species, cond.T_K, activity_set)
         n_nodes = self.sp_nodes.value()
         x_grid = None
         if self.profile is not None:
             x_grid = np.linspace(float(self.profile.x.min()), float(self.profile.x.max()), n_nodes)
-            if theta and self.an_values is not None:
+            if A_kJ and self.an_values is not None:
                 an_grid = np.interp(x_grid, self.profile.x, self.an_values)
         return DiffusionModel(
             coefficient=coef, conditions=cond, initial=ic,
@@ -1880,7 +1906,8 @@ class MainWindow(QMainWindow):
             beam_sigma_um=self.sp_beam.value(), n_nodes=n_nodes, x_grid=x_grid,
             comp_key=comp_key, composition_dependent=bool(comp_key),
             comp_scale=comp_scale, comp_offset=comp_offset,
-            an_profile=an_grid, activity_theta=theta if an_grid is not None else 0.0,
+            an_profile=an_grid, activity_A_kJ=A_kJ if an_grid is not None else 0.0,
+            activity_set=activity_set if an_grid is not None else "",
             force_numerical=self.cmb_solver.currentIndex() == 1,
             boundaries_far=self._boundaries_far(),
             fo2_buffer=((self.cmb_buffer.currentText(), self.sp_dbuf.value())
@@ -1952,11 +1979,13 @@ class MainWindow(QMainWindow):
         self._log("stop requested")
 
     def closeEvent(self, event):
-        if hasattr(self, "joint_study") and self.joint_study.thread is not None and self.joint_study.thread.isRunning():
-            self.joint_study.abort()
-            self._status("Cancelling the joint study. Close once its current calculation finishes.")
-            event.ignore()
-            return
+        for name in ("joint_study", "multicomponent_study"):
+            study = getattr(self, name, None)
+            if study is not None and study.thread is not None and study.thread.isRunning():
+                study.abort()
+                self._status("Cancelling the study. Close once its current calculation finishes.")
+                event.ignore()
+                return
         self.stop_work()
         for t, _ in self._jobs:
             t.quit()
@@ -2187,6 +2216,13 @@ class MainWindow(QMainWindow):
             return
         c = get_coefficient(it.data(Qt.UserRole))
         richtext.show(self, c.label, richtext.coefficient_html(c), 860, 700)
+
+    def show_multicomponent_study(self):
+        from .multicomponent_study import MulticomponentStudyDialog
+        if not hasattr(self, "multicomponent_study"):
+            self.multicomponent_study = MulticomponentStudyDialog(self)
+        self.multicomponent_study.show()
+        self.multicomponent_study.raise_()
 
     def show_joint_study(self):
         from .joint_study import JointStudyDialog

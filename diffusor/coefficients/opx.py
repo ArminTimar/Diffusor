@@ -34,6 +34,7 @@ def _dohmen2016_fs9(dc, cond: Conditions, p):
 
 _add(DiffusionCoefficient(
     key="opx_FeMg_dohmen2016",
+    kind="interdiffusion",
     mineral="opx", species="Fe-Mg",
     label="Opx Fe-Mg, Dohmen et al. (2016) -- Fs9, fO2-dependent",
     citation="dohmen2016",
@@ -84,6 +85,7 @@ def _dohmen2016_fs1(dc, cond: Conditions, p):
 
 _add(DiffusionCoefficient(
     key="opx_FeMg_dohmen2016_fs1",
+    kind="interdiffusion",
     mineral="opx", species="Fe-Mg",
     label="Opx Fe-Mg, Dohmen et al. (2016) -- Fs1, fO2-independent",
     citation="dohmen2016",
@@ -144,6 +146,7 @@ def dias2025_regime(log_fo2_Pa: float) -> str:
 
 _add(DiffusionCoefficient(
     key="opx_FeMg_dias2025",
+    kind="interdiffusion",
     mineral="opx", species="Fe-Mg",
     label="Opx Fe-Mg, Dias, Dohmen & Behrens (2025) -- T, XFe and fO2",
     citation="dias2025",
@@ -165,7 +168,7 @@ _add(DiffusionCoefficient(
         "m2_slope": Parameter("m2_slope", 2.96, 0.49, "-", "1s", "slope of m2 on 1e4/T, eq. 25"),
         "m2_int": Parameter("m2_int", -21.08, 0.0, "-", "1s", "intercept of m2, eq. 25"),
     },
-    sigma_logD=0.2,
+    sigma_logD=0.34,     # p. 208: average misfit of the regressions
     axis_factors={"c": 1.0, "b": 1.0, "a": 1.0 / 3.5},
     reference_axis="c",
     requires=("XFe",),
@@ -190,7 +193,7 @@ _add(DiffusionCoefficient(
         "extrapolated to near zero below about 850 C, consistent with the smaller effect "
         "inferred from order-disorder kinetics (Kroll et al. 1997, as re-evaluated by Dias et "
         "al.). The pre-exponential factors carry no published uncertainty, so the Monte Carlo "
-        "samples log D at T with a 0.2 log-unit scatter, which is how well the regressions "
+        "samples log D at T with a 0.34 log-unit scatter, the average misfit of the regressions "
         "reproduce the experiments. Natural arc magmas usually sit at log fO2 above -7 Pa, "
         "above the calibrated range, so the fO2^(1/4) term is extrapolated there: at 950 C "
         "and NNO+1 it makes D about 0.4 log units faster than Dohmen et al. (2016). The "
@@ -202,22 +205,23 @@ _add(DiffusionCoefficient(
 # Dias & Dohmen (2024) CMP 179:36 -- first calibration of the Fe effect
 # ---------------------------------------------------------------------------
 def _dias2024(dc, cond: Conditions, p):
-    """D = 3.8e-9 exp(-261 kJ/mol / RT) 10^(m (XFe - 0.09)), m = -2.711e4/T + 23.5408."""
+    """D = 3.8e-9 exp(-261 kJ/mol / RT) 10^(m (XFe - 0.1)), m = -2.711e4/T + 23.5408 (eqs 7, 12, 13)."""
     XFe = np.asarray(cond.x("XFe"), dtype=float)
     m = p["m_slope"] / cond.T_K + p["m_int"]
     logD = (np.log10(p["D0"]) - p["Q"] * 1.0e3 / (LN10 * R_GAS * cond.T_K)
-            + m * (XFe - 0.09))
+            + m * (XFe - 0.1))
     return 10.0 ** logD
 
 
 _add(DiffusionCoefficient(
     key="opx_FeMg_dias_dohmen2024",
+    kind="interdiffusion",
     mineral="opx", species="Fe-Mg",
     label="Opx Fe-Mg, Dias & Dohmen (2024) -- log fO2 = -7 Pa only",
     citation="dias_dohmen2024",
     equation_number="12-13",
-    equation_text=("D_Fe-Mg [m2/s] = 3.8e-9 exp[-(261.07 +/- 24 kJ/mol)/(R T)] at XFe = 0.09 and "
-                   "log fO2 = -7 Pa (eq. 12). D(XFe) = D(XFe = 0.09) 10^(m (XFe - 0.09)) with "
+    equation_text=("D_Fe-Mg [m2/s] = 3.8e-9 exp[-(261.07 +/- 24 kJ/mol)/(R T)] at XFe = 0.1 and "
+                   "log fO2 = -7 Pa (eq. 12). D(XFe) = D(XFe = 0.1) 10^(m (XFe - 0.1)) (eq. 7) with "
                    "m = -2.711e4 / T[K] + 23.5408 (eq. 13)"),
     func=_dias2024,
     params={
@@ -272,6 +276,7 @@ for _el, _D0, _Q, _sQ, _eq, _inv_n in [
     _is_lu = _inv_n > 0
     _add(DiffusionCoefficient(
         key=f"opx_{_el}_dias2025",
+        kind="chemical",
         mineral="opx", species=_el,
         label=f"Opx {_el}, Dias, Dohmen & Hartmann (2025)",
         citation="dias2025ree",
@@ -323,6 +328,7 @@ def _ganguly_tazzoli_no_fo2(dc, cond: Conditions, p):
 
 _add(DiffusionCoefficient(
     key="opx_FeMg_ganguly_tazzoli1994_nofo2",
+    kind="interdiffusion",
     mineral="opx", species="Fe-Mg",
     label="Opx Fe-Mg, Ganguly & Tazzoli (1994) without fO2 term (Ostorero et al. 2022)",
     citation="ganguly_tazzoli1994",
@@ -334,7 +340,7 @@ _add(DiffusionCoefficient(
         "a": Parameter("a", 2.6, 0.0, "-", "1s", "XFe coefficient"),
         "b": Parameter("b", 12530.0, 0.0, "K", "1s", "Q/(ln10 R) = 239.9 kJ/mol"),
     },
-    sigma_logD=0.5,
+    sigma_logD=1.0,       # Ganguly & Tazzoli (1994) p. 934: "approximately one order of magnitude"
     axis_factors={"c": 1.0, "b": 1.0, "a": 1.0 / 3.5},
     reference_axis="c",
     requires=("XFe",),
@@ -378,6 +384,7 @@ def _ganguly_tazzoli(dc, cond: Conditions, p):
 
 _add(DiffusionCoefficient(
     key="opx_FeMg_ganguly_tazzoli1994",
+    kind="interdiffusion",
     mineral="opx", species="Fe-Mg",
     label="Opx Fe-Mg, Ganguly & Tazzoli (1994) / Allan et al. (2013) form",
     citation="ganguly_tazzoli1994",
@@ -392,7 +399,7 @@ _add(DiffusionCoefficient(
         "n_fo2": Parameter("n_fo2", 1.0 / 6.0, 0.0, "-", "1s", "fO2 exponent relative to IW"),
         "use_fo2": Parameter("use_fo2", 1.0, 0.0, "-", "1s", "1 = apply fO2 term, 0 = omit it"),
     },
-    sigma_logD=0.5,
+    sigma_logD=1.0,       # Ganguly & Tazzoli (1994) p. 934: "approximately one order of magnitude"
     axis_factors={"c": 1.0, "b": 1.0, "a": 1.0 / 3.5},
     reference_axis="c",
     requires=("XFe",),
@@ -401,8 +408,10 @@ _add(DiffusionCoefficient(
     fo2_range=Range(None, None, "relative to IW"),
     X_range=Range(0.10, 0.50, "XFe"),
     verified=True,
-    verified_from=("transcribed from Dohmen et al. (2016) eq. 3 (PDF p. 2216) and cross-checked "
-                   "against Ostorero et al. (2022) eq. 1, which is the same law in cm2/s"),
+    verified_from=("Ganguly & Tazzoli (1994) eq. 12 (p. 934), read from the rendered page on 2 October "
+                   "2026, and Ostorero et al. (2022) eq. 1. The fO2 term is the form of Allan et al. "
+                   "(2013) as quoted by Dohmen et al. (2016) eq. 3; Ganguly & Tazzoli only speculate "
+                   "an fO2^(1/6) dependence (p. 935), and Allan et al. (2013) is not in the library"),
     secondary_citations=("dohmen2016", "ostorero2022"),
     notes=("Retrieved indirectly from Fe-Mg order-disorder kinetics. It comes from no "
            "direct diffusion measurement. Dohmen et al. (2016) argue the fO2 exponent of 1/6 "
@@ -426,6 +435,7 @@ for _axis, _label, _logD0, _slog, _Q, _sQ in [
         ("c", "(001)", -8.36, 3.27, 265.0, 66.0)]:
     _add(DiffusionCoefficient(
         key=f"opx_Mg_schwandt1998_{_axis}",
+        kind="tracer",
         mineral="opx", species="Mg",
         label=f"Opx Mg self-diffusion // {_axis}-axis {_label}, Schwandt et al. (1998)",
         citation="schwandt1998",

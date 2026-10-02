@@ -21,7 +21,7 @@ from typing import List, Optional, Sequence, Tuple
 
 import numpy as np
 
-from ..coefficients.base import Conditions, DiffusionCoefficient
+from ..coefficients.base import TRACER_ADVICE, Conditions, DiffusionCoefficient
 from ..solvers import analytical
 from ..solvers.boundary import BoundaryCondition, zero_flux
 from ..solvers.convolution import gaussian_convolve, resolution_warning
@@ -54,7 +54,9 @@ class DiffusionModel:
     comp_scale: float = 1.0             # C -> coefficient's composition coordinate
     comp_offset: float = 0.0
     an_profile: Optional[np.ndarray] = None       # plagioclase X_An on the grid
-    activity_theta: float = 0.0                   # A_i/(RT) for the plag term
+    activity_theta: float = 0.0                   # A_i/(RT) at the nominal T, for reporting
+    activity_A_kJ: float = 0.0                    # A_i in kJ/mol; the solver uses A_i/(RT) at each T
+    activity_set: str = ""                        # which published A_i set (plagioclase.ACTIVITY_SETS)
     force_numerical: bool = False
     # True when both ends of the profile only stand in for "far away", which is what
     # the closed-form step solution assumes (Crank 1975 eq. 2.14). False when an end
@@ -68,6 +70,9 @@ class DiffusionModel:
     def __post_init__(self):
         if self.coefficient.model_family != "scalar_fickian":
             raise ValueError("DiffusionModel requires a scalar Fickian coefficient; use the appropriate coupled solver")
+        if self.activity_A_kJ and not self.activity_theta:
+            from ..constants import R_GAS
+            self.activity_theta = self.activity_A_kJ * 1.0e3 / (R_GAS * self.conditions.T_K)
 
     def _composition(self, C):
         return self.comp_offset + self.comp_scale * np.asarray(C, dtype=float)
@@ -192,11 +197,19 @@ class DiffusionModel:
         res = solve_1d(x, C0, D_func, t_seconds, m=self.geometry.m,
                        bc_left=self.bc_left, bc_right=self.bc_right,
                        history=hist, theta_time=0.5,
-                       an_profile=self.an_profile, theta_activity=self.activity_theta)
+                       an_profile=self.an_profile, theta_activity=self._theta())
         C = res.C_final
         if self.beam_sigma_um > 0:
             C = gaussian_convolve(x, C, self.beam_sigma_um)
         return np.interp(np.asarray(x_out, dtype=float), x, C)
+
+    def _theta(self):
+        """A_i/(RT) as a function of temperature when A_i is known, else the fixed theta."""
+        if self.activity_A_kJ:
+            from ..constants import R_GAS
+            A = self.activity_A_kJ * 1.0e3
+            return lambda T_K: A / (R_GAS * T_K)
+        return self.activity_theta
 
     # -- diagnostics ---------------------------------------------------------
     def _range_conditions(self, T_K: Optional[float] = None) -> Conditions:
@@ -218,6 +231,8 @@ class DiffusionModel:
 
     def warnings(self, t_seconds: Optional[float] = None) -> List[str]:
         w = list(self.coefficient.check_conditions(self._range_conditions()))
+        if self.coefficient.kind == "tracer":
+            w.append(TRACER_ADVICE)
         if self.history is not None:
             for T in np.unique(self.history.temps_K):
                 w.extend(self.coefficient.check_conditions(self._range_conditions(float(T))))

@@ -61,47 +61,6 @@ class ExampleDataset:
 DATASETS: List[ExampleDataset] = [
     # ---------------------------------------------------------------- measured
     ExampleDataset(
-        key="plag_santorini",
-        name="Plagioclase, Santorini Minoan (measured)",
-        mineral="plagioclase", species="Mg",
-        filename="plagioclase_santorini_druitt2012.csv",
-        kind="measured",
-        citation="druitt2012",
-        provenance=(
-            'Real measured data. Microprobe and ion probe traverse across plagioclase '
-            'S82-30A 12 from Minoan pumice, Santorini. From Supplementary Table 1 of '
-            'Druitt, Costa, Deloule, Dungan & Scaillet (2012), Nature 482:77-80, '
-            'doi:10.1038/nature10706. Distance from the rim (um), An (mol%), and Mg, K, Ti, '
-            'Sr, Ba, La and Ce (ppm). 14 points from 21 to 267 um.'),
-        spec=dict(distance_column="Distance_from_rim_um", column_a="Mg_ppm",
-                  column_b=None, mode="A", distance_unit="um"),
-        settings=dict(T_C=900.0, sigma_T_K=25.0, P_MPa=200.0, sigma_P_MPa=100.0,
-                      buffer="NNO", delta_buffer=1.0, sigma_delta=0.5,
-                      coefficient="plag_Mg_vanorman2014", geometry="plane",
-                      an_column="An_mol_percent", an_is_percent=True,
-                      initial_condition="equilibrium_plag", bc_left="rim_melt"),
-        expected=(
-            'Druitt et al. (2012) got about 47 years for Mg at 900 C with a one-step model, '
-            'and 70 years at 900 C plus 12 years at 855 C with a two-step model (their '
-            'Supplementary Figure 5). Diffusor does NOT reproduce that number. With the '
-            'equilibrium initial profile it returns about 90 years with a reduced '
-            'chi-squared in the hundreds. Druitt et al. rebuilt the initial Mg profile from '
-            'the Sr-An correlation and a two-melt history, and Diffusor has no initial '
-            'profile of that kind. Use this example to see how an anorthite column is '
-            'loaded and how much the answer depends on the initial profile. It is no check '
-            'of the code against a published timescale.'),
-        notes=(
-            'Normally zoned from about An37 at the rim to An80 in the core. Mg only varies '
-            'from 98 to 179 ppm with real scatter, so the initial profile controls the '
-            'answer almost completely.'),
-        sources=dict(
-            T=('Druitt et al. (2012, Methods) modelled crystals in dacitic melt at 900 C and '
-               'propagated a nominal uncertainty of 25 C.'),
-            P='Placeholder. Druitt et al. (2012) give no storage pressure for this model.',
-            fO2='Placeholder. Druitt et al. (2012) give no oxygen fugacity for this model.'),
-    ),
-
-    ExampleDataset(
         key="opx_kizimen",
         name="Orthopyroxene Fe-Mg, Kizimen 2010 (measured)",
         mineral="opx", species="Fe-Mg",
@@ -291,6 +250,38 @@ DATASETS: List[ExampleDataset] = [
             P='Placeholder. The coefficient has no pressure term.',
             fO2='Placeholder. The coefficient has no fO2 term.'),
     ),
+    ExampleDataset(
+        key="plag_mg_synthetic",
+        name="Plagioclase Mg (synthetic)",
+        mineral="plagioclase", species="Mg",
+        filename="plag_mg_an.csv",
+        kind="synthetic",
+        citation=None,
+        provenance=(
+            "SYNTHETIC. Made with Diffusor's forward model and the Van Orman, Cherniak & Kita "
+            '(2014) Mg coefficient at 900 C and 100 MPa for 20 years, with noise added. A step '
+            'from 180 to 95 ppm at 200 um, D evaluated at X_An = 0.55 throughout, without the '
+            'anorthite activity term.'),
+        spec=dict(distance_column="Distance_um", column_a="Mg_ppm", column_b=None,
+                  sigma_a_column="Mg_err", mode="A", distance_unit="um"),
+        settings=dict(T_C=900.0, sigma_T_K=25.0, P_MPa=100.0, sigma_P_MPa=50.0,
+                      buffer="NNO", delta_buffer=0.0, sigma_delta=0.5,
+                      coefficient="plag_Mg_vanorman2014", geometry="plane",
+                      x_composition=0.55, fit_plateaus=True),
+        expected=(
+            'True time 20 years, set when the file was made. The traverse ends before the '
+            'profile has flattened, so the plateaus are fitted.'),
+        notes=(
+            'The file also has an X_An column (0.62 to 0.45). The profile was made without the '
+            'activity term, so switching that term on, or letting D follow X_An, changes the '
+            'fitted time away from 20 years. That difference shows how much the An coupling '
+            'matters, not an error in the file.'),
+        sources=dict(
+            T='Placeholder conditions for a dacitic magma; no study is reproduced.',
+            P='Placeholder. The coefficient has no pressure term.',
+            fO2='Placeholder. The coefficient has no fO2 term.'),
+    ),
+
     ExampleDataset(
         key="sanidine_ba",
         name="Sanidine Ba (synthetic)",

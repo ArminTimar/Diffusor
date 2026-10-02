@@ -46,6 +46,30 @@ from ..references import cite, get as get_reference
 
 LN10 = np.log(10.0)
 
+# What a measured coefficient describes. A tracer coefficient and an exchange
+# (interdiffusion) coefficient of the same elements can differ by orders of
+# magnitude (Schaffer et al. 2014; Oeser et al. 2026), so every law states which
+# one it is and the interface shows the definition.
+TRANSPORT_KINDS = {
+    "tracer": ("Tracer (self-) diffusion: the mobility of one species or isotope in a host of "
+               "fixed chemical composition, measured by isotope exchange or tracer in-diffusion "
+               "without a gradient in the host composition."),
+    "interdiffusion": ("Interdiffusion (exchange): two or more major components exchange on one "
+                       "site, so the flux of one is balanced by the others (Fe-Mg, Ca-Mg, Na-K, "
+                       "NaSi-CaAl, Fe-Ti). This is the coefficient that relaxes major-element zoning."),
+    "chemical": ("Chemical diffusion of a dilute (trace) element down its own concentration "
+                 "gradient in a host of fixed major-element composition."),
+    "effective": ("An effective coefficient that lumps several species, sites or mechanisms into "
+                  "one D, or that the entry applies beyond the conditions it was measured at."),
+}
+
+TRACER_ADVICE = (
+    "This is a tracer coefficient. It equals the chemical diffusion coefficient only for a "
+    "dilute species that mixes ideally. Major-element zoning relaxes by interdiffusion; for an "
+    "ideal binary exchange of equally charged ions D_AB = D*_A D*_B / (X_A D*_A + X_B D*_B) "
+    "(Chakraborty & Ganguly 1992 eq. 2 in the binary limit; Oeser et al. 2026 eq. 6), which "
+    "can differ from either tracer coefficient.")
+
 
 # ---------------------------------------------------------------------------
 @dataclass
@@ -138,6 +162,7 @@ class DiffusionCoefficient:
     covariance: Optional[np.ndarray] = None          # over ``cov_order``
     cov_order: Sequence[str] = ()
     sigma_logD: Optional[float] = None               # 1 sigma scatter of log10 D about the fit
+    sigma_logD_basis: str = ""                        # published / derived / assumed, see uncertainty_basis.py
     axis_factors: Dict[str, float] = field(default_factory=dict)   # D_axis / D_reference
     reference_axis: str = ""
     requires: Sequence[str] = ()                     # composition keys needed
@@ -154,7 +179,7 @@ class DiffusionCoefficient:
     secondary_citations: Sequence[str] = ()
     notes: str = ""
     recommended: bool = False
-    kind: str = "unspecified"  # tracer | self | chemical | interdiffusion | effective
+    kind: str = ""  # a key of TRANSPORT_KINDS; required
     model_family: str = "scalar_fickian"
     transported_variable: str = ""
     reference_state: str = ""
@@ -165,6 +190,16 @@ class DiffusionCoefficient:
     allowed_axes: Sequence[str] = ()
     orientation_required: bool = False
     fixed_temperature_K: Optional[float] = None
+    # Keys of the tracer laws an interdiffusion law was computed from (diffusor.coefficients.transport)
+    derived_from: Sequence[str] = ()
+
+    def __post_init__(self):
+        if self.kind not in TRANSPORT_KINDS:
+            raise ValueError(f"{self.key}: transport kind {self.kind!r} must be one of {sorted(TRANSPORT_KINDS)}")
+
+    @property
+    def kind_description(self) -> str:
+        return TRANSPORT_KINDS[self.kind]
 
     @property
     def validation_level(self) -> str:
@@ -266,13 +301,18 @@ class DiffusionCoefficient:
         raise ValueError(f"unknown sampling mode '{mode}'")
 
     def default_sampling_mode(self) -> str:
+        """The sampling used when the user leaves the choice to Diffusor.
+
+        Independent sampling of log D0 and Q is never the default: the two are
+        correlated regression parameters, and drawing them separately spreads
+        log D by orders of magnitude away from the centroid of the data. A law
+        with only marginal errors is held fixed unless the user asks otherwise.
+        """
         if self.covariance is not None:
             return "covariance"
         if self.sigma_logD is not None:
             return "logD_at_T"
-        if not any(p.sigma > 0 for p in self.params.values()):
-            return "none"
-        return "independent"
+        return "none"
 
     def D_sampled(self, cond: Conditions, overrides: Dict[str, float]):
         """Evaluate D with a set of overrides that may contain the log-offset key."""
@@ -326,8 +366,11 @@ class DiffusionCoefficient:
                  f"  equation        : {self.equation_number or '(unnumbered)'}",
                  f"     {self.equation_text}",
                  f"  D units         : m^2/s"]
-        lines.extend([f"  coefficient kind: {self.kind}", f"  model family    : {self.model_family}",
+        lines.extend([f"  coefficient kind: {self.kind} -- {self.kind_description}",
+                      f"  model family    : {self.model_family}",
                       f"  validation      : {self.validation_level}"])
+        if self.derived_from:
+            lines.append(f"  computed from   : {', '.join(self.derived_from)}")
         if self.transported_variable:
             lines.append(f"  state variable  : {self.transported_variable}")
         if self.reference_state:
@@ -347,7 +390,8 @@ class DiffusionCoefficient:
                 s = f" +/- {p.sigma:g} ({p.sigma_level})" if p.sigma else ""
                 lines.append(f"     {p.name} = {p.value:g}{s} {p.unit}  {p.description}")
         if self.sigma_logD is not None:
-            lines.append(f"  scatter about the fit: {self.sigma_logD:g} log10 units (1 sigma)")
+            lines.append(f"  scatter about the fit: {self.sigma_logD:g} log10 units (1 sigma); "
+                         f"{self.sigma_logD_basis or 'basis not recorded'}")
         if self.covariance is not None:
             lines.append(f"  covariance published for: {', '.join(self.cov_order)}")
         if self.axis_factors:

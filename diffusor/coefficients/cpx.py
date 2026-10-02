@@ -22,6 +22,7 @@ def _plain_arrhenius(dc, cond: Conditions, p):
 # ---------------------------------------------------------------------------
 _add(DiffusionCoefficient(
     key="cpx_FeMg_muller2013",
+    kind="interdiffusion",
     mineral="cpx", species="Fe-Mg",
     label="Cpx Fe-Mg // [001], Mueller et al. (2013)",
     citation="muller2013",
@@ -58,6 +59,7 @@ _add(DiffusionCoefficient(
 # ---------------------------------------------------------------------------
 _add(DiffusionCoefficient(
     key="cpx_FeMg_dimanov_sautter2000",
+    kind="interdiffusion",
     mineral="cpx", species="Fe-Mg",
     label="Cpx (Fe,Mn)-Mg, Dimanov & Sautter (2000) -- as used by NIDIS",
     citation="dimanov_sautter2000",
@@ -95,6 +97,7 @@ _add(DiffusionCoefficient(
 # ---------------------------------------------------------------------------
 _add(DiffusionCoefficient(
     key="cpx_CaMg_brady1983",
+    kind="interdiffusion",
     mineral="cpx", species="Ca-Mg",
     label="Cpx Ca-Mg effective binary interdiffusion, Brady & McCallister (1983)",
     citation="brady_mccallister1983",

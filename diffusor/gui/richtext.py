@@ -112,6 +112,18 @@ class Doc:
             f"<span class='mono'>{esc(text)}</span></td></tr></table>")
         return self
 
+    def latex(self, latex: str, plain: str = ""):
+        """A typeset equation (matplotlib mathtext) with its LaTeX source below it."""
+        from ..coefficients.latex import equation_html
+        src = f"<br><span class='faint mono'>{esc(latex)}</span>"
+        self.parts.append(
+            f"<table width='100%' cellspacing='0' cellpadding='10' style='margin: 2px 0 8px 0;'>"
+            f"<tr><td style='background-color:{theme.SURFACE_ALT}; border: 1px solid {theme.BORDER};'>"
+            f"{equation_html(latex)}{src}</td></tr></table>")
+        if plain:
+            self.parts.append(f"<p class='faint'>Plain-text transcription: {esc(plain)}</p>")
+        return self
+
     def raw(self, fragment: str):
         self.parts.append(fragment)
         return self
@@ -186,12 +198,15 @@ def coefficient_html(c) -> str:
             msg += " " + esc(c.superseded_note)
         d.box(msg, "danger")
     d.h("Equation")
-    d.kv([("Transport kind", esc(c.kind)), ("Model family", esc(c.model_family)),
+    d.kv([("Transport kind", esc(f"{c.kind}: {c.kind_description}")),
+          *([("Computed from", esc(", ".join(c.derived_from)))] if c.derived_from else []),
+          ("Model family", esc(c.model_family)),
           ("Validation", esc(c.validation_level)), ("State variable", esc(c.transported_variable)),
           ("Reference state", esc(c.reference_state))])
     if c.calibration_notes:
         d.box("<br>".join(esc(s) for s in c.calibration_notes), "warn")
-    d.equation(c.equation_text)
+    from ..coefficients.latex import coefficient_latex
+    d.latex(coefficient_latex(c), c.equation_text)
     d.p(f"<span class='muted'>Equation {esc(c.equation_number or 'unnumbered')} in the source. "
         f"D in m²/s.{' The fO2 term takes fO2 in ' + esc(c.fo2_unit) + '.' if c.needs_fo2 else ''}"
         f"</span>")
@@ -212,7 +227,8 @@ def coefficient_html(c) -> str:
     else:
         items.append("No covariance of D0 and Q is published for this law.")
     if c.sigma_logD is not None:
-        items.append(f"Scatter of log D at the working temperature: {c.sigma_logD:g} log units (1σ).")
+        items.append(f"Scatter of log D at the working temperature: {c.sigma_logD:g} log units (1σ). "
+                     + esc(c.sigma_logD_basis[:1].upper() + c.sigma_logD_basis[1:]) + ".")
     else:
         items.append("No scatter of log D is published. Only the individual parameters can be varied.")
     items.append("Best available: " + {"covariance": "correlated D0 and Q",
@@ -513,7 +529,8 @@ def methods_html(fit_result, mc_result=None, profile=None) -> str:
 
     d.h("Diffusion coefficient")
     d.p(f"<b>{esc(c.label)}</b>, equation {esc(c.equation_number or 'unnumbered')}")
-    d.equation(c.equation_text)
+    from ..coefficients.latex import coefficient_latex
+    d.latex(coefficient_latex(c))
     if not c.verified:
         d.box("The numbers of this law have not been checked against the original paper.", "warn")
 

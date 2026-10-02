@@ -18,7 +18,7 @@ scalar("ap_Sr_cherniak1993", "apatite", "Sr", "cherniak1993apatite", np.log10(2.
        reference_state="dry Durango fluorapatite; Sr implantation and SrO reservoir",
        uncertainty="Quoted Q ±2200 cal/mol and asymmetric D0 error; coefficient uncertainty not yet propagated.")
 scalar("ap_Pb_cherniak1991", "apatite", "Pb", "cherniak1991apatite", np.log10(1.27e-8),
-       54.6 * 4.184, (600, 900), source="abstract p. 1663; cm2/s and kcal/mol converted to SI", kind="tracer",
+       54.6 * 4.184, (600, 900), source="abstract p. 1663; cm2/s and kcal/mol converted to SI", kind="chemical",
        notes=("Pb introduced by ion implantation; rapid annealing was inferred for apatite. "
               "This is not the damaged-zircon law from the same paper or an (U-Th)/He model.",),
        reference_state="dry apatite, implanted Pb",
@@ -32,7 +32,7 @@ for sp, D0, Q in (("La", 2.6e-7, 324), ("Nd", 2.4e-6, 348),
            notes=("Effective chemical diffusion for the stated charge-compensating exchange mechanism. "
                   "Do not substitute for isotope exchange or out-diffusion from Nd-doped apatite.",))
 scalar("ap_Sm_cherniak2000_implant", "apatite", "Sm", "cherniak2000apatite", np.log10(6.3e-7), 298,
-       (750, 1100), source="abstract p. 3871, ion-implantation relaxation", kind="tracer",
+       (750, 1100), source="abstract p. 3871, ion-implantation relaxation", kind="chemical",
        reference_state="dry fluorapatite; implanted Sm",
        notes=("Implanted Sm exchange is faster than coupled REE chemical diffusion; select the mechanism matching the study.",))
 scalar("ap_Nd_cherniak2000_out", "apatite", "Nd", "cherniak2000apatite", np.log10(9.3e-6), 392,

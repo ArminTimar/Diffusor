@@ -12,6 +12,8 @@ from openpyxl.chart import ScatterChart, Series, Reference
 from openpyxl.styles import Alignment, Font, PatternFill
 from openpyxl.utils import get_column_letter
 
+from ..coefficients.latex import coefficient_latex as _latex
+
 INK = "243746"
 TEAL = "007F82"
 LIGHT = "EDF5F5"
@@ -135,9 +137,12 @@ def save_workbook(path, fit_result, profile_frame, metadata, methods, mc_result=
     c = fit_result.model.coefficient
     _table(coef, ("Property", "Value"),
            [("Key", c.key), ("Source", metadata["citations"][c.citation]),
-            ("Equation", c.equation_text), ("Source location", c.equation_number),
+            ("Equation", c.equation_text), ("Equation (LaTeX)", _latex(c)),
+            ("Source location", c.equation_number),
             ("Verified from", c.verified_from), ("Reference state", c.reference_state),
-            ("Transport kind", c.kind), ("State variable", c.transported_variable),
+            ("Transport kind", f"{c.kind}: {c.kind_description}"),
+            *([("Computed from tracer laws", ", ".join(c.derived_from))] if c.derived_from else []),
+            ("State variable", c.transported_variable),
             ("Uncertainty", c.uncertainty_note),
             *[(k, str(getattr(c, k))) for k in ("T_range", "P_range", "fo2_range", "X_range")],
             *[(p.name, f"{p.value:g} {p.unit}; " + (f"reported uncertainty {p.sigma:g} ({p.sigma_level})" if p.sigma > 0 else "parameter uncertainty not sampled"))

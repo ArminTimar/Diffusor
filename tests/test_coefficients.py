@@ -185,8 +185,9 @@ def test_unverified_entries_are_flagged_in_their_warnings():
 
 
 def test_every_entry_is_checked_against_its_primary_source():
-    # all five former secondary-source entries were read against their PDFs on 1 October 2026
-    assert [c.key for c in list_coefficients() if not c.verified] == []
+    # Audit of 2 October 2026: only the Aragon et al. (1984) expression could not be found in the
+    # primary paper; it is taken from Van Orman & Crispin (2010) Table 11 and marked unverified
+    assert [c.key for c in list_coefficients() if not c.verified] == ["mt_FeTi_aragon1984"]
 
 
 def test_chakraborty1997_is_the_printed_fo86_fit():

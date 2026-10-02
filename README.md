@@ -14,14 +14,19 @@ recalculated at each sampled temperature, and the Arrhenius parameters are
 sampled from a published covariance where one exists, so correlated inputs are
 not sampled as if they were independent.
 
-The program contains 103 published diffusion laws for 13 minerals: olivine,
-orthopyroxene, clinopyroxene, plagioclase, K-feldspar, magnetite, quartz,
-rutile, titanite, apatite, zircon, monazite and xenotime. Each entry stores the
+The program contains 113 published diffusion laws for 14 minerals: olivine,
+orthopyroxene, clinopyroxene, plagioclase, K-feldspar, magnetite, garnet,
+quartz, rutile, titanite, apatite, zircon, monazite and xenotime. Each entry
+states whether it is a tracer, an interdiffusion (exchange), a chemical
+(trace-element) or an effective coefficient. Each entry stores the
 citation, the equation as printed in the source with its equation number, the
 calibration ranges in temperature, pressure, oxygen fugacity and composition,
 the published parameter uncertainties, and the table, page or figure from
-which the values were transcribed. All 103 entries have been checked against
-their primary publications. A run outside the calibration range of the selected
+which the values were transcribed. 112 of the 113 entries have been compared
+with the rendered pages of their primary publications; the Fe-Ti law of Aragon
+et al. (1984) is taken from Table 11 of Van Orman & Crispin (2010) and is marked
+as not checked against the original paper. Each equation is shown typeset on
+the coefficient page and exported as LaTeX source with the results. A run outside the calibration range of the selected
 law produces a warning, and every export contains a methods paragraph that
 names the diffusion law, solver, boundary conditions and uncertainty model of
 that run, followed by the references it cites. The checks that are run against
@@ -231,6 +236,42 @@ residuals should be inspected before the profiles are interpreted as recording
 a single event. The export contains a study workbook and a full report for each
 profile.
 
+## Multicomponent and isotope profiles
+
+**File > Multicomponent and isotope study** has two tabs.
+
+*Garnet (Fe-Mg-Mn-Ca).* A table with one column per cation is normalised to
+Fe + Mg + Mn + Ca = 1 per row, and the four components are modelled together.
+The diffusion matrix is that of an ideal ionic solution (Lasaga 1979, in the
+form of Chakraborty & Ganguly 1992, eq. 2), recalculated at every node and
+time step from the tracer coefficients of one of four published sets: Carlson
+(2006), Chakraborty & Ganguly (1992), and each of them with the Mn law
+recalibrated by Chen & Chu (2024). The off-diagonal terms can move a component
+that has no initial gradient (uphill diffusion of Ca, Carlson 2006, Fig. 4).
+One duration is fitted to all components by weighted least squares; the step
+position can be fitted as well, and the Monte Carlo varies temperature and
+each tracer coefficient (Carlson 2006 gives ±0.8 log units at 95 %).
+
+*Isotopes.* The profile and model configured in the main window are combined
+with the delta-value columns of the same table. For a dilute element (Li),
+each isotope diffuses with D<sub>m</sub> = D (m<sub>ref</sub>/m)<sup>β</sup>.
+For Fe-Mg in olivine, the three Mg and four Fe isotopes are seven components
+of one exchange (Oeser et al. 2026, eqs 3-4), with the Fe and Mg tracer
+coefficients of Oeser et al. (2026) or with the main-window Fe-Mg law and a
+ratio D*<sub>Fe</sub>/D*<sub>Mg</sub>. The β values offered are those of
+Oeser et al. (2026, Table 5; olivine Fe and Mg per crystal axis) and Richter
+et al. (2014, 2017; Li in augite and olivine). β depends on the diffusion
+model it was fitted with: the Li data of Richter et al. (2014) need β = 0.27
+with a two-site model and 0.44 with a one-site model.
+
+Tracer and exchange coefficients can differ by orders of magnitude. Na-K
+interdiffusion in K-feldspar measured directly (Schäffer et al. 2014) is 5 to
+10 times slower normal to (001), and almost 100 times slower normal to (010),
+than the value calculated from Na and K tracer coefficients. A fit with a
+tracer coefficient therefore carries a warning, and interdiffusion laws
+computed from two tracer laws (olivine, Oeser et al. 2026; garnet, Borinski et
+al. 2012) name the laws they were computed from.
+
 ## Exported results
 
 **File > Export results** writes, for each run:
@@ -253,7 +294,7 @@ a search field, and saves the list as BibTeX.
 ## Example datasets
 
 One example per mineral is bundled and listed on the Data step with its
-provenance. Two are measured data from published supplementary tables. The
+provenance. One is measured data from a published supplementary table. The
 others were generated with Diffusor's forward model at a set time and given
 Gaussian noise; they are marked as synthetic in the catalogue, in the
 interface and in every exported methods paragraph. The conditions of each
@@ -263,7 +304,6 @@ not use is labelled as a placeholder.
 | dataset | kind | source | known time | fitted by Diffusor |
 | --- | --- | --- | --- | --- |
 | Orthopyroxene Fe-Mg, Kizimen 2010 | measured | crystal K9_L10C4, Supplementary Data 2 of Ostorero et al. (2022) | 2.32 yr (+7.16/−1.75), published | 2.6 yr |
-| Plagioclase, Santorini Minoan | measured | crystal S82-30A 12, Supplementary Table 1 of Druitt et al. (2012) | about 47 yr, published | not comparable, see below |
 | Orthopyroxene Fe-Mg | synthetic | Dias et al. (2025), 950 °C, NNO+1, arc andesite conditions | 1.5 yr | 1.39 yr |
 | Clinopyroxene Fe-Mg | synthetic | Mueller et al. (2013), 1100 °C, conditions after Petrone et al. (2016, 2018) | 45 d | 42 d |
 | Olivine Fe-Mg | synthetic | Dohmen & Chakraborty (2007), 1150 °C, FMQ−1, conditions after Hartley et al. (2016) | 120 d | 116 d |
@@ -294,11 +334,11 @@ supplement, whereas the 2 µm microprobe traverse resolves the 4 µm zone with
 few points. With the Dias et al. (2025) law instead, the same traverse gives
 13 years.
 
-The Santorini set illustrates the loading of measured data and the influence of
-the initial condition. It is not a validation. Druitt et al. (2012) obtained
-about 47 years from an initial profile reconstructed from the Sr-An
-correlation and a two-melt history, which cannot be expressed with Diffusor's
-built-in initial conditions.
+Earlier versions included a plagioclase traverse from Druitt et al. (2012)
+(Santorini). It was removed because the example modelled it with a different
+Mg diffusion law (Van Orman et al. 2014 instead of Costa et al. 2003), initial
+profile and anorthite activity factor than the paper, so it neither reproduced
+nor tested the published result.
 
 ## Numerical methods
 
@@ -326,7 +366,13 @@ a few hundred steps.
 
 The diffusion coefficient may depend on composition, in which case it is
 evaluated at each node from the evolving profile. For plagioclase trace
-elements the flux includes the anorthite activity term of Costa et al. (2003).
+elements the flux includes the anorthite activity term of Costa et al. (2003),
+-D C (A/RT) dX<sub>An</sub>/dx. The factor A is taken from one of the two sets
+in Table 1 of Dohmen, Faak & Blundy (2017), chosen on the Model step: Dohmen &
+Blundy (2014), using their 900 or 1200 °C column, whichever is nearer the run
+temperature, or Bindeman et al. (1998), the set used by Costa et al. (2003) and
+Druitt et al. (2012). The two differ in sign for Mg. A/RT is evaluated at the
+temperature of each time step, and every export states the set.
 Anisotropy is handled with the direction-cosine relation of Costa &
 Chakraborty (2004) and the axial ratios published for each mineral. A linear
 cooling path replaces D t by the time integral of D(T(t)) (Crank 1975,
@@ -349,10 +395,15 @@ other. Three correlations are treated explicitly.
    temperature. Where a source gives the correlation, the parameters are
    sampled jointly. Only the Sr and Ba laws of Grocolas et al. (2025) provide
    this: the authors treat log D<sub>0</sub> and Q as perfectly correlated in
-   their own Monte Carlo, and Diffusor uses the same assumption. For all other
-   laws log D is sampled at the working temperature with the scatter the
-   source reports. Independent sampling is available only to reproduce results
-   obtained that way.
+   their own Monte Carlo, and Diffusor uses the same assumption. For 68 other
+   laws log D is sampled at the working temperature with a stated scatter. For
+   8 of them the scatter is published or derived from a statement in the source;
+   for the other 60 it is Diffusor's assumption, because the source gives only
+   errors of D<sub>0</sub> and Q without their covariance. The coefficient page
+   and the methods paragraph state which applies. Laws with neither a covariance
+   nor a scatter are held fixed by default (43 laws). Independent sampling of
+   D<sub>0</sub> and Q is never the default and is available only to reproduce
+   results obtained that way.
 3. Composition enters both the diffusion coefficient and the fitted profile,
    so measurement noise affects the result through both.
 
@@ -375,12 +426,13 @@ number of cores.
 
 | mineral | entries | species |
 | --- | --- | --- |
-| Olivine | 7 | Fe-Mg, Ca, Be, P, Ni |
+| Olivine | 10 | Fe-Mg, Fe and Mg tracers, Ca, Be, P, Ni |
 | Orthopyroxene | 12 | Fe-Mg, Mg, Lu, Ce, Eu |
 | Clinopyroxene | 3 | Fe-Mg, Ca-Mg |
 | Plagioclase | 11 | Mg, Sr, Ba, Li, NaSi-CaAl |
-| K-feldspar | 3 | Sr, Ba, Ti |
+| K-feldspar | 7 | Sr, Ba, Ti, Na-K |
 | Magnetite | 42 | Ti, Fe, Fe-Ti and 21 trace elements |
+| Garnet | 3 | Fe-Mg, Fe and Mg tracers (multicomponent sets listed above) |
 | Quartz | 1 | Ti |
 | Rutile | 3 | Zr, Hf |
 | Titanite | 2 | Sr, Zr |
@@ -467,7 +519,7 @@ with Sievwright et al. (2020) within half a log unit for Ti, Mn and Co.
 
 ## Verification
 
-The test suite contains 262 tests and runs on Windows, macOS and Linux
+The test suite contains 293 tests and runs on Windows, macOS and Linux
 with Python 3.10 and 3.13 on every change to the repository (see the badge at
 the top). It does not access the network. The tests cover the following.
 
@@ -493,6 +545,9 @@ values:
 | Plagioclase Sr, difference from Giletti & Casserly (1994) at An36 and 750 °C (Audétat et al. 2026) | 2.8 log units | 2.77 |
 | Magnetite, minimum of D with fO2 for 21 elements at 1150 °C (Sievwright et al. 2020, Table 5) | log fO2 and log D at the minimum | within 0.1 and 0.05 log units |
 | Opx K9_L10C4, Kizimen (Ostorero et al. 2022, Supplementary Data 4) | 2.32 yr (+7.16/−1.75) | 2.6 yr |
+| Garnet D matrix at X<sub>Fe</sub> 0.61, X<sub>Mn</sub> 0.20, X<sub>Mg</sub> 0.18, X<sub>Ca</sub> 0.01 (Chakraborty & Ganguly 1992, eq. 5) | nine printed elements | within 0.4 % |
+| Olivine D<sub>Fe-Mg</sub> from the Fe and Mg tracer fits, 1100 to 1250 °C, a, b and c (Oeser et al. 2026, eq. 6 and Table 4) | the paper's own D<sub>Fe-Mg</sub> fit | within 0.2 log units |
+| Garnet Mn tracer at 510 °C, 2 GPa, eclogite garnet (Chen & Chu 2024) | about 1e-24 m²/s | 2.2e-24 m²/s |
 
 Further tests reproduce the Arrhenius parameters, equation forms and figures of
 the other sources, for example the olivine composition term of the Dohmen &
@@ -510,7 +565,13 @@ node spacing (second-order convergence). A closed plane system conserves mass
 to 1e-8 and a closed sphere to 1e-6, and a closed system relaxes to its mean
 composition. The explicit and implicit schemes agree with each other, the
 fractional-uptake series agree with the integrated profiles, and a constant
-temperature history gives the same result as the isothermal solution.
+temperature history gives the same result as the isothermal solution. The
+multicomponent solver agrees with the eigen-component solution for a constant
+matrix (Toor 1964, as used by Chakraborty & Ganguly 1992) within 1e-3 in mole
+fraction on a 401-node grid, conserves each component to 1e-9, reduces to the
+scalar solver for two components, and gives the same profiles whichever
+component is taken as dependent. With β = 0 the isotope models give zero delta
+values and the element profiles of the scalar model.
 
 Fitting and Monte Carlo. Fits recover a known time from noise-free and noisy
 synthetic profiles, with and without composition-dependent D. The bundled
@@ -543,8 +604,17 @@ python -m pytest
 * A Monte Carlo run with a composition-dependent law and the numerical solver
   takes a few seconds per draw and core, so several hundred draws take
   minutes. The plot shows the progress, and **Stop** ends the run.
-* Multicomponent and isotopic diffusion, garnet diffusion matrices, reactions
-  between sites and Bayesian inference are not implemented.
+* The garnet D matrix assumes an ideal solution. Borinski et al. (2012) found
+  that non-ideality changes retrieved coefficients by less than a factor of
+  1.2 for most natural garnets; their non-ideal matrix is not implemented.
+* The fO2 term of Carlson (2006) is relative to the graphite-oxygen
+  equilibrium, which Diffusor does not calculate; the offset from it is an
+  input (0 by default).
+* Isotopes of a dilute element are modelled with one diffusing species. The
+  two-site Li models of Richter et al. (2014, 2017) are not implemented, so a
+  β taken from them belongs to a different model.
+* Reactions between sites, growth and resorption, and Bayesian inference are
+  not implemented.
 * The Chakraborty (1997) olivine law is a single fit for Fo86 along [001] at
   fO2 = 1e-12 bar. Other directions are refused, and other fO2 values produce
   a warning.

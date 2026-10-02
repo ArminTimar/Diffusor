@@ -4,9 +4,9 @@ from __future__ import annotations
 from typing import Dict, List, Optional
 
 from .base import Conditions, DiffusionCoefficient, Parameter, Range
-from . import cpx, kfeldspar, magnetite, olivine, opx, plagioclase, literature, accessories
+from . import cpx, garnet, kfeldspar, magnetite, olivine, opx, plagioclase, literature, accessories
 
-_MODULES = (olivine, opx, cpx, plagioclase, kfeldspar, magnetite, literature, accessories)
+_MODULES = (olivine, opx, cpx, plagioclase, kfeldspar, magnetite, garnet, literature, accessories)
 
 REGISTRY: Dict[str, DiffusionCoefficient] = {}
 for _m in _MODULES:
@@ -14,6 +14,13 @@ for _m in _MODULES:
         if _c.key in REGISTRY:
             raise RuntimeError(f"duplicate coefficient key {_c.key}")
         REGISTRY[_c.key] = _c
+
+from .uncertainty_basis import QUOTED_ERRORS, SIGMA_LOGD_BASIS  # noqa: E402
+for _key, _quoted in QUOTED_ERRORS.items():
+    REGISTRY[_key].uncertainty_note = (_quoted + ". No covariance of D0 and Q is given, so the "
+                                       "coefficient is held fixed in the Monte Carlo.")
+for _key, _basis in SIGMA_LOGD_BASIS.items():
+    REGISTRY[_key].sigma_logD_basis = _basis
 
 
 def get(key: str) -> DiffusionCoefficient:

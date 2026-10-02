@@ -126,7 +126,8 @@ def solve_1d(x: np.ndarray, C0: np.ndarray, D_func: Callable[[np.ndarray, float]
     courant : first time step as a fraction of the explicit stability limit
     min_steps : lower bound on the number of steps (sets the dt cap for implicit schemes)
     dt_growth : geometric growth factor applied to dt each step (implicit schemes only)
-    an_profile, theta_activity : plagioclase activity term (theta = A/RT)
+    an_profile, theta_activity : plagioclase activity term, theta = A/RT; a callable
+        theta_activity(T_K) is evaluated at the temperature of every step
     snapshot_times : store the profile at these times (seconds) exactly
     progress : optional callback receiving fraction done; return True to abort
     """
@@ -140,13 +141,16 @@ def solve_1d(x: np.ndarray, C0: np.ndarray, D_func: Callable[[np.ndarray, float]
         raise ValueError("geometry index must be 0, 1 or 2; radial coordinates must be nonnegative")
     if not np.isfinite(t_total) or t_total < 0 or not 0 <= theta_time <= 1 or courant <= 0:
         raise ValueError("invalid duration, theta_time or courant")
-    if theta_activity and an_profile is None:
+    theta_of_T = theta_activity if callable(theta_activity) else (lambda T, th=theta_activity: th)
+    T_first = float(history.T(0.0)) if history is not None else float(T_K or 1.0)
+    theta0 = float(theta_of_T(T_first))
+    if theta0 and an_profile is None:
         raise ValueError("activity-driven transport requires an anorthite profile")
     if an_profile is not None:
         an_profile = np.asarray(an_profile, dtype=float)
         if an_profile.shape != x.shape or not np.all(np.isfinite(an_profile)):
             raise ValueError("anorthite profile must be finite and match the grid")
-        if np.max(np.abs(theta_activity*np.diff(an_profile))) >= 2:
+        if np.max(np.abs(theta0*np.diff(an_profile))) >= 2:
             raise ValueError("activity gradient is unresolved; refine the spatial grid")
     n = x.size
     dx = x[1] - x[0]
@@ -218,7 +222,7 @@ def solve_1d(x: np.ndarray, C0: np.ndarray, D_func: Callable[[np.ndarray, float]
         dt = min(dt, t_total - t)
         if next_snap_idx < len(snaps):
             dt = min(dt, snaps[next_snap_idx] - t)
-        lower, diag, upper = _operator(x, D_nodes, m, an_profile, theta_activity)
+        lower, diag, upper = _operator(x, D_nodes, m, an_profile, float(theta_of_T(T_now)))
         lower, diag, upper = _apply_bc_rows(lower, diag, upper, x, D_nodes, m, bc_left, bc_right)
         if theta_time < 0.5:
             # The radial centre and drift can have a larger exit rate than

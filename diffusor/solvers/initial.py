@@ -89,7 +89,8 @@ class InitialCondition:
         if k == "equilibrium_plag":
             from ..coefficients.plagioclase import equilibrium_profile
             X_An = np.interp(np.asarray(x, dtype=float), p["x_an_x"], p["x_an_values"])
-            return equilibrium_profile(X_An, p["T_K"], p["species"], p["C_ref"], p.get("X_An_ref"))
+            return equilibrium_profile(X_An, p["T_K"], p["species"], p["C_ref"], p.get("X_An_ref"),
+                                       p.get("activity_set", "dohmen_blundy2014"))
         raise ValueError(f"unknown initial condition '{k}'")
 
     def describe(self) -> str:

@@ -11,8 +11,8 @@ from .base import DiffusionCoefficient, Parameter, Range, LN10
 
 COEFFICIENTS = []
 NO_COVARIANCE = (
-    "No joint parameter covariance was transcribed. Quoted marginal errors do not define "
-    "a joint uncertainty distribution; independent sampling is an approximation."
+    "No joint parameter covariance is published. Quoted marginal errors do not define a joint "
+    "uncertainty distribution, so the coefficient is held fixed in the Monte Carlo by default."
 )
 GROWTH = "A fitted profile does not establish a diffusion origin; growth zoning must be evaluated independently."
 PRISTINE = "Crystalline, undamaged lattice only; radiation damage and fluid-assisted replacement are not modelled."

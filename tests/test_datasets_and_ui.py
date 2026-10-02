@@ -1,5 +1,6 @@
 """The bundled dataset catalogue, the superseded-coefficient flags, and the interface."""
 import os
+import re
 from pathlib import Path
 
 import numpy as np
@@ -53,20 +54,6 @@ def test_every_dataset_names_a_coefficient_that_exists():
         assert key, d.key
         c = get(key)
         assert c.mineral == d.mineral, f"{d.key} points at a {c.mineral} coefficient"
-
-
-def test_santorini_dataset_is_the_real_published_traverse():
-    d = ds.get("plag_santorini")
-    assert d.kind == "measured" and d.citation == "druitt2012"
-    df = read_table(d.path)
-    assert len(df) == 14
-    an = df["An_mol_percent"].to_numpy()
-    # normally zoned: anorthite-rich core, sodic rim
-    assert an.min() == pytest.approx(36.6)
-    assert an.max() == pytest.approx(80.3)
-    assert df["Distance_from_rim_um"].iloc[0] == pytest.approx(21.0)
-    assert "does NOT reproduce" in d.expected, (
-        "the catalogue must be honest that this is not a validation")
 
 
 # --- superseded flags -----------------------------------------------------------
@@ -155,24 +142,37 @@ def test_loading_an_example_fills_in_the_later_steps(app):
     w.close()
 
 
-def test_santorini_example_switches_on_the_activity_term(app):
-    from PySide6.QtCore import Qt
+def _plag_with_anorthite(app):
+    """The synthetic plagioclase Mg file with its anorthite column, loaded the way an
+    example is, with the equilibrium initial profile selected."""
+    from pathlib import Path
+    from diffusor.dataio.profiles import ProfileSpec
+    path = Path(ds.EXAMPLES_DIR) / "plag_mg_an.csv"
+    d = ds.ExampleDataset(
+        key="test_plag_an", name="Plagioclase Mg with An (test)", mineral="plagioclase",
+        species="Mg", filename="plag_mg_an.csv", kind="synthetic", citation=None,
+        provenance="test", spec=dict(distance_column="Distance_um", column_a="Mg_ppm",
+                                     column_b=None, mode="A", distance_unit="um"),
+        settings=dict(T_C=900.0, coefficient="plag_Mg_vanorman2014", an_column="XAn",
+                      initial_condition="equilibrium_plag", bc_left="rim_melt"),
+        expected="", notes="")
     w = _window(app)
-    for i in range(w.lst_examples.count()):
-        if w.lst_examples.item(i).data(Qt.UserRole) == "plag_santorini":
-            w.lst_examples.setCurrentRow(i)
-            break
-    w.load_example()
+    df = read_table(path)
+    w._use_table(df, ProfileSpec(**d.spec), path, d, (None, True))
     app.processEvents()
+    return w
+
+
+def test_an_column_switches_on_the_activity_term(app):
+    w = _plag_with_anorthite(app)
     assert w.an_values is not None
-    assert 0.3 < float(np.min(w.an_values)) < 0.9
-    assert w.cmb_ic.currentIndex() == 1, "should use the equilibrium initial condition"
+    assert 0.4 < float(np.min(w.an_values)) < 0.7
+    assert w.cmb_ic.currentData() == "equilibrium_plag"
     m = w._model(w._checked_keys()[0])
     assert m.activity_theta != 0.0
     assert m.an_profile is not None
     assert m.initial.kind == "equilibrium_plag"
     w.close()
-
 
 def test_summary_sidebar_keeps_a_fixed_width_and_does_not_clip(app):
     from PySide6.QtCore import Qt
@@ -494,7 +494,7 @@ def test_anorthite_initial_profile_is_offered_only_for_plagioclase(app):
     w = _load_example(app, "opx_kizimen")
     assert [w.cmb_ic.itemData(i) for i in range(w.cmb_ic.count())] == ["step"]
     w.close()
-    w = _load_example(app, "plag_santorini")
+    w = _plag_with_anorthite(app)
     assert w.cmb_ic.currentData() == "equilibrium_plag"
     w.close()
 
@@ -534,12 +534,13 @@ def test_column_dialog_guesses_and_fits_a_laptop_screen(app):
 
 def test_interface_text_has_no_semicolons(app):
     from PySide6.QtWidgets import QAbstractButton, QLabel
-    w = _load_example(app, "plag_santorini")
+    w = _plag_with_anorthite(app)
     for page in range(w.pages.count()):
         w._go(page)
         app.processEvents()
         for lab in w.pages.widget(page).findChildren(QLabel):
-            assert ";" not in lab.text().replace("&middot;", ""), lab.text()
+            text = re.sub(r"<img [^>]*>", "", lab.text())       # typeset equations are inline PNG data
+            assert ";" not in text.replace("&middot;", ""), text
         for b in w.pages.widget(page).findChildren(QAbstractButton):
             assert ";" not in b.text()
     for d in ds.DATASETS:
@@ -565,7 +566,7 @@ def test_all_references_shows_what_uses_each_paper(app):
     usage = reference_usage()
     assert "ol_FeMg_dohmen_chakraborty2007_tamed" in usage["dohmen_chakraborty2007"]
     assert "opx_FeMg_dohmen2016 (secondary)" in usage["sato2022"]
-    assert "example plag_santorini" in usage["druitt2012"]
+    assert "example opx_kizimen" in usage["ostorero2022"]
 
 
 def test_all_references_search_narrows_the_list(app):

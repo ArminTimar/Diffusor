@@ -253,6 +253,7 @@ def _feti_lnD(dc, cond: Conditions, p):
 
 _add(DiffusionCoefficient(
     key="mt_FeTi_freer_hauptman1978",
+    kind="interdiffusion",
     mineral="magnetite", species="Fe-Ti",
     label="Titanomagnetite Fe-Ti interdiffusion, Freer & Hauptman (1978)",
     citation="freer_hauptman1978",
@@ -270,8 +271,10 @@ _add(DiffusionCoefficient(
     T_range=Range(873.15, 1307.15, "K (600-1034 C)"),
     X_range=Range(0.0, 0.2, "x_Ti"),
     verified=True,
-    verified_from=("transcribed from Van Orman & Crispin (2010) RiMG 72, Table 11 (p. 820). "
-                   "Not read from the 1978 primary paper"),
+    verified_from=("Van Orman & Crispin (2010) Table 11 (p. 820), checked on 2 October 2026 against "
+                   "Freer & Hauptman (1978): the abstract gives D = 3.85e-3 cm2/s exp(-2.23 eV/kT) at "
+                   "3 mol% Ti (2.23 eV/k = 25,879 K, and ln 3.85e-7 m2/s = -15.17 + 13.3 x 0.03) and "
+                   "p. 227 gives the composition factor beta = 13.3 +/- 4.8"),
     secondary_citations=("saunders2012", "costa2008", "sievwright2020"),
     recommended=False,
     superseded_note=(
@@ -294,6 +297,7 @@ _add(DiffusionCoefficient(
 
 _add(DiffusionCoefficient(
     key="mt_FeTi_aragon1984",
+    kind="interdiffusion",
     mineral="magnetite", species="Fe-Ti",
     label="Titanomagnetite Fe-Ti interdiffusion, Aragon et al. (1984)",
     citation="aragon1984",
@@ -310,9 +314,10 @@ _add(DiffusionCoefficient(
     needs_fo2=False,
     T_range=Range(873.15, 1473.15, "K"),
     X_range=Range(0.0, 0.2, "x_Ti"),
-    verified=True,
-    verified_from=("transcribed from Van Orman & Crispin (2010) RiMG 72, Table 11 (p. 820). "
-                   "Not read from the 1984 primary paper"),
+    verified=False,
+    verified_from=("transcribed from Van Orman & Crispin (2010) RiMG 72, Table 11 (p. 820), checked "
+                   "against the rendered table on 2 October 2026. The expression was not found in "
+                   "Aragon et al. (1984) itself, so it is not checked against the primary paper"),
     secondary_citations=("sievwright2020",),
     notes=("Calibrated at the QFM buffer with solid-state buffering, so the redox state is "
            "better controlled than in Freer & Hauptman (1978). Van Orman & Crispin (2010) "
@@ -337,6 +342,7 @@ for _key, _sp, _xti, _buf, _D0, _Q in [
         ("mt_Fe_aggarwal2002_MH_xti02", "Fe", 0.2, "MH", 2.33e-4, 147.0)]:
     _add(DiffusionCoefficient(
         key=_key,
+        kind="tracer",
         mineral="magnetite", species=_sp,
         label=(f"{'Titanomagnetite' if _xti else 'Magnetite'} {_sp} tracer along the {_buf} "
                f"buffer, Aggarwal & Dieckmann (2002b)"),

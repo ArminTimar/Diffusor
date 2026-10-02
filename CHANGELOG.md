@@ -8,6 +8,27 @@ whether to update. Commit messages hold the details.
 
 ### Results that change
 
+- **Monte Carlo defaults.** Five laws (Mg tracer in orthopyroxene, Schwandt et
+  al. 1998, three axes; Ti in K-feldspar; Ca in olivine) sampled log D0 and Q
+  independently when the coefficient was left to the default, which spreads
+  log D by orders of magnitude. They are now held fixed by default.
+  Ganguly & Tazzoli (1994) is sampled with 1.0 log unit (was 0.5), the
+  standard error the paper states, and Dias et al. (2025) with 0.34 (was 0.2),
+  the average misfit the paper states.
+- **Dias & Dohmen (2024) orthopyroxene law.** The composition term used
+  X_Fe - 0.09 instead of the paper's X_Fe - 0.1 (eqs 7 and 12). D changes by
+  0.02 to 0.04 log units.
+- **Plagioclase activity term.** The anorthite activity factor A was the
+  Dohmen & Blundy (2014) 1200 C value at every temperature. The 900 C column is
+  now used when the run temperature is nearer 900 C, A/RT follows the
+  temperature along a cooling path, and the Bindeman et al. (1998) set used by
+  Costa et al. (2003) and Druitt et al. (2012) can be chosen on the Model step.
+  Refit plagioclase trace-element results that used the anorthite column.
+- **Santorini example removed.** It modelled the Druitt et al. (2012) traverse
+  with a different Mg law, initial profile and activity factor from the paper.
+- **Aragon et al. (1984)** is now marked as not checked against the original
+  paper; its expression comes from Van Orman & Crispin (2010) Table 11.
+
 - **Titanomagnetite example in the interface.** Loading the example replaced
   its x_Ti of 0.1 by the mean of the TiO2 profile, clamped to 1, which made D
   about 250 times too large: the fit gave about 0.02 days instead of 8. A
@@ -24,6 +45,34 @@ whether to update. Commit messages hold the details.
 
 ### New
 
+- **Typeset equations.** Every law is shown as a typeset equation on the
+  coefficient pages and the Coefficient step, and its LaTeX source is written
+  to the JSON, workbook and methods text.
+- **Source of every uncertainty.** Each sampled log D scatter states whether
+  it is published, derived from a statement in the source, or assumed.
+- **Multicomponent garnet profiles.** File > Multicomponent and isotope study
+  fits one duration to Fe, Mg, Mn and Ca profiles together. The diffusion
+  matrix is that of an ideal ionic solution and is recalculated from the
+  tracer coefficients at every node and step, so the cross terms (uphill
+  diffusion) are included. Tracer sets: Carlson (2006), Chakraborty & Ganguly
+  (1992), and both with the Mn law of Chen & Chu (2024).
+- **Isotope profiles.** The same window fits a duration to a concentration
+  profile together with its delta values: Li isotopes diffusing separately
+  with D proportional to m^-beta, or the seven Fe and Mg isotopes of olivine
+  as one coupled exchange (Oeser et al. 2026). beta values from Oeser et al.
+  (2026) and Richter et al. (2014, 2017) are offered with the model each was
+  fitted with.
+- **New laws.** Fe and Mg tracer diffusion in olivine and the Fe-Mg
+  interdiffusion they imply (Oeser et al. 2026, a, b and c axes, 1100-1250
+  C); Na-K interdiffusion in K-feldspar normal to (001) and (010) at X_Or 0.92
+  and 0.98 (Schaffer et al. 2014); garnet as a mineral, with the Fe and Mg
+  tracer laws of Borinski et al. (2012) and the Fe-Mg interdiffusion computed
+  from them. 113 laws for 14 minerals.
+- **Tracer or exchange.** Every law now states whether it is a tracer, an
+  interdiffusion (exchange), a chemical (trace-element) or an effective
+  coefficient; 40 laws had no stated kind before. A fit with a tracer
+  coefficient warns that major-element zoning relaxes by interdiffusion, which
+  can differ from either tracer coefficient.
 - **Recent profiles on the Data step.** The last ten files you loaded are
   listed in the panel that shows the profile; one button switches between the
   two, and loading a file brings the profile to the front. A recent file whose

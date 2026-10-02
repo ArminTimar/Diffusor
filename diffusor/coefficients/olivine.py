@@ -164,6 +164,7 @@ def _chakraborty1997(dc, cond: Conditions, p):
 
 _add(DiffusionCoefficient(
     key="ol_FeMg_chakraborty1997",
+    kind="interdiffusion",
     mineral="olivine", species="Fe-Mg",
     label="Olivine Fe-Mg // [001], Chakraborty (1997) -- older calibration",
     citation="chakraborty1997",
@@ -196,4 +197,99 @@ _add(DiffusionCoefficient(
            "refused. It gives no fO2 term either, so other fO2 values raise a range warning. "
            "For Fo92 the paper gives D0 = 6.59e-9 m2/s and Q = 229 +/- 18 kJ/mol. sigma_logD "
            "is Diffusor's judgement, not a published scatter."),
+))
+
+
+# ---------------------------------------------------------------------------
+# Oeser, Dohmen & Weyer (2026): Fe and Mg tracer coefficients and the Fe-Mg
+# interdiffusion coefficient computed from them
+# ---------------------------------------------------------------------------
+# Table 4 (p. 57): Arrhenius fits for 1100-1250 C at fO2 ~ 1e-5 Pa, uncertainties
+# are 95 % confidence bounds. The fits are for X_Fe = 0.085 (Fig. 6 caption). The
+# composition dependence 10^(3 (X_Fe - X_ref)) is the one used in their
+# multicomponent model (p. 51, n = 3).
+_OESER_TRACERS = {
+    "Fe": {"a": (287.0, 52.0, -6.29, 1.88), "b": (307.0, 49.0, -5.22, 1.74), "c": (328.0, 36.0, -4.18, 1.32)},
+    "Mg": {"a": (231.0, 34.0, -8.69, 1.24), "b": (292.0, 45.0, -6.11, 1.60), "c": (329.0, 75.0, -4.39, 2.74)},
+}
+_OESER_XFE_REF = 0.085
+
+
+def _oeser_axis(axis):
+    def evaluate(dc, cond: Conditions, p):
+        XFe = np.asarray(cond.x("XFe"), dtype=float)
+        logD = (p[f"logD0_{axis}"] - p[f"Ea_{axis}"] * 1.0e3 / (LN10 * R_GAS * cond.T_K)
+                + p["n"] * (XFe - p["XFe_ref"]))
+        return 10.0 ** logD
+    return evaluate
+
+
+_OESER_NOTE = ("Table 4 gives 95 % confidence bounds on Ea and log D0 without their covariance. "
+               "Sampling the two independently would greatly overstate the spread of D, so the "
+               "coefficient is held fixed in the Monte Carlo.")
+
+for _el, _fits in _OESER_TRACERS.items():
+    _funcs = {ax: _oeser_axis(ax) for ax in _fits}
+    _params = {"n": Parameter("n", 3.0, 0.0, "", "1s", "composition exponent"),
+               "XFe_ref": Parameter("XFe_ref", _OESER_XFE_REF, 0.0, "", "1s",
+                                    "X_Fe of the Table 4 fits (Fig. 6 caption)")}
+    for _ax, (_Ea, _sEa, _lD0, _slD0) in _fits.items():
+        # bounds are kept for reporting with sigma = 0 so they are not sampled
+        _params[f"Ea_{_ax}"] = Parameter(f"Ea_{_ax}", _Ea, 0.0, "kJ/mol", "2s",
+                                         f"activation energy // {_ax} (95 % bound +/- {_sEa:g})")
+        _params[f"logD0_{_ax}"] = Parameter(f"logD0_{_ax}", _lD0, 0.0, "log10(m2/s)", "2s",
+                                            f"log10 D0 // {_ax} (95 % bound +/- {_slD0:g})")
+    _add(DiffusionCoefficient(
+        key=f"ol_{_el}_oeser2026_tracer",
+        kind="tracer",
+        mineral="olivine", species=_el,
+        label=f"Olivine {_el} tracer, Oeser, Dohmen & Weyer (2026), independent a/b/c laws",
+        citation="oeser2026",
+        equation_number="Table 4 (p. 57); composition term p. 51",
+        equation_text=("log D*_" + _el + "//axis = log D0_axis - Ea_axis / (2.303 R T) + 3 (X_Fe - 0.085); "
+                       + "; ".join(f"{ax}: Ea = {v[0]:g} +/- {v[1]:g} kJ/mol, log D0 = {v[2]:g} +/- {v[3]:g}"
+                                   for ax, v in _fits.items())
+                       + " (95 % bounds), fO2 ~ 1e-5 Pa"),
+        func=_funcs["c"], principal_funcs=_funcs, reference_axis="c", orientation_required=True,
+        params=_params, requires=("XFe",), needs_fo2=False, fo2_unit="Pa",
+        fo2_range=Range(-5.0, -5.0, "log10 Pa (Table 4 fits at fO2 ~ 1e-5 Pa)"),
+        T_range=Range(1373.15, 1523.15, "K (1100-1250 C)"),
+        P_range=Range(1.0e5, 1.0e5, "Pa (1 atm)"),
+        X_range=Range(0.085, 0.085, "XFe (San Carlos olivine, Fo91.5)"),
+        transported_variable=f"{_el} isotope tracer (25Mg and 57Fe doped powder source)",
+        reference_state="San Carlos olivine Fo91.5, fO2 ~ 1e-5 Pa, high silica activity (SiO2 + opx in the source)",
+        verified=True,
+        verified_from="read from the rendered Table 4 (p. 57) and the model description on p. 51 of the open-access paper",
+        uncertainty_note=_OESER_NOTE,
+        calibration_notes=(
+            "Fitted for 1100-1250 C. The high activation energies and the change of anisotropy at "
+            "about 1150 C suggest a change of diffusion mechanism there (abstract); do not extrapolate "
+            "to magmatic temperatures below 1100 C.",
+            "Measured at high silica activity. Mg tracer diffusion depends on silica activity "
+            "(Jollands et al. 2020, discussed on p. 57).",
+        ),
+        notes=("Determined together with the isotope fractionation factors beta_Fe and beta_Mg by fitting "
+               "chemical and isotopic profiles with a seven-isotope multicomponent model. Fe tracer "
+               "diffusion is faster than Mg at and below 1250 C."),
+    ))
+
+
+from .transport import interdiffusion_from_tracers  # noqa: E402  (needs the tracer laws above)
+
+_add(interdiffusion_from_tracers(
+    "ol_FeMg_oeser2026",
+    tracer_a=COEFFICIENTS[-2], tracer_b=COEFFICIENTS[-1], species="Fe-Mg", comp_key="XFe",
+    label="Olivine Fe-Mg from the Fe and Mg tracer laws, Oeser, Dohmen & Weyer (2026), a/b/c",
+    citation="oeser2026", equation_number="eq. 6 with the Table 4 tracer laws",
+    X_range=Range(0.085, 0.085, "XFe (San Carlos olivine, Fo91.5)"),
+    verified_from=("eq. 6 (p. 54) applied to the Table 4 tracer laws. At X_Mg = 0.915 it reproduces "
+                   "the paper's own D_Fe-Mg regression (Table 4) within 0.2 log units from 1100 to 1250 C"),
+    calibration_notes=(
+        "Fitted for 1100-1250 C at fO2 ~ 1e-5 Pa. Above about 1150 C the activation energies are "
+        "higher than in Dohmen & Chakraborty (2007), which the authors attribute to a change of "
+        "mechanism; for magmatic temperatures below that, Dohmen & Chakraborty (2007) remains the "
+        "recommended law.",),
+    notes=("The interdiffusion coefficient that the tracer laws imply for an ideal Fe-Mg binary. "
+           "The paper computes its D_Fe-Mg values the same way (p. 54). Use it to compare with the "
+           "Dohmen & Chakraborty (2007) laws, or as the chemical part of an isotope model."),
 ))

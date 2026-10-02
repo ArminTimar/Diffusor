@@ -99,6 +99,8 @@ KFELDSPAR = Mineral(
         "Sr": Species("Sr", "Sr", "trace", "Cherniak (1996), sanidine Or61"),
         "Ba": Species("Ba", "Ba", "trace", "Cherniak (2002), sanidine Or61"),
         "Ti": Species("Ti", "Ti", "trace", "Cherniak & Watson (2020)"),
+        "Na-K": Species("Na-K", "Na-K interdiffusion", "interdiffusion",
+                        "the orthoclase fraction itself, Schaffer et al. (2014)"),
     },
     isotropic=True,
     notes=("Sr and Ba diffusion in sanidine showed no resolvable dependence on orientation "
@@ -128,8 +130,25 @@ MAGNETITE = Mineral(
            "Tomiya et al. (2013) used exactly this formulation for Shinmoedake 2011."),
 )
 
+GARNET = Mineral(
+    key="garnet", name="Garnet", formula="(Fe,Mg,Mn,Ca)3Al2Si3O12", system="cubic",
+    axes=("a",),
+    composition_variable=X_FE,
+    species={
+        "Fe-Mg": Species("Fe-Mg", "Fe-Mg interdiffusion (binary)", "interdiffusion",
+                         "almandine-pyrope garnet with little Mn and Ca"),
+        "Fe": Species("Fe", "Fe tracer", "tracer"),
+        "Mg": Species("Mg", "Mg tracer", "tracer"),
+    },
+    isotropic=True,
+    notes=("Cubic, so diffusion is isotropic. Fe, Mg, Mn and Ca zoning relaxes by coupled "
+           "multicomponent exchange with large off-diagonal terms (Chakraborty & Ganguly 1992), "
+           "which File > Multicomponent and isotope study models. The scalar Fe-Mg law here is "
+           "for near-binary almandine-pyrope garnet."),
+)
+
 MINERALS = {m.key: m for m in (OLIVINE, ORTHOPYROXENE, CLINOPYROXENE, PLAGIOCLASE, KFELDSPAR,
-                                   MAGNETITE)}
+                                   MAGNETITE, GARNET)}
 
 TRACE = CompositionVariable("none", "concentration", "measured trace-element concentration", default_mode="A")
 for _key, _name, _formula, _system, _species in (

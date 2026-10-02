@@ -43,6 +43,11 @@ def _model_input(value):
     return _fmt(value)
 
 
+def _latex(c) -> str:
+    from ..coefficients.latex import coefficient_latex
+    return coefficient_latex(c)
+
+
 def collect_citations(fit_result, mc_result=None, extra: Sequence[str] = ()) -> List[str]:
     """Every citation key used by this run, in a stable order."""
     keys: List[str] = ["crank1975", "costa2008"]
@@ -53,7 +58,12 @@ def collect_citations(fit_result, mc_result=None, extra: Sequence[str] = ()) -> 
     if c.axis_factors and (model.conditions.angles_deg or model.conditions.axis):
         keys.append("costa_chakraborty2004")
     if model.activity_theta:
-        keys.extend(["costa2003", "dohmen2017", "dohmen_blundy2014", "grove1984"])
+        keys.extend(["costa2003", "dohmen2017", "grove1984"])
+        from ..coefficients.plagioclase import ACTIVITY_SETS
+        if model.activity_set in ACTIVITY_SETS:
+            keys.append(ACTIVITY_SETS[model.activity_set]["citation"])
+        else:
+            keys.append("dohmen_blundy2014")
     if model.beam_sigma_um:
         keys.extend(["ganguly1988", "bradshaw_kent2017"])
     if model.history is not None and not model.history.is_isothermal:
@@ -106,6 +116,7 @@ def methods_paragraph(fit_result, mc_result=None, profile=None) -> str:
     L.append("Diffusion coefficient")
     L.append("-" * 70)
     L.append(c.describe())
+    L.append(f"  equation (LaTeX): ${_latex(c)}$")
     L.append("")
 
     L.append("Conditions")
@@ -140,6 +151,13 @@ def methods_paragraph(fit_result, mc_result=None, profile=None) -> str:
     if model.composition_dependent and model.comp_key:
         L.append(f"Coefficient composition coordinate: {model.comp_key} = {model.comp_offset:g} + ({model.comp_scale:g}) * C, where C is the plotted profile variable.")
     L.append(f"Boundaries: left {model.bc_left.describe()}, right {model.bc_right.describe()}")
+    if model.activity_theta:
+        from ..coefficients.plagioclase import activity_note
+        what = (activity_note(model.activity_set, cond.T_K) if model.activity_set
+                else f"theta = A/RT = {model.activity_theta:.4g} given directly.")
+        L.append(f"Anorthite coupling: flux term -D C (A/RT) dX_An/dx (Costa et al. 2003; Dohmen et al. "
+                 f"2017, Appendix eqs A7-A8), A = {model.activity_A_kJ:g} kJ/mol. {what} A/RT is "
+                 "evaluated at the temperature of each time step.")
     L.append(f"Solver: {'analytical, ' + why if ok else 'numerical Crank-Nicolson (theta = 1/2), ' + why}")
     if not ok:
         L.append(f"  Conservative finite-volume scheme for the equations in Crank (1975) section 8.4 with D evaluated at "
@@ -174,8 +192,9 @@ def methods_paragraph(fit_result, mc_result=None, profile=None) -> str:
         if "diffusion_coefficient" in b.active_sources():
             mode = c.default_sampling_mode() if b.coefficient_mode == "auto" else b.coefficient_mode
             expl = {"covariance": "sampled from the published parameter covariance matrix",
-                    "logD_at_T": "ln D sampled at the working temperature from the scatter "
-                                 "reported by the source, so ln D0 and Q stay correlated",
+                    "logD_at_T": (f"log D sampled at the working temperature with 1 sigma = "
+                                  f"{c.sigma_logD} log units ({c.sigma_logD_basis or 'basis not recorded'}), "
+                                  "so D0 and Q stay on the fitted line"),
                     "independent": "each Arrhenius parameter sampled independently. This "
                                    "omits the ln D0 - Q covariance and can misestimate "
                                    "the uncertainty",
@@ -216,8 +235,10 @@ def result_dict(fit_result, mc_result=None, profile=None) -> Dict:
         "coefficient": {
             "key": c.key, "label": c.label, "citation": c.citation,
             "equation_number": c.equation_number, "equation": c.equation_text,
+            "equation_latex": _latex(c),
             "verified": c.verified, "verified_from": c.verified_from,
-            "kind": c.kind, "model_family": c.model_family,
+            "kind": c.kind, "kind_definition": c.kind_description,
+            "derived_from": list(c.derived_from), "model_family": c.model_family,
             "validation_level": c.validation_level,
             "transported_variable": c.transported_variable,
             "reference_state": c.reference_state,
@@ -252,6 +273,7 @@ def result_dict(fit_result, mc_result=None, profile=None) -> Dict:
             "boundary_values": {"left": _model_input(model.bc_left.value), "right": _model_input(model.bc_right.value)},
             "x_grid_um": _model_input(model.x_grid),
             "anorthite_profile": _model_input(model.an_profile), "activity_theta": model.activity_theta,
+            "activity_A_kJ_per_mol": model.activity_A_kJ, "activity_set": model.activity_set,
             "thermal_history": None if model.history is None else {
                 "times_s": model.history.times.tolist(), "temperatures_K": model.history.temps_K.tolist(),
                 "label": model.history.label, "time_axis_rescaled_to_fitted_duration": True},

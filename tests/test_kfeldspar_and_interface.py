@@ -14,11 +14,11 @@ from diffusor.solvers import Geometry, InitialCondition, dirichlet, zero_flux
 
 
 # --- K-feldspar ------------------------------------------------------------------
-def test_kfeldspar_is_a_mineral_with_sr_ba_ti():
+def test_kfeldspar_is_a_mineral_with_sr_ba_ti_and_na_k():
     m = get_mineral("kfeldspar")
-    assert set(m.species_keys()) == {"Sr", "Ba", "Ti"}
+    assert set(m.species_keys()) == {"Sr", "Ba", "Ti", "Na-K"}
     assert m.isotropic
-    for species in ("Sr", "Ba", "Ti"):
+    for species in ("Sr", "Ba", "Ti", "Na-K"):
         assert list_coefficients("kfeldspar", species), species
 
 
@@ -64,10 +64,6 @@ def test_kizimen_conditions_follow_supplementary_data_3():
     assert (s["buffer"], s["delta_buffer"], s["sigma_delta"]) == ("NNO", 1.3, 0.35)
     assert (s["P_MPa"], s["sigma_P_MPa"]) == (200.0, 50.0)
     assert "Supplementary Data 3" in ds.get("opx_kizimen").sources["T"]
-
-
-def test_santorini_uses_the_druitt_temperature_uncertainty():
-    assert ds.get("plag_santorini").settings["sigma_T_K"] == 25.0
 
 
 def test_sanidine_example_recovers_its_time():

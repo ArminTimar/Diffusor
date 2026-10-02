@@ -8,8 +8,8 @@ Faak & Blundy 2017 Appendix eq. A7-A8):
     J_i = -D_i dC_i/dx + (D_i C_i / R T) A_i dX_An/dx
 
 with ``A_i`` the slope of ``-R T ln(gamma_i)`` against X_An.  The A values are
-in :data:`ACTIVITY_A` and are applied by the solver as
-``theta = A_i / (R T)``.  X_An is treated as frozen because NaSi-CaAl
+in :data:`ACTIVITY_SETS` (two published sets, see below) and are applied by the
+solver as ``theta = A_i / (R T)`` at the temperature of each time step.  X_An is treated as frozen because NaSi-CaAl
 interdiffusion is orders of magnitude slower (Grove et al. 1984).
 """
 from __future__ import annotations
@@ -28,46 +28,83 @@ def _add(c):
 
 
 # --- activity (non-ideality) slopes A_i, kJ/mol -------------------------------
-# Source: Dohmen, Faak & Blundy (2017) RiMG 83, Appendix Fig. A1 caption and
-# Table 1, calculated at 1200 C from the lattice-strain model of Dohmen &
-# Blundy (2014).  -R T ln(gamma_i) = A_i X_An + B_i  (Appendix eq. A6).
-ACTIVITY_A = {
-    "Mg": 15.8,
-    "Sr": -17.4,
-    "Ba": -35.1,
-    "Li": -1.7,
-    "K": -8.0,
-    "Rb": -15.9,
+# -R T ln(gamma_i) = A_i X_An + B_i (Dohmen, Faak & Blundy 2017, Appendix eq. A6).
+# Dohmen, Faak & Blundy (2017) Table 1 (p. 556) lists three sets, read from the
+# rendered table on 2 October 2026. They disagree in sign for Mg: Dohmen & Blundy
+# (2014) give a positive A_Mg from the lattice-strain model, Bindeman et al.
+# (1998) a negative one, and the second was used by Costa et al. (2003) and
+# Druitt et al. (2012). Dohmen et al. (2017, p. 556) call the Bindeman values
+# potentially incorrect. The set is therefore a choice that every run records.
+ACTIVITY_SPECIES = ("Mg", "Sr", "Ba", "Li", "K", "Rb")
+ACTIVITY_SETS = {
+    "dohmen_blundy2014": {
+        "label": "Dohmen & Blundy (2014), lattice-strain model",
+        "citation": "dohmen_blundy2014",
+        # columns at 900 and 1200 C; the column nearer the run temperature is used
+        "columns": {
+            1173.15: {"Mg": 13.7, "Sr": -15.1, "Ba": -30.5, "Li": -2.5, "K": -8.8, "Rb": -16.7},
+            1473.15: {"Mg": 15.8, "Sr": -17.4, "Ba": -35.1, "Li": -1.7, "K": -8.0, "Rb": -15.9},
+        },
+    },
+    "bindeman1998": {
+        "label": "Bindeman et al. (1998), as used by Costa et al. (2003) and Druitt et al. (2012)",
+        "citation": "bindeman1998",
+        "columns": {
+            None: {"Mg": -26.1, "Sr": -30.4, "Ba": -55.0, "Li": -6.9, "K": -25.5, "Rb": -40.0},
+        },
+    },
 }
+DEFAULT_ACTIVITY_SET = "dohmen_blundy2014"
 ACTIVITY_A_CITATION = "dohmen2017"
 ACTIVITY_A_NOTE = (
-    "A_i values (kJ/mol) at 1200 C from Dohmen, Faak & Blundy (2017) RiMG 83, Appendix "
-    "Fig. A1 caption / Table 1, derived from the lattice-strain model of Dohmen & Blundy "
-    "(2014). Table 1 of that appendix also lists values for 900 C. Costa et al. (2003) "
-    "used A_Mg = -RT ln(gamma) slope of the same form. The DMG Short Course 2025 script "
-    "Diff_Model_Sr_in_Plag_implicit.m uses A_Sr = -15.1 kJ/mol."
-)
+    "A_i (kJ/mol) from Dohmen, Faak & Blundy (2017) Table 1. Dohmen & Blundy (2014) give values at "
+    "900 and 1200 C; Diffusor uses the column nearer the run temperature and does not interpolate. "
+    "Bindeman et al. (1998) give one value per element. The two sets differ in sign for Mg.")
 
 
-def activity_theta(species: str, T_K: float) -> float:
+def _column(name: str, T_K: float) -> dict:
+    try:
+        cols = ACTIVITY_SETS[name]["columns"]
+    except KeyError as exc:
+        raise KeyError(f"unknown activity set {name!r}; choose from {sorted(ACTIVITY_SETS)}") from exc
+    if None in cols:
+        return cols[None]
+    return cols[min(cols, key=lambda T: abs(T - T_K))]
+
+
+def activity_A(species: str, T_K: float, activity_set: str = DEFAULT_ACTIVITY_SET) -> float:
+    """A_i in kJ/mol for the chosen set at temperature T_K (0 for an element without a value)."""
+    return float(_column(activity_set, T_K).get(species, 0.0))
+
+
+def activity_note(activity_set: str, T_K: float) -> str:
+    s = ACTIVITY_SETS[activity_set]
+    cols = s["columns"]
+    if None in cols:
+        return f"A_i from {s['label']}."
+    T_col = min(cols, key=lambda T: abs(T - T_K))
+    return f"A_i from {s['label']}, the {T_col - 273.15:.0f} C column (nearest the run temperature)."
+
+
+def activity_theta(species: str, T_K: float, activity_set: str = DEFAULT_ACTIVITY_SET) -> float:
     """theta = A_i / (R T), the coefficient of the dX_An/dx flux term."""
-    if species not in ACTIVITY_A:
-        return 0.0
-    return ACTIVITY_A[species] * 1.0e3 / (R_GAS * T_K)
+    return activity_A(species, T_K, activity_set) * 1.0e3 / (R_GAS * T_K)
 
 
-def equilibrium_profile(X_An, T_K: float, species: str, C_ref: float, X_An_ref: float = None):
+def equilibrium_profile(X_An, T_K: float, species: str, C_ref: float, X_An_ref: float = None,
+                        activity_set: str = DEFAULT_ACTIVITY_SET):
     """Quasi-steady-state ("equilibrated") profile for a frozen X_An(x).
 
     ``C_eq(x) = C0 exp(A_i X_An(x) / (R T))``  -- Dohmen et al. (2017) Appendix
     eq. A13, with C0 fixed by the rim condition eq. A14 when ``X_An_ref`` is
     given (C_ref is then the rim concentration).
 
-    This is the state a fast trace element relaxes to, and is the physically
-    correct initial condition when the crystal grew in equilibrium with one melt.
+    This is the state a fast trace element relaxes to. It is the final state of
+    diffusion, so it is an initial condition only for a crystal that had already
+    equilibrated with one melt before the event being timed.
     """
     X_An = np.asarray(X_An, dtype=float)
-    th = ACTIVITY_A.get(species, 0.0) * 1.0e3 / (R_GAS * T_K)
+    th = activity_theta(species, T_K, activity_set)
     if X_An_ref is None:
         X_An_ref = float(X_An[0])
     return C_ref * np.exp(th * (X_An - X_An_ref))
@@ -85,6 +122,7 @@ def _vanorman2014(dc, cond: Conditions, p):
 
 _add(DiffusionCoefficient(
     key="plag_Mg_vanorman2014",
+    kind="chemical",
     mineral="plagioclase", species="Mg",
     label="Plagioclase Mg, Van Orman et al. (2014)",
     citation="vanorman2014",
@@ -122,10 +160,11 @@ def _costa2003_mg(dc, cond: Conditions, p):
 
 _add(DiffusionCoefficient(
     key="plag_Mg_costa2003",
+    kind="effective",
     mineral="plagioclase", species="Mg",
     label="Plagioclase Mg, Costa et al. (2003) -- older estimate",
     citation="costa2003",
-    equation_number="as re-written by Van Orman et al. (2014), p. 84",
+    equation_number="eq. 8, p. 2193 (as re-written by Van Orman et al. 2014, p. 84)",
     equation_text="ln D = -6.07 - 9.44 x_An - (266 kJ/mol)/(R T), D in m2/s",
     func=_costa2003_mg,
     params={
@@ -139,8 +178,10 @@ _add(DiffusionCoefficient(
     T_range=Range(1073.15, 1473.15, "K"),
     X_range=Range(0.0, 1.0, "x_An"),
     verified=True,
-    verified_from=("transcribed verbatim from Van Orman et al. (2014) p. 84, who re-write the "
-                   "Costa et al. (2003) expression in this form. Not read from Costa et al. (2003)"),
+    verified_from=("Costa et al. (2003) eq. 8 (p. 2193), D = 2.92 x 10^(-4.1 X_An - 3.1) "
+                   "exp(-266000/RT) m2/s, read from the rendered page on 2 October 2026. It equals the "
+                   "ln D = -6.07 - 9.44 X_An - 266/RT form of Van Orman et al. (2014, p. 84) and eq. 1 "
+                   "of Druitt et al. (2012)"),
     secondary_citations=("vanorman2014", "latourrette_wasserburg1998"),
     notes=("A preliminary estimate built on the compositional dependence of Sr diffusion. "
            "Van Orman et al. (2014) show it over-predicts D at low temperature and low An "
@@ -163,6 +204,7 @@ def _audetat2026_mg(dc, cond: Conditions, p):
 
 _add(DiffusionCoefficient(
     key="plag_Mg_audetat2026",
+    kind="chemical",
     mineral="plagioclase", species="Mg",
     label="Plagioclase Mg, Audetat et al. (2026) -- with silica activity",
     citation="audetat2026",
@@ -228,6 +270,7 @@ def _compensated_covariance(s_a, s_b, s_Q):
 
 _add(DiffusionCoefficient(
     key="plag_Sr_grocolas2025",
+    kind="chemical",
     mineral="plagioclase", species="Sr",
     label="Plagioclase Sr, Grocolas et al. (2025)",
     citation="grocolas2025",
@@ -278,10 +321,11 @@ def _giletti_casserly1994(dc, cond: Conditions, p):
 
 _add(DiffusionCoefficient(
     key="plag_Sr_giletti_casserly1994",
+    kind="tracer",
     mineral="plagioclase", species="Sr",
     label="Plagioclase Sr, Giletti & Casserly (1994)",
     citation="giletti_casserly1994",
-    equation_number="(An-dependent form as implemented in the DMG Short Course 2025 script)",
+    equation_number="eq. 1 (p. 3791) with Q = 276 kJ/g-atom; [Ab] = 100 (1 - X_An)",
     equation_text=("D_Sr = 8.3176e-5 exp(-276000 / (R T)) x 10^(-4.1 X_An) m2/s. "
                    "Equivalently log D0 = -(4.1 X_An + 4.08)"),
     func=_giletti_casserly1994,
@@ -326,6 +370,7 @@ _add(DiffusionCoefficient(
 
 _add(DiffusionCoefficient(
     key="plag_Sr_cherniak_watson1994",
+    kind="chemical",
     mineral="plagioclase", species="Sr",
     label="Plagioclase Sr, Cherniak & Watson (1994), as re-fitted by Grocolas et al. (2025)",
     citation="cherniak_watson1994",
@@ -368,6 +413,7 @@ _add(DiffusionCoefficient(
 # ---------------------------------------------------------------------------
 _add(DiffusionCoefficient(
     key="plag_Ba_grocolas2025",
+    kind="chemical",
     mineral="plagioclase", species="Ba",
     label="Plagioclase Ba, Grocolas et al. (2025)",
     citation="grocolas2025",
@@ -403,6 +449,7 @@ _add(DiffusionCoefficient(
 
 _add(DiffusionCoefficient(
     key="plag_Ba_cherniak2002",
+    kind="chemical",
     mineral="plagioclase", species="Ba",
     label="Plagioclase Ba, Cherniak (2002), as re-fitted by Grocolas et al. (2025)",
     citation="cherniak2002",
@@ -464,6 +511,7 @@ for _mech, _sym, _logD0, _slog, _Q, _sQ, _eq, _rec, _lead in [
          "interstitial one over the experimental range. ")]:
     _add(DiffusionCoefficient(
         key=f"plag_Li_pohl2024_{_mech}",
+        kind="effective",
         mineral="plagioclase", species="Li",
         label=f"Plagioclase Li, Pohl et al. (2024) -- {_mech} mechanism",
         citation="pohl2024",
@@ -499,6 +547,7 @@ def _grove1984(dc, cond: Conditions, p):
 
 _add(DiffusionCoefficient(
     key="plag_NaSiCaAl_grove1984",
+    kind="interdiffusion",
     mineral="plagioclase", species="NaSi-CaAl",
     label="Plagioclase coupled NaSi-CaAl interdiffusion, Grove et al. (1984)",
     citation="grove1984",

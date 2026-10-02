@@ -515,6 +515,34 @@ def test_resolution_presets_set_sigma_from_the_spot_size(app):
     w.close()
 
 
+def test_every_example_sets_its_analytical_resolution(app):
+    from diffusor.gui.main_window import RESOLUTION_PRESETS
+    labels = [p[0] for p in RESOLUTION_PRESETS]
+    for d in ds.available():
+        assert d.settings["resolution"] in labels, d.key
+        assert d.sources.get("resolution"), d.key
+        w = _load_example(app, d.key)
+        assert w.cmb_resolution.currentText() == d.settings["resolution"], d.key
+        w.close()
+
+
+def test_example_resolution_replaces_what_the_last_profile_left(app):
+    from PySide6.QtCore import Qt
+    w = _load_example(app, "opx_kizimen")
+    # Ostorero et al. (2022): microprobe with a focused beam of 2 um, sigma = d / 4
+    assert w.cmb_resolution.currentText() == "Microprobe, defocused beam"
+    assert w.sp_width.value() == pytest.approx(2.0)
+    assert w.sp_beam.value() == pytest.approx(0.5)
+    # a synthetic file was made without broadening, so the beam must go back to zero
+    for i in range(w.lst_examples.count()):
+        if w.lst_examples.item(i).data(Qt.UserRole) == "opx_shinmoedake":
+            w.lst_examples.setCurrentRow(i)
+    w.load_example()
+    assert w.cmb_resolution.currentText() == "No correction"
+    assert w.sp_beam.value() == 0.0
+    w.close()
+
+
 def test_column_dialog_guesses_and_fits_a_laptop_screen(app):
     from diffusor.gui.main_window import ColumnDialog
     from diffusor.dataio.profiles import suggest_spec

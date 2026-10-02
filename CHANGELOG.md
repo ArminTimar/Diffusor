@@ -6,6 +6,20 @@ whether to update. Commit messages hold the details.
 
 ## Unreleased
 
+### Fixed
+
+- **Examples set the analytical resolution.** Loading an example left the
+  resolution on whatever the previous profile used. Each example now selects
+  its own. The Kizimen microprobe traverse uses the 2 um focused beam stated
+  by Ostorero et al. (2022), a beam sigma of 0.5 um. The synthetic examples
+  were made without beam broadening and load with no correction, or with the
+  BSE preset for the two that mimic BSE profiles. The "Where these values come
+  from" page lists the resolution and its source.
+- **Taskbar icon on Windows.** The running window showed a default icon beside
+  the pinned Diffusor icon. The window now sets its own icon and the shell's
+  relaunch properties, so its taskbar button and any pin made from it show
+  Diffusor's icon.
+
 ### Results that change
 
 - **Monte Carlo defaults.** Five laws (Mg tracer in orthopyroxene, Schwandt et

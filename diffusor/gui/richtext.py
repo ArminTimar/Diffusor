@@ -274,9 +274,13 @@ def example_html(ds, coefficient=None) -> str:
         fo2 = f"log fO2 {s['fo2_absolute']:g} ± {s.get('sigma_delta', 0):g} bar"
     else:
         fo2 = f"{s.get('buffer', 'NNO')} {s.get('delta_buffer', 0):+g} ± {s.get('sigma_delta', 0):g}"
+    res = s.get("resolution", "No correction")
+    if "beam_width_um" in s:
+        res += f", {s['beam_width_um']:g} um"
     rows = [("Temperature", f"{s.get('T_C', 950):g} ± {s.get('sigma_T_K', 20):g} °C", "T"),
             ("Pressure", f"{s.get('P_MPa', 200):g} ± {s.get('sigma_P_MPa', 100):g} MPa", "P"),
-            ("Oxygen fugacity", fo2, "fO2")]
+            ("Oxygen fugacity", fo2, "fO2"),
+            ("Analytical resolution", res, "resolution")]
     d.table(["", "Value (1σ)", "Source"],
             [(esc(k), f"<b>{esc(v)}</b>", esc(ds.sources.get(src, "Not recorded.")))
              for k, v, src in rows])
@@ -507,6 +511,9 @@ def methods_html(fit_result, mc_result=None, profile=None) -> str:
         d.ul(esc(n) for n in profile.notes)
 
     d.h("Conditions")
+    res = s.get("resolution", "No correction")
+    if "beam_width_um" in s:
+        res += f", {s['beam_width_um']:g} um"
     rows = [("Temperature", f"{cond.T_K - 273.15:.1f} °C ({cond.T_K:.2f} K)"),
             ("Pressure", f"{cond.P_Pa / 1e6:.1f} MPa")]
     if cond.log_fo2_bar is not None:

@@ -83,7 +83,8 @@ DATASETS: List[ExampleDataset] = [
         settings=dict(T_C=850.0, sigma_T_K=57.0, P_MPa=200.0, sigma_P_MPa=50.0,
                       buffer="NNO", delta_buffer=1.3, sigma_delta=0.35,
                       coefficient="opx_FeMg_ganguly_tazzoli1994_nofo2", axis="b",
-                      geometry="plane", composition_dependent=True),
+                      geometry="plane", composition_dependent=True,
+                      resolution="Microprobe, defocused beam", beam_width_um=2.0),
         expected=(
             'Ostorero et al. (2022, Supplementary Data 4) modelled this reverse zone at 850 '
             '± 57 C with the Ganguly & Tazzoli (1994) law without an fO2 term and got 2.32 '
@@ -109,7 +110,11 @@ DATASETS: List[ExampleDataset] = [
             P=('Earlier Kizimen studies cited by Ostorero et al. (2022) put storage at 1 to '
                '3 kbar. 200 +/- 50 MPa covers that range at 2 sigma.'),
             fO2=('Mean and standard deviation of delta NNO for the same 21 oxide pairs, '
-                 'Supplementary Data 3 (NNO +1.28 +/- 0.35).')),
+                 'Supplementary Data 3 (NNO +1.28 +/- 0.35).'),
+            resolution=('The traverse is a microprobe analysis with a focused beam of 2 um '
+                        '(Ostorero et al. 2022, Methods). Diffusor takes sigma = diameter / 4 '
+                        'for a round spot, which gives 0.5 um. That conversion is not from the '
+                        'paper.')),
     ),
 
     # --------------------------------------------------------------- synthetic
@@ -131,13 +136,16 @@ DATASETS: List[ExampleDataset] = [
         settings=dict(T_C=950.0, sigma_T_K=20.0, P_MPa=150.0, sigma_P_MPa=75.0,
                       buffer="NNO", delta_buffer=1.0, sigma_delta=0.3,
                       coefficient="opx_FeMg_dias2025", axis="c", geometry="plane",
-                      composition_dependent=True),
+                      composition_dependent=True,
+                      resolution="No correction"),
         expected=(
             'True time 1.5 years, set when the file was made.'),
         sources=dict(
             T='Used to make the file. The uncertainty is illustrative.',
             P='Used to make the file. The uncertainty is illustrative.',
-            fO2='Used to make the file. The uncertainty is illustrative.'),
+            fO2='Used to make the file. The uncertainty is illustrative.',
+            resolution=('The file was made without beam broadening, so no correction recovers '
+                        'the stated time.')),
     ),
     ExampleDataset(
         key="cpx_stromboli",
@@ -155,14 +163,17 @@ DATASETS: List[ExampleDataset] = [
                   mode="A/(A+B)", oxide_a="FeO", oxide_b="MgO", distance_unit="um"),
         settings=dict(T_C=1100.0, sigma_T_K=25.0, P_MPa=200.0, sigma_P_MPa=100.0,
                       buffer="NNO", delta_buffer=0.0, sigma_delta=0.5,
-                      coefficient="cpx_FeMg_muller2013", geometry="plane"),
+                      coefficient="cpx_FeMg_muller2013", geometry="plane",
+                      resolution="No correction"),
         expected=(
             'True time 45 days, set when the file was made.'),
         sources=dict(
             T=('Used to make the file. Petrone et al. (2018) found 1040 to 1180 C for Stromboli '
                'clinopyroxene. The uncertainty is illustrative.'),
             P='Placeholder. The coefficient has no pressure term.',
-            fO2='Placeholder. The coefficient has no fO2 term.'),
+            fO2='Placeholder. The coefficient has no fO2 term.',
+            resolution=('The file was made without beam broadening, so no correction recovers '
+                        'the stated time.')),
     ),
     ExampleDataset(
         key="olivine_laki",
@@ -181,7 +192,8 @@ DATASETS: List[ExampleDataset] = [
                       buffer="FMQ", delta_buffer=-1.0, sigma_delta=0.5,
                       coefficient="ol_FeMg_dohmen_chakraborty2007_tamed", axis="c",
                       geometry="plane", composition_dependent=True, olivine_coordinate=2,
-                      x_composition=0.15),
+                      x_composition=0.15,
+                      resolution="No correction"),
         expected=(
             'True time 120 days, set when the file was made.'),
         notes=(
@@ -191,7 +203,9 @@ DATASETS: List[ExampleDataset] = [
         sources=dict(
             T='Hartley et al. (2016) modelled Laki olivine at 1150 +/- 30 C.',
             P='Placeholder. The file was made at 1 atm.',
-            fO2='Hartley et al. (2016) used FMQ -1 +/- 0.5.'),
+            fO2='Hartley et al. (2016) used FMQ -1 +/- 0.5.',
+            resolution=('The file was made without beam broadening, so no correction recovers '
+                        'the stated time.')),
     ),
     ExampleDataset(
         key="magnetite_shinmoedake",
@@ -211,7 +225,8 @@ DATASETS: List[ExampleDataset] = [
         settings=dict(T_C=950.0, sigma_T_K=20.0, P_MPa=0.1, sigma_P_MPa=0.0,
                       fo2_absolute=-11.0, sigma_delta=0.5,
                       coefficient="mt_Ti_vanorman_crispin2010", geometry="plane",
-                      x_composition=0.1, fit_plateaus=True),
+                      x_composition=0.1, fit_plateaus=True,
+                      resolution="No correction"),
         expected=(
             'True time 8 days, set when the file was made.'),
         notes=(
@@ -223,7 +238,9 @@ DATASETS: List[ExampleDataset] = [
             T=('Tomiya et al. (2013) used 950 C for Shinmoedake 2011. The uncertainty is '
                'illustrative.'),
             P='Placeholder. The coefficient has no pressure term.',
-            fO2='Tomiya et al. (2013) used log fO2 = -11. The uncertainty is illustrative.'),
+            fO2='Tomiya et al. (2013) used log fO2 = -11. The uncertainty is illustrative.',
+            resolution=('The file was made without beam broadening, so no correction recovers '
+                        'the stated time.')),
     ),
     ExampleDataset(
         key="cpx_greyscale",
@@ -242,13 +259,17 @@ DATASETS: List[ExampleDataset] = [
         settings=dict(T_C=1000.0, sigma_T_K=25.0, P_MPa=200.0, sigma_P_MPa=100.0,
                       buffer="NNO", delta_buffer=0.0, sigma_delta=0.5,
                       coefficient="cpx_FeMg_muller2013", geometry="plane",
-                      greyscale=True, anchors="cpx_greyscale_anchors.csv"),
+                      greyscale=True, anchors="cpx_greyscale_anchors.csv",
+                      resolution="BSE image profile"),
         expected=(
             'True time 3 years, set when the file was made.'),
         sources=dict(
             T='Used to make the file. The uncertainty is illustrative.',
             P='Placeholder. The coefficient has no pressure term.',
-            fO2='Placeholder. The coefficient has no fO2 term.'),
+            fO2='Placeholder. The coefficient has no fO2 term.',
+            resolution=('The profile is a BSE grey-value profile, which resolves better than '
+                        '0.5 um (Petrone et al. 2016), and the file was made without beam '
+                        'broadening.')),
     ),
     ExampleDataset(
         key="plag_mg_synthetic",
@@ -267,7 +288,8 @@ DATASETS: List[ExampleDataset] = [
         settings=dict(T_C=900.0, sigma_T_K=25.0, P_MPa=100.0, sigma_P_MPa=50.0,
                       buffer="NNO", delta_buffer=0.0, sigma_delta=0.5,
                       coefficient="plag_Mg_vanorman2014", geometry="plane",
-                      x_composition=0.55, fit_plateaus=True),
+                      x_composition=0.55, fit_plateaus=True,
+                      resolution="No correction"),
         expected=(
             'True time 20 years, set when the file was made. The traverse ends before the '
             'profile has flattened, so the plateaus are fitted.'),
@@ -279,7 +301,9 @@ DATASETS: List[ExampleDataset] = [
         sources=dict(
             T='Placeholder conditions for a dacitic magma; no study is reproduced.',
             P='Placeholder. The coefficient has no pressure term.',
-            fO2='Placeholder. The coefficient has no fO2 term.'),
+            fO2='Placeholder. The coefficient has no fO2 term.',
+            resolution=('The file was made without beam broadening, so no correction recovers '
+                        'the stated time.')),
     ),
 
     ExampleDataset(
@@ -297,7 +321,8 @@ DATASETS: List[ExampleDataset] = [
                   sigma_a_column="Ba_err", mode="A", distance_unit="um"),
         settings=dict(T_C=790.0, sigma_T_K=30.0, P_MPa=200.0, sigma_P_MPa=100.0,
                       buffer="NNO", delta_buffer=0.0, sigma_delta=0.5,
-                      coefficient="kfs_Ba_cherniak2002", geometry="plane"),
+                      coefficient="kfs_Ba_cherniak2002", geometry="plane",
+                      resolution="BSE image profile"),
         expected=(
             'True time 5000 years, set when the file was made.'),
         notes=(
@@ -307,7 +332,10 @@ DATASETS: List[ExampleDataset] = [
             T=('Chamberlain et al. (2014) modelled Bishop Tuff sanidine at 753 to 815 C with '
                '+/- 30 C uncertainty in their thermometry.'),
             P='Placeholder. The coefficient has no pressure term.',
-            fO2='Placeholder. The coefficient has no fO2 term.'),
+            fO2='Placeholder. The coefficient has no fO2 term.',
+            resolution=('The profile is sampled like a calibrated BSE profile, which resolves '
+                        'better than 0.5 um (Petrone et al. 2016), and the file was made '
+                        'without beam broadening.')),
     ),
 ]
 

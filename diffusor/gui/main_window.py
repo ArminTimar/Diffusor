@@ -1369,7 +1369,8 @@ class MainWindow(QMainWindow):
                 self._apply_dataset_settings(dataset, df)
                 msg = (f"<b>{dataset.name.split(' (')[0]}</b>, {len(p)} points from "
                        f"{p.x.min():.1f} to {p.x.max():.1f} um. The example also filled in the "
-                       "mineral, conditions, model and coefficient. Each step shows what it set.")
+                       "mineral, conditions, model, coefficient and analytical resolution. "
+                       "Each step shows what it set.")
                 self._mark_loaded_example(dataset.key)
             else:
                 msg = (f"<b>{path.name}</b>, {len(p)} points from {p.x.min():.1f} to "
@@ -1455,6 +1456,10 @@ class MainWindow(QMainWindow):
         self._refresh_ic_options()
         self._select_ic("equilibrium_plag" if s.get("initial_condition") == "equilibrium_plag"
                         else "step")
+        labels = [p[0] for p in RESOLUTION_PRESETS]
+        self.cmb_resolution.setCurrentIndex(labels.index(s.get("resolution", "No correction")))
+        if "beam_width_um" in s:
+            self.sp_width.setValue(s["beam_width_um"])
 
         name = d.name.split(" (")[0]
         head = f"Set by the {name} example: "

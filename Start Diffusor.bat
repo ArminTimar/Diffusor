@@ -43,9 +43,9 @@ echo Diffusor is set up. Starting it now.
 
 :launch
 if not exist "%VENV%\Scripts\pythonw.exe" goto broken
-rem a shortcut with Diffusor's icon beside this file, remade each time so it
-rem still works after the folder is moved
-powershell -NoProfile -Command "$s = (New-Object -ComObject WScript.Shell).CreateShortcut('%~dp0Diffusor.lnk'); $s.TargetPath = '%VENV%\Scripts\pythonw.exe'; $s.Arguments = '-m diffusor'; $s.WorkingDirectory = '%~dp0'; $s.IconLocation = '%~dp0diffusor\gui\icons\diffusor.ico,0'; $s.Description = 'Diffusor'; $s.Save()" >nul 2>&1
+rem a shortcut with Diffusor's icon beside this file and another in the Start Menu,
+rem so Windows search finds it; both are remade each time so they follow a moved folder
+powershell -NoProfile -Command "$w = New-Object -ComObject WScript.Shell; foreach ($p in '%~dp0Diffusor.lnk', (Join-Path $env:APPDATA 'Microsoft\Windows\Start Menu\Programs\Diffusor.lnk')) { try { $s = $w.CreateShortcut($p); $s.TargetPath = '%VENV%\Scripts\pythonw.exe'; $s.Arguments = '-m diffusor'; $s.WorkingDirectory = '%~dp0'; $s.IconLocation = '%~dp0diffusor\gui\icons\diffusor.ico,0'; $s.Description = 'Diffusor'; $s.Save() } catch {} }" >nul 2>&1
 start "" "%VENV%\Scripts\pythonw.exe" -m diffusor
 exit /b 0
 

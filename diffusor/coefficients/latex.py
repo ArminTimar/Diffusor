@@ -376,20 +376,22 @@ def pixel_ratio() -> float:
 _HTML_CACHE: dict = {}
 
 
-def equation_html(latex: str, max_width: int = 700, ratio: float = None) -> str:
-    """<img> tags, one per line of the equation, as inline data for Qt rich text.
+_PIECE_CACHE: dict = {}
 
-    The pictures are drawn with one pixel for every pixel of the screen and given their
-    size in logical pixels, so Qt shows them as they are. Pictures drawn at a fixed
-    resolution and then stretched or shrunk by Qt look soft on a scaled display.
-    Lines wider than ``max_width`` logical pixels are cut at operators."""
-    import base64
+
+def equation_pieces(latex: str, max_width: int = 700, ratio: float = None) -> list:
+    """One ``(png bytes, width, height)`` per drawn line of the equation, sizes in logical pixels.
+
+    The pictures are drawn with one pixel for every pixel of the screen, so Qt shows
+    them as they are. Pictures drawn at a fixed resolution and then stretched or
+    shrunk by Qt look soft on a scaled display. Lines wider than ``max_width``
+    logical pixels are cut at operators."""
     ratio = pixel_ratio() if ratio is None else float(ratio)
     key = (latex, max_width, ratio)
-    if key in _HTML_CACHE:
-        return _HTML_CACHE[key]
+    if key in _PIECE_CACHE:
+        return _PIECE_CACHE[key]
     dpi = BASE_DPI * ratio
-    tags = []
+    pieces = []
     for line in equation_lines(latex):
         for piece in wrap_equation(line, max_width * ratio, dpi):
             png = render_png(piece, dpi=dpi)
@@ -398,8 +400,22 @@ def equation_html(latex: str, max_width: int = 700, ratio: float = None) -> str:
                 # nothing to cut at: draw it smaller instead of stretching the picture
                 png = render_png(piece, dpi=dpi * max_width * ratio / w)
                 w, h = png_size(png)
-            tags.append(f"<img src='data:image/png;base64,{base64.b64encode(png).decode()}' "
-                        f"width='{round(w / ratio)}' height='{round(h / ratio)}'>")
-    html = "<br>".join(tags)
+            pieces.append((png, round(w / ratio), round(h / ratio)))
+    if len(_PIECE_CACHE) > 400:
+        _PIECE_CACHE.clear()
+    _PIECE_CACHE[key] = pieces
+    return pieces
+
+
+def equation_html(latex: str, max_width: int = 700, ratio: float = None) -> str:
+    """<img> tags, one per line of the equation, as inline data for Qt rich text."""
+    import base64
+    ratio = pixel_ratio() if ratio is None else float(ratio)
+    key = (latex, max_width, ratio)
+    if key in _HTML_CACHE:
+        return _HTML_CACHE[key]
+    html = "<br>".join(
+        f"<img src='data:image/png;base64,{base64.b64encode(png).decode()}' "
+        f"width='{w}' height='{h}'>" for png, w, h in equation_pieces(latex, max_width, ratio))
     _HTML_CACHE[key] = html
     return html

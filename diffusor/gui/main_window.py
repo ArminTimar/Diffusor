@@ -44,9 +44,9 @@ from ..thermo import available_buffers, log_fo2_from_delta
 from ..thermo.units import human_time
 from . import format_help, richtext, theme
 from .plot_widget import DataPreview, ProfilePlot
-from .widgets import (WrapLabel, callout, card, collapsible, divider, field, ghost_button,
-                      install_no_wheel, note, page_columns, pair, primary_button, row,
-                      scrollable)
+from .widgets import (EquationView, FitScrollArea, WrapLabel, callout, card, collapsible,
+                      divider, field, ghost_button, install_no_wheel, note, page_columns, pair,
+                      primary_button, row, scrollable)
 from .workers import CompareWorker, FitWorker, MonteCarloWorker, UpdateWorker, start
 
 # The coefficient comes straight after the mineral because it decides what the later
@@ -335,6 +335,7 @@ class MainWindow(QMainWindow):
         self.step = 0
 
         self.plot = ProfilePlot()
+        self.plot.points_cut.connect(self._on_points_cut)
 
         root = QWidget(); root.setObjectName("Page")
         outer = QVBoxLayout(root)
@@ -448,6 +449,7 @@ class MainWindow(QMainWindow):
         for text, fn in (("Load profile...", self.load_file),
                          ("Extract profile from image...", self.show_image_extractor),
                          ("Export results...", self.export_results),
+                         ("Export figure for Inkscape or CorelDRAW...", self.export_figure),
                          ("Shared-duration study...", self.show_joint_study),
                          ("Multicomponent and isotope study...", self.show_multicomponent_study),
                          (None, None),
@@ -835,16 +837,29 @@ class MainWindow(QMainWindow):
         body.addWidget(self.lst_coef, 1)
 
         d, dbody = card("Selected")
+        # The name, equation and notes scroll inside the card when the window is short,
+        # so a long equation never makes the window taller than the screen. The button
+        # stays below them, in view.
+        inner = QWidget()
+        ilay = QVBoxLayout(inner)
+        ilay.setContentsMargins(0, 0, 0, 0)
+        ilay.setSpacing(8)
         self.lbl_coef_name = note("", "H2")
-        dbody.addWidget(self.lbl_coef_name)
-        self.lbl_coef_eq = note("", "Equation")
-        # set in code, so the wrapped height is measured with the font actually drawn
-        self.lbl_coef_eq.setFont(QFont("Consolas", 9))
-        dbody.addWidget(self.lbl_coef_eq)
+        ilay.addWidget(self.lbl_coef_name)
+        ilay.addSpacing(6)
+        self.lbl_coef_eq = EquationView()
+        ilay.addWidget(self.lbl_coef_eq)
         self.lbl_coef = note("", "Hint")
-        dbody.addWidget(self.lbl_coef)
+        ilay.addWidget(self.lbl_coef)
         self.lbl_coef_range = note("", "Hint")
-        dbody.addWidget(self.lbl_coef_range)
+        ilay.addWidget(self.lbl_coef_range)
+        ilay.addStretch(1)
+        area = FitScrollArea()
+        area.setWidget(inner)
+        area.setWidgetResizable(True)
+        area.setFrameShape(QFrame.NoFrame)
+        area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        dbody.addWidget(area, 1)
         b = ghost_button("Full details and references")
         b.clicked.connect(lambda: self.show_coefficient_info())
         dbody.addWidget(row(b))
@@ -1076,7 +1091,10 @@ class MainWindow(QMainWindow):
         if self.profile is not None:
             p = self.profile
             name = Path(p.source).name if p.source else "loaded profile"
-            self._summary_line(name, f"{len(p)} points, {p.x.min():.1f} to {p.x.max():.1f} um")
+            self._summary_line(name, f"{len(p) - p.n_excluded} points, {p.x.min():.1f} to "
+                                     f"{p.x.max():.1f} um")
+            if p.n_excluded:
+                self._summary_line("cut by hand", f"{p.n_excluded} of {len(p)} points")
             if self.dataset is not None:
                 self._summary_line("provenance",
                                    "measured, published" if self.dataset.kind == "measured"
@@ -1397,6 +1415,7 @@ class MainWindow(QMainWindow):
                       + "".join(f"\nnote: {n}" for n in p.notes))
             self._guess_initial()
             self.preview.show_data(p.x, p.C, p.sigma, y_label=self._y_label())
+            self.plot.set_points(p.x, p.C, None)
             self.plot.show_data(p.x, p.C, p.sigma, y_label=self._y_label())
             self.fit_result = self.mc_result = self.compare_results = None
             self._mc_draws = []
@@ -1560,10 +1579,8 @@ class MainWindow(QMainWindow):
             return
         c = get_coefficient(item.data(Qt.UserRole))
         self.lbl_coef_name.setText(c.label)
-        from ..coefficients.latex import coefficient_latex, equation_html
-        self.lbl_coef_eq.setTextFormat(Qt.RichText)
-        self.lbl_coef_eq.setText(equation_html(coefficient_latex(c),
-                                               max_width=max(self.lbl_coef_eq.width() - 8, 240)))
+        from ..coefficients.latex import coefficient_latex
+        self.lbl_coef_eq.set_latex(coefficient_latex(c))
         self.lbl_coef_eq.setToolTip(c.equation_text)
         parts = []
         if c.superseded_by:
@@ -1773,6 +1790,44 @@ class MainWindow(QMainWindow):
         except Exception as exc:
             self.lbl_fo2.setText(str(exc))
 
+    def _fit_profile(self):
+        """The loaded profile without the points the user cut: what every fit uses."""
+        return self.profile.kept()
+
+    @Slot(object)
+    def _on_points_cut(self, mask):
+        """Points were cut from, or restored to, the fit on the plot."""
+        p = self.profile
+        if p is None:
+            return
+        if self._running():
+            self._status("Wait for the running calculation or press Stop before cutting points.")
+            return
+        mask = np.asarray(mask, dtype=bool)
+        if int(np.count_nonzero(~mask)) < 3:
+            self._status("Keep at least three points in the fit.")
+            return
+        refit = self.fit_result is not None and self.mc_result is None
+        p.set_excluded(mask)
+        kept = p.kept()
+        cut = p.excluded
+        self.fit_result = self.mc_result = self.compare_results = None
+        self._mc_draws, self._mc_meta = [], None
+        self._stale = False
+        self.plot.set_points(p.x, p.C, cut)
+        self.plot.show_data(kept.x, kept.C, kept.sigma, y_label=self._y_label())
+        self.preview.show_data(kept.x, kept.C, kept.sigma, y_label=self._y_label(),
+                               cut=None if cut is None else (p.x[cut], p.C[cut]))
+        if cut is None:
+            self._log("no points cut: the whole profile is fitted")
+        else:
+            self._log(f"{p.n_excluded} of {len(p)} points cut from the fit, at x = "
+                      + ", ".join(f"{v:.2f}" for v in p.x[cut][:12])
+                      + (", ..." if p.n_excluded > 12 else "") + " um")
+        self._rebuild_summary()
+        if refit and self._ready():
+            self.run_fit()
+
     def _guess_initial(self, from_button: bool = False):
         """Step and plateaus from the data, and the composition if the profile is one.
 
@@ -1781,7 +1836,8 @@ class MainWindow(QMainWindow):
         """
         if self.profile is None:
             return
-        ic = guess_step_from_data(self.profile.x, self.profile.C)
+        kept = self._fit_profile()
+        ic = guess_step_from_data(kept.x, kept.C)
         self.sp_x0.setValue(ic.params["x0"])
         self.sp_cl.setValue(ic.params["C_left"])
         self.sp_cr.setValue(ic.params["C_right"])
@@ -1807,7 +1863,7 @@ class MainWindow(QMainWindow):
         scale, offset = 1.0, 0.0
         if mineral.key == "olivine" and species == "Fe-Mg":
             scale, offset = self.cmb_ol_coordinate.currentData()
-        X = offset + scale * np.asarray(self.profile.C, dtype=float)
+        X = offset + scale * np.asarray(self._fit_profile().C, dtype=float)
         if not (np.all(np.isfinite(X)) and 0.0 <= X.min() and X.max() <= 1.0):
             return None
         return X
@@ -2045,7 +2101,7 @@ class MainWindow(QMainWindow):
         except Exception:
             QMessageBox.critical(self, "Model error", traceback.format_exc())
             return
-        p = self.profile
+        p = self._fit_profile()
         w = FitWorker(model, p.x, p.C, p.sigma, self._free_parameters(), T_MIN, T_MAX)
         w.finished.connect(self._fit_done)
         w.failed.connect(self._work_failed)
@@ -2078,7 +2134,7 @@ class MainWindow(QMainWindow):
         except Exception:
             QMessageBox.critical(self, "Model error", traceback.format_exc())
             return
-        p = self.profile
+        p = self._fit_profile()
         w = CompareWorker(models, p.x, p.C, p.sigma, self._free_parameters(), T_MIN, T_MAX)
         w.progress.connect(self._compare_progress)
         w.finished.connect(self._compare_done)
@@ -2115,7 +2171,7 @@ class MainWindow(QMainWindow):
         except Exception:
             QMessageBox.critical(self, "Model error", traceback.format_exc())
             return
-        p = self.profile
+        p = self._fit_profile()
         n = self.sp_draws.value()
         budget = self._budget()
         w = MonteCarloWorker(model, p.x, p.C, p.sigma, budget, n,
@@ -2175,8 +2231,8 @@ class MainWindow(QMainWindow):
             self.fit_result = res.base_fit
         elif self.fit_result is None:
             from ..fitting import fit_time
-            self.fit_result = fit_time(self._model(self._checked_keys()[0]), self.profile.x,
-                                       self.profile.C, self.profile.sigma,
+            p = self._fit_profile()
+            self.fit_result = fit_time(self._model(self._checked_keys()[0]), p.x, p.C, p.sigma,
                                        self._free_parameters())
         self._stale = False
         self.plot.finish_monte_carlo(res, self._best_curve(res))
@@ -2214,8 +2270,8 @@ class MainWindow(QMainWindow):
         if self.fit_result is not None:
             self.plot.show_fit(self.fit_result, self.mc_result, y_label=self._y_label())
         elif self.profile is not None:
-            self.plot.show_data(self.profile.x, self.profile.C, self.profile.sigma,
-                                y_label=self._y_label())
+            p = self._fit_profile()
+            self.plot.show_data(p.x, p.C, p.sigma, y_label=self._y_label())
 
     def show_histogram(self):
         if self._mc_meta is None or not self._mc_draws:
@@ -2245,7 +2301,7 @@ class MainWindow(QMainWindow):
             QMessageBox.information(self, "Nothing yet", "Run a fit first.")
             return
         richtext.show(self, "Methods and references",
-                      richtext.methods_html(self.fit_result, self.mc_result, self.profile),
+                      richtext.methods_html(self.fit_result, self.mc_result, self._fit_profile()),
                       900, 720)
 
     def show_log(self):
@@ -2280,10 +2336,32 @@ class MainWindow(QMainWindow):
         if not d:
             return
         try:
-            written = save_results(d, self.fit_result, self.mc_result, self.profile,
+            written = save_results(d, self.fit_result, self.mc_result, self._fit_profile(),
                                    figure=self.plot.figure)
             self._log("exported\n" + "\n".join(f"{k}: {v}" for k, v in written.items()))
             QMessageBox.information(self, "Exported", "Written:\n" + "\n".join(written.values()))
+        except Exception:
+            QMessageBox.critical(self, "Export failed", traceback.format_exc())
+
+    def export_figure(self):
+        """The plot as an editable vector file: text as text, one object per data point."""
+        from ..dataio.vector import save_vector
+        source = self.profile.source if self.profile is not None else None
+        name = f"{Path(source).stem if source else 'profile'}_diffusor"
+        start = str(Path(self.output_dir()) / name) if self.output_dir() else name
+        path, _ = QFileDialog.getSaveFileName(
+            self, "Export figure for editing", start + ".svg",
+            "SVG, for Inkscape and CorelDRAW (*.svg);;PDF (*.pdf);;EPS (*.eps)")
+        if not path:
+            return
+        try:
+            save_vector(self.plot.figure, path, bbox_inches="tight")
+            self._log("figure exported\n" + path)
+            QMessageBox.information(
+                self, "Figure exported",
+                path + "\n\nText is editable text and every data point is its own object, "
+                "named for its series and number (for example measured_point_007), "
+                "with its error bar in the same group.")
         except Exception:
             QMessageBox.critical(self, "Export failed", traceback.format_exc())
 

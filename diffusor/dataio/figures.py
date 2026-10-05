@@ -43,7 +43,9 @@ def _profile(ax, residual_ax, fit, mc=None, name=None):
     ax.set_title(name or f"{fit.model.coefficient.mineral.capitalize()} · {fit.model.coefficient.species}",
                  loc="left", fontsize=12, color=INK, fontweight="bold", pad=12)
     ax.set_ylabel("Concentration (input units)", color=INK)
-    ax.legend(loc="best", frameon=False, fontsize=8)
+    # outlined, so the legend's sample dot is not taken for a measured point
+    ax.legend(loc="best", frameon=True, fancybox=False, framealpha=.95, facecolor="white",
+              edgecolor="#ccd7d9", fontsize=8)
     if sigma is None:
         r, label = y-model, "Residual"
     else:

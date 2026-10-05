@@ -66,6 +66,7 @@ def test_joint_dialog_keeps_independent_snapshots_and_runs_worker():
             self.c=constraint('a',1e8)
             self.profile=SimpleNamespace(x=self.c.x,C=self.c.concentration,sigma=self.c.sigma)
         def _ready(self): return True
+        def _fit_profile(self): return self.profile
         def _checked_keys(self): return ['selected']
         def _model(self,key): return self.c.model
     owner=Owner();dialog=JointStudyDialog(owner)

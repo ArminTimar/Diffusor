@@ -3,8 +3,8 @@ from __future__ import annotations
 
 from typing import Optional
 
-from PySide6.QtCore import QEvent, QObject, Qt
-from PySide6.QtGui import QGuiApplication
+from PySide6.QtCore import QEvent, QObject, QSize, Qt, QTimer
+from PySide6.QtGui import QGuiApplication, QPainter, QPixmap
 from PySide6.QtWidgets import (QAbstractScrollArea, QAbstractSpinBox, QApplication, QComboBox,
                                QFrame, QHBoxLayout, QLabel, QPushButton, QScrollArea,
                                QSizePolicy, QVBoxLayout, QWidget)
@@ -42,12 +42,18 @@ class WrapLabel(QLabel):
     def _sync(self):
         w = self.width()
         if w > 0:
+            old = self.minimumHeight()
+            if old:
+                # QLabel never answers heightForWidth with less than its own minimum
+                # height, so measure with it cleared: otherwise a label first laid out
+                # narrow keeps the tall height it needed then, even once it is wide
+                self.setMinimumHeight(0)
             h = self._height_for(w)
-            if h != self.minimumHeight():
-                # shrink as well as grow, and tell the layout, or a label first laid
-                # out narrow keeps the tall height it needed then
+            if h != old:
                 self.setMinimumHeight(h)
                 self.updateGeometry()
+            elif old:
+                self.setMinimumHeight(old)
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
@@ -57,6 +63,62 @@ class WrapLabel(QLabel):
         super().setText(text)
         self._sync()
         self.updateGeometry()
+
+
+class EquationView(QWidget):
+    """A typeset equation, drawn line by line from pictures, exactly as tall as it is.
+
+    The equation used to sit in a rich-text label, whose line boxes add room above
+    and below every picture and whose height was measured before the label had its
+    final width. Here each line is a picture drawn at the screen's own resolution,
+    the lines are cut to the width the widget really has, and the widget's height is
+    the sum of the pictures, so nothing is left over below it.
+    """
+    GAP = 5             # logical pixels between two lines
+    MIN_WIDTH = 160     # the narrowest the lines are cut for
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self._latex = ""
+        self._pixmaps: list = []
+        self._laid_width = 0
+        self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed)
+        self.setFixedHeight(0)
+        # redraw once a resize has settled, not at every step of a drag
+        self._settle = QTimer(self)
+        self._settle.setSingleShot(True)
+        self._settle.setInterval(90)
+        self._settle.timeout.connect(self._relayout)
+
+    def set_latex(self, latex: str):
+        self._latex = latex or ""
+        self._relayout()
+
+    def _relayout(self):
+        from ..coefficients.latex import equation_pieces, pixel_ratio
+        width = max(self.width() - 2, self.MIN_WIDTH) if self.width() > 50 else 560
+        ratio = pixel_ratio()
+        pixmaps, height = [], 0
+        for png, _w, h in (equation_pieces(self._latex, width, ratio) if self._latex else []):
+            pm = QPixmap()
+            pm.loadFromData(png)
+            pm.setDevicePixelRatio(ratio)
+            pixmaps.append((pm, height))
+            height += h + self.GAP
+        self._pixmaps = pixmaps
+        self._laid_width = self.width()
+        self.setFixedHeight(max(height - self.GAP, 0))
+        self.update()
+
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        if self.width() != self._laid_width:
+            self._settle.start()
+
+    def paintEvent(self, _event):
+        p = QPainter(self)
+        for pm, y in self._pixmaps:
+            p.drawPixmap(0, y, pm)
 
 
 def card(title: str = "", subtitle: str = "") -> tuple[QFrame, QVBoxLayout]:
@@ -161,6 +223,28 @@ def fit_to_screen(window: QWidget, width: int, height: int,
               else QGuiApplication.primaryScreen()).availableGeometry()
     window.resize(min(width, int(screen.width() * width_share)),
                   min(height, int(screen.height() * height_share)))
+
+
+class FitScrollArea(QScrollArea):
+    """A scroll area that asks for the whole height of its content, and can give it up.
+
+    A plain QScrollArea asks for at most about 24 lines of text, so a tall panel
+    would scroll even in a large window. This one asks for its content's own height,
+    which a layout grants when there is room, and shrinks below it when there is not,
+    so a long equation scrolls inside its card instead of making the window taller
+    than the screen.
+    """
+
+    def sizeHint(self):
+        inner = self.widget()
+        if inner is None:
+            return super().sizeHint()
+        s = inner.sizeHint()
+        f = 2 * self.frameWidth()
+        return QSize(s.width() + f, s.height() + f)
+
+    def minimumSizeHint(self):
+        return QSize(120, 120)
 
 
 def scrollable(inner: QWidget) -> QScrollArea:

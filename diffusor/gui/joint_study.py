@@ -83,7 +83,7 @@ class JointStudyDialog(QDialog):
         if not self.owner._ready():
             return
         try:
-            p = self.owner.profile
+            p = self.owner._fit_profile()
             model = copy.deepcopy(self.owner._model(self.owner._checked_keys()[0]))
             index = 1
             names = {c.name for c in self.profiles}

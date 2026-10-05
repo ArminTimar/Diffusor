@@ -363,7 +363,10 @@ def save_results(directory, fit_result, mc_result=None, profile=None,
         f = out / f"{basename}_figure.png"
         figure.savefig(f, dpi=300, bbox_inches="tight")
         written["figure"] = str(f)
-        fs = out / f"{basename}_figure.svg"
-        figure.savefig(fs, bbox_inches="tight")
-        written["figure_svg"] = str(fs)
+        # for editing in Inkscape or CorelDRAW: text stays text, every point is an object
+        from .vector import save_vector
+        for suffix in ("svg", "pdf"):
+            f = out / f"{basename}_figure.{suffix}"
+            save_vector(figure, f, bbox_inches="tight")
+            written[f"figure_{suffix}"] = str(f)
     return written

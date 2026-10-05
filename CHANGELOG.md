@@ -4,10 +4,47 @@ What changed between releases, newest first. The text under a version heading
 is what goes into the GitHub release, so it is written for someone deciding
 whether to update. Commit messages hold the details.
 
-## Unreleased
+## 0.3.1 (5 October 2026)
+
+### Added
+
+- **Cut points out of the fit.** On the Results step the plot toolbar has a
+  **Cut points** mode. Drag a box around points to leave them out of the fit,
+  Shift+drag to bring them back, or click a single point to toggle it. Cut
+  points stay on the plot as grey crosses and in the file, and are marked in the
+  sidebar and in the exported Methods text. A Fit that was showing is repeated
+  on the remaining points. **Restore all** puts every point back. The joint
+  and isotope studies also read only the kept points.
+
+- **Diffusor in Windows search.** **Start Diffusor.bat** now also places a
+  Diffusor shortcut with the application icon in the Start Menu, so typing
+  "Diffusor" in the Windows search bar opens the application. It is remade on
+  every start and follows the folder when it is moved.
+
+- **Figures for Inkscape and CorelDRAW.** **File > Export figure for Inkscape or
+  CorelDRAW** saves the plot as SVG, PDF or EPS, and so does the save button of
+  the plot toolbar. Text stays editable text. Every data point is its own group,
+  named for its series and number (`measured_point_007`), with its error bar
+  inside it, so single points can be selected and recoloured. The exported
+  folder now holds the figure as PDF as well as SVG.
+- **Cut points and Restore all are icons in the plot toolbar**, drawn like the
+  other buttons. The tool in use (pan, zoom or cut) is highlighted, and choosing
+  one ends the others.
+- **The legend has a frame**, so its sample dot cannot be mistaken for a
+  measured point.
 
 ### Fixed
 
+- **The window no longer grows past the screen.** Choosing a coefficient with a
+  long equation, such as Dias et al. (2025), made the page ask for more height
+  than a laptop screen has and pushed the Back and Continue buttons off the
+  bottom. The name, equation and notes of the selected coefficient now scroll
+  inside their card when the window is short, and the window's minimum height
+  is the same for every law.
+- **No empty band around a coefficient's equation.** The equation is drawn as
+  tall as its lines, whichever law is selected, and is cut again at the width
+  the panel really has. Wrapped text no longer keeps the tall height it needed
+  while the window was narrow.
 - **One best-fit time on screen.** After a Fit, a change of settings and a Monte
   Carlo run, the sidebar could show the earlier fit (for example 2.8 yr) while
   the plot legend showed the best fit of the Monte Carlo run (338 d). The run

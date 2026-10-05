@@ -450,7 +450,7 @@ class MulticomponentStudyDialog(QDialog):
         except Exception as exc:
             QMessageBox.warning(self, "Cannot read the main-window model", str(exc))
             return
-        self.i_profile = o.profile
+        self.i_profile = o._fit_profile()
         c = self.i_model.coefficient
         if c.mineral == "olivine" and c.species == "Fe-Mg":
             self.i_mode, elements = "coupled", ("Fe", "Mg")

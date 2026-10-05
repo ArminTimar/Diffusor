@@ -1,6 +1,7 @@
 """Matplotlib canvas: measured profile, initial condition, fit, Monte Carlo envelope."""
 from __future__ import annotations
 
+import math
 from pathlib import Path
 from typing import Dict, Optional, Sequence
 
@@ -9,10 +10,71 @@ from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
 from matplotlib.backends.backend_qtagg import NavigationToolbar2QT
 from matplotlib.collections import LineCollection
 from matplotlib.figure import Figure
+from matplotlib.patches import Rectangle
+from PySide6.QtCore import QPointF, QRectF, QSize, Qt, Signal
+from PySide6.QtGui import QAction, QColor, QIcon, QPainter, QPen, QPixmap
 from PySide6.QtWidgets import QVBoxLayout, QWidget
 
+from ..dataio.vector import VECTOR_SUFFIXES, save_vector
 from ..thermo.units import human_time
 from . import theme
+
+# The toolbar's own buttons are checkable (pan, zoom) and the cut tool is too. The
+# checked one is filled and outlined, so the mode in use is always visible.
+TOOLBAR_STYLE = (
+    f"QToolBar {{ background:{theme.SURFACE}; border:none; "
+    f"border-bottom:1px solid {theme.BORDER}; padding:3px; spacing:2px; }}"
+    f"QToolButton {{ border:1px solid transparent; border-radius:5px; padding:3px; }}"
+    f"QToolButton:hover {{ background:{theme.ACCENT_SOFT}; }}"
+    f"QToolButton:checked, QToolButton:checked:hover {{ background:{theme.ACCENT_SELECTED}; "
+    f"border:1px solid {theme.ACCENT}; }}")
+
+
+def _tool_icon(kind: str, size: QSize, ratio: float) -> QIcon:
+    """A toolbar icon in the style of matplotlib's own: dark line drawing, no fill.
+
+    ``cut`` is a dashed selection box around a point with a cross; ``restore`` is an
+    arrow running round counter-clockwise."""
+    side = max(int(round(size.width() * ratio)), 16)
+    pm = QPixmap(side, side)
+    pm.fill(Qt.transparent)
+    pm.setDevicePixelRatio(ratio)
+    p = QPainter(pm)
+    p.setRenderHint(QPainter.Antialiasing)
+    k = side / ratio / 24.0
+    p.scale(k, k)                       # the drawing below is on a 24 x 24 grid
+    ink = QColor("#111111")
+    pen = QPen(ink, 2.2)
+    pen.setCapStyle(Qt.RoundCap)
+    pen.setJoinStyle(Qt.RoundJoin)
+    if kind == "cut":
+        box = QPen(ink, 2.0, Qt.CustomDashLine)
+        box.setDashPattern([2.0, 1.5])
+        p.setPen(box)
+        p.drawRect(QRectF(2.6, 4.6, 18.8, 14.8))
+        p.setPen(pen)
+        p.setBrush(ink)
+        p.drawEllipse(QPointF(8.0, 12.0), 2.0, 2.0)
+        p.setBrush(Qt.NoBrush)
+        p.drawLine(QPointF(13.0, 8.8), QPointF(17.6, 15.2))
+        p.drawLine(QPointF(17.6, 8.8), QPointF(13.0, 15.2))
+    else:
+        c, r = QPointF(12.0, 12.5), 7.5
+        p.setPen(pen)
+        # an arc from 60 degrees round to 330, counter-clockwise, ending in a filled arrow head
+        p.drawArc(QRectF(c.x() - r, c.y() - r, 2 * r, 2 * r), 60 * 16, 270 * 16)
+        end = math.radians(330.0)
+        tx, ty = -math.sin(end), math.cos(end)          # direction of travel, y up
+        nx, ny = ty, -tx
+        ex, ey = c.x() + r * math.cos(end), c.y() - r * math.sin(end)    # y down on screen
+        tip = QPointF(ex + 3.4 * tx, ey - 3.4 * ty)
+        left = QPointF(ex - 2.6 * tx + 3.6 * nx, ey + 2.6 * ty - 3.6 * ny)
+        right = QPointF(ex - 2.6 * tx - 3.6 * nx, ey + 2.6 * ty + 3.6 * ny)
+        p.setPen(Qt.NoPen)
+        p.setBrush(ink)
+        p.drawPolygon([tip, left, right])
+    p.end()
+    return QIcon(pm)
 
 
 class SaveToolbar(NavigationToolbar2QT):
@@ -27,6 +89,7 @@ class SaveToolbar(NavigationToolbar2QT):
         super().__init__(canvas, parent)
         self.start_dir: Optional[Path] = None
         self.default_name: Optional[str] = None
+        self.setStyleSheet(TOOLBAR_STYLE)
 
     def save_figure(self, *args):
         import matplotlib as mpl
@@ -34,33 +97,91 @@ class SaveToolbar(NavigationToolbar2QT):
             mpl.rcParams["savefig.directory"] = str(self.start_dir)
         if self.default_name:
             self.canvas.get_default_filename = lambda: self.default_name
+        fig = self.canvas.figure
+
+        def save(fname, *a, **k):
+            # this stand-in goes first, so the figure saves itself through the plain method
+            fig.__dict__.pop("savefig", None)
+            # SVG, PDF and EPS are written for editing in Inkscape or CorelDRAW:
+            # text stays text and every point is its own object
+            if Path(str(fname)).suffix.lower() in VECTOR_SUFFIXES:
+                return save_vector(fig, fname, **k)
+            return fig.savefig(fname, *a, **k)
+        fig.savefig = save
         try:
             return super().save_figure(*args)
         finally:
             self.canvas.__dict__.pop("get_default_filename", None)
+            fig.__dict__.pop("savefig", None)
+
+
+CUT_HINT = ("Cut points: drag a box around the points to leave out of the fit, "
+            "Shift+drag to bring them back, click one point to toggle it.")
+CLICK_PIXELS = 5            # a press and release closer than this is a click, not a box
+PICK_PIXELS = 12            # how near a click must land to a point to pick it
+
+
+def _legend(ax, fontsize: float = 9):
+    """A legend on a white, outlined box.
+
+    Without a frame the legend's sample dot looks like one more measured point."""
+    leg = ax.legend(fontsize=fontsize, loc="best", frameon=True, fancybox=False,
+                    framealpha=0.95, facecolor=theme.SURFACE, edgecolor=theme.BORDER_STRONG,
+                    borderpad=0.6)
+    leg.get_frame().set_linewidth(0.9)
+    return leg
 
 
 class ProfilePlot(QWidget):
+    # the new exclusion mask (one flag per point) after points were cut or restored
+    points_cut = Signal(object)
+
     def __init__(self, parent=None):
         super().__init__(parent)
+        self._pts = None           # (x, C, excluded) of every loaded point, for cutting
+        self._drag = None          # (pixel x, pixel y, data x, data y) of a box being drawn
+        self._band = None
         self.figure = Figure(figsize=(7, 5.5), layout="constrained",
                              facecolor=theme.SURFACE)
         self.canvas = FigureCanvasQTAgg(self.figure)
         self.toolbar = SaveToolbar(self.canvas, self)
-        self.toolbar.setStyleSheet(
-            f"QToolBar {{ background:{theme.SURFACE}; border:none; "
-            f"border-bottom:1px solid {theme.BORDER}; padding:3px; }}")
         self.setStyleSheet(f"background:{theme.SURFACE};")
         lay = QVBoxLayout(self)
         lay.setContentsMargins(0, 0, 0, 0)
         lay.addWidget(self.toolbar)
         lay.addWidget(self.canvas)
+        ratio = float(self.devicePixelRatioF())
+        icon_size = self.toolbar.iconSize()
+        self.act_cut = QAction(_tool_icon("cut", icon_size, ratio), "Cut points", self)
+        self.act_cut.setCheckable(True)
+        self.act_cut.setToolTip(CUT_HINT)
+        self.act_cut.toggled.connect(self._cut_toggled)
+        self.act_restore = QAction(_tool_icon("restore", icon_size, ratio), "Restore all", self)
+        self.act_restore.setToolTip("Put every cut point back into the fit")
+        self.act_restore.setEnabled(False)
+        self.act_restore.triggered.connect(self._restore_all)
+        # before the coordinate readout, which stretches and would push these into the overflow
+        readout = next((a for a in self.toolbar.actions()
+                        if self.toolbar.widgetForAction(a) is getattr(self.toolbar, "locLabel", None)),
+                       None)
+        self.toolbar.insertSeparator(readout)
+        self.toolbar.insertAction(readout, self.act_cut)
+        self.toolbar.insertAction(readout, self.act_restore)
+        # one tool at a time: choosing pan or zoom ends the cut mode, and the other way round
+        for key in ("pan", "zoom"):
+            act = getattr(self.toolbar, "_actions", {}).get(key)
+            if act is not None:
+                act.toggled.connect(lambda on: on and self.act_cut.setChecked(False))
+        self.canvas.mpl_connect("button_press_event", self._cut_press)
+        self.canvas.mpl_connect("motion_notify_event", self._cut_motion)
+        self.canvas.mpl_connect("button_release_event", self._cut_release)
         self.ax = None
         self.ax_res = None
         self._make_axes()
 
     def _make_axes(self):
         self._mc = None            # leaving the Monte Carlo view detaches its live panels
+        self._drag = self._band = None
         self.figure.clear()
         gs = self.figure.add_gridspec(4, 1)
         self.ax = self.figure.add_subplot(gs[0:3, 0])
@@ -80,7 +201,7 @@ class ProfilePlot(QWidget):
         self._make_axes()
         self._plot_data(x, C, sigma, label)
         self.ax.set_ylabel(y_label)
-        self.ax.legend(fontsize=9, frameon=False)
+        _legend(self.ax, 9)
         theme.apply_plot_style(self.figure, [self.ax, self.ax_res])
         self.canvas.draw_idle()
 
@@ -90,6 +211,98 @@ class ProfilePlot(QWidget):
                              ecolor=theme.PLOT_DATA_ERR, elinewidth=1, capsize=2, label=label, zorder=3)
         else:
             self.ax.plot(x, C, "o", ms=4.5, color=theme.PLOT_DATA, label=label, zorder=3)
+        self._plot_cut()
+
+    def _plot_cut(self):
+        """Mark the points the user has cut, so it is clear what the fit leaves out."""
+        if self._pts is None or not self._pts[2].any():
+            return
+        x, C, cut = self._pts
+        self.ax.plot(x[cut], C[cut], "x", ms=6.5, mew=1.5, color=theme.TEXT_FAINT,
+                     label="cut from the fit", zorder=2)
+
+    # ------------------------------------------------------------------ cutting points
+    def set_points(self, x, C, excluded=None):
+        """Tell the plot every loaded point, so a box or click can cut them."""
+        x = np.asarray(x, dtype=float)
+        cut = (np.zeros(x.shape, bool) if excluded is None else np.asarray(excluded, bool))
+        self._pts = (x, np.asarray(C, dtype=float), cut)
+        n = int(cut.sum())
+        self.act_restore.setEnabled(n > 0)
+        self.act_cut.setToolTip(f"{n} point{'s' if n != 1 else ''} cut. {CUT_HINT}" if n else CUT_HINT)
+
+    def _nav_mode(self) -> str:
+        return str(getattr(self.toolbar.mode, "value", self.toolbar.mode))
+
+    def _cut_toggled(self, on: bool):
+        self.canvas.setCursor(Qt.CrossCursor if on else Qt.ArrowCursor)
+        if on:
+            # pan and zoom use the same mouse gestures
+            mode = self._nav_mode()
+            if mode == "pan/zoom":
+                self.toolbar.pan()
+            elif mode == "zoom rect":
+                self.toolbar.zoom()
+            self.toolbar.set_message(CUT_HINT)
+        else:
+            self._drop_band()
+
+    def _cut_active(self) -> bool:
+        return (self.act_cut.isChecked() and not self._nav_mode() and self._mc is None
+                and self.ax_res is not None and self._pts is not None)
+
+    def _drop_band(self):
+        self._drag = None
+        if self._band is not None:
+            try:
+                self._band.remove()
+            except (ValueError, NotImplementedError):
+                pass
+            self._band = None
+            self.canvas.draw_idle()
+
+    def _cut_press(self, ev):
+        if self._cut_active() and ev.button == 1 and ev.inaxes is self.ax:
+            self._drag = (ev.x, ev.y, ev.xdata, ev.ydata)
+
+    def _cut_motion(self, ev):
+        if self._drag is None or ev.inaxes is not self.ax:
+            return
+        _, _, x0, y0 = self._drag
+        if self._band is None:
+            self._band = Rectangle((x0, y0), 0, 0, fill=True, alpha=0.18, lw=1.2,
+                                   facecolor=theme.PLOT_MODEL, edgecolor=theme.PLOT_MODEL,
+                                   zorder=6)
+            self.ax.add_patch(self._band)
+        self._band.set_bounds(min(x0, ev.xdata), min(y0, ev.ydata),
+                              abs(ev.xdata - x0), abs(ev.ydata - y0))
+        self.canvas.draw_idle()
+
+    def _cut_release(self, ev):
+        if self._drag is None:
+            return
+        px, py, x0, y0 = self._drag
+        self._drop_band()
+        x, C, cut = self._pts
+        new = cut.copy()
+        if np.hypot(ev.x - px, ev.y - py) < CLICK_PIXELS:
+            xy = self.ax.transData.transform(np.column_stack([x, C]))
+            d = np.hypot(xy[:, 0] - px, xy[:, 1] - py)
+            i = int(np.argmin(d)) if d.size else -1
+            if i < 0 or d[i] > PICK_PIXELS:
+                return
+            new[i] = not new[i]
+        else:
+            x1, y1 = self.ax.transData.inverted().transform((ev.x, ev.y))
+            inside = ((x >= min(x0, x1)) & (x <= max(x0, x1))
+                      & (C >= min(y0, y1)) & (C <= max(y0, y1)))
+            new[inside] = ev.key != "shift"
+        if not np.array_equal(new, cut):
+            self.points_cut.emit(new)
+
+    def _restore_all(self):
+        if self._pts is not None and self._pts[2].any():
+            self.points_cut.emit(np.zeros(self._pts[0].shape, bool))
 
     def show_fit(self, fit_result, mc_result=None, y_label="composition",
                  initial=True, title: str = ""):
@@ -129,7 +342,7 @@ class ProfilePlot(QWidget):
         self.ax.plot(xf, Cf, "-", color=theme.PLOT_MODEL, lw=2.2, label=label, zorder=4)
 
         self.ax.set_ylabel(y_label)
-        self.ax.legend(fontsize=9, frameon=False, loc="best")
+        _legend(self.ax, 9)
         if title:
             self.ax.set_title(title, fontsize=11, color=theme.TEXT, pad=10)
 
@@ -182,7 +395,7 @@ class ProfilePlot(QWidget):
                          label=f"{key}: {human_time(r.t_seconds)}")
             self.ax_res.plot(x, C - r.C_model, "o", ms=3, color=colors[i % len(colors)])
         self.ax.set_ylabel(y_label)
-        self.ax.legend(fontsize=8, frameon=False, loc="best")
+        _legend(self.ax, 8)
         self.ax_res.axhline(0.0, color=theme.BORDER_STRONG, lw=1)
         self.ax_res.set_xlabel("distance (um)")
         self.ax_res.set_ylabel("residual")
@@ -205,7 +418,7 @@ class ProfilePlot(QWidget):
         ax.set_title(f"Monte Carlo, {mc_result.n_draws} draws "
                      f"(median {human_time(mc_result.median)})", fontsize=11,
                      color=theme.TEXT, pad=10)
-        ax.legend(fontsize=9, frameon=False)
+        _legend(ax, 9)
         theme.apply_plot_style(self.figure, [ax])
         self.ax = ax
         self.ax_res = None
@@ -244,7 +457,7 @@ class ProfilePlot(QWidget):
         if "measurement_noise" in self._mc["sampled"]:
             ax.plot([], [], "o", color=theme.PLOT_DATA_ERR, alpha=0.6, ms=3,
                     label="data as drawn with its noise")
-        ax.legend(fontsize=8.5, frameon=False, loc="best")
+        _legend(ax, 8.5)
         self._redraw_mc_panels()
         self.canvas.draw_idle()
 
@@ -285,7 +498,7 @@ class ProfilePlot(QWidget):
             xf, Cf = best_curve
             self.ax.plot(xf, Cf, "-", color=theme.PLOT_MODEL, lw=2.2, zorder=4,
                          label="best fit: " + human_time(res.t_best))
-            self.ax.legend(fontsize=8.5, frameon=False, loc="best")
+            _legend(self.ax, 8.5)
         mc["result"] = res
         self._redraw_mc_panels()
         self.canvas.draw_idle()
@@ -378,7 +591,8 @@ class DataPreview(QWidget):
         ax.set_axis_off()
         self.canvas.draw_idle()
 
-    def show_data(self, x, C, sigma=None, y_label="composition", title=""):
+    def show_data(self, x, C, sigma=None, y_label="composition", title="", cut=None):
+        """``cut`` is an (x, C) pair of points the user left out of the fit."""
         self.figure.clear()
         ax = self.figure.add_subplot(111)
         if sigma is not None:
@@ -386,6 +600,8 @@ class DataPreview(QWidget):
                         ecolor=theme.PLOT_DATA_ERR, elinewidth=0.9, capsize=1.5)
         else:
             ax.plot(x, C, "o", ms=3.5, color=theme.PLOT_DATA)
+        if cut is not None and len(cut[0]):
+            ax.plot(cut[0], cut[1], "x", ms=6, mew=1.4, color=theme.TEXT_FAINT)
         ax.set_xlabel("distance (um)")
         ax.set_ylabel(y_label)
         if title:

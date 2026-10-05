@@ -104,16 +104,43 @@ class Profile:
     source: str = ""
     notes: List[str] = field(default_factory=list)
     row_index: Optional[np.ndarray] = None   # rows of ``raw`` behind each point
+    excluded: Optional[np.ndarray] = None    # True where the user cut the point from the fit
 
     def __len__(self) -> int:
         return int(self.x.size)
+
+    @property
+    def n_excluded(self) -> int:
+        return 0 if self.excluded is None else int(np.count_nonzero(self.excluded))
+
+    def set_excluded(self, mask) -> None:
+        """Cut the points where ``mask`` is True. They stay in the profile, only the fit skips them."""
+        mask = np.asarray(mask, dtype=bool)
+        if mask.shape != self.x.shape:
+            raise ValueError("the exclusion mask must have one entry per point")
+        self.excluded = mask if mask.any() else None
+
+    def kept(self) -> "Profile":
+        """The points the fit uses: everything the user has not cut."""
+        if self.excluded is None:
+            return self
+        keep = ~self.excluded
+        x_cut = self.x[self.excluded]
+        shown = ", ".join(f"{v:.1f}" for v in x_cut[:8]) + (", ..." if x_cut.size > 8 else "")
+        notes = list(self.notes) + [f"{x_cut.size} of {self.x.size} points cut by hand and left "
+                                    f"out of the fit (x = {shown} um)"]
+        return Profile(self.x[keep], self.C[keep],
+                       None if self.sigma is None else self.sigma[keep],
+                       self.raw, self.spec, self.source, notes,
+                       None if self.row_index is None else self.row_index[keep])
 
     def sorted(self) -> "Profile":
         idx = np.argsort(self.x, kind="stable")
         return Profile(self.x[idx], self.C[idx],
                        None if self.sigma is None else self.sigma[idx],
                        self.raw, self.spec, self.source, list(self.notes),
-                       None if self.row_index is None else self.row_index[idx])
+                       None if self.row_index is None else self.row_index[idx],
+                       None if self.excluded is None else self.excluded[idx])
 
     def column(self, name: str) -> np.ndarray:
         """Another column of the source table, aligned point for point with x.

@@ -46,9 +46,10 @@ The first start creates a separate Python environment in a `.venv` folder
 inside the Diffusor folder and downloads the required libraries into it, so no
 other Python installation on the computer is changed. This takes a few minutes
 and needs an internet connection. Later starts open the application directly.
-The first start also places a **Diffusor** shortcut with the application icon
-next to the batch file; it can be moved to the desktop or the taskbar. If the
-folder is moved, start once with **Start Diffusor.bat** to recreate the
+The first start also places a **Diffusor** shortcut with the application icon in the
+Start Menu, so Windows search finds it, and another
+next to the batch file; either can be pinned to the taskbar or copied to the desktop. If the
+folder is moved, start once with **Start Diffusor.bat** to recreate both
 shortcut. If the environment is damaged, delete the `.venv` folder and run
 **Start Diffusor.bat** again.
 
@@ -168,7 +169,11 @@ X<sub>Fe</sub>, X<sub>Fo</sub> or Fo per cent. Distances may increase in either
 direction and need not be evenly spaced. Additional columns are carried along,
 so that an anorthite column can supply the activity term for plagioclase trace
 elements. A fit window excludes points from the fit without removing them from
-the file, for example a later overgrowth at the rim.
+the file, for example a later overgrowth at the rim. Single points, or a
+group inside a box, can also be cut on the plot of the Results step (**Cut
+points** in its toolbar): a spurious analysis or the stretch across a second
+zone boundary then stays out of the fit, and out of the Monte Carlo, while it
+remains visible as a grey cross. At least three points must stay.
 
 ## Profiles from images
 
@@ -285,8 +290,19 @@ al. 2012) name the laws they were computed from.
   fit and the residuals, the diffusion coefficient, the methods text and the
   Monte Carlo draws;
 * the fitted times of all Monte Carlo draws as CSV;
-* the figure as PNG (300 dpi) and SVG;
+* the figure as PNG (300 dpi) and, for editing, as SVG and PDF (see below);
 * the methods paragraph as plain text, with the reference list of the run.
+
+**File > Export figure for Inkscape or CorelDRAW** saves the plot on screen as
+SVG, PDF or EPS, and the save button of the plot toolbar does the same for these
+three types. The files are made for editing afterwards. Text stays text, in Arial
+where it is installed. Each data point is its own group, named for its series
+and number (for example `measured_point_007`), holding the marker and its error
+bar, so one point can be selected, recoloured, enlarged or removed. A marker is
+a plain path, not a copy of a shared shape. The fit, the Monte Carlo bands, the
+legend and each axis have names as well. In Inkscape, **Edit > Find** with the
+name of a point selects it. CorelDRAW 2018 and later opens the SVG directly;
+the PDF is the alternative where fonts matter, because it embeds them.
 
 **Help > All references** lists every source used anywhere in the program, with
 a search field, and saves the list as BibTeX.

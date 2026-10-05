@@ -114,6 +114,7 @@ class MonteCarloResult:
     contributions: Dict[str, float] = field(default_factory=dict)
     warnings: List[str] = field(default_factory=list)
     workers: int = 1                            # processes that fitted the draws
+    base_fit: Optional[object] = None           # the FitResult at t_best, from the same model and data
 
     # -- statistics ---------------------------------------------------------
     @property
@@ -152,7 +153,7 @@ class MonteCarloResult:
 
     def summary(self) -> str:
         lines = [
-            f"best fit          : {human_time(self.t_best)}",
+            f"best fit          : {human_time(self.t_best)}  (the data as measured, nothing perturbed)",
             f"Monte Carlo median: {human_time(self.median)}  ({self.n_draws} draws, seed {self.seed})",
             f"  68% interval    : {human_time(self.p16)} to {human_time(self.p84)}",
             f"  95% interval    : {human_time(self.p2_5)} to {human_time(self.p97_5)}",
@@ -459,7 +460,7 @@ def run(model: DiffusionModel, x_data, C_data, sigma=None, *,
     times = np.array([r["t"] for r in kept])
     profiles = [r["C_model"] for r in kept[:keep_profiles]]
     res = MonteCarloResult(
-        times=times, t_best=base.t_seconds, n_draws=len(kept),
+        times=times, t_best=base.t_seconds, base_fit=base, n_draws=len(kept),
         n_failed=n_failed, seed=seed, budget=budget,
         profiles=np.array(profiles) if profiles else None,
         x_profiles=x_data, warnings=list(base.warnings) + notes, workers=n_workers)

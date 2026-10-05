@@ -161,7 +161,7 @@ QUOTED_ERRORS = {
     'zrn_Ti_cherniak2007_perp_c': ('Cherniak & Watson (2007) abstract: Q = 754 +/- 56 kJ/mol; results text: '
                                    'log D0 = 2.52 +/- 1.72 (confidence level not stated)'),
     'mnz_Pb_cherniak2004': ('Cherniak et al. (2004) abstract: Q = 592 +/- 39 kJ/mol (the results text and Fig. 3 '
-                            'caption print 594 +/- 39; the printed log D0 errors disagree, +/- 0.014 in the text and '
+                            'caption print 594 +/- 39; the log D0 error is printed as +/- 0.014 in the text and '
                             '+/- 1.350 in the Fig. 3 caption; confidence level not stated)'),
     'xtm_Sm_cherniak2006': ('Cherniak (2006) abstract: Q = 441 +/- 12 kJ/mol; results text: log D0 = -3.824 +/- 0.420 '
                             '(confidence level not stated)'),

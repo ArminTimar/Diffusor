@@ -340,9 +340,9 @@ The Kizimen conditions, 850 ± 57 °C and NNO +1.3 ± 0.35, are the mean and
 standard deviation of 21 magnetite-ilmenite pairs from the andesites in
 Supplementary Data 3 of Ostorero et al. (2022). The temperature statistics are
 those printed in the table. The ΔNNO statistics (1.28 ± 0.35 before rounding)
-are computed from its ΔNNO column, which has no mean. The main text of that paper gives the andesite and
-dacite temperatures in reverse order; the table and the caption of its Fig. 3
-agree with each other and are used here. Ostorero et al. modelled this reverse
+are computed from its ΔNNO column, which has no mean. The main text of that paper lists 832 ± 37 °C for the
+andesite and 850 ± 57 °C for the dacite, while the table and the caption of its
+Fig. 3 give 850 ± 57 °C for the andesite; Diffusor uses the table and caption values. Ostorero et al. modelled this reverse
 zone at 850 °C with the Ganguly & Tazzoli (1994) law without an fO2 term. With
 the same law and temperature, Diffusor fits 2.5 years to the microprobe
 traverse, within the published interval. The remaining difference is expected, because Ostorero et al. fitted

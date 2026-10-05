@@ -36,6 +36,37 @@ def test_every_law_and_family_has_a_rendering_latex_equation():
         assert render_png(family_latex(f).split(r";\quad ")[0])[:4] == b"\x89PNG"
 
 
+def test_equation_images_have_one_picture_pixel_per_screen_pixel():
+    """Qt stretches a picture to the width and height it is given, which made the typeset
+    laws soft on a scaled display. The picture is drawn at the screen's pixel ratio and sized
+    in logical pixels, so the two agree to within the rounding of the size."""
+    import base64
+    from diffusor.coefficients.latex import equation_html, png_size
+    for key in ("opx_FeMg_dias2025", "ol_FeMg_dohmen_chakraborty2007_tamed"):
+        for ratio in (1.0, 1.25, 1.5, 2.0):
+            html = equation_html(coefficient_latex(get(key)), max_width=640, ratio=ratio)
+            tags = re.findall(r"base64,([^']+)' width='(\d+)' height='(\d+)'", html)
+            assert tags
+            for data, w, h in tags:
+                pw, ph = png_size(base64.b64decode(data))
+                assert abs(pw / ratio - int(w)) <= 0.5 and abs(ph / ratio - int(h)) <= 0.5, (key, ratio)
+                assert int(w) <= 640, (key, ratio)
+
+
+def test_long_equations_are_cut_at_operators_and_every_piece_renders():
+    from diffusor.coefficients.latex import BASE_DPI, wrap_equation
+    law = equation_lines(coefficient_latex(get("ol_FeMg_dohmen_chakraborty2007_tamed")))[0]
+    pieces = wrap_equation(law, 600, BASE_DPI)
+    assert len(pieces) >= 2
+    for piece in pieces:
+        assert render_png(piece)[:4] == b"\x89PNG"
+    # nothing is cut inside parentheses, exponents or \left ... \right
+    assert all(p.count("(") == p.count(")") for p in pieces)
+    assert all(p.count(r"\left") == p.count(r"\right") for p in pieces)
+    # a short line is left alone
+    assert wrap_equation(r"D = 1", 600, BASE_DPI) == [r"D = 1"]
+
+
 def test_latex_carries_the_parameter_values_the_code_uses():
     assert num(262914) == "262914" and num(2.77e-7) == r"2.77\times10^{-7}" and num(555.425) == "555.425"
     s = coefficient_latex(get("cpx_FeMg_muller2013"))

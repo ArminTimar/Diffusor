@@ -248,6 +248,49 @@ def test_a_fit_runs_end_to_end_through_the_interface(app):
     w.close()
 
 
+def test_the_headline_time_is_the_best_fit_of_the_run_that_made_the_interval(app):
+    """A Fit made with one beam width, then a Monte Carlo with another, put 2.8 yr in
+    the headline and 338 d in the plot legend. The run refits the data it is given,
+    so the window must take that fit, and must say when settings changed after a Fit."""
+    from PySide6.QtWidgets import QLabel
+    from diffusor.fitting import UncertaintyBudget, fit_time, run_montecarlo
+    from diffusor.gui import main_window as mw
+    w = _load_example(app, "opx_kizimen")
+    p = w.profile
+    w.sp_beam.setValue(0.0)
+    key = w._checked_keys()[0]
+    first = fit_time(w._model(key), p.x, p.C, p.sigma, w._free_parameters())
+    w._fit_done(first)
+    for step in range(len(mw.STEPS)):            # moving between steps changes nothing
+        w._go(step)
+    assert not w._stale
+    w.sp_beam.setValue(1.25)
+    assert w._stale
+    w._rebuild_summary()
+    assert any("Run Fit again" in lab.text() for lab in w.findChildren(QLabel))
+    res = run_montecarlo(w._model(key), p.x, p.C, p.sigma, budget=UncertaintyBudget(),
+                         n_draws=12, seed=1)
+    w._mc_done(res)
+    assert not w._stale
+    assert w.fit_result.t_seconds == res.t_best != first.t_seconds
+    assert w.fit_result.t_seconds < 0.5 * first.t_seconds      # the wider beam gives a shorter time
+    w.close()
+
+
+def test_a_setting_that_only_configures_the_monte_carlo_leaves_the_fit_standing(app):
+    from diffusor.fitting import fit_time
+    w = _load_example(app, "opx_kizimen")
+    p = w.profile
+    r = fit_time(w._model(w._checked_keys()[0]), p.x, p.C, p.sigma, w._free_parameters())
+    w._fit_done(r)
+    w.sp_draws.setValue(300)
+    w.sp_seed.setValue(7)
+    assert not w._stale
+    w.sp_T.setValue(w.sp_T.value() + 10)
+    assert w._stale
+    w.close()
+
+
 def test_kizimen_dataset_is_the_real_ostorero_traverse():
     d = ds.get("opx_kizimen")
     assert d.kind == "measured" and d.citation == "ostorero2022"
@@ -535,7 +578,7 @@ def test_example_resolution_replaces_what_the_last_profile_left(app):
     from PySide6.QtCore import Qt
     w = _load_example(app, "opx_kizimen")
     # Ostorero et al. (2022): microprobe with a focused beam of 2 um, sigma = d / 4
-    assert w.cmb_resolution.currentText() == "Microprobe, defocused beam"
+    assert w.cmb_resolution.currentText() == "Microprobe, stated beam diameter"
     assert w.sp_width.value() == pytest.approx(2.0)
     assert w.sp_beam.value() == pytest.approx(0.5)
     # a synthetic file was made without broadening, so the beam must go back to zero

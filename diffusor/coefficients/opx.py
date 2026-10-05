@@ -194,7 +194,7 @@ _add(DiffusionCoefficient(
     reference_axis="c",
     requires=("XFe",),
     needs_fo2=True, fo2_unit="Pa",
-    T_range=Range(1173.15, 1373.15, "K (900-1100 C as in section 4.3. The paper is not consistent: abstract 950-1100 C, text above eq. 23 870-1100 C)"),
+    T_range=Range(1173.15, 1373.15, "K (900-1100 C, the interval Section 4.3 gives for both equations. The new experiments ran at 950-1100 C, and Section 4.3 fits them together with the refitted Dohmen et al. (2016) data, which reach lower temperatures (the sentence introducing eq. 23 names 870 C))"),
     P_range=Range(1.0e5, 101325.0, "Pa (atmospheric; 1 bar to 1 atm)"),
     fo2_range=Range(-11.0, -7.0, "log10 Pa"),
     X_range=Range(0.1, 0.4, "XFe"),
@@ -341,8 +341,8 @@ for _el, _D0, _Q, _sQ, _eq, _inv_n in [
         verified=True,
         verified_from=(
             f"read from the paper PDF: abstract and eq. {_eq} (p. 93)"
-            + (". The equation is transcribed as printed, but the paper never defines the "
-               "reference fugacity fO2[Pa]_0. It states the laws for 'fO2 close to the "
+            + (". The equation is transcribed as printed. The reference fugacity "
+               "fO2[Pa]_0 is not defined in the text; the paper states the laws for 'fO2 close to the "
                "iron-wustite (IW) buffer' and the abstract calls them laws 'along the IW "
                "buffer', so Diffusor takes fO2_0 as the IW buffer at T. That choice is an "
                "interpretation, not part of the source. Check against the 12 Lu values of "
@@ -472,7 +472,7 @@ _add(DiffusionCoefficient(
     verified_from=("Ganguly & Tazzoli (1994) eq. 12 (p. 934), read from the rendered page on 2 October "
                    "2026, and Ostorero et al. (2022) eq. 1. The fO2 term is the form of Allan et al. "
                    "(2013) as quoted by Dohmen et al. (2016) eq. 3; Ganguly & Tazzoli only speculate "
-                   "an fO2^(1/6) dependence (p. 935), and Allan et al. (2013) is not in the library"),
+                   "an fO2^(1/6) dependence (p. 935), and Diffusor did not consult Allan et al. (2013) itself"),
     secondary_citations=("dohmen2016", "ostorero2022"),
     calibration_notes=("The first three terms are Ganguly & Tazzoli (1994) eq. 12, valid for 500-800 C, "
                        "fO2 from the iron-wustite (IW) buffer to 0.8 log units above IW, and XFe 0.10-0.50. "
@@ -534,9 +534,9 @@ for _axis, _label, _logD0, _slog, _Q, _sQ in [
         verified=True,
         verified_from="read from the paper PDF: abstract and Table 3",
         notes=("25Mg self-diffusion by SIMS depth profiling at the IW buffer on orthoenstatite. "
-               "The paper is inconsistent about the host composition: the abstract and the "
-               "microprobe Table 1 give En88Fs12 (Fs 0.11-0.13 for the three surfaces), the "
-               "captions of Tables 2 and 3 say En90Fs10. Diffusor shows the Table 3 caption value "
+               "The abstract and the "
+               "microprobe Table 1 give the host as En88Fs12 (Fs 0.11-0.13 for the three surfaces), "
+               "while the captions of Tables 2 and 3 give En90Fs10. Diffusor shows the Table 3 caption value "
                "(XFs = 0.10) because the parameters come from that table; the difference does not "
                "enter the calculation. The anisotropy in D is very small (the three axes lie "
                "within 0.35 log units of each other at 900 C, p. 394), but the c-axis activation "

@@ -101,16 +101,16 @@ def _dohmen2016_fs9(c):
 
 
 def _dias2025(c):
-    return (rf"\log_{{10}} f_{{O_2}} > -10:\ D = {num(_p(c, 'D0_1'))}\left(\frac{{f_{{O_2}}}}{{10^{{-7}}}}\right)^{{{num(_p(c, 'n_1'))}}}"
-            rf"{arr_exp(_p(c, 'Q_1'))}\,10^{{m_1(X_{{Fe}} - 0.1)}},\ m_1 = {num(_p(c, 'm1_slope'))}\,\frac{{10^4}}{{T}}"
+    return (rf"\mathrm{{for}}\ \log_{{10}} f_{{O_2}} > -10;\ D = {num(_p(c, 'D0_1'))}\left(\frac{{f_{{O_2}}}}{{10^{{-7}}}}\right)^{{{num(_p(c, 'n_1'))}}}"
+            rf"{arr_exp(_p(c, 'Q_1'))}\,10^{{m_1(X_{{Fe}} - 0.1)}};\ \mathrm{{where}}\ m_1 = {num(_p(c, 'm1_slope'))}\,\frac{{10^4}}{{T}}"
             rf"{term(_p(c, 'm1_int'), '')};\ "
-            rf"\log_{{10}} f_{{O_2}} \leq -10:\ D = {num(_p(c, 'D0_2'))}{arr_exp(_p(c, 'Q_2'))}\,10^{{m_2(X_{{Fe}} - 0.1)}},"
-            rf"\ m_2 = {num(_p(c, 'm2_slope'))}\,\frac{{10^4}}{{T}}{term(_p(c, 'm2_int'), '')}\quad (f_{{O_2}}\ \mathrm{{in\ Pa}})")
+            rf"\mathrm{{for}}\ \log_{{10}} f_{{O_2}} \leq -10;\ D = {num(_p(c, 'D0_2'))}{arr_exp(_p(c, 'Q_2'))}\,10^{{m_2(X_{{Fe}} - 0.1)}};"
+            rf"\ \mathrm{{where}}\ m_2 = {num(_p(c, 'm2_slope'))}\,\frac{{10^4}}{{T}}{term(_p(c, 'm2_int'), '')}\quad (f_{{O_2}}\ \mathrm{{in\ Pa}})")
 
 
 def _dias2024(c):
-    return (rf"D = {num(_p(c, 'D0'))}\,{arr_exp(_p(c, 'Q'))}\,10^{{m(X_{{Fe}} - 0.1)}},\ "
-            rf"m = \frac{{{num(_p(c, 'm_slope'))}}}{{T}}{term(_p(c, 'm_int'), '')}")
+    return (rf"D = {num(_p(c, 'D0'))}\,{arr_exp(_p(c, 'Q'))}\,10^{{m(X_{{Fe}} - 0.1)}};\ "
+            rf"\mathrm{{where}}\ m = \frac{{{num(_p(c, 'm_slope'))}}}{{T}}{term(_p(c, 'm_int'), '')}")
 
 
 def _dias_ree(c):
@@ -236,13 +236,20 @@ def family_latex(f) -> str:
     return law + r";\quad " + matrix
 
 
-def render_png(latex: str, dpi: int = 160, fontsize: int = 15) -> bytes:
+# Typeset size: 15 pt at 100 dpi is a cap height of about 21 logical pixels, which keeps the
+# subscripts and the fractions readable next to 13 px interface text.
+BASE_DPI = 100
+FONT_SIZE = 15
+_TEXT_COLOUR = "#1f2a30"
+
+
+def render_png(latex: str, dpi: float = BASE_DPI, fontsize: int = FONT_SIZE) -> bytes:
     """PNG bytes of the typeset equation (Computer Modern), for the interface."""
     import io
     import matplotlib
     from matplotlib.figure import Figure
     from matplotlib.backends.backend_agg import FigureCanvasAgg
-    with matplotlib.rc_context({"mathtext.fontset": "cm", "text.color": "#1f2a30"}):
+    with matplotlib.rc_context({"mathtext.fontset": "cm", "text.color": _TEXT_COLOUR}):
         fig = Figure(figsize=(0.01, 0.01))
         FigureCanvasAgg(fig)
         fig.text(0, 0, f"${latex}$", fontsize=fontsize)
@@ -283,14 +290,116 @@ def png_size(png: bytes):
     return struct.unpack(">II", png[16:24])
 
 
-def equation_html(latex: str, max_width: int = 700, dpi: int = 150) -> str:
-    """<img> tags, one per line of the equation, as inline data for Qt rich text."""
+def _text_width(latex: str, dpi: float, fontsize: int = FONT_SIZE) -> float:
+    """Width in pixels of the typeset equation at ``dpi``, measured without drawing it."""
+    import matplotlib
+    from matplotlib.backends.backend_agg import FigureCanvasAgg
+    from matplotlib.figure import Figure
+    from matplotlib.font_manager import FontProperties
+    with matplotlib.rc_context({"mathtext.fontset": "cm"}):
+        renderer = FigureCanvasAgg(Figure(dpi=dpi)).get_renderer()
+        return renderer.get_text_width_height_descent(
+            f"${latex}$", FontProperties(size=fontsize), ismath=True)[0]
+
+
+def _break_points(latex: str) -> list:
+    """Indices of the top-level ' + ' and ' - ' where a long line may be cut.
+
+    Operators inside braces (exponents, subscripts, fractions), parentheses or between
+    \\left and \\right are never cut, and neither is a sign that opens a term after '=',
+    '(' or ','."""
+    points, depth, fence, paren, i = [], 0, 0, 0, 0
+    while i < len(latex):
+        if latex.startswith(r"\left", i):
+            fence += 1
+            i += 5
+            continue
+        if latex.startswith(r"\right", i):
+            fence -= 1
+            i += 6
+            continue
+        ch = latex[i]
+        if ch == "{":
+            depth += 1
+        elif ch == "}":
+            depth -= 1
+        elif ch == "(":
+            paren += 1
+        elif ch == ")":
+            paren -= 1
+        elif (depth == 0 and fence == 0 and paren == 0 and ch in "+-" and 0 < i < len(latex) - 1
+              and latex[i - 1] == " " and latex[i + 1] == " "
+              and latex[:i].rstrip()[-1:] not in "=(,:+-<>"
+              and not latex[:i].rstrip().endswith(("\\", r"\leq", r"\geq"))):
+            points.append(i)
+        i += 1
+    return points
+
+
+def wrap_equation(latex: str, max_px: float, dpi: float = BASE_DPI) -> list:
+    """One equation line cut into pieces that each fit in ``max_px`` pixels at ``dpi``.
+
+    The cuts are at top-level operators, so every piece is valid on its own, and the
+    continuation lines are indented. A line with no usable cut is returned whole."""
+    if _text_width(latex, dpi) <= max_px:
+        return [latex]
+    points = _break_points(latex)
+    pieces, start, prefix = [], 0, ""
+    while True:
+        rest = prefix + latex[start:]
+        if _text_width(rest, dpi) <= max_px:
+            pieces.append(rest.strip())
+            return pieces
+        later = [p for p in points if p > start]
+        if not later:
+            pieces.append(rest.strip())
+            return pieces
+        best = later[0]
+        for p in later:
+            if _text_width(prefix + latex[start:p], dpi) > max_px:
+                break
+            best = p
+        pieces.append((prefix + latex[start:best]).strip())
+        start, prefix = best, r"\quad "
+
+
+def pixel_ratio() -> float:
+    """Device pixels per logical pixel of the main screen (1 without Qt or a screen)."""
+    try:
+        from PySide6.QtGui import QGuiApplication
+        screen = QGuiApplication.primaryScreen()
+        return max(1.0, float(screen.devicePixelRatio())) if screen is not None else 1.0
+    except Exception:
+        return 1.0
+
+
+_HTML_CACHE: dict = {}
+
+
+def equation_html(latex: str, max_width: int = 700, ratio: float = None) -> str:
+    """<img> tags, one per line of the equation, as inline data for Qt rich text.
+
+    The pictures are drawn with one pixel for every pixel of the screen and given their
+    size in logical pixels, so Qt shows them as they are. Pictures drawn at a fixed
+    resolution and then stretched or shrunk by Qt look soft on a scaled display.
+    Lines wider than ``max_width`` logical pixels are cut at operators."""
     import base64
+    ratio = pixel_ratio() if ratio is None else float(ratio)
+    key = (latex, max_width, ratio)
+    if key in _HTML_CACHE:
+        return _HTML_CACHE[key]
+    dpi = BASE_DPI * ratio
     tags = []
     for line in equation_lines(latex):
-        png = render_png(line, dpi=dpi)
-        w, h = png_size(png)
-        scale = min(1.0, max_width / w)
-        tags.append(f"<img src='data:image/png;base64,{base64.b64encode(png).decode()}' "
-                    f"width='{int(w * scale)}' height='{int(h * scale)}'>")
-    return "<br>".join(tags)
+        for piece in wrap_equation(line, max_width * ratio, dpi):
+            png = render_png(piece, dpi=dpi)
+            w, h = png_size(png)
+            if w > max_width * ratio:
+                # nothing to cut at: draw it smaller instead of stretching the picture
+                png = render_png(piece, dpi=dpi * max_width * ratio / w)
+                w, h = png_size(png)
+            tags.append(f"<img src='data:image/png;base64,{base64.b64encode(png).decode()}' "
+                        f"width='{round(w / ratio)}' height='{round(h / ratio)}'>")
+    html = "<br>".join(tags)
+    _HTML_CACHE[key] = html
+    return html

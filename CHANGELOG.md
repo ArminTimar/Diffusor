@@ -4,6 +4,32 @@ What changed between releases, newest first. The text under a version heading
 is what goes into the GitHub release, so it is written for someone deciding
 whether to update. Commit messages hold the details.
 
+## Unreleased
+
+### Fixed
+
+- **One best-fit time on screen.** After a Fit, a change of settings and a Monte
+  Carlo run, the sidebar could show the earlier fit (for example 2.8 yr) while
+  the plot legend showed the best fit of the Monte Carlo run (338 d). The run
+  refits the data with the current settings, so the window now takes that fit
+  as its best fit, and the sidebar names the median of the draws separately.
+  A setting changed after a result was computed now says so in the sidebar
+  until the next Fit.
+- **Equations are sharp on scaled displays.** The typeset laws were drawn at a
+  fixed resolution and stretched by the window, so they looked soft, and small
+  exponents could disappear. They are now drawn at the screen's own pixel
+  density and a little smaller, and long laws are broken over several lines at
+  plus and minus signs instead of being shrunk.
+- **Beam preset without a mineral in its hint.** "Microprobe, defocused beam"
+  explained itself with feldspar studies, which was confusing for the
+  orthopyroxene example. It is now "Microprobe, stated beam diameter" and asks
+  for the diameter given in the study's methods.
+- **Source notes say what the papers state.** Notes no longer call a paper
+  inconsistent. Where two places in a paper give different values, the note says
+  what each gives and which one Diffusor uses. The Dias et al. (2025) opx law
+  uses 900-1100 C, the interval of its Section 4.3. Reference notes no longer
+  name local files.
+
 ## 0.3.0 (5 October 2026)
 
 ### Fixed

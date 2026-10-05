@@ -78,9 +78,9 @@ RESOLUTION_PRESETS = [
     ("Microprobe, focused beam", None, 0.0, 0.6,
      "Ganguly et al. (1988) found sigma rarely exceeds 0.6 um on a modern microprobe. "
      "Profiles longer than about 15 um are barely affected."),
-    ("Microprobe, defocused beam", "spot", 5.0, None,
-     "Feldspar is often measured with a 5 um beam (Chamberlain et al. 2014, "
-     "Grocolas et al. 2025)."),
+    ("Microprobe, stated beam diameter", "spot", 5.0, None,
+     "Enter the beam diameter given in the analytical methods of the study. The "
+     "starting value is only a placeholder."),
     ("LA-ICP-MS spot", "spot", 10.0, None,
      "Druitt et al. (2012) used a 10 um laser spot."),
     ("LA-ICP-MS line scan", "slit", 7.5, None,
@@ -322,6 +322,7 @@ class MainWindow(QMainWindow):
         self.fit_result = None
         self.mc_result = None
         self.compare_results = None
+        self._stale = False             # a setting changed after the result was computed
         self._jobs: List = []           # (thread, worker) pairs kept alive until finished
         self._update_job = None         # the (thread, worker) of a running update check
         self._update_manual = False     # the user asked for it, so say the outcome
@@ -362,6 +363,7 @@ class MainWindow(QMainWindow):
         self._build_menu()
         self._on_mineral_changed()
         self._on_resolution_changed()
+        self._watch_inputs()
         self._go(DATA)
 
     # ================================================================ chrome
@@ -1048,9 +1050,12 @@ class MainWindow(QMainWindow):
             self.summary_layout.addWidget(head)
             res = WrapLabel("")
             txt = (f"<b style='font-size:19px;color:{theme.ACCENT}'>"
-                   f"{human_time(self.fit_result.t_seconds)}</b>")
+                   f"{human_time(self.fit_result.t_seconds)}</b>"
+                   f" <span style='color:{theme.TEXT_MUTED};font-size:11.5px'>best fit</span>")
             if self.mc_result is not None:
-                txt += (f"<br><span style='color:{theme.TEXT}'>68%: "
+                txt += (f"<br><span style='color:{theme.TEXT}'>Monte Carlo median "
+                        f"{human_time(self.mc_result.median)}</span>"
+                        f"<br><span style='color:{theme.TEXT}'>68%: "
                         f"{human_time(self.mc_result.p16)} to "
                         f"{human_time(self.mc_result.p84)}</span>"
                         f"<br><span style='color:{theme.TEXT_MUTED};font-size:11.5px'>95%: "
@@ -1059,6 +1064,9 @@ class MainWindow(QMainWindow):
             txt += (f"<br><span style='color:{theme.TEXT_FAINT};font-size:11px'>"
                     f"reduced chi2 {self.fit_result.stats.reduced_chi2:.2f} &middot; "
                     f"R2 {self.fit_result.stats.r_squared:.4f}</span>")
+            if self._stale:
+                txt += (f"<br><span style='color:{theme.WARN};font-size:11.5px'>"
+                        "A setting changed after this was computed. Run Fit again.</span>")
             res.setText(txt)
             self.summary_layout.addWidget(res)
             self.summary_layout.addSpacing(6)
@@ -1704,6 +1712,26 @@ class MainWindow(QMainWindow):
                                     + why + ".")
         self.sp_nodes.setEnabled(not ok)
 
+    # --- results that no longer match the settings -------------------------------
+    def _watch_inputs(self):
+        """Note when any setting changes after a result was computed.
+
+        A fit stays on screen until the next one, so without this a changed setting
+        leaves a number that belongs to the old settings next to the new ones."""
+        # these only configure a Monte Carlo run, not the fitted time
+        skip = {self.sp_draws, self.sp_seed, self.sp_cores, self.chk_contrib}
+        for kind, signal in ((QDoubleSpinBox, "valueChanged"), (QSpinBox, "valueChanged"),
+                             (QComboBox, "currentIndexChanged"), (QCheckBox, "toggled"),
+                             (QListWidget, "itemChanged")):
+            for w in self.pages.findChildren(kind):
+                if w not in skip:
+                    getattr(w, signal).connect(self._inputs_changed)
+
+    def _inputs_changed(self, *_):
+        if self.fit_result is not None and not self._stale:
+            self._stale = True
+            self._rebuild_summary()
+
     # --- resolution --------------------------------------------------------------
     def _on_resolution_changed(self):
         label, kind, width, sigma, hint = RESOLUTION_PRESETS[self.cmb_resolution.currentIndex()]
@@ -2030,6 +2058,7 @@ class MainWindow(QMainWindow):
         self.fit_result = res
         self.mc_result = None
         self.compare_results = None
+        self._stale = False
         self.plot.show_fit(res, None, y_label=self._y_label())
         self._log(f"fit complete: {human_time(res.t_seconds)}\nsolver: {res.route}"
                   + "".join(f"\n{w}" for w in res.warnings))
@@ -2069,6 +2098,7 @@ class MainWindow(QMainWindow):
         self.plot.show_comparison(ok, y_label=self._y_label())
         if ok:
             self.fit_result = next(iter(ok.values()))
+            self._stale = False
         self._rebuild_summary()
         self._log("comparison complete\n" + "\n".join(
             f"{k}: {'failed' if isinstance(r, Exception) else human_time(r.t_seconds)}"
@@ -2138,11 +2168,17 @@ class MainWindow(QMainWindow):
     def _mc_done(self, res):
         self._busy(False)
         self.mc_result = res
-        if self.fit_result is None:
+        # The run refits the data it was given, so its best fit is the one for these
+        # settings. An earlier Fit may have been made with other settings, and the
+        # headline, the plot legend and the histograms must all show the same time.
+        if res.base_fit is not None:
+            self.fit_result = res.base_fit
+        elif self.fit_result is None:
             from ..fitting import fit_time
             self.fit_result = fit_time(self._model(self._checked_keys()[0]), self.profile.x,
                                        self.profile.C, self.profile.sigma,
                                        self._free_parameters())
+        self._stale = False
         self.plot.finish_monte_carlo(res, self._best_curve(res))
         self._rebuild_summary()
         self._log(f"Monte Carlo complete: median {human_time(res.median)}, 68% "

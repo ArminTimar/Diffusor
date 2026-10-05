@@ -80,8 +80,9 @@ DATASETS: List[ExampleDataset] = [
             '21 magnetite-ilmenite pairs from the andesites in Supplementary Data 3. The '
             'delta NNO mean and standard deviation are computed from the delta NNO column of '
             'that table, which prints no mean for it. The main text of the paper gives the '
-            'andesite and dacite temperatures in reverse order, 832 +/- 37 and 850 +/- 57 C. '
-            'The table and the Fig. 3 caption agree with each other and are used here.'),
+            'andesite and dacite temperatures as 832 +/- 37 and 850 +/- 57 C, while Supplementary '
+            'Data 3 and the Fig. 3 caption give 850 +/- 57 C for the andesite. Diffusor uses the '
+            'table and caption values.'),
         spec=dict(distance_column="Distance_from_rim_um", column_a="FeO_wt", column_b="MgO_wt",
                   sigma_a_column="FeO_err", sigma_b_column="MgO_err",
                   mode="A/(A+B)", oxide_a="FeO", oxide_b="MgO", distance_unit="um",
@@ -90,7 +91,7 @@ DATASETS: List[ExampleDataset] = [
                       buffer="NNO", delta_buffer=1.3, sigma_delta=0.35,
                       coefficient="opx_FeMg_ganguly_tazzoli1994_nofo2", axis="b",
                       geometry="plane", composition_dependent=True,
-                      resolution="Microprobe, defocused beam", beam_width_um=2.0),
+                      resolution="Microprobe, stated beam diameter", beam_width_um=2.0),
         expected=(
             'Ostorero et al. (2022, Supplementary Data 4) modelled this reverse zone at 850 '
             '± 57 C with the Ganguly & Tazzoli (1994) law without an fO2 term and got 2.32 '
@@ -122,8 +123,9 @@ DATASETS: List[ExampleDataset] = [
                'al. (2008) thermometer, as printed there (850 and 57 C). Recomputed from the 21 '
                'values they are 851.0 C and 59.1 C (sample standard deviation). The 57 C is the '
                'scatter between pairs, not the uncertainty of the thermometer. The main text '
-               'swaps the andesite and dacite values (832 +/- 37 and 850 +/- 57 C). The table '
-               'and the Fig. 3 caption agree and are used here.'),
+               'lists 832 +/- 37 C for the andesite and 850 +/- 57 C for the dacite, while the table '
+               'and the Fig. 3 caption give 850 +/- 57 C for the andesite. Diffusor uses the '
+               'table and caption values.'),
             P=('Earlier Kizimen studies cited by Ostorero et al. (2022) put storage at 1 to '
                '3 kbar. 200 +/- 50 MPa covers that range at 2 sigma.'),
             fO2=('Mean and sample standard deviation of delta NNO for the same 21 oxide pairs, '

@@ -190,10 +190,10 @@ for _plane, _xor, _D0, _EA in _SCHAFFER:
             "coefficients (eq. 3) are 5-10 times faster normal to (001) and almost 100 times "
             "faster normal to (010) (p. 1313).",
             "The Arrhenius parameters printed in the abstract and on p. 1310 were extracted from "
-            "the 800, 950 and 1000 C data only. A log-linear fit to Table 3 at those three "
-            "temperatures does not reproduce them (it gives Q = 201, 208, 293 and 282 kJ/mol for "
-            "the four laws, against the printed 179, 182, 272 and 269). This is an inconsistency "
-            "inside the paper, so the printed parameters are used as published.",
+            "the 800, 950 and 1000 C data only. A log-linear fit by Diffusor to Table 3 at "
+            "those three temperatures gives Q = 201, 208, 293 and 282 kJ/mol for the four laws, "
+            "against the printed 179, 182, 272 and 269. Diffusor does not know how the authors "
+            "weighted or selected the data, so it uses the printed parameters as published.",
             "The 850 C data (measured D higher than the law by factors of about 1.5 to 2.2) and "
             "the anomalous 920 C data (D higher than at 950 and 1000 C; normal to (001) the law "
             "is low by a factor of about 3.5 to 3.8) were not used for the fit and are not "

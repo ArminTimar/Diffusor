@@ -1,6 +1,6 @@
 """Boundary conditions for the 1-D solvers.
 
-Types (Crank 1975, section 1.3 and section 8.4; Costa et al. 2008 section "Boundary conditions"):
+Types (Crank 1975, section 8.6 "Other boundary conditions"; Costa et al. 2008 section "Boundary conditions"):
 
 * ``dirichlet``  -- fixed concentration at the boundary (crystal rim in
   contact with an infinite melt reservoir; "open system").  The value may be

@@ -26,3 +26,6 @@ tmp/
 /references.bib
 /examples/README.md
 /tests/test_writeup.py
+
+# local verification workbooks and previews
+/outputs/

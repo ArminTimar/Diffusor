@@ -193,6 +193,8 @@ def fit_time(model: DiffusionModel, x_data, C_data, sigma=None,
         t_bounds_scan=(float(ts[0]), float(ts[-1])), success=success, message=message,
         warnings=m_final.warnings(t_best),
         route=("analytical (Crank 1975) -- " + why) if ok else ("numerical Crank-Nicolson -- " + why))
+    if stats.dof_warning():
+        res.warnings.append(stats.dof_warning())
     if t_best <= 1.05 * t_min or t_best >= 0.95 * t_max:
         res.warnings.append(
             f"the fitted time is at the edge of the search window "

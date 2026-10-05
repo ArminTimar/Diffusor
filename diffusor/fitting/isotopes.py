@@ -377,7 +377,8 @@ def fit_dilute_isotopes(model: DiluteIsotopeModel, x, concentration, sigma_conce
     if progress is not None:
         progress(1.0)
     return IsotopeFitResult(t, x, obs, sig, pred, stats, per, beta, 10.0 ** logts, chis,
-                            used.warnings(t) + resolution_warnings(logts, chis, logt, stats.chi2), labels, used)
+                            used.warnings(t) + resolution_warnings(logts, chis, logt, stats.chi2)
+                            + ([stats.dof_warning()] if stats.dof_warning() else []), labels, used)
 
 
 def _with_beta(model, beta):
@@ -413,5 +414,6 @@ def fit_coupled_isotopes(model: CoupledFeMgIsotopeModel, x, observed: Dict[str, 
     if progress is not None:
         progress(1.0)
     return IsotopeFitResult(t, x, obs, sig, pred, stats, per, None, 10.0 ** logts, chis,
-                            model.warnings() + resolution_warnings(logts, chis, logt, stats.chi2),
+                            model.warnings() + resolution_warnings(logts, chis, logt, stats.chi2)
+                            + ([stats.dof_warning()] if stats.dof_warning() else []),
                             {"XFe": "X_Fe", "d56Fe": "δ56Fe", "d26Mg": "δ26Mg"}, model)

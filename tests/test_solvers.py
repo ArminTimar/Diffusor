@@ -155,3 +155,50 @@ def test_dirichlet_boundary_can_vary_with_time():
 def test_geometry_rejects_unknown_kinds():
     with pytest.raises(ValueError):
         Geometry("hexagon")
+
+
+def test_step_between_nodes_gets_the_cell_average():
+    """A sharp interface inside a node's cell gives that node the cell-weighted average,
+    not the whole plateau, so the discretised step is not offset by up to dx/2."""
+    x = np.linspace(0.0, 1.0, 11)
+    C = step(x, 0.33, 0.0, 1.0)
+    assert C[3] == pytest.approx(0.2)                  # cell [0.25, 0.35] is 20 % right of 0.33
+    assert C[2] == 0.0 and C[4] == 1.0
+    assert step(x, 0.3, 0.0, 1.0)[3] == pytest.approx(0.5)   # 0.3 is not exactly a float node
+    assert np.allclose(step(np.linspace(0, 10, 11), 5.0, 0.0, 1.0)[4:7], [0.0, 0.5, 1.0])
+
+
+def test_off_node_step_is_as_accurate_as_an_on_node_step():
+    Dt = 4.0
+    x = make_grid(-40.0, 40.0, 161)
+    for x0 in (0.13, 0.37):
+        res = solve_1d(x, step(x, x0, 0.0, 1.0), _D, Dt, T_K=1000.0,
+                       bc_left=dirichlet(0.0), bc_right=dirichlet(1.0))
+        assert np.max(np.abs(res.C_final - analytical.step_infinite(x, x0, 0.0, 1.0, Dt))) < 2e-3
+
+
+def test_multi_step_edges_between_nodes_are_cell_averaged():
+    from diffusor.solvers.initial import multi_step
+    x = np.linspace(0.0, 1.0, 11)
+    C = multi_step(x, [0.33, 0.77], [0.0, 1.0, 3.0])
+    assert C[3] == pytest.approx(0.2) and C[7] == 1.0 and C[8] == pytest.approx(1.0 + 2.0 * 0.8)
+    assert C[0] == 0.0 and C[10] == 3.0
+
+
+def test_source_comments_carry_no_stale_crank_locators():
+    """Crank (1975) locators checked against the book: 5.4, 6.3, 7.7, 8.31, 8.33 and 8.35
+    are not the equations these comments used to cite."""
+    import pathlib
+    import re
+    import diffusor
+    root = pathlib.Path(diffusor.__file__).parent
+    stale = re.compile(r"Crank[^\n]{0,60}eqs?\.? (5\.4|6\.3|7\.7|8\.31|8\.33|8\.35)\b")
+    files = (list(root.glob("solvers/*.py")) + list(root.glob("dataio/*.py"))
+             + list(root.glob("fitting/*.py")))
+    hits = [str(p) for p in files if stale.search(p.read_text(encoding="utf-8"))]
+    assert not hits, hits
+
+
+def test_resolution_warning_says_the_threshold_is_diffusors_own():
+    msg = resolution_warning(0.1, 3.0)
+    assert "rule of thumb" in msg and "gradient width/spot size" in msg

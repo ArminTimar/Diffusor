@@ -10,14 +10,19 @@ also given in Costa et al. (2008) RiMG 69 it is cited as a secondary source.
 
 Solutions implemented
 ---------------------
-step_infinite       infinite medium, initial step at x0        Crank section 2.3.1, eq. 2.14
+step_infinite       infinite medium, initial step at x0        Crank section 2.2.3, eq. 2.14
                     (C = C_left for x < x0, C_right for x > x0)
-semi_infinite_fixed_surface   x >= 0, C(0,t) = C_s, C(x,0) = C_0   Crank section 2.4, eq. 2.45
-band_infinite       band of half-width h at C_in inside C_out   Crank section 2.3.2, eq. 2.15
+semi_infinite_fixed_surface   x >= 0, C(0,t) = C_s, C(x,0) = C_0   Crank section 2.4.2, eq. 2.45
+band_infinite       band of half-width h at C_in inside C_out   Crank section 2.2.3, eq. 2.15
 plane_sheet         -l < x < l, C(x,0)=C_0, C(+-l,t)=C_1        Crank section 4.3.2, eq. 4.17
 cylinder            0 < r < a, C(r,0)=C_0, C(a,t)=C_1          Crank section 5.3.1, eq. 5.22
 sphere              0 < r < a, C(r,0)=C_0, C(a,t)=C_1          Crank section 6.3.1, eq. 6.18
 fraction_*          fractional uptake M_t/M_inf                Crank eqs 4.18, 5.23, 6.20
+
+Symbol convention: C_0 is always the initial (uniform) concentration and C_1 the
+surface value.  Crank uses this in eq. 4.17 for the plane sheet but the reverse
+in eqs 5.22 and 6.18 (C_1 initial, C_0 at the surface); the cylinder and sphere
+functions here are written with the plane-sheet labelling.
 """
 from __future__ import annotations
 

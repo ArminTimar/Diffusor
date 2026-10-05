@@ -12,11 +12,17 @@ change of a few tens of per cent. Those standard deviations are opx 0.13,
 cpx 0.11, magnetite 0.09, olivine 0.08, plagioclase 0.06 and greyscale 0.03.
 
 Two of the traverses end before the profile has flattened: the magnetite one is
-only 1.4 and the plagioclase one 1.8 diffusion lengths 2 sqrt(Dt) from the
+only 1.5 and the plagioclase one 1.8 diffusion lengths 2 sqrt(Dt) from the
 interface to each end. Plateaus fixed at the median of the outer points then sit
 inside the true ones, the fitted step is too small and the time comes out short
-(by about 24 and 12 per cent, before noise). Those two fits leave the plateaus
+(by about 22 and 10 per cent, before noise). Those two fits leave the plateaus
 free, which is how such a profile should be fitted.
+
+Numbers recomputed on 5 October 2026 with the corrected Table 12 interpolation
+(Ti at 950 C: 4.15e-16 m2/s, 2 sqrt(Dt) = 33.9 um at 8 d). The magnetite example
+file was regenerated with that law; the other six files were unchanged by it.
+The magnetite D is evaluated at x_Ti = 0.1 (X_Usp 0.3) with a fixed value, so the
+TiO2 amplitude of the file (6.5 to 4.2 wt%) does not affect the recovered time.
 """
 from pathlib import Path
 
@@ -59,6 +65,7 @@ def test_opx_example_recovers_1_5_years():
     r, prof = _fit("opx_femg_step.csv", spec, "opx_FeMg_dias2025", cond, comp_key="XFe")
     assert 0.65 < r.t_seconds / (1.5 * SEC_PER_YEAR) < 1.5
     assert r.stats.r_squared > 0.97
+    assert r.t_seconds / SEC_PER_YEAR == pytest.approx(1.41, abs=0.03)       # README example table
 
 
 def test_cpx_example_recovers_45_days():
@@ -68,6 +75,7 @@ def test_cpx_example_recovers_45_days():
     r, _ = _fit("cpx_femg_step.csv", spec, "cpx_FeMg_muller2013", cond)
     assert 0.7 < r.t_seconds / (45 * SEC_PER_DAY) < 1.4
     assert r.stats.r_squared > 0.97
+    assert r.t_seconds / SEC_PER_DAY == pytest.approx(42.0, abs=1.0)         # README example table
 
 
 def test_plag_example_recovers_20_years():
@@ -98,14 +106,18 @@ def test_magnetite_example_recovers_8_days():
     spec = ProfileSpec("Distance_um", "TiO2_wt", None, "TiO2_err", mode="A")
     r, _ = _fit("magnetite_ti.csv", spec, "mt_Ti_vanorman_crispin2010", cond, free=FREE_PLATEAUS)
     assert 0.75 < r.t_seconds / (8 * SEC_PER_DAY) < 1.33
+    assert r.t_seconds / SEC_PER_DAY == pytest.approx(7.4, abs=0.1)          # README example table
+    # plateaus held at the outer points: the README quotes 5.5 d
+    r, _ = _fit("magnetite_ti.csv", spec, "mt_Ti_vanorman_crispin2010", cond)
+    assert r.t_seconds / SEC_PER_DAY == pytest.approx(5.5, abs=0.1)
 
 
 def test_plateaus_fixed_inside_an_unrelaxed_profile_shorten_the_time():
     """Why the magnetite and plagioclase fits leave the plateaus free.
 
     The noise-free magnetite profile still slopes at both ends of its traverse.
-    The median of the outer points sits about 0.09 wt% inside each true plateau,
-    and a step fixed there fits a narrower profile: about 6.1 d instead of 8 d.
+    The median of the outer points sits about 0.08 wt% inside each true plateau,
+    and a step fixed there fits a narrower profile: about 6.2 d instead of 8 d.
     Freeing the plateaus recovers the true time exactly.
     """
     cond = Conditions(T_K=950 + 273.15, P_Pa=1.0e5, log_fo2_bar=-11.0, X={"xTi": 0.1})
@@ -141,6 +153,7 @@ def test_olivine_example_recovers_120_days():
         bc_right=dirichlet(ic.params["C_right"]), comp_key="XFe", n_nodes=301)
     r = fit_time(model, prof.x, xfe, prof.sigma / 100.0, free_parameters=("t", "x0"))
     assert 0.75 < r.t_seconds / (120 * SEC_PER_DAY) < 1.3
+    assert r.t_seconds / SEC_PER_DAY == pytest.approx(116.0, abs=2.0)        # README example table
 
 
 def test_greyscale_example_calibrates_and_fits():
@@ -160,6 +173,7 @@ def test_greyscale_example_calibrates_and_fits():
                            bc_right=dirichlet(ic.params["C_right"]), n_nodes=301)
     r = fit_time(model, x, C, sigma, free_parameters=("t", "x0"))
     assert 0.85 < r.t_seconds / (3.0 * SEC_PER_YEAR) < 1.15
+    assert r.t_seconds / SEC_PER_YEAR == pytest.approx(3.0, abs=0.05)        # README example table
 
 
 def test_comparing_two_coefficients_gives_different_times():

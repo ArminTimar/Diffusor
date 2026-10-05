@@ -214,7 +214,8 @@ def coefficient_html(c) -> str:
         d.h("Parameters")
         rows = []
         for p in c.params.values():
-            unc = f"± {p.sigma:g} ({'2σ' if p.sigma_level == '2s' else '1σ'})" if p.sigma else "not given"
+            level = {"2s": "2σ", "unstated": "level not stated, sampled as 1σ"}.get(p.sigma_level, "1σ")
+            unc = f"± {p.sigma:g} ({level})" if p.sigma else "not given"
             rows.append((esc(p.name), f"<span class='num'>{p.value:g}</span>", unc,
                          esc(p.unit), esc(p.description)))
         d.table(["Name", "Value", "Uncertainty", "Unit", "Meaning"], rows)

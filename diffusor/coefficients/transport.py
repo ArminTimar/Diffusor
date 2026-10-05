@@ -11,7 +11,9 @@ eq. 2, and by Oeser et al. 2026, eq. 4):
     D_ij = D*_i delta_ij - D*_i X_i (D*_j - D*_n) / sum_k(X_k D*_k)
 
 with component n dependent. For two components this reduces to the
-binary interdiffusion coefficient (Oeser et al. 2026, eq. 6)
+binary interdiffusion coefficient (Oeser et al. 2026, eq. 6; Borinski et al.
+2012, eq. 8, for the ideal binary, with their eq. 1 as the ideal multicomponent
+matrix; their eq. 2 is the non-ideal matrix)
 
     D_AB = D*_A D*_B / (X_A D*_A + X_B D*_B)
 
@@ -23,6 +25,11 @@ solution multiplies the binary form by the thermodynamic factor
 Only equal valences are handled: the printed forms of the general equation
 differ in where the valences enter, and every application here (Fe, Mg, Mn
 and Ca in garnet; Fe and Mg isotopes in olivine) exchanges divalent ions.
+
+A law built here is a calculation from two fitted tracer laws, not a fit of its
+own. Its composition range (``X_range``) is the mathematical domain of the
+formula unless the caller passes the range the tracer laws were fitted over; the
+tracer coefficients are assumed independent of composition.
 
 The tracer coefficients of a family must have been extracted with the same
 formalism they are used in. Chakraborty & Ganguly (1992, p. 79) make this

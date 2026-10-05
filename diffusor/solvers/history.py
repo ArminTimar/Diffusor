@@ -6,8 +6,9 @@ replacing ``D t`` with the *effective* integral
 
     Dt_eff = integral_0^t D(T(t')) dt'
 
-(Crank 1975, section 7.2 "Time-dependent diffusion coefficients", eq. 7.7 substitution
-``dT = D(t) dt``; used in geospeedometry by Lasaga 1983 and reviewed by Costa
+(Crank 1975, section 7.1 "Time-dependent diffusion coefficients", eqs 7.2-7.3,
+substitution ``dT = D(t) dt``, which reduces eq. 7.1 to dC/dT = d2C/dx2 (7.4) and
+is exact only when D depends on time alone; used in geospeedometry by Lasaga 1983 and reviewed by Costa
 et al. 2008.)  The numerical solver instead evaluates D at every time step, so
 both routes give identical answers for constant initial/boundary geometry.
 """
@@ -79,7 +80,7 @@ def effective_Dt(D_of_T: Callable[[np.ndarray], np.ndarray], history: ThermalHis
     """integral_0^t D(T(t')) dt' by the trapezoidal rule on a fine time grid.
 
     ``D_of_T`` must accept an array of temperatures (K) and return D (m^2/s).
-    Source: Crank (1975) eq. 7.7; Lasaga (1983).
+    Source: Crank (1975) eqs 7.2-7.3 (T = integral of D(t') dt'); Lasaga (1983).
     """
     if history.is_isothermal:
         return float(D_of_T(np.array([history.temps_K[0]]))[0]) * t_total

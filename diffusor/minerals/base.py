@@ -9,7 +9,7 @@ A :class:`Mineral` tells the rest of Diffusor
   (X_Fe, X_An, X_Fo, x_Ti ...), and how to build it from two measured columns,
 * which species (diffusing components) can be modelled.
 
-Composition conventions follow Deer, Howie & Zussman (1992) and the usage of
+Composition conventions follow Deer, Howie & Zussman (2013) and the usage of
 the diffusion papers themselves (see :mod:`diffusor.coefficients`).
 """
 from __future__ import annotations
@@ -27,7 +27,7 @@ class CompositionVariable:
     label: str                    # human readable
     definition: str               # e.g. 'Fe/(Fe+Mg) molar'
     default_mode: str = "A/(A+B)"  # composition_variable() mode
-    citation: str = "deer1992"
+    citation: str = "deer2013"
 
     def __str__(self) -> str:
         return f"{self.label} = {self.definition}"
@@ -69,8 +69,8 @@ def direction_factor(D_a, D_b, D_c, alpha_deg: float, beta_deg: float, gamma_deg
 
     ``D_V = D_a cos^2(alpha) + D_b cos^2(beta) + D_c cos^2(gamma)``
 
-    Source: Costa & Chakraborty (2004) EPSL 227, eq. for diffusion along an
-    arbitrary direction in an orthorhombic crystal; DMG Short Course 2025
+    Source: Costa & Chakraborty (2004) EPSL 227, eq. 5 (diffusion along an
+    arbitrary direction in an orthorhombic crystal), also Costa et al. (2008) p. 574; DMG Short Course 2025
     Lecture 6 "Crystal orientation" (also used in the course script
     ``MCdiff_OlFo_MO.m``).  The angles must satisfy
     ``cos^2 a + cos^2 b + cos^2 g = 1`` for orthogonal axes.

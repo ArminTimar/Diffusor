@@ -1,27 +1,34 @@
 """Finite-difference solver for the 1-D diffusion equation.
 
-Governing equation (Crank 1975 eq. 1.7 for planar; section 5.1 eq. 5.4 cylinder;
-section 6.1 eq. 6.3 sphere; compact form with geometry index m):
+Governing equation (Crank 1975: eq. 1.5 for plane flow with variable D, eq. 5.1
+for a cylinder, and the radial reduction of eq. 1.8 for a sphere -- eq. 6.1 is
+the constant-D sphere form -- written in a compact form with geometry index m):
 
     dC/dt = (1/x^m) d/dx [ x^m ( D(C,x,T) dC/dx  -  theta D C dXAn/dx ) ]
 
 with m = 0 (plane), 1 (cylinder, x = r), 2 (sphere, x = r).  The second flux
 term is the activity (non-ideality) term of Costa et al. (2003) eq. 7 with
-theta = A_i/(R T) (Dohmen, Faak & Blundy 2017, RiMG 83, Appendix eqs A7-A8);
+theta = A_i/(R T) (general form: Dohmen, Faak & Blundy 2017, RiMG 83, main-text
+eqs 6-7; their Electronic Appendix eqs A7-A8 were not available to check this
+implementation against);
 it is only active for plagioclase trace elements (``an_profile`` given).
 
 Discretisation: conservative finite volumes on a uniform grid with D at
-half-nodes, ``D_{i+1/2} = (D_i + D_{i+1})/2`` (Dohmen et al. 2017 App. eqs
-A17-A19), integrated in time with the theta-scheme
+half-nodes, ``D_{i+1/2} = (D_i + D_{i+1})/2`` (an arithmetic face mean, the usual
+conservative finite-volume choice; Dohmen et al. 2017 describe their scheme only
+in the Electronic Appendix, which was not available to check, so this is
+Diffusor's own implementation), integrated in time with the theta-scheme
 
     (I - theta_t dt L^{j}) C^{j+1} = (I + (1 - theta_t) dt L^{j}) C^{j}
 
-theta_t = 1/2 gives Crank-Nicolson (Crank 1975 section 8.4, eq. 8.35; Dohmen et al.
-2017 App. eq. A21), theta_t = 0 the explicit scheme (Crank eq. 8.31) and
+theta_t = 1/2 gives Crank-Nicolson (Crank 1975 section 8.5, eqs 8.16-8.17, stable
+for all r; Dohmen et al. 2017 also use it, but their appendix equations could not
+be checked), theta_t = 0 the explicit scheme (Crank eq. 8.12) and
 theta_t = 1 fully implicit.  The operator L is lagged (evaluated at C^j); for
 composition-dependent D the time step is kept small enough that this is
 accurate (default Courant-like number dt D/dx^2 <= 0.5, the explicit stability
-limit, Crank eq. 8.33).
+limit r = dT/dX^2 <= 1/2, which Crank states in words in sections 8.4.1 and 8.11
+without an equation number).
 
 Boundary rows use exact half-cell volumes and zero total external flux for
 closed boundaries. Dirichlet rows are replaced by the prescribed boundary value.
@@ -170,8 +177,8 @@ def solve_1d(x: np.ndarray, C0: np.ndarray, D_func: Callable[[np.ndarray, float]
         return result
 
     # --- time-step plan ----------------------------------------------------
-    # The explicit scheme is stable only for dt <= dx^2/(2 D) (Crank 1975 eq.
-    # 8.33), but Crank-Nicolson (theta >= 1/2) is unconditionally stable, so
+    # The explicit scheme is stable only for dt <= dx^2/(2 D) (Crank 1975,
+    # r <= 1/2, stated in words in section 8.4.1), but Crank-Nicolson (theta >= 1/2) is unconditionally stable, so
     # for the implicit schemes dt is limited by *accuracy*, not stability.
     # A sharp initial step needs small steps while the front is unresolved,
     # after which the profile is smooth and large steps are accurate. Diffusor

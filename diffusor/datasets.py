@@ -75,7 +75,13 @@ DATASETS: List[ExampleDataset] = [
             'doi:10.1038/s43247-022-00622-3, archived at doi:10.5281/zenodo.7307563. '
             'Extracted by scripts/extract_kizimen.py. 109 points about 2 um apart, starting '
             'at the first point the authors marked as good. FeO_err and MgO_err are the '
-            "authors' mean analytical standard deviations in wt%."),
+            "authors' mean analytical standard deviations in wt%. The conditions of the "
+            'example (850 +/- 57 C, NNO +1.28 +/- 0.35, entered as +1.3) are the mean and standard deviation of '
+            '21 magnetite-ilmenite pairs from the andesites in Supplementary Data 3. The '
+            'delta NNO mean and standard deviation are computed from the delta NNO column of '
+            'that table, which prints no mean for it. The main text of the paper gives the '
+            'andesite and dacite temperatures in reverse order, 832 +/- 37 and 850 +/- 57 C. '
+            'The table and the Fig. 3 caption agree with each other and are used here.'),
         spec=dict(distance_column="Distance_from_rim_um", column_a="FeO_wt", column_b="MgO_wt",
                   sigma_a_column="FeO_err", sigma_b_column="MgO_err",
                   mode="A/(A+B)", oxide_a="FeO", oxide_b="MgO", distance_unit="um",
@@ -88,8 +94,8 @@ DATASETS: List[ExampleDataset] = [
         expected=(
             'Ostorero et al. (2022, Supplementary Data 4) modelled this reverse zone at 850 '
             '± 57 C with the Ganguly & Tazzoli (1994) law without an fO2 term and got 2.32 '
-            'years (+7.16/-1.75). With the same law and temperature Diffusor fits about 3 '
-            'years to the microprobe traverse, inside their uncertainty. The test suite '
+            'years (+7.16/-1.75). With the same law and temperature Diffusor fits about 2.5 '
+            'years to the microprobe traverse, inside their range of 0.6 to 9.5 years. The test suite '
             'checks this. The match is close but inexact. Ostorero et al. fitted '
             "high-resolution BSE grey-value profiles with D. J. Morgan's spreadsheet. The "
             'supplement only has the 2 um microprobe traverse, which crosses the 4 um zone '
@@ -99,18 +105,31 @@ DATASETS: List[ExampleDataset] = [
         notes=(
             'The rim zone (Mg# 0.71-0.74) lies 4 to 11 um from the rim. The core is Mg# '
             '0.62. Switch to opx_FeMg_dias2025 to see the effect of the newest calibration. '
-            'At 850 C and NNO it gives about ten times longer, 30 to 50 years, because D is '
-            'about one log unit slower. 850 C is below its 900 C calibration limit, so part '
-            'of that difference is extrapolation.'),
+            'At 850 C and NNO +1.3 it gives about 12 years, nearly five times longer, '
+            'because D is 0.6 to 0.8 log units slower over the X_Fe of the zone (0.26 to '
+            '0.35). 850 C is below its 900 C calibration limit and log fO2 is about -6.6 '
+            '(Pa), above its calibrated range of -11 to -7, so part of that difference is '
+            'extrapolation. The Ganguly & Tazzoli law was calibrated at 500 to 800 C and is '
+            'extrapolated to 850 C here, as in Ostorero et al. Those authors do not state the '
+            'unit of D in their equation 1. The coefficient here uses the m2/s form of the '
+            'Ganguly & Tazzoli law (intercept -9.54 in m2/s, -5.54 in cm2/s). X_Fe is '
+            'Fe/(Fe+Mg) from the two oxides. The Mg# of the authors counts Mn in the denominator, '
+            'so it is 0.013 lower than Mg/(Mg+Fe) from the two oxides. A shift of 0.013 in '
+            'X_Fe changes D by about 8 per cent.'),
         sources=dict(
-            T=('Mean and standard deviation of 21 magnetite-ilmenite pairs from the andesites, '
-               'Ostorero et al. (2022) Supplementary Data 3, Sauerzapf et al. (2008) '
-               'thermometer. The main text swaps the andesite and dacite values. The table '
-               'is unambiguous.'),
+            T=('Mean and standard deviation of the temperatures of 21 magnetite-ilmenite pairs '
+               'from the andesites, Ostorero et al. (2022) Supplementary Data 3, Sauerzapf et '
+               'al. (2008) thermometer, as printed there (850 and 57 C). Recomputed from the 21 '
+               'values they are 851.0 C and 59.1 C (sample standard deviation). The 57 C is the '
+               'scatter between pairs, not the uncertainty of the thermometer. The main text '
+               'swaps the andesite and dacite values (832 +/- 37 and 850 +/- 57 C). The table '
+               'and the Fig. 3 caption agree and are used here.'),
             P=('Earlier Kizimen studies cited by Ostorero et al. (2022) put storage at 1 to '
                '3 kbar. 200 +/- 50 MPa covers that range at 2 sigma.'),
-            fO2=('Mean and standard deviation of delta NNO for the same 21 oxide pairs, '
-                 'Supplementary Data 3 (NNO +1.28 +/- 0.35).'),
+            fO2=('Mean and sample standard deviation of delta NNO for the same 21 oxide pairs, '
+                 'computed from Supplementary Data 3, which prints no mean for it (NNO +1.28 '
+                 '+/- 0.35, entered as +1.3). The law used here has no fO2 term, so this does '
+                 'not enter D.'),
             resolution=('The traverse is a microprobe analysis with a focused beam of 2 um '
                         '(Ostorero et al. 2022, Methods). Diffusor takes sigma = diameter / 4 '
                         'for a round spot, which gives 0.5 um. That conversion is not from the '
@@ -129,7 +148,9 @@ DATASETS: List[ExampleDataset] = [
             "SYNTHETIC. Made with Diffusor's forward model and the Dias, Dohmen & Behrens "
             '(2025) coefficient, with noise added and converted to FeO and MgO wt%. The '
             'conditions (950 C, NNO+1, 150 MPa, along [001]) are typical of an arc andesite '
-            'and are not taken from one study.'),
+            'and are not taken from one study. NNO+1 at 950 C is log fO2 -5.0 (Pa), above the '
+            'range of -11 to -7 that the Dias et al. (2025) fit was calibrated on. The fO2 term '
+            'is therefore extrapolated, in the file and in the fit alike.'),
         spec=dict(distance_column="Distance_um", column_a="FeO_wt", column_b="MgO_wt",
                   sigma_a_column="FeO_err", sigma_b_column="MgO_err",
                   mode="A/(A+B)", oxide_a="FeO", oxide_b="MgO", distance_unit="um"),
@@ -170,7 +191,8 @@ DATASETS: List[ExampleDataset] = [
         sources=dict(
             T=('Used to make the file. Petrone et al. (2018) found 1040 to 1180 C for Stromboli '
                'clinopyroxene. The uncertainty is illustrative.'),
-            P='Placeholder. The coefficient has no pressure term.',
+            P=('Placeholder. The coefficient has no pressure term and its data are at 1 atm, '
+               'outside this value.'),
             fO2='Placeholder. The coefficient has no fO2 term.',
             resolution=('The file was made without beam broadening, so no correction recovers '
                         'the stated time.')),
@@ -184,8 +206,19 @@ DATASETS: List[ExampleDataset] = [
         citation=None,
         provenance=(
             "SYNTHETIC. Made with Diffusor's forward model and the Dohmen & Chakraborty "
-            '(2007) TaMED coefficient, with noise added. The conditions (1150 C, FMQ-1, 1 '
-            'atm, along [001]) resemble the Laki olivines of Hartley et al. (2016).'),
+            '(2007) TaMED coefficient, with noise added. The conditions are 1150 C, FMQ-1, 1 '
+            'atm, along [001]. The temperature and oxygen fugacity are those of Hartley et al. '
+            '(2016, p. 61) for the Laki olivines: 1150 +/- 30 C and 1 +/- 0.5 log units below '
+            'QFM. They cite Dohmen & Chakraborty (2007) for the anisotropic, composition-dependent '
+            'Fe-Mg diffusion they model. The main text does not say which regime or equation was '
+            'used (further details are in a supplementary file that was not available). The '
+            'pressure and the traverse along [001] are Diffusor choices, not theirs: they state no '
+            'pressure for the diffusion calculation (1.5 kbar enters only their Petrolog3 '
+            'crystallisation model) and corrected each measured profile for its angle to the '
+            'crystal axes, found by EBSD. The forsterite values (about Fo 80 to 88) and the '
+            'duration are not from the paper either: Laki cores are Fo70 to Fo86 and rims Fo68 to '
+            'Fo81.5 (p. 61), and the most probable timescale is 7.8 days (abstract), about 124 '
+            'days for the Fo > 81 population.'),
         spec=dict(distance_column="Distance_um", column_a="Fo_mol", column_b=None,
                   sigma_a_column="Fo_err", mode="A", distance_unit="um"),
         settings=dict(T_C=1150.0, sigma_T_K=30.0, P_MPa=0.1, sigma_P_MPa=0.0,
@@ -195,15 +228,28 @@ DATASETS: List[ExampleDataset] = [
                       x_composition=0.15,
                       resolution="No correction"),
         expected=(
-            'True time 120 days, set when the file was made.'),
+            'True time 120 days, set when the file was made. It is not a value from Hartley et al. '
+            '(2016).'),
         notes=(
             'The file holds forsterite in mol%. The Fe-Mg coefficient needs X_Fe = 1 - '
             'Fo/100. Alternatively model Fo directly with the composition dependence '
             'switched off.'),
         sources=dict(
-            T='Hartley et al. (2016) modelled Laki olivine at 1150 +/- 30 C.',
-            P='Placeholder. The file was made at 1 atm.',
-            fO2='Hartley et al. (2016) used FMQ -1 +/- 0.5.',
+            T=('Hartley et al. (2016, p. 61) modelled Laki olivine at 1150 +/- 30 C, and used the '
+               'same +/- 30 in their Monte Carlo error propagation. They do not state the '
+               'confidence level of the +/-. Diffusor samples it as 1 sigma. Their temperature '
+               'agrees with 1150 to 1160 C from clinopyroxene-liquid thermometry, and a reverse '
+               'crystallisation model gave 1113 to 1175 C (average 1145 +/- 10 C).'),
+            P=('Diffusor choice, 1 atm, as in the file. Hartley et al. (2016) state no pressure for '
+               'the diffusion calculation (p. 61: 1.5 kbar is used only in their Petrolog3 '
+               'crystallisation model). With the activation volume of the coefficient, 1.5 kbar '
+               'would lower D by about 8.5 per cent and lengthen a recovered time by about 9 '
+               'per cent.'),
+            fO2=('Hartley et al. (2016, p. 61) assumed 1 +/- 0.5 log units below the QFM buffer '
+                 '(Fe3+/total Fe about 0.12 +/- 0.02) and propagated the +/- 0.5 by Monte Carlo. '
+                 'They do not state its confidence level. Diffusor samples it as 1 sigma. They do '
+                 'not name the buffer calibration. Diffusor uses its default FMQ expression. At '
+                 'this temperature the fO2 is far above 1e-10 Pa, so the TaMED equation applies.'),
             resolution=('The file was made without beam broadening, so no correction recovers '
                         'the stated time.')),
     ),
@@ -215,11 +261,15 @@ DATASETS: List[ExampleDataset] = [
         kind="synthetic",
         citation=None,
         provenance=(
-            "SYNTHETIC. Made with Diffusor's forward model and the Van Orman & Crispin "
-            '(2010) Table 12 Ti coefficient, with noise added. The conditions (950 C, log '
-            'fO2 -11, X_Usp 0.3) are the ones Tomiya et al. (2013) used for Shinmoedake '
-            '2011. Diffusor reproduces their diffusivity of 4.3e-16 m2/s to about 1 per '
-            'cent.'),
+            "SYNTHETIC. Made with Diffusor's forward model for a plane sheet and the Van Orman "
+            '& Crispin (2010) Table 12 Ti coefficient, with noise added. D is evaluated at the '
+            'conditions Tomiya et al. (2013) used for Shinmoedake 2011 (950 C, log fO2 -11, '
+            'X_Usp 0.3, so x_Ti 0.1). There Diffusor gives 4.15e-16 m2/s against their 4.3e-16, '
+            'about 3 per cent lower. The TiO2 values (6.5 to 4.2 wt%) are illustrative and '
+            'lower than the 9.2 to 10.4 wt% of the type A magnetite of '
+            'Shinmoedake at X_Usp 0.27 to 0.31 (Tomiya et al. 2013, Table 2). In proportion '
+            'they would correspond to X_Usp of about 0.12 to 0.19. D uses a fixed x_Ti of 0.1, so the amplitude does not change '
+            'the recovered time. Tomiya et al. modelled a sphere. This example is a plane.'),
         spec=dict(distance_column="Distance_um", column_a="TiO2_wt", column_b=None,
                   sigma_a_column="TiO2_err", mode="A", distance_unit="um"),
         settings=dict(T_C=950.0, sigma_T_K=20.0, P_MPa=0.1, sigma_P_MPa=0.0,
@@ -228,12 +278,16 @@ DATASETS: List[ExampleDataset] = [
                       x_composition=0.1, fit_plateaus=True,
                       resolution="No correction"),
         expected=(
-            'True time 8 days, set when the file was made.'),
+            'True time 8 days, set when the file was made. With the plateaus fitted, as the '
+            'example sets them, Diffusor returns about 7.4 days, inside the scatter of the '
+            'added noise.'),
         notes=(
-            'Diffusion in magnetite has a minimum near 950-980 C, so the time depends '
-            'little on temperature here. The traverse ends before the profile has '
+            'Ti diffusion in this law has a minimum near 1020 C. At 950 C D still falls with '
+            'temperature, by about 17 per cent for each 20 K, so the temperature uncertainty '
+            'matters here. The law was fitted at 1100 to 1300 C and is extrapolated to 950 C, '
+            'as in Tomiya et al. The traverse ends before the profile has '
             'flattened, so the plateaus are fitted: held at the values of the outer '
-            'points they sit inside the true plateaus and the fit gives about 5.3 days.'),
+            'points they sit inside the true plateaus and the fit gives about 5.5 days.'),
         sources=dict(
             T=('Tomiya et al. (2013) used 950 C for Shinmoedake 2011. The uncertainty is '
                'illustrative.'),
@@ -265,7 +319,8 @@ DATASETS: List[ExampleDataset] = [
             'True time 3 years, set when the file was made.'),
         sources=dict(
             T='Used to make the file. The uncertainty is illustrative.',
-            P='Placeholder. The coefficient has no pressure term.',
+            P=('Placeholder. The coefficient has no pressure term and its data are at 1 atm, '
+               'outside this value.'),
             fO2='Placeholder. The coefficient has no fO2 term.',
             resolution=('The profile is a BSE grey-value profile, which resolves better than '
                         '0.5 um (Petrone et al. 2016), and the file was made without beam '
@@ -300,7 +355,8 @@ DATASETS: List[ExampleDataset] = [
             'matters, not an error in the file.'),
         sources=dict(
             T='Placeholder conditions for a dacitic magma; no study is reproduced.',
-            P='Placeholder. The coefficient has no pressure term.',
+            P=('Placeholder. The coefficient has no pressure term and its data are at 1 atm, '
+               'outside this value.'),
             fO2='Placeholder. The coefficient has no fO2 term.',
             resolution=('The file was made without beam broadening, so no correction recovers '
                         'the stated time.')),
@@ -330,8 +386,10 @@ DATASETS: List[ExampleDataset] = [
             'coefficient on the same file to see how much faster Sr would have relaxed.'),
         sources=dict(
             T=('Chamberlain et al. (2014) modelled Bishop Tuff sanidine at 753 to 815 C with '
-               '+/- 30 C uncertainty in their thermometry.'),
-            P='Placeholder. The coefficient has no pressure term.',
+               '+/- 30 C uncertainty in their thermometry. The Ba law was measured at 828 to '
+               '1075 C, so 790 C is an extrapolation.'),
+            P=('Placeholder. The coefficient has no pressure term and its data are at 1 atm, '
+               'outside this value.'),
             fO2='Placeholder. The coefficient has no fO2 term.',
             resolution=('The profile is sampled like a calibrated BSE profile, which resolves '
                         'better than 0.5 um (Petrone et al. 2016), and the file was made '

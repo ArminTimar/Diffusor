@@ -14,7 +14,9 @@ Available forms
 ``plateau_rim``     interior plateau plus a rim of different composition
 ``table``           an arbitrary user-supplied profile
 ``equilibrium_plag``  the quasi-steady-state trace-element profile implied by a
-                    frozen anorthite profile (Dohmen et al. 2017 App. eq. A13)
+                    frozen anorthite profile (after Costa et al. 2003 and Dohmen et al. 2017;
+                    the Dohmen et al. appendix equation for it was not available
+                    to check, so the implementation is Diffusor's own)
 """
 from __future__ import annotations
 
@@ -36,12 +38,31 @@ def step(x, x0: float, C_left: float, C_right: float, smooth: float = 0.0):
     if smooth and smooth > 0:
         from scipy.special import erf
         return C_left + (C_right - C_left) * 0.5 * (1.0 + erf((x - x0) / (smooth * np.sqrt(2.0))))
-    # A node sitting exactly on the interface gets the cell average of the two
-    # plateaus. Without this the discretised step is offset by half a cell and
-    # the numerical solution is shifted by dx/2 relative to the Crank solution.
-    return np.where(x < x0, float(C_left),
-                    np.where(x > x0, float(C_right),
-                             0.5 * (float(C_left) + float(C_right)))).astype(float)
+    # Each node stands for a finite-volume cell. A sharp interface that falls
+    # inside a cell gives that node the cell average of the two plateaus, so the
+    # discretised step is not offset by up to half a cell (dx/2) relative to the
+    # Crank solution, whether or not x0 coincides exactly with a node.
+    w = _right_fraction(x, x0)
+    return float(C_left) + (float(C_right) - float(C_left)) * w
+
+
+def _right_fraction(x, x0: float):
+    """Fraction of each node's cell (midpoint to midpoint) that lies right of ``x0``.
+
+    0 or 1 away from the interface, 1/2 for a node exactly on it and in between
+    for a node whose cell contains it, so the cell average of a sharp step is
+    reproduced for any x0 (not only when x0 equals a node to the last bit).
+    """
+    x = np.asarray(x, dtype=float)
+    if x.ndim != 1 or x.size < 2:
+        return np.where(x < x0, 0.0, np.where(x > x0, 1.0, 0.5)).astype(float)
+    mid = 0.5 * (x[1:] + x[:-1])
+    lo = np.concatenate(([x[0] - (mid[0] - x[0])], mid))
+    hi = np.concatenate((mid, [x[-1] + (x[-1] - mid[-1])]))
+    width = hi - lo
+    with np.errstate(divide="ignore", invalid="ignore"):
+        w = np.clip((hi - float(x0)) / width, 0.0, 1.0)
+    return np.where(width > 0, w, np.where(x < x0, 0.0, np.where(x > x0, 1.0, 0.5)))
 
 
 def multi_step(x, edges: Sequence[float], values: Sequence[float], smooth: float = 0.0):
@@ -53,7 +74,7 @@ def multi_step(x, edges: Sequence[float], values: Sequence[float], smooth: float
     for e, v_next in zip(edges, values[1:]):
         C = C + (float(v_next) - C) * (
             0.5 * (1.0 + np.tanh((x - e) / max(smooth, 1e-12))) if smooth > 0
-            else (x >= e).astype(float))
+            else _right_fraction(x, e))
     return C
 
 

@@ -14,8 +14,10 @@ parameters through a strongly non-linear function, and those parameters are
 * The Arrhenius parameters ln D0 and Q are typically positively correlated by the
   regression that produced them.  Sampling them independently inflates the
   spread of D at the temperature of interest enormously.  Diffusor samples
-  from the published covariance when it exists, and otherwise samples ln D
-  directly at the working temperature using the paper's stated scatter (see
+  from a covariance matrix when the registry holds one for the coefficient
+  (either published, or built by Diffusor from a correlation the source states
+  in words; the entry says which), and otherwise samples ln D directly at the
+  working temperature using the paper's stated scatter (see
   :mod:`diffusor.coefficients.base`).
 * The composition enters both the diffusion coefficient and the profile being
   fitted, so measurement noise propagates through two routes at once.

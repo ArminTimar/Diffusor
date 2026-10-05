@@ -74,7 +74,8 @@ def suggest_grid(x_data: np.ndarray, n_nodes: int = 401, pad: float = 0.0) -> np
 
 
 def stability_dt(dx: float, D_max: float, courant: float = 0.5) -> float:
-    """Explicit-scheme stability limit ``dt <= dx^2 / (2 D)`` (Crank 1975 eq. 8.33).
+    """Explicit-scheme stability limit ``dt <= dx^2 / (2 D)``, i.e. r = dT/dX^2 <= 1/2
+    for the explicit scheme (Crank 1975, section 8.4.1; stated in words, no equation number).
 
     ``courant`` scales it; the DMG Short Course 2025 scripts use 0.2-0.4.
     """

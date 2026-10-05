@@ -15,10 +15,13 @@ the timescale that follows is not trustworthy.
 
 The uncertainty on each calibrated point combines the scatter of the grey
 values across the averaged raster lines with the standard error of the
-calibration itself.
+calibration itself.  Both terms are combined by first-order propagation of
+independent uncertainties (JCGM 100:2008, eq. 10); the calibration term uses the
+full covariance of the fitted coefficients (eq. 13 with the covariance terms).
 """
 from __future__ import annotations
 
+import warnings
 from dataclasses import dataclass, field
 from typing import List, Optional, Sequence, Tuple
 
@@ -41,9 +44,22 @@ class GreyscaleCalibration:
     def apply(self, grey) -> np.ndarray:
         return np.polyval(self.coefficients, np.asarray(grey, dtype=float))
 
+    @property
+    def exactly_determined(self) -> bool:
+        """True when there are no more anchors than coefficients: the fit passes through
+        every anchor, so neither a residual nor a coefficient covariance exists."""
+        return self.covariance is None and self.grey_anchors.size <= self.degree + 1
+
     def sigma_from_calibration(self, grey) -> np.ndarray:
-        """1-sigma prediction uncertainty from the calibration fit alone."""
+        """1-sigma prediction uncertainty from the calibration fit alone.
+
+        NaN (unknown) for an exactly determined calibration: its zero residual says
+        nothing about the uncertainty of the anchors, so reporting 0 would claim a
+        perfect calibration.
+        """
         g = np.asarray(grey, dtype=float)
+        if self.exactly_determined:
+            return np.full(g.shape, np.nan)
         if self.covariance is None:
             return np.full(g.shape, self.rmse)
         powers = np.vstack([g ** (self.degree - i) for i in range(self.degree + 1)])
@@ -104,7 +120,16 @@ def apply_calibration(x_um, grey, calibration: GreyscaleCalibration,
     g = np.asarray(grey, dtype=float)
     C = calibration.apply(g)
     sigma = calibration.sigma_from_calibration(g)
+    if calibration.exactly_determined:
+        warnings.warn(
+            "The greyscale calibration is exactly determined (as many anchors as coefficients), "
+            "so its own uncertainty cannot be estimated. The returned sigma contains only the "
+            "grey-value scatter (NaN if none was given); add anchors for a real estimate.",
+            UserWarning, stacklevel=2)
+        sigma = np.zeros(g.shape) if grey_scatter is not None else sigma
     if grey_scatter is not None:
+        # independent grey-value scatter times the local slope dC/dg, added in quadrature
+        # to the calibration term (JCGM 100:2008 eq. 10)
         slope = np.polyval(np.polyder(calibration.coefficients), g)
         sigma = np.sqrt(sigma ** 2 + (np.abs(slope) * np.asarray(grey_scatter, dtype=float)) ** 2)
     return x, C, sigma

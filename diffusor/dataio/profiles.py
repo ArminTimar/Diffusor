@@ -19,7 +19,45 @@ from typing import Dict, List, Optional, Sequence
 import numpy as np
 import pandas as pd
 
+from ..constants import OXIDE_CATIONS, OXIDE_MOLAR_MASS
 from ..thermo.units import composition_variable, length_to_m
+
+
+def composition_sigma(a, b, sa, sb, mode: str,
+                      oxide_a: Optional[str] = None, oxide_b: Optional[str] = None):
+    """1-sigma uncertainty of the modelled variable built by ``composition_variable``.
+
+    First-order propagation for independent inputs (JCGM 100:2008, the Guide to
+    the expression of uncertainty in measurement, eq. 10 of clause 5.1.2).  With
+    oxides named, the modelled variable is formed from cation moles,
+    ``A = n_a a / M_a`` and ``B = n_b b / M_b`` (a, b in wt%, M the oxide molar
+    mass, n the number of cations per formula unit), so the sensitivity
+    coefficients with respect to the measured wt% are
+
+        d[A/(A+B)]/da =  k_a B / (A+B)^2        k = n / M
+        d[A/(A+B)]/db = -k_b A / (A+B)^2
+
+    and the combined standard uncertainty is ``sqrt((k_a B sa)^2 + (k_b A sb)^2)
+    / (A+B)^2``.  Without oxides k_a = k_b = 1 (the raw columns are the moles).
+    ``B/(A+B)`` has the same magnitude (it is 1 - A/(A+B)); ``A-B`` gives
+    ``sqrt((k_a sa)^2 + (k_b sb)^2)``; mode ``A`` returns ``sa``.
+    """
+    sa = np.asarray(sa, dtype=float)
+    if mode == "A" or b is None:
+        return sa
+    a = np.asarray(a, dtype=float)
+    b = np.asarray(b, dtype=float)
+    sb = np.asarray(sb, dtype=float)
+    ka = kb = 1.0
+    if oxide_a and oxide_b:
+        ka = OXIDE_CATIONS[oxide_a] / OXIDE_MOLAR_MASS[oxide_a]
+        kb = OXIDE_CATIONS[oxide_b] / OXIDE_MOLAR_MASS[oxide_b]
+    if mode == "A-B":
+        return np.sqrt((ka * sa) ** 2 + (kb * sb) ** 2)
+    A, B = ka * a, kb * b
+    tot = A + B
+    with np.errstate(divide="ignore", invalid="ignore"):
+        return np.sqrt((ka * B * sa) ** 2 + (kb * A * sb) ** 2) / tot ** 2
 
 
 
@@ -234,19 +272,16 @@ def build_profile(df: pd.DataFrame, spec: ProfileSpec, source: str = "") -> Prof
         if spec.sigma_level == "2s":
             sa = sa / 2.0
             notes.append("uncertainty column interpreted as 2 sigma and halved")
-        if spec.mode in ("A/(A+B)", "B/(A+B)") and b is not None:
-            # propagate to the ratio; if only one uncertainty column is given the
-            # other is assumed to have the same relative uncertainty
+        if spec.mode in ("A/(A+B)", "B/(A+B)", "A-B") and b is not None:
+            # propagate to the modelled variable; if only one uncertainty column is
+            # given the other is assumed to have the same relative uncertainty
             sb = (np.asarray(df[spec.sigma_b_column], dtype=float)
                   if spec.sigma_b_column else sa / np.maximum(np.abs(a), 1e-30) * np.abs(b))
             if spec.sigma_b_column and spec.sigma_level == "2s":
                 sb = sb / 2.0
-            tot = a + b
-            with np.errstate(divide="ignore", invalid="ignore"):
-                # d(a/(a+b)) = (b da - a db)/(a+b)^2, errors added in quadrature
-                sigma = np.sqrt((b * sa) ** 2 + (a * sb) ** 2) / tot ** 2
-            if spec.mode == "B/(A+B)":
-                pass                       # the ratio uncertainty is symmetric
+            # first-order propagation through the same wt% -> cation-mole conversion
+            # that builds C (JCGM 100:2008 eq. 10); see composition_sigma
+            sigma = composition_sigma(a, b, sa, sb, spec.mode, spec.oxide_a, spec.oxide_b)
             if not spec.sigma_b_column:
                 notes.append("only one uncertainty column was given. The second element was "
                              "assumed to carry the same relative uncertainty")

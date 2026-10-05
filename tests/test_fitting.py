@@ -317,3 +317,27 @@ def test_short_runs_stay_on_one_core():
     m, x, C, s, budget = _quick_setup()
     res = run_montecarlo(m, x, C, s, budget=budget, n_draws=10, seed=1, workers=4)
     assert res.workers == 1
+
+
+# --- robustness of the goodness-of-fit statistics -----------------------------------
+def test_reduced_chi2_is_undefined_without_degrees_of_freedom():
+    from diffusor.fitting.objective import statistics
+    obs = np.array([1.0, 2.0, 3.0])
+    st = statistics(obs, obs + 0.1, np.full(3, 0.1), n_params=3)
+    assert st.dof == 0 and np.isnan(st.reduced_chi2)
+    assert "degrees of freedom" in st.dof_warning()
+    over = statistics(obs, obs + 0.1, np.full(3, 0.1), n_params=4)
+    assert over.dof == -1 and np.isnan(over.reduced_chi2) and over.dof_warning()
+    ok = statistics(obs, obs + 0.1, np.full(3, 0.1), n_params=2)
+    assert ok.dof == 1 and ok.reduced_chi2 == pytest.approx(3.0) and ok.dof_warning() is None
+
+
+def test_nan_and_inf_uncertainties_are_replaced_with_a_warning():
+    from diffusor.fitting.objective import weights_from_sigma
+    with pytest.warns(UserWarning, match="not finite and positive"):
+        w = weights_from_sigma(np.array([1.0, np.nan, 2.0, np.inf, 0.0]), 5)
+    assert np.all(np.isfinite(w)) and np.all(w > 0)
+    assert w[1] == pytest.approx(1.0 / 1.5)             # median of the valid 1 and 2
+    assert w[0] == 1.0 and w[2] == 0.5
+    with pytest.warns(UserWarning):
+        assert np.allclose(weights_from_sigma(np.array([np.nan, np.nan]), 2), 1.0)

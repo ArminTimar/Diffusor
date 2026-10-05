@@ -22,10 +22,14 @@ def test_buffer_ordering_is_physically_correct():
 
 
 def test_nno_and_fmq_agree_between_the_two_parameterisations():
+    import warnings
+    from diffusor.thermo import BufferRangeWarning
     for T in (1073.15, 1273.15, 1473.15):
         for b in ("NNO", "FMQ"):
             a = log_fo2_buffer(b, T, parameterisation="frost1991")
-            c = log_fo2_buffer(b, T, parameterisation="oneill")
+            with warnings.catch_warnings():     # 1473.15 K is above O'Neill's printed 1420 K for FMQ
+                warnings.simplefilter("ignore", BufferRangeWarning)
+                c = log_fo2_buffer(b, T, parameterisation="oneill")
             assert abs(a - c) < 0.25, f"{b} at {T} K: {a:.3f} vs {c:.3f}"
 
 
@@ -51,6 +55,80 @@ def test_pressure_raises_the_buffer_fo2():
 def test_unknown_buffer_is_rejected():
     with pytest.raises(ValueError):
         log_fo2_buffer("XYZ", 1273.15)
+
+
+# Frost (1991) Table 1 rows (A, B, C), read from the rendered page
+_FROST_TABLE_1 = {
+    "aQIF": (-29435.7, 7.391, 0.044), "bQIF": (-29520.8, 7.492, 0.050),
+    "IW": (-27489.0, 6.702, 0.055), "WM": (-32807.0, 13.012, 0.083),
+    "FMaQ": (-26455.3, 10.344, 0.092), "FMbQ": (-25096.3, 8.735, 0.110),
+    "NiNiO": (-24930.0, 9.36, 0.046),
+    "MH300": (-25497.5, 14.330, 0.019), "MH573": (-26452.6, 15.455, 0.019),
+    "MH682": (-25700.6, 14.558, 0.019),
+}
+
+
+def _table(row, T, P_bar):
+    A, B, C = _FROST_TABLE_1[row]
+    return A / T + B + C * (P_bar - 1.0) / T
+
+
+@pytest.mark.parametrize("buffer,row,T_C", [
+    ("IW", "IW", 900.0), ("WM", "WM", 900.0), ("NNO", "NiNiO", 900.0),
+    ("FMQ", "FMbQ", 900.0), ("FMQ", "FMaQ", 500.0),
+    ("QIF", "bQIF", 900.0), ("QIF", "aQIF", 400.0),
+    ("HM", "MH682", 900.0), ("HM", "MH573", 600.0), ("HM", "MH300", 400.0)])
+def test_frost_rows_are_selected_by_temperature(buffer, row, T_C):
+    T = T_C + 273.15
+    assert log_fo2_buffer(buffer, T) == pytest.approx(_table(row, T, 1.0), abs=1e-12)
+
+
+def test_quartz_row_follows_the_pressure_shifted_transition():
+    """T(C) = 573 + 0.025 P(bar): 1 kbar moves the transition to 598 C."""
+    P = 1000.0 * 1.0e5
+    assert log_fo2_buffer("FMQ", 590.0 + 273.15, P) == pytest.approx(_table("FMaQ", 863.15, 1000.0), abs=1e-12)
+    assert log_fo2_buffer("FMQ", 605.0 + 273.15, P) == pytest.approx(_table("FMbQ", 878.15, 1000.0), abs=1e-12)
+
+
+def test_iqf_is_the_quartz_iron_fayalite_buffer_not_iw():
+    T = 1273.15
+    assert log_fo2_buffer("IQF", T) == log_fo2_buffer("QIF", T)
+    assert log_fo2_buffer("IQF", T) == pytest.approx(_table("bQIF", T, 1.0), abs=1e-12)
+    assert log_fo2_buffer("IW", T) - log_fo2_buffer("IQF", T) == pytest.approx(0.806, abs=0.001)
+
+
+def test_buffers_inside_the_printed_range_do_not_warn():
+    import warnings
+    from diffusor.thermo import BufferRangeWarning
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", BufferRangeWarning)
+        for b, (lo, hi) in {"IW": (565, 1200), "WM": (565, 1200), "FMQ": (400, 1200), "NNO": (600, 1200),
+                            "HM": (300, 1100), "QIF": (150, 1200)}.items():
+            for T_C in (lo, 0.5 * (lo + hi), hi):
+                log_fo2_buffer(b, T_C + 273.15)
+        log_fo2_buffer("FMQ", 1200.0, 1.0e5, "oneill")
+        log_fo2_buffer("NNO", 1000.0, 1.0e5, "oneill")
+
+
+@pytest.mark.parametrize("buffer,T_C,parameterisation", [
+    ("IW", 500.0, "frost1991"), ("WM", 1250.0, "frost1991"), ("NNO", 550.0, "frost1991"),
+    ("FMQ", 350.0, "frost1991"), ("HM", 1150.0, "frost1991"), ("QIF", 100.0, "frost1991"),
+    ("FMQ", 1150.0, "oneill"), ("FMQ", 600.0, "oneill"), ("NNO", 1500.0, "oneill")])
+def test_extrapolation_beyond_the_printed_range_warns_but_still_returns(buffer, T_C, parameterisation):
+    from diffusor.thermo import BufferRangeWarning, buffer_range_status
+    T = T_C + 273.15
+    inside, message = buffer_range_status(buffer, T, parameterisation)
+    assert not inside and "printed for" in message
+    with pytest.warns(BufferRangeWarning, match="printed for"):
+        value = log_fo2_buffer(buffer, T, 1.0e5, parameterisation)
+    assert np.isfinite(value)
+
+
+def test_buffer_accepts_temperature_arrays():
+    T = np.array([873.15, 1073.15, 1273.15])
+    vec = log_fo2_buffer("FMQ", T)
+    assert vec.shape == T.shape
+    assert [float(v) for v in vec] == pytest.approx([log_fo2_buffer("FMQ", float(t)) for t in T])
 
 
 # --- units and compositions ------------------------------------------------------
@@ -223,3 +301,68 @@ def test_methods_paragraph_lists_the_sources_actually_used(tmp_path):
     assert d["coefficient"]["key"] == "opx_FeMg_dohmen2016"
     assert d["fit"]["t_seconds"] > 0
     assert "citations" in d and len(d["citations"]) > 5
+
+
+# --- propagation of the oxide uncertainties through the cation-mole conversion ------
+def _fd_sigma(a, b, sa, sb, mode, oa, ob, h=1e-6):
+    from diffusor.thermo.units import composition_variable
+
+    def f(x, y):
+        return composition_variable(np.array([x]), np.array([y]), mode, oa, ob)[0]
+    da = (f(a + h, b) - f(a - h, b)) / (2 * h)
+    db = (f(a, b + h) - f(a, b - h)) / (2 * h)
+    return float(np.hypot(da * sa, db * sb))
+
+
+@pytest.mark.parametrize("a,b,sa,sb,oa,ob", [
+    (10.0, 10.0, 0.2, 0.2, "FeO", "MgO"),           # one cation each
+    (10.0, 5.0, 0.1, 0.05, "CaO", "Na2O"),          # Na2O carries two cations
+    (8.0, 3.0, 0.05, 0.2, "Na2O", "K2O"),           # two cations each
+    (20.0, 15.0, 0.2, 0.15, None, None),            # raw columns, no oxide conversion
+])
+@pytest.mark.parametrize("mode", ["A/(A+B)", "B/(A+B)", "A-B"])
+def test_composition_sigma_matches_finite_differences(a, b, sa, sb, oa, ob, mode):
+    from diffusor.dataio.profiles import composition_sigma
+    s = composition_sigma(np.array([a]), np.array([b]), np.array([sa]), np.array([sb]), mode, oa, ob)[0]
+    assert s == pytest.approx(_fd_sigma(a, b, sa, sb, mode, oa, ob), rel=1e-6)
+
+
+def test_composition_sigma_matches_monte_carlo():
+    from diffusor.dataio.profiles import composition_sigma
+    from diffusor.thermo.units import composition_variable
+    rng = np.random.default_rng(7)
+    for a, b, sa, sb, oa, ob in [(10.0, 10.0, 0.2, 0.2, "FeO", "MgO"),
+                                 (10.0, 5.0, 0.1, 0.05, "CaO", "Na2O")]:
+        draws = composition_variable(rng.normal(a, sa, 400000), rng.normal(b, sb, 400000),
+                                     "A/(A+B)", oa, ob)
+        s = composition_sigma(np.array([a]), np.array([b]), np.array([sa]), np.array([sb]),
+                              "A/(A+B)", oa, ob)[0]
+        assert s == pytest.approx(np.std(draws), rel=0.01)
+
+
+def test_oxide_profile_sigma_is_propagated_through_the_cation_moles():
+    """FeO = MgO = 10 wt%, 0.2 wt% each: the molar ratio has sigma 6.51e-3. The old
+    propagation from the raw wt% ratio gave 7.07e-3 (8.6 % too high)."""
+    df = pd.DataFrame({"x": [0.0, 1.0, 2.0], "FeO": [10.0] * 3, "MgO": [10.0] * 3,
+                       "eA": [0.2] * 3, "eB": [0.2] * 3})
+    spec = ProfileSpec("x", "FeO", "MgO", "eA", "eB", mode="A/(A+B)", oxide_a="FeO", oxide_b="MgO")
+    p = build_profile(df, spec)
+    assert p.sigma[0] == pytest.approx(6.51e-3, rel=2e-3)
+    assert p.sigma[0] < 0.93 * 7.07e-3
+    # without oxides the raw-column formula is unchanged
+    spec_raw = ProfileSpec("x", "FeO", "MgO", "eA", "eB", mode="A/(A+B)")
+    assert build_profile(df, spec_raw).sigma[0] == pytest.approx(np.sqrt(2) * 10 * 0.2 / 400, rel=1e-9)
+
+
+def test_exactly_determined_greyscale_calibration_does_not_claim_zero_uncertainty():
+    cal = calibrate([50.0, 200.0], [0.2, 0.5], degree=1)
+    assert cal.exactly_determined and np.all(np.isnan(cal.sigma_from_calibration([100.0, 150.0])))
+    x = np.array([0.0, 1.0])
+    with pytest.warns(UserWarning, match="exactly determined"):
+        _, C, sig = apply_calibration(x, np.array([100.0, 150.0]), cal)
+    assert np.all(np.isnan(sig))                          # unknown, not 0
+    with pytest.warns(UserWarning, match="exactly determined"):
+        _, C, sig = apply_calibration(x, np.array([100.0, 150.0]), cal, grey_scatter=np.array([3.0, 3.0]))
+    assert np.allclose(sig, (0.3 / 150.0) * 3.0)          # only the grey-value scatter, with the slope
+    over = calibrate([50.0, 100.0, 200.0], [0.2, 0.31, 0.5], degree=1)
+    assert not over.exactly_determined and np.all(over.sigma_from_calibration([120.0]) > 0)

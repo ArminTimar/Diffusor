@@ -136,12 +136,12 @@ def methods_paragraph(fit_result, mc_result=None, profile=None) -> str:
         L.append(f"Traverse along the {cond.axis}-axis.")
     if cond.angles_deg:
         L.append(f"Traverse at {cond.angles_deg} degrees to a, b, c. The direction-cosine "
-                 f"relation of Costa & Chakraborty (2004) was applied.")
+                 f"relation of Costa & Chakraborty (2004, eq. 5; see also Costa et al. 2008) was applied.")
     if model.history is not None and model.history.is_isothermal:
         L.append(f"Supplied isothermal history: {model.history.temps_K[0]:.2f} K; this overrides the nominal temperature above.")
     if model.history is not None and not model.history.is_isothermal:
         L.append(f"Non-isothermal history ({model.history.label}). The diffusion integral "
-                 f"int D(T(t)) dt was evaluated numerically (Crank 1975 eq. 7.7, Lasaga 1983).")
+                 f"int D(T(t)) dt was evaluated numerically (Crank 1975 eqs 7.2-7.3, Lasaga 1983).")
     L.append("")
 
     L.append("Model")
@@ -156,12 +156,13 @@ def methods_paragraph(fit_result, mc_result=None, profile=None) -> str:
         what = (activity_note(model.activity_set, cond.T_K) if model.activity_set
                 else f"theta = A/RT = {model.activity_theta:.4g} given directly.")
         L.append(f"Anorthite coupling: flux term -D C (A/RT) dX_An/dx (Costa et al. 2003; Dohmen et al. "
-                 f"2017, Appendix eqs A7-A8), A = {model.activity_A_kJ:g} kJ/mol. {what} A/RT is "
+                 f"2017), A = {model.activity_A_kJ:g} kJ/mol. {what} A/RT is "
                  "evaluated at the temperature of each time step.")
     L.append(f"Solver: {'analytical, ' + why if ok else 'numerical Crank-Nicolson (theta = 1/2), ' + why}")
     if not ok:
-        L.append(f"  Conservative finite-volume scheme for the equations in Crank (1975) section 8.4 with D evaluated at "
-                 f"half-nodes (Dohmen et al. 2017, Appendix eqs A17-A21), {model.n_nodes} grid nodes.")
+        L.append(f"  Conservative finite-volume scheme (Diffusor's implementation) with Crank-Nicolson time stepping "
+                 f"(Crank 1975, section 8.5) and D evaluated at half-nodes as the mean of the two neighbouring "
+                 f"nodes, {model.n_nodes} grid nodes.")
     if model.beam_sigma_um:
         L.append(f"Model profiles were convolved with a Gaussian of sigma = "
                  f"{model.beam_sigma_um:.2f} um to account for the analytical spatial "

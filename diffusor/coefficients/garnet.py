@@ -40,7 +40,7 @@ LABELS = {c: f"X_{_ABBREVIATION[c]} = {c}/(Fe+Mg+Mn+Ca)" for c in COMPONENTS}
 
 # Carlson (2006) p. 7: end-member unit-cell edges in nm (Ganguly et al. 1993; Geiger & Feenstra 1997)
 A0_NM = {"Fe": 1.1525, "Mg": 1.1456, "Mn": 1.1614, "Ca": 1.1852}
-A0_CALIBRATED_MAX = 1.1821       # p. 9: calibration restricted to a0 < 1.1821 nm
+A0_CALIBRATED_MAX = 1.1821       # p. 10: calibration restricted to a0 < 1.1821 nm
 
 # Carlson (2006) Table 4: ln D*0,alm (D* in m2/s), k (1/nm), Q (kJ/mol), dV (cm3/mol)
 CARLSON_TABLE4 = {
@@ -90,7 +90,7 @@ def _a0_inside(X) -> bool:
 
 _FO2_HELP = ("log10(fO2 / fO2 at the graphite-oxygen equilibrium). 0 is the condition Carlson's "
              "data were normalised to; D* changes by 1/6 log unit per log unit of fO2.")
-_A0_CHECK = (("The garnet is more grossular-rich than the calibration: Carlson (2006, p. 9) restricts "
+_A0_CHECK = (("The garnet is more grossular-rich than the calibration: Carlson (2006, p. 10) restricts "
               "the model to a0 < 1.1821 nm.", _a0_inside),)
 
 _carlson_laws = {c: _carlson(*CARLSON_TABLE4[c]) for c in COMPONENTS}
@@ -123,6 +123,16 @@ register(TracerFamily(
            "in Mn- and especially Ca-rich garnet."),
     **_CARLSON_COMMON))
 
+# The Mn law of Chen & Chu (2024) was calibrated on a garnet that cooled from about 515 to 480 C
+# (thermobarometry in the abstract; garnet mantle at 500-510 C and 1.9-2.0 GPa, p. 13), below the
+# 580 C lower bound of Carlson's data. The family has one temperature range, so it is the hull of
+# the Mn calibration and the data of the other components.
+
+
+def _T_CHEN_CHU_HULL(label):
+    return Range(753.15, 1753.15, label)
+
+
 _carlson_chen = dict(_carlson_laws)
 _carlson_chen["Mn"] = _carlson(CHEN_CHU_MN["carlson"][0] * LN10, CARLSON_TABLE4["Mn"][1],
                                CHEN_CHU_MN["carlson"][1], CARLSON_TABLE4["Mn"][3])
@@ -137,8 +147,12 @@ register(TracerFamily(
     uncertainty_note=("Chen & Chu (2024) give 1 SD on log D0 and Q of the Mn law without their correlation; "
                       "the coefficients are held fixed in the Monte Carlo."),
     calibration_notes=("The Mn law is recalibrated from one natural eclogite garnet at about 510 C and 2 GPa "
-                       "with an assumed 5 +/- 3 Myr duration; the other components keep Carlson's laws.",),
-    **_CARLSON_COMMON))
+                       "with an assumed 5 +/- 3 Myr duration; the other components keep Carlson's laws.",
+                       "The temperature range is the hull of the Mn calibration (about 480-515 C) and "
+                       "Carlson's data (580-1480 C) for the other components. Fe, Mg and Ca are not "
+                       "calibrated between 480 and 580 C."),
+    **{**_CARLSON_COMMON,
+       "T_range": _T_CHEN_CHU_HULL("K (480-1480 C: Mn law 480-515 C, other components 580-1480 C)")}))
 
 _cg_laws = {c: _cg(*CG1992[c]) for c in ("Fe", "Mg", "Mn")}
 _cg_laws["Ca"] = _half(_cg_laws["Fe"])
@@ -185,8 +199,14 @@ register(TracerFamily(
     verified=True, verified_from="Table 8 of Chen & Chu (2024)",
     uncertainty_note="The coefficients are held fixed in the Monte Carlo.",
     calibration_notes=_CG_NOTES + ("The Mn law is recalibrated from one natural eclogite garnet at about "
-                                   "510 C and 2 GPa (Chen & Chu 2024).",),
-    **_CG_COMMON))
+                                   "510 C and 2 GPa (Chen & Chu 2024). Table 8 gives an activation volume "
+                                   "only for the original models, so the dV = 6.0 cm3/mol of Chakraborty & "
+                                   "Ganguly (1992) is kept for the new Mn law (Diffusor's assumption).",
+                                   "The temperature range is the hull of the Mn calibration (about "
+                                   "480-515 C) and the Chakraborty & Ganguly data (1100-1480 C) for Fe, "
+                                   "Mg and Ca."),
+    **{**_CG_COMMON,
+       "T_range": _T_CHEN_CHU_HULL("K (480-1480 C: Mn law 480-515 C, other components 1100-1480 C)")}))
 
 
 # ---------------------------------------------------------------------------
@@ -208,8 +228,10 @@ for _el, _D0, _sD0, _Q, _sQ, _dV in (("Mg", 2.72e-10, 4.52e-10, 228.3, 20.3, 0.5
         equation_text=(f"log D*_{_el} = log D0 - (Q + dV (P - 1)) / (2.303 R T), D0 = ({_D0:g} +/- {_sD0:g}) m2/s, "
                        f"Q = {_Q:g} +/- {_sQ:g} kJ/mol, dV = {_dV:g} J/bar/mol (from Chakraborty & Ganguly 1992), P in bar"),
         func=_borinski,
-        params={"D0": Parameter("D0", _D0, 0.0, "m2/s", "1s", f"pre-exponential factor (quoted +/- {_sD0:g})"),
-                "Q": Parameter("Q", _Q, 0.0, "kJ/mol", "1s", f"activation energy at 1 bar (quoted +/- {_sQ:g})"),
+        params={"D0": Parameter("D0", _D0, 0.0, "m2/s", "unstated",
+                                f"pre-exponential factor (quoted +/- {_sD0:g}, level not stated, not sampled)"),
+                "Q": Parameter("Q", _Q, 0.0, "kJ/mol", "unstated",
+                               f"activation energy at 1 bar (quoted +/- {_sQ:g}, level not stated, not sampled)"),
                 "dV": Parameter("dV", _dV, 0.0, "J/bar/mol", "1s", "activation volume")},
         T_range=Range(1330.15, 1705.15, "K (1057-1432 C, with the refitted Ganguly et al. 1998 runs)"),
         P_range=Range(2.0e9, 4.0e9, "Pa (20-40 kbar)"),
@@ -227,11 +249,16 @@ COEFFICIENTS.append(interdiffusion_from_tracers(
     "grt_FeMg_borinski2012", tracer_a=COEFFICIENTS[1], tracer_b=COEFFICIENTS[0],
     species="Fe-Mg", comp_key="XFe",
     label="Garnet Fe-Mg interdiffusion from the Borinski et al. (2012) tracer laws",
-    citation="borinski2012", equation_number="binary limit of eq. 2 (ideal) with the eq. 11 tracer laws",
-    X_range=Range(0.0, 1.0, "XFe = Fe/(Fe+Mg)"),
+    citation="borinski2012",
+    equation_number=("eq. 8, p. 578 (interdiffusion in an ideal system of equally charged species, the binary "
+                     "form of eq. 1) with the eq. 11 tracer laws"),
+    X_range=Range(0.0, 1.0, "XFe = Fe/(Fe+Mg) (the whole binary join, not a calibration range)"),
     calibration_notes=(
-        "Binary Fe-Mg exchange. Valid only where Mn and Ca are low and do not zone; otherwise use the "
-        "multicomponent garnet model (File > Multicomponent and isotope study).",
+        "Binary Fe-Mg exchange. Borinski et al. note that most metamorphic garnets are nearly binary "
+        "almandine-pyrope solid solutions poor in spessartine and grossular (p. 573). Diffusor's own "
+        "restriction: use it only where Mn and Ca are low and nearly uniform, since they are not "
+        "modelled. Otherwise use the multicomponent garnet model (File > Multicomponent and isotope "
+        "study).",
         "Ideal mixing; Borinski et al. (2012) found that non-ideality changes retrieved coefficients by "
         "less than a factor of 1.2 for most natural garnet compositions (abstract).",),
     notes="Computed from the two tracer laws for an ideal Fe-Mg binary of divalent ions.",

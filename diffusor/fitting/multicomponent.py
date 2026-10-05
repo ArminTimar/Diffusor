@@ -252,6 +252,8 @@ def fit_multicomponent_time(model: MulticomponentModel, x, data: Mapping[str, Se
     stats = statistics(obs, mod, s_all, n_params=1 + len(free))
     per = {c: statistics(data[c], pred[c], sig[c], n_params=0) for c in fitted}
     w = model.warnings()
+    if stats.dof_warning():
+        w.append(stats.dof_warning())
     if any(sig[c] is None for c in fitted):
         w.append("No uncertainties were given for every component, so all are weighted equally in mole "
                  "fraction and chi2 is only a relative measure.")

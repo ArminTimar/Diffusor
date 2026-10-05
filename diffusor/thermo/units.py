@@ -3,11 +3,20 @@
 Temperature / pressure / time helpers plus the mineral composition variables
 used by the diffusion coefficients:
 
-* ``X_Fe = Fe / (Fe + Mg)``  (molar; Fe = total Fe as Fe2+ unless stated)
-  -- convention of Dohmen & Chakraborty (2007), Dohmen et al. (2016),
-  Mueller et al. (2013).
+* ``X_Fe = Fe / (Fe + Mg)``  (molar; Diffusor's convention is to count all Fe,
+  reported as FeO, as one species -- an assumption of this program, not a
+  statement of the laws' authors).  Dohmen & Chakraborty (2007), Dohmen et al.
+  (2016) and Mueller et al. (2013) use X_Fe as the mole fraction of the
+  fayalite, ferrosilite or hedenbergite component; none of them states how
+  Fe3+ is to be treated when it is computed from an analysis.  Mueller et al.
+  (2013, Table 1) compute their diopside fraction as Mg/(Mg + Fe + Mn), and
+  the printed values (0.93) are consistent with Fe2+ and Fe3+ both counted
+  (0.93-0.94 from the rounded apfu printed there) and not with Fe2+ alone
+  (0.96-1.00), i.e. they use total Fe.
 * ``Fo = 100 * Mg / (Mg + Fe)`` mol%; ``Mg# = 100 * Mg / (Mg + Fe)``.
-* ``X_An = Ca / (Ca + Na + K)`` (molar), Deer, Howie & Zussman (1992).
+* ``X_An = Ca / (Ca + Na + K)`` (molar), the ternary-feldspar form of Deer, Howie
+  & Zussman (2013, Appendix 3, p. 489); for K-free plagioclase it equals their
+  plagioclase form Ca / (Ca + Na).
 * ``X_Usp`` (ulvoespinel fraction) for titanomagnetite from Ti apfu on a
   3-cation basis: ``X_Usp = 3 Ti / (Ti + Fe)`` i.e. Ti per formula unit
   (Fe3-xTixO4 => X_Usp = x); Stormer (1983)-style recalculation is *not*

@@ -23,8 +23,10 @@ factor.  Diffusor therefore offers three sampling modes, in order of
 preference:
 
 ``covariance``
-    Sample the parameter vector from the published covariance matrix
-    (this is the approach of Mutch et al. 2021, DFENS).
+    Sample the parameter vector from a covariance matrix (this is the
+    approach of Mutch et al. 2021, DFENS). The matrix is either published or
+    built from a correlation the source states in words; each entry's
+    uncertainty note says which.
 ``logD_at_T``
     Sample ln D directly at the working temperature using the paper's stated
     scatter about the Arrhenius line (e.g. "reproduces the data within 1 log
@@ -115,7 +117,10 @@ class Parameter:
     value: float
     sigma: float = 0.0
     unit: str = ""
-    sigma_level: str = "1s"       # '1s' or '2s' as published
+    # '1s' or '2s' as published, or 'unstated' when the source prints a +/- without
+    # saying what it is (standard deviation, standard error, 95 % bound ...). An
+    # unstated level is sampled as if it were 1 sigma and is reported as unstated.
+    sigma_level: str = "1s"
     description: str = ""
 
     @property
@@ -233,8 +238,12 @@ class DiffusionCoefficient:
         """D (m^2/s) along the traverse described by ``cond``.
 
         If ``cond.axis`` is given, the axis factor for that axis is applied.
-        If ``cond.angles_deg`` is given, the direction-cosine relation of
-        Costa & Chakraborty (2004) is used.  With neither, the reference axis
+        If ``cond.angles_deg`` is given, the direction-cosine relation
+        D_trav = D_a cos^2(alpha) + D_b cos^2(beta) + D_c cos^2(gamma) is used
+        (Costa & Chakraborty 2004, EPSL 227, eq. 5, there taken from Philibert
+        1991; also stated in Costa, Dohmen & Chakraborty 2008, RiMG 69, p. 574, who
+        note that the principal axes need not coincide with the crystallographic
+        axes).  With neither, the reference axis
         of the publication is used unchanged.
         """
         self._validate_conditions(cond)
@@ -284,7 +293,7 @@ class DiffusionCoefficient:
         mode = self.default_sampling_mode() if mode == "auto" else mode
         if mode == "covariance":
             if self.covariance is None:
-                raise ValueError(f"{self.key} has no published covariance matrix")
+                raise ValueError(f"{self.key} has no covariance matrix")
             mean = np.array([self.params[k].value for k in self.cov_order], dtype=float)
             draw = rng.multivariate_normal(mean, np.asarray(self.covariance, dtype=float))
             return dict(zip(self.cov_order, draw))
@@ -393,7 +402,7 @@ class DiffusionCoefficient:
             lines.append(f"  scatter about the fit: {self.sigma_logD:g} log10 units (1 sigma); "
                          f"{self.sigma_logD_basis or 'basis not recorded'}")
         if self.covariance is not None:
-            lines.append(f"  covariance published for: {', '.join(self.cov_order)}")
+            lines.append(f"  covariance (see uncertainty note for its basis): {', '.join(self.cov_order)}")
         if self.axis_factors:
             fac = ", ".join(f"D_{k}/D_{self.reference_axis} = {v:g}" for k, v in self.axis_factors.items())
             lines.append(f"  anisotropy      : {fac}")
@@ -422,8 +431,8 @@ def arrhenius(D0: float, Q_J: float, T_K: float, dV: float = 0.0,
               P_Pa: float = 1.0e5, P0_Pa: float = 1.0e5):
     """``D = D0 exp(-(Q + (P - P0) dV) / (R T))``.
 
-    The standard Arrhenius form with an activation volume (Crank 1975 section 11;
-    Costa et al. 2008 eq. 20, where the pressure term is written
+    The standard Arrhenius form with an activation volume (Costa et al. 2008
+    eq. 20, where the pressure term is written
     ``Q + P dV``).  ``dV`` in m^3/mol, ``Q_J`` in J/mol.
     """
     return D0 * np.exp(-(Q_J + (P_Pa - P0_Pa) * dV) / (R_GAS * T_K))

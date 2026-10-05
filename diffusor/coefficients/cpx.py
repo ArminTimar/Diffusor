@@ -30,16 +30,17 @@ _add(DiffusionCoefficient(
     equation_text=("D_Fe-Mg = 2.77 (+/- 4.27) x 10^-7 exp(-320.7 +/- 16.0 kJ/mol / R T) m2/s"),
     func=_plain_arrhenius,
     params={
-        "D0": Parameter("D0", 2.77e-7, 4.27e-7, "m2/s", "1s", "pre-exponential factor"),
-        "Q": Parameter("Q", 320.7, 16.0, "kJ/mol", "1s", "activation energy"),
+        "D0": Parameter("D0", 2.77e-7, 4.27e-7, "m2/s", "unstated", "pre-exponential factor"),
+        "Q": Parameter("Q", 320.7, 16.0, "kJ/mol", "unstated", "activation energy"),
     },
     sigma_logD=0.5,
     reference_axis="c",
     needs_fo2=False,
     T_range=Range(1073.15, 1473.15, "K (800-1200 C)"),
-    P_range=Range(1.0e5, 1.0e5, "Pa (1 atm)"),
+    P_range=Range(1.0e5, 101325.0, "Pa (atmospheric; 1 bar to 1 atm)"),
     fo2_range=Range(-17.0, -11.0, "log10 bar (no dependence resolved)"),
-    X_range=Range(0.0, 0.35, "XFe (Di93Hd7 measured. Di93-Di65 explored)"),
+    fo2_unit="bar",
+    X_range=Range(0.07, 0.35, "XFe (Di93 to Di65, the compositional range the authors estimate; Di93Hd7 was the crystal measured)"),
     verified=True,
     verified_from="read from the paper PDF: abstract and Fig. 5b annotation",
     recommended=True,
@@ -47,10 +48,21 @@ _add(DiffusionCoefficient(
            "No fO2 dependence resolved between 1e-17 and 1e-11 bar, unlike Dimanov & "
            "Wiedenbeck (2006). The authors relate this to the high Al content of their "
            "crystals. CAUTION: the paper is internally inconsistent about D0 -- the abstract "
-           "and the annotation in Fig. 5b give 2.77e-7 m2/s, while the running text on "
-           "p. 1570 gives 2.77e-8 m2/s. Diffusor uses 2.77e-7, the value that appears twice. "
-           "The Arrhenius fit reproduces the measurements within about 1 log unit, which is "
-           "why sigma_logD is set to 0.5 (1 sigma)."),
+           "and the annotation in Fig. 5b (p. 1569) give 2.77e-7 m2/s, while the running text "
+           "on p. 1569 (right column) gives 2.77e-8 m2/s. Diffusor uses 2.77e-7, the value that "
+           "appears twice; with Q = 320.7 kJ/mol it gives log D = -19.7 at 1000 C, on the "
+           "data of Fig. 5b, whereas 2.77e-8 would give -20.7, a full log unit below them. "
+           "The +/- values (D0 +/-4.27e-7, Q +/-16.0 kJ/mol) are printed without a stated "
+           "confidence level, and the error on D0 is larger than D0 itself, so it cannot be a "
+           "symmetric 1 sigma interval (it would allow negative D0); the parameters are therefore "
+           "not sampled independently and the Monte Carlo uses the scatter of log D instead. "
+           "The paper says the Arrhenius expression reproduces the measured coefficients "
+           "within 1 log unit (envelope of Fig. 5b) and puts the reproducibility of individual "
+           "coefficients at 0.4 log units. Reading the 1 log unit envelope as roughly two "
+           "standard deviations is Diffusor's own conversion, hence sigma_logD = 0.5 "
+           "(treated as 1 sigma). The composition range of the data is Di93 to Di65 (XFe about "
+           "0.07 to 0.35); the authors find no composition dependence over it. XFe below 0.07 "
+           "(towards pure diopside) is extrapolation."),
 ))
 
 
@@ -72,8 +84,11 @@ _add(DiffusionCoefficient(
         "Q": Parameter("Q", 406.0, 0.0, "kJ/mol", "1s", "apparent activation enthalpy"),
     },
     sigma_logD=0.5,
+    reference_axis="c",
     needs_fo2=False,
+    fo2_unit="atm",
     T_range=Range(1173.15, 1513.15, "K (900-1240 C)"),
+    fo2_range=Range(-18.0, -13.0, "log10 atm (pO2 10^-18 to 10^-13 atm, abstract; it varied with T, Table 1: 4e-18 to 2.5e-13 atm)"),
     verified=True,
     verified_from=("read from the paper PDF: abstract (p. 749) and the fit on p. 757. Before "
                    "1 October 2026 this entry used 9.5e-5 m2/s from the Table 2 footnote of "
@@ -87,7 +102,11 @@ _add(DiffusionCoefficient(
            "406 kJ/mol is an apparent enthalpy with no fO2 correction. Leaving out the "
            "1240 C point gives 332 kJ/mol (p. 757). The published 1 sigma values (64 kJ/mol, "
            "0.32 log units) are strongly correlated and no covariance is given, so they are "
-           "not sampled. Mueller et al. (2013) is the more recent and better constrained "
+           "not sampled. Diffusion was measured along [001] only (film on surfaces cut "
+           "perpendicular to [001]); the entry carries no anisotropy factors, so other "
+           "directions are not calibrated. The paper reports pO2 in atm (the fO2 range shown is "
+           "in log10 atm); the law itself has no fO2 term and the pO2 varied with temperature in "
+           "the experiments. Mueller et al. (2013) is the more recent and better constrained "
            "calibration and gives markedly different timescales."),
 ))
 
@@ -110,6 +129,7 @@ _add(DiffusionCoefficient(
         "Q": Parameter("Q", 360.87, 0.0, "kJ/mol", "1s", "activation energy"),
     },
     sigma_logD=0.30,
+    reference_axis="c",
     needs_fo2=False,
     T_range=Range(1423.15, 1523.15, "K (1150-1250 C)"),
     P_range=Range(2.5e9, 2.5e9, "Pa (25 kbar)"),
@@ -117,9 +137,14 @@ _add(DiffusionCoefficient(
     verified_from=("read from the paper PDF: abstract (p. 95) and eq. 5 (p. 100). "
                    "86.25 kcal/mol x 4.184 = 360.87 kJ/mol and 3.89e-3 cm2/s = 3.89e-7 m2/s"),
     notes=("From homogenisation of (001) pigeonite lamellae in sub-calcic diopside. The "
-           "stated uncertainty is a factor of 2, hence sigma_logD = 0.30. Ca-Mg is slower "
-           "than Fe-Mg in cpx (Mueller et al. 2013), so Ca profiles can be used to test "
-           "whether a boundary formed by growth or by diffusion. These are 'average' "
+           "diffusion is one-dimensional and normal to the (001) lamellae, i.e. along c* "
+           "(shown as the c direction; for monoclinic cpx c* is not exactly [001]), and no "
+           "other direction was measured. The "
+           "stated uncertainty is a factor of 2, hence sigma_logD = 0.30. The statement that "
+           "Ca-Mg is slower than Fe-Mg in cpx is from the abstract of Mueller et al. (2013), "
+           "not from Brady & McCallister; using Ca profiles to test whether a boundary formed "
+           "by growth or by diffusion is Diffusor's suggestion, not a claim of the source. "
+           "These are 'average' "
            "effective binary coefficients: the paper warns that near the solvus actual "
            "interdiffusion coefficients should vary by an order of magnitude or more with "
            "composition."),

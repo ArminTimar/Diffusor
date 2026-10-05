@@ -66,14 +66,23 @@ def test_ideal_ionic_matrix_limits():
 
 def test_chakraborty_ganguly_1992_eq5_matrix_is_reproduced():
     """Eq. 5 prints nine matrix elements (cm2/s) at X_Fe .61, X_Mn .20, X_Mg .18, X_Ca .01 with
-    Ca dependent. Tracer values D*Mn 2.495e-12, D*Mg = D*Fe = 6.0e-13 and D*Ca = 0.5 D*Fe (p. 81)
-    reproduce all nine within 0.3 %, which checks the structure of eq. 2 element by element."""
+    Ca dependent. This verifies the structure of eq. 2 element by element, not the tracer
+    coefficients. The paper does not print the D* behind eq. 5 (its text points to Table 1, which
+    holds microprobe analyses, and Table 2 covers only 1200 C and 20 to 35 kb). Only D*Ca = 0.5 D*Fe
+    (p. 81) is stated. The values D*Mn 2.495e-12, D*Mg = D*Fe = 6.0e-13 cm2/s were chosen to
+    reproduce the printed matrix: they reproduce all nine elements within 0.45 %. Eq. 3 at the
+    experiment's 41 kb and 1430 C gives D*Mn 1.52e-12, D*Mg 4.46e-13 and D*Fe 4.52e-13 cm2/s, and
+    a matrix 17 to 36 % below the printed one. D[Fe,Mn] (-8.231e-13 against -8.24e-13) and
+    D[Fe,Mg] (-1.125e-13 against -1.12e-13) differ in the last printed digit, which is rounding.
+    The comparison has no absolute tolerance: with numpy's default atol of 1e-8 every element,
+    all of order 1e-12 or smaller, would pass whatever its value."""
     printed = np.array([[1.37e-12, -1.53e-13, -1.53e-13],
                         [-2.43e-13, 5.67e-13, -3.32e-14],
                         [-8.24e-13, -1.12e-13, 4.88e-13]])
     D = np.array([2.495e-12, 6.0e-13, 6.0e-13, 3.0e-13])       # Mn, Mg, Fe, Ca
     M = ideal_ionic_matrix(D, np.array([.20, .18, .61, .01]), dependent=-1)
-    assert np.allclose(M, printed, rtol=4e-3)
+    assert np.allclose(M, printed, rtol=5e-3, atol=0.0)
+    assert not np.allclose(M, 0.7 * printed, rtol=5e-3, atol=0.0)      # the comparison is not vacuous
 
 
 # ---------------------------------------------------------------- new scalar laws

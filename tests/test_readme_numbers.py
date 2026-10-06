@@ -81,3 +81,23 @@ def test_registry_counts_of_the_readme():
     assert (len(with_cov), len(scatter), len(neither)) == (2, 68, 43)
     stated = [c for c in scatter if not c.sigma_logD_basis.startswith("assumed")]
     assert (len(stated), len(scatter) - len(stated)) == (7, 61)
+
+
+def test_published_study_rows_of_the_readme():
+    """The Lynn, Gordeychik and Araya rows, from the saved validation results."""
+    import json
+    from diffusor.thermo import log_fo2_from_delta
+    from diffusor.validation import ROOT
+    lynn = json.loads((ROOT / "results.json").read_text(encoding="utf8"))
+    ratio = [r["original_days"] / r["published_days"] for r in lynn]
+    assert len(lynn) == 18 and all(r["within_published_interval"] for r in lynn)
+    assert round(min(ratio), 2) == 0.75 and round(max(ratio), 2) == 1.06
+    assert round(max(r["published_time_curve_rmse_Fo"] for r in lynn), 2) == 0.10
+    ages = json.loads((ROOT / "gordeychik_results.json").read_text(encoding="utf8"))
+    assert len(ages) == 32 and max(r["Fo_max_relative_error"] for r in ages) < 4e-16
+    T = 966 + 273.15
+    c = Conditions(T, P_Pa=1e5, log_fo2_bar=log_fo2_from_delta("NNO", 0, T, 1e5),
+                   X={"XFe": .09}, axis="a")
+    assert np.log10(get("opx_FeMg_dohmen2016").D(c)) == pytest.approx(-19.782, abs=5e-4)
+    mourey = json.loads((ROOT / "mourey_results.json").read_text(encoding="utf8"))
+    assert round(mourey["fits"][1]["days"]) == 406

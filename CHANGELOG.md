@@ -4,6 +4,77 @@ What changed between releases, newest first. The text under a version heading
 is what goes into the GitHub release, so it is written for someone deciding
 whether to update. Commit messages hold the details.
 
+## 0.4.0 (7 October 2026)
+
+### Added
+
+- **Published validation library.** File > Published validation library opens
+  316 measured olivine profiles extracted from the supplements of eight studies
+  (Lynn et al. 2024; Mutch et al. 2019; Mourey et al. 2023; Sundermeyer et al.
+  2020, Piton de la Fournaise and Eifel; Gordeychik et al. 2018; Ruprecht &
+  Plank 2013; Ruth et al. 2018), with a search field. Every file keeps the
+  source row of each analysis, and the manifest stores the source workbook,
+  sheet and SHA-256 checksum. Profiles whose study does not publish a complete
+  model setup load as data only, with a note on every step saying that the
+  conditions and model still have to be set.
+- **18 olivine examples from Lynn et al. (2024), Kilauea 2020.** Each loads the
+  inputs archived with it: 1200 ± 10 °C, 42 MPa, log fO2 = −8.2 (bar), the EBSD
+  angles to a, b and c, and the published initial profile, which is a new
+  initial-condition choice ("Published tabulated initial profile"). Only the
+  time is fitted. The refits give 0.75 to 1.06 times the published times, all
+  inside the published ± 30 %. Ol 8 records two diffusion events and is in the
+  library only.
+- **Validation report** (examples/validation/report.md). It compares the
+  published times with Diffusor's refits for the Lynn profiles, recomputes the
+  32 olivine ages of Gordeychik et al. (2018) from their fitted widths, checks
+  the orthopyroxene D of Araya et al. (2024), reconstructs one Mourey et al.
+  (2023) crystal (406 d against 395 d published) and reports two Sundermeyer et
+  al. (2020) reconstructions that do not reproduce the published ages. Each
+  comparison is repeated with the Oeser et al. (2026) olivine law to show how
+  much the time depends on the choice of D. The scripts that produce it are in
+  the same folder.
+- **Choose what to export.** File > Export results (and the Export button) now
+  opens a list of the eight outputs, each with a tick box, before it asks for the
+  folder: results JSON, profile CSV, methods text, Excel workbook, Monte Carlo
+  times, and the figure as PNG, SVG and PDF. Select all and Select none are
+  there too, and what you switch off is remembered. The Monte Carlo times are
+  listed but cannot be ticked until a Monte Carlo has been run.
+- **Start-up window.** Clicking the shortcut now opens a small window at once,
+  with the Diffusor icon, its name, a line saying what is loading and a
+  progress bar. The main window opens when the loading is done, and the
+  splash closes after it. If a library fails to load, a message box says why
+  instead of Diffusor stopping silently.
+- Help > About now names the author and the licence.
+
+### Changed
+
+- **Examples are grouped.** The examples list on the Data step is now a tree:
+  mineral, then study, then example. The 18 Lynn et al. (2024) profiles take
+  one row until opened. Everything starts closed; choosing or loading an
+  example opens its mineral and study.
+- The word "measured" is gone from the examples list, the example pages and the
+  sidebar. Only synthetic examples carry a label.
+- **Loaded data card.** When a fit window leaves points out, the card now says
+  so: "28 of 109 points, from 4.2 to 59.5 um. The fit window (4 to 60 um) leaves
+  out the other 81." Before, it showed only the points inside the window.
+- **Example descriptions.** The "Where the data come from" section of the
+  Kizimen example is now three paragraphs: where the data come from, which part
+  of them the example fits, and how Diffusor's result relates to the paper's.
+  Dataset texts can use blank lines for paragraphs.
+- When Diffusor is installed as a package (pip), the example files are found in
+  the installation's data folder.
+
+### Fixed
+
+- A wrong time and runaway plateaus when the numerical solver is used
+  with **Fit the plateaus** ticked. The ends of the profile stayed at the
+  starting plateau values while the fitted plateaus drifted to their limits,
+  so the time was off (12.6 days instead of 6.9 on the titanomagnetite
+  example). The ends now follow the fitted plateaus, in a fit and in the
+  Monte Carlo draws that vary the boundary compositions.
+- The y-axis label being cut off at the left edge of the plot after the
+  display scaling changed. The plot is now drawn again when a label sticks out.
+
 ## 0.3.1 (5 October 2026)
 
 ### Added

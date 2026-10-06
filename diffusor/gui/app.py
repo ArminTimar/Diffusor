@@ -108,23 +108,76 @@ def _set_window_properties(hwnd: int, values: dict) -> None:
         release(store)
 
 
-def main(argv=None) -> int:
+def _show_window(app, splash=None) -> object:
+    """Build the main window and show it. The splash, if there is one, closes after it."""
     from PySide6.QtCore import QTimer
-    from PySide6.QtGui import QIcon
-    from PySide6.QtWidgets import QApplication
-    import matplotlib
-    matplotlib.use("QtAgg")
     from .main_window import MainWindow
 
-    _own_taskbar_entry()
-    app = QApplication(argv if argv is not None else sys.argv)
-    app.setApplicationName("Diffusor")
-    app.setWindowIcon(QIcon(str(ICON)))
     win = MainWindow()
     win.show()
     _taskbar_icon(win)
     # after the window is up, so a slow network never delays the start
     QTimer.singleShot(1500, win.startup_update_check)
+    if splash is not None:
+        splash.complete()
+    return win
+
+
+def _start_error(app, splash, text: str) -> None:
+    """Say why Diffusor could not start. Without a console, pythonw would show nothing."""
+    from PySide6.QtWidgets import QMessageBox
+    if splash is not None:
+        splash.finish()
+    QMessageBox.critical(None, "Diffusor could not start", text)
+    app.exit(1)
+
+
+def main(argv=None, splash: bool = True) -> int:
+    from PySide6.QtCore import QTimer
+    from PySide6.QtGui import QIcon
+    from PySide6.QtWidgets import QApplication
+
+    _own_taskbar_entry()
+    app = QApplication(argv if argv is not None else sys.argv)
+    app.setApplicationName("Diffusor")
+    app.setWindowIcon(QIcon(str(ICON)))
+
+    if not splash:
+        import matplotlib
+        matplotlib.use("QtAgg")
+        win = _show_window(app)
+        return app.exec()
+
+    # The splash opens before anything heavy is imported. The imports run on a second
+    # thread while its bar moves, and the window is built here once they are done.
+    from .. import __version__
+    from .splash import Preloader, StartupSplash
+    loader = Preloader()
+    screen = StartupSplash(loader, __version__)
+    screen.begin()
+    app.processEvents()
+    loader.start()
+    keep = {}
+    poll = QTimer()
+    poll.setInterval(30)
+
+    def check():
+        if not loader.done:
+            return
+        poll.stop()
+        if loader.error:
+            _start_error(app, screen, loader.error)
+            return
+        screen.set_progress(0.95, "Building the window")
+        app.processEvents()
+        try:
+            keep["window"] = _show_window(app, screen)
+        except Exception:
+            import traceback
+            _start_error(app, screen, traceback.format_exc())
+
+    poll.timeout.connect(check)
+    poll.start()
     return app.exec()
 
 

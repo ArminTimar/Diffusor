@@ -23,6 +23,7 @@ dependencies = [
 [project.optional-dependencies]
 dev = ["pytest>=7", "pypdf>=3"]
 images = ["tifffile>=2023.1"]
+validation = ["xlrd>=2.0"]
 
 # a GUI script: the launcher opens the window without a console
 [project.gui-scripts]
@@ -37,6 +38,22 @@ include = ["diffusor*"]
 
 [tool.setuptools.package-data]
 "diffusor.gui" = ["icons/*.svg", "icons/*.png", "icons/*.ico"]
+
+# Example profiles are data files shared by the desktop app and validation
+# tools. Keep them under the installation data directory so wheels stay small
+# and the files remain outside the Python import packages.
+[tool.setuptools.data-files]
+"share/diffusor/examples" = ["examples/*.csv"]
+"share/diffusor/examples/images" = ["examples/images/*"]
+"share/diffusor/examples/validation" = [
+    "examples/validation/*.json",
+    "examples/validation/*.md",
+    "examples/validation/*.png",
+    "examples/validation/*.py",
+    "examples/validation/*.svg",
+]
+"share/diffusor/examples/validation/fits" = ["examples/validation/fits/*"]
+"share/diffusor/examples/validation/profiles" = ["examples/validation/profiles/*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

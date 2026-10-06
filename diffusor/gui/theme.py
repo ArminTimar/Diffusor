@@ -49,6 +49,7 @@ def stylesheet() -> str:
     dot = _icon("dot.svg")
     down = _icon("chevron_down.svg")
     up = _icon("chevron_up.svg")
+    right = _icon("chevron_right.svg")
     return f"""
 * {{
     font-family: {FONT_STACK};
@@ -180,6 +181,20 @@ QListWidget::item:selected, QListWidget::item:selected:!active {{
     background: {ACCENT_SELECTED}; color: {TEXT}; border: 1px solid #A9CBC7;
 }}
 QListWidget::item:selected:hover {{ background: {ACCENT_SELECTED}; color: {TEXT}; border: 1px solid {ACCENT}; }}
+QTreeWidget {{
+    background: {SURFACE}; border: 1px solid {BORDER}; border-radius: 8px;
+    outline: none; padding: 4px;
+}}
+QTreeWidget::item {{ padding: 5px 6px; border-radius: 6px; color: {TEXT}; border: 1px solid transparent; }}
+QTreeWidget::item:hover {{ background: {ACCENT_SOFT}; color: {TEXT}; }}
+QTreeWidget::item:selected, QTreeWidget::item:selected:!active {{
+    background: {ACCENT_SELECTED}; color: {TEXT}; border: 1px solid transparent;
+}}
+QTreeWidget::item:disabled {{ color: {TEXT_FAINT}; }}
+QTreeView::branch {{ background: {SURFACE}; image: none; border-image: none; }}
+QTreeView::branch:selected, QTreeView::branch:hover {{ background: {SURFACE}; image: none; border-image: none; }}
+QTreeView::branch:has-children:closed {{ image: url({right}); }}
+QTreeView::branch:has-children:open {{ image: url({down}); }}
 QTableWidget {{
     background: {SURFACE}; border: 1px solid {BORDER}; border-radius: 8px; gridline-color: {BORDER};
 }}

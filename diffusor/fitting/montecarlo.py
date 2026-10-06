@@ -52,7 +52,7 @@ import numpy as np
 from ..solvers.history import ThermalHistory
 from ..thermo.buffers import log_fo2_from_delta
 from ..thermo.units import human_time
-from .fit import T_MAX_DEFAULT, T_MIN_DEFAULT, fit_time
+from .fit import T_MAX_DEFAULT, T_MIN_DEFAULT, fit_time, follow_plateaus
 from .model import DiffusionModel
 
 # expected run time below which the draws stay in this process (starting workers
@@ -271,6 +271,7 @@ def _evaluate(model: DiffusionModel, d: _Draw, sigma, free_parameters, t_min, t_
         m.conditions, m.fo2_buffer, m.history = d.conditions, d.fo2_buffer, d.history
         if d.initial is not None:
             m.initial = d.initial
+            follow_plateaus(m, model.initial.params, d.initial.params)
         if refit:
             r = fit_time(m, d.x, d.C, sigma, free_parameters, t_min, t_max,
                          overrides=d.overrides, t_guess=t_guess)

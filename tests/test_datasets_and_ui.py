@@ -19,7 +19,7 @@ def test_every_dataset_declares_its_provenance():
         assert d.provenance.strip(), d.key
         if d.kind == "measured":
             assert d.citation in REFERENCES, f"{d.key} cites unknown key {d.citation}"
-            assert "Real measured data" in d.provenance
+            assert "SYNTHETIC" not in d.provenance, f"{d.key} is a measurement"
         else:
             assert "SYNTHETIC" in d.provenance, (
                 f"{d.key} must say in its provenance that it is not a measurement")
@@ -31,7 +31,8 @@ def test_provenance_banner_never_calls_synthetic_data_measured():
         if d.kind == "synthetic":
             assert "not a measurement" in banner
         else:
-            assert banner.startswith("MEASURED DATA")
+            assert banner == d.provenance, "only synthetic data get a heading"
+            assert "SYNTHETIC" not in banner
 
 
 def test_there_is_a_dataset_for_every_mineral():

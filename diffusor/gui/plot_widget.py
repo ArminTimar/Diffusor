@@ -132,6 +132,38 @@ def _legend(ax, fontsize: float = 9):
     return leg
 
 
+def keep_labels_in_view(canvas) -> None:
+    """Draw once more when an axis label sticks out of the figure.
+
+    Constrained layout makes room for the labels as they measure at the moment of
+    drawing. If the figure's scale changes after that, which happens when the window
+    meets another display scaling, the labels come out wider than the room made for
+    them and the edge of the y label is cut off. A second draw lays the figure out
+    again at the new scale. It is tried once per clipped state, so a label that is
+    too long for the figure cannot start a loop of redraws.
+    """
+    state = {"again": False}
+
+    def check(_event):
+        try:
+            renderer = canvas.get_renderer()
+            out = False
+            for ax in canvas.figure.axes:
+                for label in (ax.yaxis.label, ax.xaxis.label):
+                    if label.get_text():
+                        box = label.get_window_extent(renderer)
+                        out = out or box.x0 < -0.5 or box.y0 < -0.5
+        except Exception:
+            return
+        if not out:
+            state["again"] = False
+        elif not state["again"]:
+            state["again"] = True
+            canvas.draw_idle()
+
+    canvas.mpl_connect("draw_event", check)
+
+
 class ProfilePlot(QWidget):
     # the new exclusion mask (one flag per point) after points were cut or restored
     points_cut = Signal(object)
@@ -144,6 +176,7 @@ class ProfilePlot(QWidget):
         self.figure = Figure(figsize=(7, 5.5), layout="constrained",
                              facecolor=theme.SURFACE)
         self.canvas = FigureCanvasQTAgg(self.figure)
+        keep_labels_in_view(self.canvas)
         self.toolbar = SaveToolbar(self.canvas, self)
         self.setStyleSheet(f"background:{theme.SURFACE};")
         lay = QVBoxLayout(self)
@@ -578,6 +611,7 @@ class DataPreview(QWidget):
         super().__init__(parent)
         self.figure = Figure(figsize=(5, 3), layout="constrained", facecolor=theme.SURFACE)
         self.canvas = FigureCanvasQTAgg(self.figure)
+        keep_labels_in_view(self.canvas)
         lay = QVBoxLayout(self)
         lay.setContentsMargins(0, 0, 0, 0)
         lay.addWidget(self.canvas)

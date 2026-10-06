@@ -1,0 +1,29 @@
+{
+  "study": "ostorero2022",
+  "sample": "K9_L10C4",
+  "published_years": 2.32,
+  "classification": "EPMA surrogate for published BSE fit, not exact replication",
+  "fits": [
+    {
+      "coefficient": "opx_FeMg_ganguly_tazzoli1994_nofo2",
+      "years": 2.5098482450521753,
+      "success": true,
+      "warnings": [
+        "T = 1123 K is outside the calibration range (773.15 to 1073.15 K (500-800 C, extrapolated above)) of Ganguly & Tazzoli (1994)",
+        "Ganguly & Tazzoli (1994) state the law only for fO2 from the iron-wustite (IW) buffer to 0.8 log units above IW; the fO2 window is not checked by Diffusor for this entry (the law has no fO2 term), so make sure the crystal's fO2 lies in it or accept the extrapolation.",
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "coefficient": "opx_FeMg_dias2025",
+      "years": 11.836070564222238,
+      "success": true,
+      "warnings": [
+        "T = 1123 K is outside the calibration range (1173.15 to 1373.15 K (900-1100 C, the interval Section 4.3 gives for both equations. The new experiments ran at 950-1100 C, and Section 4.3 fits them together with the refitted Dohmen et al. (2016) data, which reach lower temperatures (the sentence introducing eq. 23 names 870 C))) of Dias et al. (2025)",
+        "log fO2 = -6.45 (Pa) is outside the calibration range (-11 to -7 log10 Pa) of Dias et al. (2025)",
+        "P = 0.20 GPa is outside the calibration range (100000 to 101325 Pa (atmospheric; 1 bar to 1 atm)) of Dias et al. (2025)",
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    }
+  ]
+}

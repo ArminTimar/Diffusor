@@ -87,11 +87,17 @@ class ProfileSpec:
             s += f" (as {self.oxide_a}/{self.oxide_b} wt%, converted to cation moles)"
         if self.sigma_a_column:
             s += f", uncertainty from '{self.sigma_a_column}' ({self.sigma_level})"
-        if self.x_min is not None or self.x_max is not None:
-            lo = "start" if self.x_min is None else f"{self.x_min:g}"
-            hi = "end" if self.x_max is None else f"{self.x_max:g}"
-            s += f", fitted window {lo} to {hi} {self.distance_unit}"
+        if self.window_text():
+            s += f", fitted window {self.window_text()}"
         return s
+
+    def window_text(self) -> str:
+        """The fitted window as "4 to 60 um", or "" when every point is used."""
+        if self.x_min is None and self.x_max is None:
+            return ""
+        lo = "start" if self.x_min is None else f"{self.x_min:g}"
+        hi = "end" if self.x_max is None else f"{self.x_max:g}"
+        return f"{lo} to {hi} {self.distance_unit}"
 
 
 @dataclass
@@ -105,6 +111,7 @@ class Profile:
     notes: List[str] = field(default_factory=list)
     row_index: Optional[np.ndarray] = None   # rows of ``raw`` behind each point
     excluded: Optional[np.ndarray] = None    # True where the user cut the point from the fit
+    n_outside_window: int = 0                # valid points the fitted window left out
 
     def __len__(self) -> int:
         return int(self.x.size)
@@ -132,7 +139,8 @@ class Profile:
         return Profile(self.x[keep], self.C[keep],
                        None if self.sigma is None else self.sigma[keep],
                        self.raw, self.spec, self.source, notes,
-                       None if self.row_index is None else self.row_index[keep])
+                       None if self.row_index is None else self.row_index[keep],
+                       n_outside_window=self.n_outside_window)
 
     def sorted(self) -> "Profile":
         idx = np.argsort(self.x, kind="stable")
@@ -140,7 +148,8 @@ class Profile:
                        None if self.sigma is None else self.sigma[idx],
                        self.raw, self.spec, self.source, list(self.notes),
                        None if self.row_index is None else self.row_index[idx],
-                       None if self.excluded is None else self.excluded[idx])
+                       None if self.excluded is None else self.excluded[idx],
+                       self.n_outside_window)
 
     def column(self, name: str) -> np.ndarray:
         """Another column of the source table, aligned point for point with x.
@@ -326,6 +335,7 @@ def build_profile(df: pd.DataFrame, spec: ProfileSpec, source: str = "") -> Prof
     ok = np.isfinite(x) & np.isfinite(C)
     if not np.all(ok):
         notes.append(f"{int((~ok).sum())} rows with missing values were dropped")
+    n_out = 0
     if spec.x_min is not None or spec.x_max is not None:
         lo = -np.inf if spec.x_min is None else float(length_to_m(spec.x_min, spec.distance_unit)) * 1.0e6
         hi = np.inf if spec.x_max is None else float(length_to_m(spec.x_max, spec.distance_unit)) * 1.0e6
@@ -338,7 +348,8 @@ def build_profile(df: pd.DataFrame, spec: ProfileSpec, source: str = "") -> Prof
             raise ValueError("no points fall inside the fitted window")
     rows = np.arange(len(df))
     prof = Profile(x=x[ok], C=C[ok], sigma=None if sigma is None else sigma[ok],
-                   raw=df, spec=spec, source=source, notes=notes, row_index=rows[ok])
+                   raw=df, spec=spec, source=source, notes=notes, row_index=rows[ok],
+                   n_outside_window=n_out)
     return prof.sorted()
 
 

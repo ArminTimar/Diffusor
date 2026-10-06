@@ -262,13 +262,20 @@ def coefficient_html(c) -> str:
 
 
 # ------------------------------------------------------------------ examples
+def paragraphs(text: str) -> list:
+    """The paragraphs of a dataset text, which are separated by a blank line."""
+    return [p.strip() for p in str(text).split("\n\n") if p.strip()]
+
+
 def example_html(ds, coefficient=None) -> str:
-    kind = ("measured", "ok") if ds.kind == "measured" else ("synthetic", "warn")
-    d = Doc(ds.name.split(" (")[0], esc(f"{ds.mineral}, {ds.species}"), [kind])
-    if ds.kind != "measured":
+    # only synthetic data carry a label; everything else is simply a published example
+    tags = [("synthetic", "warn")] if ds.kind == "synthetic" else []
+    d = Doc(ds.name.split(" (")[0], esc(f"{ds.mineral}, {ds.species}"), tags)
+    if ds.kind == "synthetic":
         d.box("Synthetic data made by Diffusor with a known answer. Not a measurement.", "warn")
     d.h("Where the data come from")
-    d.p(esc(ds.provenance))
+    for para in paragraphs(ds.provenance):
+        d.p(esc(para))
     s = ds.settings
     d.h("Conditions it sets")
     if "fo2_absolute" in s:
@@ -291,10 +298,12 @@ def example_html(ds, coefficient=None) -> str:
             d.p("<span class='muted'>" + esc(unused) + "</span>")
     if ds.expected:
         d.h("Expected answer")
-        d.p(esc(ds.expected))
+        for para in paragraphs(ds.expected):
+            d.p(esc(para))
     if ds.notes:
         d.h("Notes")
-        d.p(esc(ds.notes))
+        for para in paragraphs(ds.notes):
+            d.p(esc(para))
     if ds.citation:
         d.h("Reference")
         d.ul(reference_items([ds.citation]))

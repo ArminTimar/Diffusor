@@ -1,0 +1,1462 @@
+[
+  {
+    "group": "outer_core",
+    "sample": "SHIV-08-07 10 Ol-4",
+    "part": 1,
+    "row": 4,
+    "source_file": "41598_2018_30133_MOESM6_ESM.xlsx",
+    "published_Fo_days": [
+      646.7225871921327,
+      1768.494463508446
+    ],
+    "published_Ni_days": [
+      353.17147643499897,
+      1106.3481924338496
+    ],
+    "recomputed_Fo_days": [
+      646.7225871921328,
+      1768.4944635084462
+    ],
+    "equation_Ni_days": [
+      353.17147643499885,
+      1022.9931916340389
+    ],
+    "Fo_max_relative_error": 2.220446049250313e-16,
+    "Ni_max_relative_error": 0.07534246575342474,
+    "alternative_Fo_days": [
+      457.6080116802294,
+      1566.1095210178573
+    ],
+    "registry_original_D_ratio": [
+      0.997032121846842,
+      0.9968439500988727
+    ],
+    "alternative_warnings": [
+      "log fO2 = -2.22 (Pa) is outside the calibration range (-5 to -5 log10 Pa (Table 4 fits at fO2 ~ 1e-5 Pa)) of Oeser et al. (2026)",
+      "P = 0.60 GPa is outside the calibration range (100000 to 101325 Pa (atmospheric; 1 bar to 1 atm)) of Oeser et al. (2026)",
+      "XFe is outside the calibration range (0.085 to 0.085 XFe (San Carlos olivine, Fo91.5)) of Oeser et al. (2026)",
+      "Fitted for 1100-1250 C at fO2 ~ 1e-5 Pa. The authors read the high activation energies (230-370 kJ/mol) and the change of anisotropy at 1150 C as a possible change of mechanism around 1150 C (abstract). For magmatic temperatures below 1100 C Diffusor recommends Dohmen & Chakraborty (2007).",
+      "Table 4 gives 95 % confidence bounds on Ea and log D0 without their covariance. Sampling the two independently would greatly overstate the spread of D, so the coefficient is held fixed in the Monte Carlo.",
+      "log fO2 = -2.11 (Pa) is outside the calibration range (-5 to -5 log10 Pa (Table 4 fits at fO2 ~ 1e-5 Pa)) of Oeser et al. (2026)",
+      "P = 1.00 GPa is outside the calibration range (100000 to 101325 Pa (atmospheric; 1 bar to 1 atm)) of Oeser et al. (2026)",
+      "XFe is outside the calibration range (0.085 to 0.085 XFe (San Carlos olivine, Fo91.5)) of Oeser et al. (2026)",
+      "Fitted for 1100-1250 C at fO2 ~ 1e-5 Pa. The authors read the high activation energies (230-370 kJ/mol) and the change of anisotropy at 1150 C as a possible change of mechanism around 1150 C (abstract). For magmatic temperatures below 1100 C Diffusor recommends Dohmen & Chakraborty (2007).",
+      "Table 4 gives 95 % confidence bounds on Ea and log D0 without their covariance. Sampling the two independently would greatly overstate the spread of D, so the coefficient is held fixed in the Monte Carlo."
+    ],
+    "alternative_to_published_ratio": [
+      0.70758006716144,
+      0.8855608843190353
+    ],
+    "classification": "Published fitted-width/Dt calculation; not an independent profile fit. Oeser extrapolation, no precision claim."
+  },
+  {
+    "group": "outer_core",
+    "sample": "SHIV-08-07 10 Ol-4",
+    "part": 2,
+    "row": 5,
+    "source_file": "41598_2018_30133_MOESM6_ESM.xlsx",
+    "published_Fo_days": [
+      806.0974112923519,
+      2204.3126947342794
+    ],
+    "published_Ni_days": [
+      441.84706909159985,
+      1381.5600233573994
+    ],
+    "recomputed_Fo_days": [
+      806.0974112923519,
+      2204.31269473428
+    ],
+    "equation_Ni_days": [
+      441.8470690916,
+      1279.8500829875295
+    ],
+    "Fo_max_relative_error": 2.220446049250313e-16,
+    "Ni_max_relative_error": 0.07361963190184051,
+    "alternative_Fo_days": [
+      570.3784604209053,
+      1952.0530992645643
+    ],
+    "registry_original_D_ratio": [
+      0.997032121846842,
+      0.9968439500988727
+    ],
+    "alternative_warnings": [
+      "log fO2 = -2.22 (Pa) is outside the calibration range (-5 to -5 log10 Pa (Table 4 fits at fO2 ~ 1e-5 Pa)) of Oeser et al. (2026)",
+      "P = 0.60 GPa is outside the calibration range (100000 to 101325 Pa (atmospheric; 1 bar to 1 atm)) of Oeser et al. (2026)",
+      "XFe is outside the calibration range (0.085 to 0.085 XFe (San Carlos olivine, Fo91.5)) of Oeser et al. (2026)",
+      "Fitted for 1100-1250 C at fO2 ~ 1e-5 Pa. The authors read the high activation energies (230-370 kJ/mol) and the change of anisotropy at 1150 C as a possible change of mechanism around 1150 C (abstract). For magmatic temperatures below 1100 C Diffusor recommends Dohmen & Chakraborty (2007).",
+      "Table 4 gives 95 % confidence bounds on Ea and log D0 without their covariance. Sampling the two independently would greatly overstate the spread of D, so the coefficient is held fixed in the Monte Carlo.",
+      "log fO2 = -2.11 (Pa) is outside the calibration range (-5 to -5 log10 Pa (Table 4 fits at fO2 ~ 1e-5 Pa)) of Oeser et al. (2026)",
+      "P = 1.00 GPa is outside the calibration range (100000 to 101325 Pa (atmospheric; 1 bar to 1 atm)) of Oeser et al. (2026)",
+      "XFe is outside the calibration range (0.085 to 0.085 XFe (San Carlos olivine, Fo91.5)) of Oeser et al. (2026)",
+      "Fitted for 1100-1250 C at fO2 ~ 1e-5 Pa. The authors read the high activation energies (230-370 kJ/mol) and the change of anisotropy at 1150 C as a possible change of mechanism around 1150 C (abstract). For magmatic temperatures below 1100 C Diffusor recommends Dohmen & Chakraborty (2007).",
+      "Table 4 gives 95 % confidence bounds on Ea and log D0 without their covariance. Sampling the two independently would greatly overstate the spread of D, so the coefficient is held fixed in the Monte Carlo."
+    ],
+    "alternative_to_published_ratio": [
+      0.70758006716144,
+      0.8855608843190353
+    ],
+    "classification": "Published fitted-width/Dt calculation; not an independent profile fit. Oeser extrapolation, no precision claim."
+  },
+  {
+    "group": "outer_core",
+    "sample": "SHIV-08-05 17 Ol-7-2",
+    "part": 1,
+    "row": 6,
+    "source_file": "41598_2018_30133_MOESM6_ESM.xlsx",
+    "published_Fo_days": [
+      685.0994676963791,
+      1873.4379153726406
+    ],
+    "published_Ni_days": [
+      374.5952190650767,
+      1172.7297315201558
+    ],
+    "recomputed_Fo_days": [
+      685.099467696379,
+      1873.4379153726404
+    ],
+    "equation_Ni_days": [
+      374.5952190650768,
+      1085.049003929864
+    ],
+    "Fo_max_relative_error": 1.1102230246251565e-16,
+    "Ni_max_relative_error": 0.0747663551401867,
+    "alternative_Fo_days": [
+      359.03718265241093,
+      1165.4832647157257
+    ],
+    "registry_original_D_ratio": [
+      0.9970321218468422,
+      0.9968439500988726
+    ],
+    "alternative_warnings": [
+      "log fO2 = -2.22 (Pa) is outside the calibration range (-5 to -5 log10 Pa (Table 4 fits at fO2 ~ 1e-5 Pa)) of Oeser et al. (2026)",
+      "P = 0.60 GPa is outside the calibration range (100000 to 101325 Pa (atmospheric; 1 bar to 1 atm)) of Oeser et al. (2026)",
+      "XFe is outside the calibration range (0.085 to 0.085 XFe (San Carlos olivine, Fo91.5)) of Oeser et al. (2026)",
+      "Fitted for 1100-1250 C at fO2 ~ 1e-5 Pa. The authors read the high activation energies (230-370 kJ/mol) and the change of anisotropy at 1150 C as a possible change of mechanism around 1150 C (abstract). For magmatic temperatures below 1100 C Diffusor recommends Dohmen & Chakraborty (2007).",
+      "Table 4 gives 95 % confidence bounds on Ea and log D0 without their covariance. Sampling the two independently would greatly overstate the spread of D, so the coefficient is held fixed in the Monte Carlo.",
+      "log fO2 = -2.11 (Pa) is outside the calibration range (-5 to -5 log10 Pa (Table 4 fits at fO2 ~ 1e-5 Pa)) of Oeser et al. (2026)",
+      "P = 1.00 GPa is outside the calibration range (100000 to 101325 Pa (atmospheric; 1 bar to 1 atm)) of Oeser et al. (2026)",
+      "XFe is outside the calibration range (0.085 to 0.085 XFe (San Carlos olivine, Fo91.5)) of Oeser et al. (2026)",
+      "Fitted for 1100-1250 C at fO2 ~ 1e-5 Pa. The authors read the high activation energies (230-370 kJ/mol) and the change of anisotropy at 1150 C as a possible change of mechanism around 1150 C (abstract). For magmatic temperatures below 1100 C Diffusor recommends Dohmen & Chakraborty (2007).",
+      "Table 4 gives 95 % confidence bounds on Ea and log D0 without their covariance. Sampling the two independently would greatly overstate the spread of D, so the coefficient is held fixed in the Monte Carlo."
+    ],
+    "alternative_to_published_ratio": [
+      0.5240657737768499,
+      0.622109361165514
+    ],
+    "classification": "Published fitted-width/Dt calculation; not an independent profile fit. Oeser extrapolation, no precision claim."
+  },
+  {
+    "group": "outer_core",
+    "sample": "SHIV-08-05 17 Ol-7-2",
+    "part": 2,
+    "row": 7,
+    "source_file": "41598_2018_30133_MOESM6_ESM.xlsx",
+    "published_Fo_days": [
+      540.0491480443551,
+      1476.7907403474612
+    ],
+    "published_Ni_days": [
+      295.97646938475197,
+      925.5187912308603
+    ],
+    "recomputed_Fo_days": [
+      540.0491480443551,
+      1476.7907403474612
+    ],
+    "equation_Ni_days": [
+      295.97646938475197,
+      857.3226697717444
+    ],
+    "Fo_max_relative_error": 0.0,
+    "Ni_max_relative_error": 0.07368421052631569,
+    "alternative_Fo_days": [
+      283.02127464739357,
+      918.7253440527054
+    ],
+    "registry_original_D_ratio": [
+      0.9970321218468422,
+      0.9968439500988726
+    ],
+    "alternative_warnings": [
+      "log fO2 = -2.22 (Pa) is outside the calibration range (-5 to -5 log10 Pa (Table 4 fits at fO2 ~ 1e-5 Pa)) of Oeser et al. (2026)",
+      "P = 0.60 GPa is outside the calibration range (100000 to 101325 Pa (atmospheric; 1 bar to 1 atm)) of Oeser et al. (2026)",
+      "XFe is outside the calibration range (0.085 to 0.085 XFe (San Carlos olivine, Fo91.5)) of Oeser et al. (2026)",
+      "Fitted for 1100-1250 C at fO2 ~ 1e-5 Pa. The authors read the high activation energies (230-370 kJ/mol) and the change of anisotropy at 1150 C as a possible change of mechanism around 1150 C (abstract). For magmatic temperatures below 1100 C Diffusor recommends Dohmen & Chakraborty (2007).",
+      "Table 4 gives 95 % confidence bounds on Ea and log D0 without their covariance. Sampling the two independently would greatly overstate the spread of D, so the coefficient is held fixed in the Monte Carlo.",
+      "log fO2 = -2.11 (Pa) is outside the calibration range (-5 to -5 log10 Pa (Table 4 fits at fO2 ~ 1e-5 Pa)) of Oeser et al. (2026)",
+      "P = 1.00 GPa is outside the calibration range (100000 to 101325 Pa (atmospheric; 1 bar to 1 atm)) of Oeser et al. (2026)",
+      "XFe is outside the calibration range (0.085 to 0.085 XFe (San Carlos olivine, Fo91.5)) of Oeser et al. (2026)",
+      "Fitted for 1100-1250 C at fO2 ~ 1e-5 Pa. The authors read the high activation energies (230-370 kJ/mol) and the change of anisotropy at 1150 C as a possible change of mechanism around 1150 C (abstract). For magmatic temperatures below 1100 C Diffusor recommends Dohmen & Chakraborty (2007).",
+      "Table 4 gives 95 % confidence bounds on Ea and log D0 without their covariance. Sampling the two independently would greatly overstate the spread of D, so the coefficient is held fixed in the Monte Carlo."
+    ],
+    "alternative_to_published_ratio": [
+      0.52406577377685,
+      0.6221093611655139
+    ],
+    "classification": "Published fitted-width/Dt calculation; not an independent profile fit. Oeser extrapolation, no precision claim."
+  },
+  {
+    "group": "outer_core",
+    "sample": "SHIV-08-05 3-5 Ol-2",
+    "part": null,
+    "row": 8,
+    "source_file": "41598_2018_30133_MOESM6_ESM.xlsx",
+    "published_Fo_days": [
+      224.9908268288675,
+      615.2483916087972
+    ],
+    "published_Ni_days": [
+      122.75590062584786,
+      384.7189687157648
+    ],
+    "recomputed_Fo_days": [
+      224.9908268288675,
+      615.2483916087972
+    ],
+    "equation_Ni_days": [
+      122.75590062584784,
+      355.5735922979038
+    ],
+    "Fo_max_relative_error": 0.0,
+    "Ni_max_relative_error": 0.0757575757575758,
+    "alternative_Fo_days": [
+      241.89375700080254,
+      874.1512859201181
+    ],
+    "registry_original_D_ratio": [
+      0.9970321218468421,
+      0.9968439500988727
+    ],
+    "alternative_warnings": [
+      "log fO2 = -2.22 (Pa) is outside the calibration range (-5 to -5 log10 Pa (Table 4 fits at fO2 ~ 1e-5 Pa)) of Oeser et al. (2026)",
+      "P = 0.60 GPa is outside the calibration range (100000 to 101325 Pa (atmospheric; 1 bar to 1 atm)) of Oeser et al. (2026)",
+      "XFe is outside the calibration range (0.085 to 0.085 XFe (San Carlos olivine, Fo91.5)) of Oeser et al. (2026)",
+      "Fitted for 1100-1250 C at fO2 ~ 1e-5 Pa. The authors read the high activation energies (230-370 kJ/mol) and the change of anisotropy at 1150 C as a possible change of mechanism around 1150 C (abstract). For magmatic temperatures below 1100 C Diffusor recommends Dohmen & Chakraborty (2007).",
+      "Table 4 gives 95 % confidence bounds on Ea and log D0 without their covariance. Sampling the two independently would greatly overstate the spread of D, so the coefficient is held fixed in the Monte Carlo.",
+      "log fO2 = -2.11 (Pa) is outside the calibration range (-5 to -5 log10 Pa (Table 4 fits at fO2 ~ 1e-5 Pa)) of Oeser et al. (2026)",
+      "P = 1.00 GPa is outside the calibration range (100000 to 101325 Pa (atmospheric; 1 bar to 1 atm)) of Oeser et al. (2026)",
+      "XFe is outside the calibration range (0.085 to 0.085 XFe (San Carlos olivine, Fo91.5)) of Oeser et al. (2026)",
+      "Fitted for 1100-1250 C at fO2 ~ 1e-5 Pa. The authors read the high activation energies (230-370 kJ/mol) and the change of anisotropy at 1150 C as a possible change of mechanism around 1150 C (abstract). For magmatic temperatures below 1100 C Diffusor recommends Dohmen & Chakraborty (2007).",
+      "Table 4 gives 95 % confidence bounds on Ea and log D0 without their covariance. Sampling the two independently would greatly overstate the spread of D, so the coefficient is held fixed in the Monte Carlo."
+    ],
+    "alternative_to_published_ratio": [
+      1.0751271970069771,
+      1.4208103553661025
+    ],
+    "classification": "Published fitted-width/Dt calculation; not an independent profile fit. Oeser extrapolation, no precision claim."
+  },
+  {
+    "group": "advanced_core",
+    "sample": "SHIV-08-05 17 Ol-7-1",
+    "part": null,
+    "row": 4,
+    "source_file": "41598_2018_30133_MOESM7_ESM.xlsx",
+    "published_Fo_days": [
+      183.0910211527687,
+      500.6713290046013
+    ],
+    "published_Ni_days": [
+      86.53753751583831,
+      250.66382085295962
+    ],
+    "recomputed_Fo_days": [
+      183.0910211527687,
+      500.6713290046013
+    ],
+    "equation_Ni_days": [
+      86.53753751583831,
+      250.66382085295967
+    ],
+    "Fo_max_relative_error": 0.0,
+    "Ni_max_relative_error": 2.220446049250313e-16,
+    "alternative_Fo_days": [
+      165.86936610806896,
+      534.2348066013212
+    ],
+    "registry_original_D_ratio": [
+      0.9970321218468422,
+      0.9968439500988726
+    ],
+    "alternative_warnings": [
+      "log fO2 = -2.22 (Pa) is outside the calibration range (-5 to -5 log10 Pa (Table 4 fits at fO2 ~ 1e-5 Pa)) of Oeser et al. (2026)",
+      "P = 0.60 GPa is outside the calibration range (100000 to 101325 Pa (atmospheric; 1 bar to 1 atm)) of Oeser et al. (2026)",
+      "XFe is outside the calibration range (0.085 to 0.085 XFe (San Carlos olivine, Fo91.5)) of Oeser et al. (2026)",
+      "Fitted for 1100-1250 C at fO2 ~ 1e-5 Pa. The authors read the high activation energies (230-370 kJ/mol) and the change of anisotropy at 1150 C as a possible change of mechanism around 1150 C (abstract). For magmatic temperatures below 1100 C Diffusor recommends Dohmen & Chakraborty (2007).",
+      "Table 4 gives 95 % confidence bounds on Ea and log D0 without their covariance. Sampling the two independently would greatly overstate the spread of D, so the coefficient is held fixed in the Monte Carlo.",
+      "log fO2 = -2.11 (Pa) is outside the calibration range (-5 to -5 log10 Pa (Table 4 fits at fO2 ~ 1e-5 Pa)) of Oeser et al. (2026)",
+      "P = 1.00 GPa is outside the calibration range (100000 to 101325 Pa (atmospheric; 1 bar to 1 atm)) of Oeser et al. (2026)",
+      "XFe is outside the calibration range (0.085 to 0.085 XFe (San Carlos olivine, Fo91.5)) of Oeser et al. (2026)",
+      "Fitted for 1100-1250 C at fO2 ~ 1e-5 Pa. The authors read the high activation energies (230-370 kJ/mol) and the change of anisotropy at 1150 C as a possible change of mechanism around 1150 C (abstract). For magmatic temperatures below 1100 C Diffusor recommends Dohmen & Chakraborty (2007).",
+      "Table 4 gives 95 % confidence bounds on Ea and log D0 without their covariance. Sampling the two independently would greatly overstate the spread of D, so the coefficient is held fixed in the Monte Carlo."
+    ],
+    "alternative_to_published_ratio": [
+      0.9059393795705022,
+      1.0670369474989678
+    ],
+    "classification": "Published fitted-width/Dt calculation; not an independent profile fit. Oeser extrapolation, no precision claim."
+  },
+  {
+    "group": "advanced_core",
+    "sample": "SHIV-08-05 17 Ol-7-2",
+    "part": null,
+    "row": 5,
+    "source_file": "41598_2018_30133_MOESM7_ESM.xlsx",
+    "published_Fo_days": [
+      335.0997483710125,
+      916.3466089690614
+    ],
+    "published_Ni_days": [
+      158.3841024186999,
+      458.77390799768955
+    ],
+    "recomputed_Fo_days": [
+      335.0997483710125,
+      916.3466089690614
+    ],
+    "equation_Ni_days": [
+      158.3841024186999,
+      458.7739079976896
+    ],
+    "Fo_max_relative_error": 0.0,
+    "Ni_max_relative_error": 2.220446049250313e-16,
+    "alternative_Fo_days": [
+      175.6143089224824,
+      570.067803511928
+    ],
+    "registry_original_D_ratio": [
+      0.9970321218468422,
+      0.9968439500988726
+    ],
+    "alternative_warnings": [
+      "log fO2 = -2.22 (Pa) is outside the calibration range (-5 to -5 log10 Pa (Table 4 fits at fO2 ~ 1e-5 Pa)) of Oeser et al. (2026)",
+      "P = 0.60 GPa is outside the calibration range (100000 to 101325 Pa (atmospheric; 1 bar to 1 atm)) of Oeser et al. (2026)",
+      "XFe is outside the calibration range (0.085 to 0.085 XFe (San Carlos olivine, Fo91.5)) of Oeser et al. (2026)",
+      "Fitted for 1100-1250 C at fO2 ~ 1e-5 Pa. The authors read the high activation energies (230-370 kJ/mol) and the change of anisotropy at 1150 C as a possible change of mechanism around 1150 C (abstract). For magmatic temperatures below 1100 C Diffusor recommends Dohmen & Chakraborty (2007).",
+      "Table 4 gives 95 % confidence bounds on Ea and log D0 without their covariance. Sampling the two independently would greatly overstate the spread of D, so the coefficient is held fixed in the Monte Carlo.",
+      "log fO2 = -2.11 (Pa) is outside the calibration range (-5 to -5 log10 Pa (Table 4 fits at fO2 ~ 1e-5 Pa)) of Oeser et al. (2026)",
+      "P = 1.00 GPa is outside the calibration range (100000 to 101325 Pa (atmospheric; 1 bar to 1 atm)) of Oeser et al. (2026)",
+      "XFe is outside the calibration range (0.085 to 0.085 XFe (San Carlos olivine, Fo91.5)) of Oeser et al. (2026)",
+      "Fitted for 1100-1250 C at fO2 ~ 1e-5 Pa. The authors read the high activation energies (230-370 kJ/mol) and the change of anisotropy at 1150 C as a possible change of mechanism around 1150 C (abstract). For magmatic temperatures below 1100 C Diffusor recommends Dohmen & Chakraborty (2007).",
+      "Table 4 gives 95 % confidence bounds on Ea and log D0 without their covariance. Sampling the two independently would greatly overstate the spread of D, so the coefficient is held fixed in the Monte Carlo."
+    ],
+    "alternative_to_published_ratio": [
+      0.52406577377685,
+      0.6221093611655142
+    ],
+    "classification": "Published fitted-width/Dt calculation; not an independent profile fit. Oeser extrapolation, no precision claim."
+  },
+  {
+    "group": "advanced_core",
+    "sample": "SHIV-08-07 10 Ol-4",
+    "part": 1,
+    "row": 6,
+    "source_file": "41598_2018_30133_MOESM7_ESM.xlsx",
+    "published_Fo_days": [
+      720.8729907902548,
+      1971.262359399544
+    ],
+    "published_Ni_days": [
+      340.71891178440177,
+      986.9232094697572
+    ],
+    "recomputed_Fo_days": [
+      720.8729907902548,
+      1971.262359399544
+    ],
+    "equation_Ni_days": [
+      340.7189117844019,
+      986.9232094697574
+    ],
+    "Fo_max_relative_error": 0.0,
+    "Ni_max_relative_error": 4.440892098500626e-16,
+    "alternative_Fo_days": [
+      510.07535923823656,
+      1745.672838214688
+    ],
+    "registry_original_D_ratio": [
+      0.997032121846842,
+      0.9968439500988727
+    ],
+    "alternative_warnings": [
+      "log fO2 = -2.22 (Pa) is outside the calibration range (-5 to -5 log10 Pa (Table 4 fits at fO2 ~ 1e-5 Pa)) of Oeser et al. (2026)",
+      "P = 0.60 GPa is outside the calibration range (100000 to 101325 Pa (atmospheric; 1 bar to 1 atm)) of Oeser et al. (2026)",
+      "XFe is outside the calibration range (0.085 to 0.085 XFe (San Carlos olivine, Fo91.5)) of Oeser et al. (2026)",
+      "Fitted for 1100-1250 C at fO2 ~ 1e-5 Pa. The authors read the high activation energies (230-370 kJ/mol) and the change of anisotropy at 1150 C as a possible change of mechanism around 1150 C (abstract). For magmatic temperatures below 1100 C Diffusor recommends Dohmen & Chakraborty (2007).",
+      "Table 4 gives 95 % confidence bounds on Ea and log D0 without their covariance. Sampling the two independently would greatly overstate the spread of D, so the coefficient is held fixed in the Monte Carlo.",
+      "log fO2 = -2.11 (Pa) is outside the calibration range (-5 to -5 log10 Pa (Table 4 fits at fO2 ~ 1e-5 Pa)) of Oeser et al. (2026)",
+      "P = 1.00 GPa is outside the calibration range (100000 to 101325 Pa (atmospheric; 1 bar to 1 atm)) of Oeser et al. (2026)",
+      "XFe is outside the calibration range (0.085 to 0.085 XFe (San Carlos olivine, Fo91.5)) of Oeser et al. (2026)",
+      "Fitted for 1100-1250 C at fO2 ~ 1e-5 Pa. The authors read the high activation energies (230-370 kJ/mol) and the change of anisotropy at 1150 C as a possible change of mechanism around 1150 C (abstract). For magmatic temperatures below 1100 C Diffusor recommends Dohmen & Chakraborty (2007).",
+      "Table 4 gives 95 % confidence bounds on Ea and log D0 without their covariance. Sampling the two independently would greatly overstate the spread of D, so the coefficient is held fixed in the Monte Carlo."
+    ],
+    "alternative_to_published_ratio": [
+      0.70758006716144,
+      0.8855608843190352
+    ],
+    "classification": "Published fitted-width/Dt calculation; not an independent profile fit. Oeser extrapolation, no precision claim."
+  },
+  {
+    "group": "advanced_core",
+    "sample": "SHIV-08-07 10 Ol-4",
+    "part": 2,
+    "row": 7,
+    "source_file": "41598_2018_30133_MOESM7_ESM.xlsx",
+    "published_Fo_days": [
+      763.3486720657748,
+      2087.414181923086
+    ],
+    "published_Ni_days": [
+      360.79494194004843,
+      1045.07525043178
+    ],
+    "recomputed_Fo_days": [
+      763.3486720657748,
+      2087.414181923086
+    ],
+    "equation_Ni_days": [
+      360.79494194004843,
+      1045.07525043178
+    ],
+    "Fo_max_relative_error": 0.0,
+    "Ni_max_relative_error": 0.0,
+    "alternative_Fo_days": [
+      540.1303046478969,
+      1848.5323488839035
+    ],
+    "registry_original_D_ratio": [
+      0.997032121846842,
+      0.9968439500988727
+    ],
+    "alternative_warnings": [
+      "log fO2 = -2.22 (Pa) is outside the calibration range (-5 to -5 log10 Pa (Table 4 fits at fO2 ~ 1e-5 Pa)) of Oeser et al. (2026)",
+      "P = 0.60 GPa is outside the calibration range (100000 to 101325 Pa (atmospheric; 1 bar to 1 atm)) of Oeser et al. (2026)",
+      "XFe is outside the calibration range (0.085 to 0.085 XFe (San Carlos olivine, Fo91.5)) of Oeser et al. (2026)",
+      "Fitted for 1100-1250 C at fO2 ~ 1e-5 Pa. The authors read the high activation energies (230-370 kJ/mol) and the change of anisotropy at 1150 C as a possible change of mechanism around 1150 C (abstract). For magmatic temperatures below 1100 C Diffusor recommends Dohmen & Chakraborty (2007).",
+      "Table 4 gives 95 % confidence bounds on Ea and log D0 without their covariance. Sampling the two independently would greatly overstate the spread of D, so the coefficient is held fixed in the Monte Carlo.",
+      "log fO2 = -2.11 (Pa) is outside the calibration range (-5 to -5 log10 Pa (Table 4 fits at fO2 ~ 1e-5 Pa)) of Oeser et al. (2026)",
+      "P = 1.00 GPa is outside the calibration range (100000 to 101325 Pa (atmospheric; 1 bar to 1 atm)) of Oeser et al. (2026)",
+      "XFe is outside the calibration range (0.085 to 0.085 XFe (San Carlos olivine, Fo91.5)) of Oeser et al. (2026)",
+      "Fitted for 1100-1250 C at fO2 ~ 1e-5 Pa. The authors read the high activation energies (230-370 kJ/mol) and the change of anisotropy at 1150 C as a possible change of mechanism around 1150 C (abstract). For magmatic temperatures below 1100 C Diffusor recommends Dohmen & Chakraborty (2007).",
+      "Table 4 gives 95 % confidence bounds on Ea and log D0 without their covariance. Sampling the two independently would greatly overstate the spread of D, so the coefficient is held fixed in the Monte Carlo."
+    ],
+    "alternative_to_published_ratio": [
+      0.7075800671614398,
+      0.8855608843190353
+    ],
+    "classification": "Published fitted-width/Dt calculation; not an independent profile fit. Oeser extrapolation, no precision claim."
+  },
+  {
+    "group": "advanced_core",
+    "sample": "SHIV-08-05 3-4 Ol-20",
+    "part": null,
+    "row": 8,
+    "source_file": "41598_2018_30133_MOESM7_ESM.xlsx",
+    "published_Fo_days": [
+      171.1788511213762,
+      468.0969189467224
+    ],
+    "published_Ni_days": [
+      80.90727856323493,
+      234.35526549115676
+    ],
+    "recomputed_Fo_days": [
+      171.1788511213762,
+      468.09691894672244
+    ],
+    "equation_Ni_days": [
+      80.90727856323493,
+      234.35526549115673
+    ],
+    "Fo_max_relative_error": 2.220446049250313e-16,
+    "Ni_max_relative_error": 1.1102230246251565e-16,
+    "alternative_Fo_days": [
+      159.9046454389108,
+      570.4691239723484
+    ],
+    "registry_original_D_ratio": [
+      0.9970321218468419,
+      0.9968439500988725
+    ],
+    "alternative_warnings": [
+      "log fO2 = -2.22 (Pa) is outside the calibration range (-5 to -5 log10 Pa (Table 4 fits at fO2 ~ 1e-5 Pa)) of Oeser et al. (2026)",
+      "P = 0.60 GPa is outside the calibration range (100000 to 101325 Pa (atmospheric; 1 bar to 1 atm)) of Oeser et al. (2026)",
+      "XFe is outside the calibration range (0.085 to 0.085 XFe (San Carlos olivine, Fo91.5)) of Oeser et al. (2026)",
+      "Fitted for 1100-1250 C at fO2 ~ 1e-5 Pa. The authors read the high activation energies (230-370 kJ/mol) and the change of anisotropy at 1150 C as a possible change of mechanism around 1150 C (abstract). For magmatic temperatures below 1100 C Diffusor recommends Dohmen & Chakraborty (2007).",
+      "Table 4 gives 95 % confidence bounds on Ea and log D0 without their covariance. Sampling the two independently would greatly overstate the spread of D, so the coefficient is held fixed in the Monte Carlo.",
+      "log fO2 = -2.11 (Pa) is outside the calibration range (-5 to -5 log10 Pa (Table 4 fits at fO2 ~ 1e-5 Pa)) of Oeser et al. (2026)",
+      "P = 1.00 GPa is outside the calibration range (100000 to 101325 Pa (atmospheric; 1 bar to 1 atm)) of Oeser et al. (2026)",
+      "XFe is outside the calibration range (0.085 to 0.085 XFe (San Carlos olivine, Fo91.5)) of Oeser et al. (2026)",
+      "Fitted for 1100-1250 C at fO2 ~ 1e-5 Pa. The authors read the high activation energies (230-370 kJ/mol) and the change of anisotropy at 1150 C as a possible change of mechanism around 1150 C (abstract). For magmatic temperatures below 1100 C Diffusor recommends Dohmen & Chakraborty (2007).",
+      "Table 4 gives 95 % confidence bounds on Ea and log D0 without their covariance. Sampling the two independently would greatly overstate the spread of D, so the coefficient is held fixed in the Monte Carlo."
+    ],
+    "alternative_to_published_ratio": [
+      0.9341378586863437,
+      1.2186987371247315
+    ],
+    "classification": "Published fitted-width/Dt calculation; not an independent profile fit. Oeser extrapolation, no precision claim."
+  },
+  {
+    "group": "advanced_core",
+    "sample": "SHIV-08-05 3-5 Ol-14",
+    "part": null,
+    "row": 9,
+    "source_file": "41598_2018_30133_MOESM7_ESM.xlsx",
+    "published_Fo_days": [
+      35.60396718167975,
+      97.36078511361914
+    ],
+    "published_Ni_days": [
+      16.828130764132208,
+      48.74420599706328
+    ],
+    "recomputed_Fo_days": [
+      35.60396718167975,
+      97.36078511361914
+    ],
+    "equation_Ni_days": [
+      16.828130764132208,
+      48.744205997063276
+    ],
+    "Fo_max_relative_error": 0.0,
+    "Ni_max_relative_error": 1.1102230246251565e-16,
+    "alternative_Fo_days": [
+      39.462097677170114,
+      144.10448303840914
+    ],
+    "registry_original_D_ratio": [
+      0.9970321218468419,
+      0.9968439500988726
+    ],
+    "alternative_warnings": [
+      "log fO2 = -2.22 (Pa) is outside the calibration range (-5 to -5 log10 Pa (Table 4 fits at fO2 ~ 1e-5 Pa)) of Oeser et al. (2026)",
+      "P = 0.60 GPa is outside the calibration range (100000 to 101325 Pa (atmospheric; 1 bar to 1 atm)) of Oeser et al. (2026)",
+      "XFe is outside the calibration range (0.085 to 0.085 XFe (San Carlos olivine, Fo91.5)) of Oeser et al. (2026)",
+      "Fitted for 1100-1250 C at fO2 ~ 1e-5 Pa. The authors read the high activation energies (230-370 kJ/mol) and the change of anisotropy at 1150 C as a possible change of mechanism around 1150 C (abstract). For magmatic temperatures below 1100 C Diffusor recommends Dohmen & Chakraborty (2007).",
+      "Table 4 gives 95 % confidence bounds on Ea and log D0 without their covariance. Sampling the two independently would greatly overstate the spread of D, so the coefficient is held fixed in the Monte Carlo.",
+      "log fO2 = -2.11 (Pa) is outside the calibration range (-5 to -5 log10 Pa (Table 4 fits at fO2 ~ 1e-5 Pa)) of Oeser et al. (2026)",
+      "P = 1.00 GPa is outside the calibration range (100000 to 101325 Pa (atmospheric; 1 bar to 1 atm)) of Oeser et al. (2026)",
+      "XFe is outside the calibration range (0.085 to 0.085 XFe (San Carlos olivine, Fo91.5)) of Oeser et al. (2026)",
+      "Fitted for 1100-1250 C at fO2 ~ 1e-5 Pa. The authors read the high activation energies (230-370 kJ/mol) and the change of anisotropy at 1150 C as a possible change of mechanism around 1150 C (abstract). For magmatic temperatures below 1100 C Diffusor recommends Dohmen & Chakraborty (2007).",
+      "Table 4 gives 95 % confidence bounds on Ea and log D0 without their covariance. Sampling the two independently would greatly overstate the spread of D, so the coefficient is held fixed in the Monte Carlo."
+    ],
+    "alternative_to_published_ratio": [
+      1.1083623764678558,
+      1.4801080627096477
+    ],
+    "classification": "Published fitted-width/Dt calculation; not an independent profile fit. Oeser extrapolation, no precision claim."
+  },
+  {
+    "group": "advanced_core",
+    "sample": "SHIV-08-05 3-5 Ol-2",
+    "part": null,
+    "row": 10,
+    "source_file": "41598_2018_30133_MOESM7_ESM.xlsx",
+    "published_Fo_days": [
+      169.9310882155588,
+      464.68485041160307
+    ],
+    "published_Ni_days": [
+      80.31752638099682,
+      232.64699484237477
+    ],
+    "recomputed_Fo_days": [
+      169.9310882155588,
+      464.684850411603
+    ],
+    "equation_Ni_days": [
+      80.31752638099681,
+      232.6469948423748
+    ],
+    "Fo_max_relative_error": 1.1102230246251565e-16,
+    "Ni_max_relative_error": 2.220446049250313e-16,
+    "alternative_Fo_days": [
+      182.6975345575391,
+      660.2290474465537
+    ],
+    "registry_original_D_ratio": [
+      0.9970321218468421,
+      0.9968439500988727
+    ],
+    "alternative_warnings": [
+      "log fO2 = -2.22 (Pa) is outside the calibration range (-5 to -5 log10 Pa (Table 4 fits at fO2 ~ 1e-5 Pa)) of Oeser et al. (2026)",
+      "P = 0.60 GPa is outside the calibration range (100000 to 101325 Pa (atmospheric; 1 bar to 1 atm)) of Oeser et al. (2026)",
+      "XFe is outside the calibration range (0.085 to 0.085 XFe (San Carlos olivine, Fo91.5)) of Oeser et al. (2026)",
+      "Fitted for 1100-1250 C at fO2 ~ 1e-5 Pa. The authors read the high activation energies (230-370 kJ/mol) and the change of anisotropy at 1150 C as a possible change of mechanism around 1150 C (abstract). For magmatic temperatures below 1100 C Diffusor recommends Dohmen & Chakraborty (2007).",
+      "Table 4 gives 95 % confidence bounds on Ea and log D0 without their covariance. Sampling the two independently would greatly overstate the spread of D, so the coefficient is held fixed in the Monte Carlo.",
+      "log fO2 = -2.11 (Pa) is outside the calibration range (-5 to -5 log10 Pa (Table 4 fits at fO2 ~ 1e-5 Pa)) of Oeser et al. (2026)",
+      "P = 1.00 GPa is outside the calibration range (100000 to 101325 Pa (atmospheric; 1 bar to 1 atm)) of Oeser et al. (2026)",
+      "XFe is outside the calibration range (0.085 to 0.085 XFe (San Carlos olivine, Fo91.5)) of Oeser et al. (2026)",
+      "Fitted for 1100-1250 C at fO2 ~ 1e-5 Pa. The authors read the high activation energies (230-370 kJ/mol) and the change of anisotropy at 1150 C as a possible change of mechanism around 1150 C (abstract). For magmatic temperatures below 1100 C Diffusor recommends Dohmen & Chakraborty (2007).",
+      "Table 4 gives 95 % confidence bounds on Ea and log D0 without their covariance. Sampling the two independently would greatly overstate the spread of D, so the coefficient is held fixed in the Monte Carlo."
+    ],
+    "alternative_to_published_ratio": [
+      1.0751271970069771,
+      1.420810355366102
+    ],
+    "classification": "Published fitted-width/Dt calculation; not an independent profile fit. Oeser extrapolation, no precision claim."
+  },
+  {
+    "group": "advanced_core",
+    "sample": "SHIV-08-05 3-1 Ol-76",
+    "part": null,
+    "row": 11,
+    "source_file": "41598_2018_30133_MOESM7_ESM.xlsx",
+    "published_Fo_days": [
+      97.60037232412627,
+      266.89297932360813
+    ],
+    "published_Ni_days": [
+      46.13058482267982,
+      133.62142004235028
+    ],
+    "recomputed_Fo_days": [
+      97.60037232412624,
+      266.89297932360813
+    ],
+    "equation_Ni_days": [
+      46.13058482267982,
+      133.62142004235028
+    ],
+    "Fo_max_relative_error": 3.3306690738754696e-16,
+    "Ni_max_relative_error": 0.0,
+    "alternative_Fo_days": [],
+    "registry_original_D_ratio": [],
+    "alternative_warnings": [],
+    "alternative_to_published_ratio": [],
+    "classification": "Published fitted-width/Dt calculation; no matching a/b/c orientation row for alternative D. "
+  },
+  {
+    "group": "advanced_core",
+    "sample": "SHIV-08-07 10 Ol-5",
+    "part": null,
+    "row": 12,
+    "source_file": "41598_2018_30133_MOESM7_ESM.xlsx",
+    "published_Fo_days": [
+      266.0496600396293,
+      727.5257739816767
+    ],
+    "published_Ni_days": [
+      125.74774170681552,
+      364.2397311581983
+    ],
+    "recomputed_Fo_days": [
+      266.0496600396294,
+      727.5257739816767
+    ],
+    "equation_Ni_days": [
+      125.74774170681552,
+      364.23973115819837
+    ],
+    "Fo_max_relative_error": 2.220446049250313e-16,
+    "Ni_max_relative_error": 2.220446049250313e-16,
+    "alternative_Fo_days": [
+      218.45937231671806,
+      724.6080878550267
+    ],
+    "registry_original_D_ratio": [
+      0.9970321218468422,
+      0.9968439500988728
+    ],
+    "alternative_warnings": [
+      "log fO2 = -2.22 (Pa) is outside the calibration range (-5 to -5 log10 Pa (Table 4 fits at fO2 ~ 1e-5 Pa)) of Oeser et al. (2026)",
+      "P = 0.60 GPa is outside the calibration range (100000 to 101325 Pa (atmospheric; 1 bar to 1 atm)) of Oeser et al. (2026)",
+      "XFe is outside the calibration range (0.085 to 0.085 XFe (San Carlos olivine, Fo91.5)) of Oeser et al. (2026)",
+      "Fitted for 1100-1250 C at fO2 ~ 1e-5 Pa. The authors read the high activation energies (230-370 kJ/mol) and the change of anisotropy at 1150 C as a possible change of mechanism around 1150 C (abstract). For magmatic temperatures below 1100 C Diffusor recommends Dohmen & Chakraborty (2007).",
+      "Table 4 gives 95 % confidence bounds on Ea and log D0 without their covariance. Sampling the two independently would greatly overstate the spread of D, so the coefficient is held fixed in the Monte Carlo.",
+      "log fO2 = -2.11 (Pa) is outside the calibration range (-5 to -5 log10 Pa (Table 4 fits at fO2 ~ 1e-5 Pa)) of Oeser et al. (2026)",
+      "P = 1.00 GPa is outside the calibration range (100000 to 101325 Pa (atmospheric; 1 bar to 1 atm)) of Oeser et al. (2026)",
+      "XFe is outside the calibration range (0.085 to 0.085 XFe (San Carlos olivine, Fo91.5)) of Oeser et al. (2026)",
+      "Fitted for 1100-1250 C at fO2 ~ 1e-5 Pa. The authors read the high activation energies (230-370 kJ/mol) and the change of anisotropy at 1150 C as a possible change of mechanism around 1150 C (abstract). For magmatic temperatures below 1100 C Diffusor recommends Dohmen & Chakraborty (2007).",
+      "Table 4 gives 95 % confidence bounds on Ea and log D0 without their covariance. Sampling the two independently would greatly overstate the spread of D, so the coefficient is held fixed in the Monte Carlo."
+    ],
+    "alternative_to_published_ratio": [
+      0.8211225388680351,
+      0.9959895769593402
+    ],
+    "classification": "Published fitted-width/Dt calculation; not an independent profile fit. Oeser extrapolation, no precision claim."
+  },
+  {
+    "group": "advanced_core",
+    "sample": "SHIV-08-07 10 Ol-12",
+    "part": null,
+    "row": 13,
+    "source_file": "41598_2018_30133_MOESM7_ESM.xlsx",
+    "published_Fo_days": [
+      1226.5849303514049,
+      3354.156328090192
+    ],
+    "published_Ni_days": [
+      579.7424622919117,
+      1679.2765877142804
+    ],
+    "recomputed_Fo_days": [
+      1226.5849303514049,
+      3354.156328090192
+    ],
+    "equation_Ni_days": [
+      579.7424622919117,
+      1679.2765877142804
+    ],
+    "Fo_max_relative_error": 0.0,
+    "Ni_max_relative_error": 0.0,
+    "alternative_Fo_days": [
+      698.5668251414897,
+      2254.5271203633642
+    ],
+    "registry_original_D_ratio": [
+      0.9970321218468421,
+      0.9968439500988729
+    ],
+    "alternative_warnings": [
+      "log fO2 = -2.22 (Pa) is outside the calibration range (-5 to -5 log10 Pa (Table 4 fits at fO2 ~ 1e-5 Pa)) of Oeser et al. (2026)",
+      "P = 0.60 GPa is outside the calibration range (100000 to 101325 Pa (atmospheric; 1 bar to 1 atm)) of Oeser et al. (2026)",
+      "XFe is outside the calibration range (0.085 to 0.085 XFe (San Carlos olivine, Fo91.5)) of Oeser et al. (2026)",
+      "Fitted for 1100-1250 C at fO2 ~ 1e-5 Pa. The authors read the high activation energies (230-370 kJ/mol) and the change of anisotropy at 1150 C as a possible change of mechanism around 1150 C (abstract). For magmatic temperatures below 1100 C Diffusor recommends Dohmen & Chakraborty (2007).",
+      "Table 4 gives 95 % confidence bounds on Ea and log D0 without their covariance. Sampling the two independently would greatly overstate the spread of D, so the coefficient is held fixed in the Monte Carlo.",
+      "log fO2 = -2.11 (Pa) is outside the calibration range (-5 to -5 log10 Pa (Table 4 fits at fO2 ~ 1e-5 Pa)) of Oeser et al. (2026)",
+      "P = 1.00 GPa is outside the calibration range (100000 to 101325 Pa (atmospheric; 1 bar to 1 atm)) of Oeser et al. (2026)",
+      "XFe is outside the calibration range (0.085 to 0.085 XFe (San Carlos olivine, Fo91.5)) of Oeser et al. (2026)",
+      "Fitted for 1100-1250 C at fO2 ~ 1e-5 Pa. The authors read the high activation energies (230-370 kJ/mol) and the change of anisotropy at 1150 C as a possible change of mechanism around 1150 C (abstract). For magmatic temperatures below 1100 C Diffusor recommends Dohmen & Chakraborty (2007).",
+      "Table 4 gives 95 % confidence bounds on Ea and log D0 without their covariance. Sampling the two independently would greatly overstate the spread of D, so the coefficient is held fixed in the Monte Carlo."
+    ],
+    "alternative_to_published_ratio": [
+      0.5695217737114682,
+      0.6721592256992563
+    ],
+    "classification": "Published fitted-width/Dt calculation; not an independent profile fit. Oeser extrapolation, no precision claim."
+  },
+  {
+    "group": "advanced_core",
+    "sample": "SHIV-08-05 3-4 Ol-19",
+    "part": null,
+    "row": 14,
+    "source_file": "41598_2018_30133_MOESM7_ESM.xlsx",
+    "published_Fo_days": [
+      71.41059080498819,
+      195.27574415298702
+    ],
+    "published_Ni_days": [
+      33.75204661542952,
+      97.76586218070192
+    ],
+    "recomputed_Fo_days": [
+      71.41059080498819,
+      195.27574415298702
+    ],
+    "equation_Ni_days": [
+      33.75204661542953,
+      97.76586218070193
+    ],
+    "Fo_max_relative_error": 0.0,
+    "Ni_max_relative_error": 2.220446049250313e-16,
+    "alternative_Fo_days": [],
+    "registry_original_D_ratio": [],
+    "alternative_warnings": [],
+    "alternative_to_published_ratio": [],
+    "classification": "Published fitted-width/Dt calculation; no matching a/b/c orientation row for alternative D. "
+  },
+  {
+    "group": "advanced_core",
+    "sample": "SHIV-08-05 3-3 Ol-19",
+    "part": null,
+    "row": 15,
+    "source_file": "41598_2018_30133_MOESM7_ESM.xlsx",
+    "published_Fo_days": [
+      1332.9463733231717,
+      3645.00688248788
+    ],
+    "published_Ni_days": [
+      630.0139464065153,
+      1824.892497871293
+    ],
+    "recomputed_Fo_days": [
+      1332.9463733231717,
+      3645.00688248788
+    ],
+    "equation_Ni_days": [
+      630.0139464065154,
+      1824.8924978712928
+    ],
+    "Fo_max_relative_error": 0.0,
+    "Ni_max_relative_error": 2.220446049250313e-16,
+    "alternative_Fo_days": [],
+    "registry_original_D_ratio": [],
+    "alternative_warnings": [],
+    "alternative_to_published_ratio": [],
+    "classification": "Published fitted-width/Dt calculation; no matching a/b/c orientation row for alternative D. "
+  },
+  {
+    "group": "advanced_core",
+    "sample": "SHIV-08-05 17 Ol-8-1",
+    "part": null,
+    "row": 16,
+    "source_file": "41598_2018_30133_MOESM7_ESM.xlsx",
+    "published_Fo_days": [
+      1057.848372827921,
+      2892.737980128421
+    ],
+    "published_Ni_days": [
+      499.9895280134026,
+      1448.264985069275
+    ],
+    "recomputed_Fo_days": [
+      1057.8483728279207,
+      2892.737980128421
+    ],
+    "equation_Ni_days": [
+      499.9895280134025,
+      1448.2649850692749
+    ],
+    "Fo_max_relative_error": 2.220446049250313e-16,
+    "Ni_max_relative_error": 2.220446049250313e-16,
+    "alternative_Fo_days": [
+      949.7746846838875,
+      2857.243366286933
+    ],
+    "registry_original_D_ratio": [
+      0.9970321218468421,
+      0.9968439500988727
+    ],
+    "alternative_warnings": [
+      "log fO2 = -2.22 (Pa) is outside the calibration range (-5 to -5 log10 Pa (Table 4 fits at fO2 ~ 1e-5 Pa)) of Oeser et al. (2026)",
+      "P = 0.60 GPa is outside the calibration range (100000 to 101325 Pa (atmospheric; 1 bar to 1 atm)) of Oeser et al. (2026)",
+      "XFe is outside the calibration range (0.085 to 0.085 XFe (San Carlos olivine, Fo91.5)) of Oeser et al. (2026)",
+      "Fitted for 1100-1250 C at fO2 ~ 1e-5 Pa. The authors read the high activation energies (230-370 kJ/mol) and the change of anisotropy at 1150 C as a possible change of mechanism around 1150 C (abstract). For magmatic temperatures below 1100 C Diffusor recommends Dohmen & Chakraborty (2007).",
+      "Table 4 gives 95 % confidence bounds on Ea and log D0 without their covariance. Sampling the two independently would greatly overstate the spread of D, so the coefficient is held fixed in the Monte Carlo.",
+      "log fO2 = -2.11 (Pa) is outside the calibration range (-5 to -5 log10 Pa (Table 4 fits at fO2 ~ 1e-5 Pa)) of Oeser et al. (2026)",
+      "P = 1.00 GPa is outside the calibration range (100000 to 101325 Pa (atmospheric; 1 bar to 1 atm)) of Oeser et al. (2026)",
+      "XFe is outside the calibration range (0.085 to 0.085 XFe (San Carlos olivine, Fo91.5)) of Oeser et al. (2026)",
+      "Fitted for 1100-1250 C at fO2 ~ 1e-5 Pa. The authors read the high activation energies (230-370 kJ/mol) and the change of anisotropy at 1150 C as a possible change of mechanism around 1150 C (abstract). For magmatic temperatures below 1100 C Diffusor recommends Dohmen & Chakraborty (2007).",
+      "Table 4 gives 95 % confidence bounds on Ea and log D0 without their covariance. Sampling the two independently would greatly overstate the spread of D, so the coefficient is held fixed in the Monte Carlo."
+    ],
+    "alternative_to_published_ratio": [
+      0.8978363148065137,
+      0.9877297515069401
+    ],
+    "classification": "Published fitted-width/Dt calculation; not an independent profile fit. Oeser extrapolation, no precision claim."
+  },
+  {
+    "group": "advanced_core",
+    "sample": "SHIV-08-05 17 Ol-8-2",
+    "part": null,
+    "row": 17,
+    "source_file": "41598_2018_30133_MOESM7_ESM.xlsx",
+    "published_Fo_days": [
+      842.38487201478,
+      2303.5425262776907
+    ],
+    "published_Ni_days": [
+      398.15121465693636,
+      1153.281080188913
+    ],
+    "recomputed_Fo_days": [
+      842.3848720147798,
+      2303.5425262776903
+    ],
+    "equation_Ni_days": [
+      398.15121465693625,
+      1153.2810801889127
+    ],
+    "Fo_max_relative_error": 2.220446049250313e-16,
+    "Ni_max_relative_error": 3.3306690738754696e-16,
+    "alternative_Fo_days": [],
+    "registry_original_D_ratio": [],
+    "alternative_warnings": [],
+    "alternative_to_published_ratio": [],
+    "classification": "Published fitted-width/Dt calculation; no matching a/b/c orientation row for alternative D. Table SM2-B gives SHIV 08-05 17 Ol-8-2 the geometric factor 0.1677; this age row uses 0.2539, the factor SM2-B lists for SHIV 08-05 17 Ol-8-3. No orientation is paired with it."
+  },
+  {
+    "group": "advanced_core",
+    "sample": "SHIV-08-05 3-2 Ol-23",
+    "part": null,
+    "row": 18,
+    "source_file": "41598_2018_30133_MOESM7_ESM.xlsx",
+    "published_Fo_days": [
+      23.46085943010988,
+      64.15486459416486
+    ],
+    "published_Ni_days": [
+      11.08871964503892,
+      32.11948149187874
+    ],
+    "recomputed_Fo_days": [
+      23.460859430109885,
+      64.15486459416486
+    ],
+    "equation_Ni_days": [
+      11.08871964503892,
+      32.11948149187874
+    ],
+    "Fo_max_relative_error": 2.220446049250313e-16,
+    "Ni_max_relative_error": 0.0,
+    "alternative_Fo_days": [
+      25.478658123042315,
+      92.85826190292069
+    ],
+    "registry_original_D_ratio": [
+      0.997032121846842,
+      0.9968439500988726
+    ],
+    "alternative_warnings": [
+      "log fO2 = -2.22 (Pa) is outside the calibration range (-5 to -5 log10 Pa (Table 4 fits at fO2 ~ 1e-5 Pa)) of Oeser et al. (2026)",
+      "P = 0.60 GPa is outside the calibration range (100000 to 101325 Pa (atmospheric; 1 bar to 1 atm)) of Oeser et al. (2026)",
+      "XFe is outside the calibration range (0.085 to 0.085 XFe (San Carlos olivine, Fo91.5)) of Oeser et al. (2026)",
+      "Fitted for 1100-1250 C at fO2 ~ 1e-5 Pa. The authors read the high activation energies (230-370 kJ/mol) and the change of anisotropy at 1150 C as a possible change of mechanism around 1150 C (abstract). For magmatic temperatures below 1100 C Diffusor recommends Dohmen & Chakraborty (2007).",
+      "Table 4 gives 95 % confidence bounds on Ea and log D0 without their covariance. Sampling the two independently would greatly overstate the spread of D, so the coefficient is held fixed in the Monte Carlo.",
+      "log fO2 = -2.11 (Pa) is outside the calibration range (-5 to -5 log10 Pa (Table 4 fits at fO2 ~ 1e-5 Pa)) of Oeser et al. (2026)",
+      "P = 1.00 GPa is outside the calibration range (100000 to 101325 Pa (atmospheric; 1 bar to 1 atm)) of Oeser et al. (2026)",
+      "XFe is outside the calibration range (0.085 to 0.085 XFe (San Carlos olivine, Fo91.5)) of Oeser et al. (2026)",
+      "Fitted for 1100-1250 C at fO2 ~ 1e-5 Pa. The authors read the high activation energies (230-370 kJ/mol) and the change of anisotropy at 1150 C as a possible change of mechanism around 1150 C (abstract). For magmatic temperatures below 1100 C Diffusor recommends Dohmen & Chakraborty (2007).",
+      "Table 4 gives 95 % confidence bounds on Ea and log D0 without their covariance. Sampling the two independently would greatly overstate the spread of D, so the coefficient is held fixed in the Monte Carlo."
+    ],
+    "alternative_to_published_ratio": [
+      1.0860070236959338,
+      1.4474079633762724
+    ],
+    "classification": "Published fitted-width/Dt calculation; not an independent profile fit. Oeser extrapolation, no precision claim."
+  },
+  {
+    "group": "advanced_core",
+    "sample": "SHIV-08-05 3-2 Ol-18",
+    "part": null,
+    "row": 19,
+    "source_file": "41598_2018_30133_MOESM7_ESM.xlsx",
+    "published_Fo_days": [
+      400.40318812295817,
+      1094.9220506445868
+    ],
+    "published_Ni_days": [
+      189.24961855306026,
+      548.1786730156613
+    ],
+    "recomputed_Fo_days": [
+      400.4031881229582,
+      1094.9220506445868
+    ],
+    "equation_Ni_days": [
+      189.24961855306026,
+      548.1786730156612
+    ],
+    "Fo_max_relative_error": 2.220446049250313e-16,
+    "Ni_max_relative_error": 2.220446049250313e-16,
+    "alternative_Fo_days": [
+      425.81079861460717,
+      1546.850089897637
+    ],
+    "registry_original_D_ratio": [
+      0.997032121846842,
+      0.9968439500988727
+    ],
+    "alternative_warnings": [
+      "log fO2 = -2.22 (Pa) is outside the calibration range (-5 to -5 log10 Pa (Table 4 fits at fO2 ~ 1e-5 Pa)) of Oeser et al. (2026)",
+      "P = 0.60 GPa is outside the calibration range (100000 to 101325 Pa (atmospheric; 1 bar to 1 atm)) of Oeser et al. (2026)",
+      "XFe is outside the calibration range (0.085 to 0.085 XFe (San Carlos olivine, Fo91.5)) of Oeser et al. (2026)",
+      "Fitted for 1100-1250 C at fO2 ~ 1e-5 Pa. The authors read the high activation energies (230-370 kJ/mol) and the change of anisotropy at 1150 C as a possible change of mechanism around 1150 C (abstract). For magmatic temperatures below 1100 C Diffusor recommends Dohmen & Chakraborty (2007).",
+      "Table 4 gives 95 % confidence bounds on Ea and log D0 without their covariance. Sampling the two independently would greatly overstate the spread of D, so the coefficient is held fixed in the Monte Carlo.",
+      "log fO2 = -2.11 (Pa) is outside the calibration range (-5 to -5 log10 Pa (Table 4 fits at fO2 ~ 1e-5 Pa)) of Oeser et al. (2026)",
+      "P = 1.00 GPa is outside the calibration range (100000 to 101325 Pa (atmospheric; 1 bar to 1 atm)) of Oeser et al. (2026)",
+      "XFe is outside the calibration range (0.085 to 0.085 XFe (San Carlos olivine, Fo91.5)) of Oeser et al. (2026)",
+      "Fitted for 1100-1250 C at fO2 ~ 1e-5 Pa. The authors read the high activation energies (230-370 kJ/mol) and the change of anisotropy at 1150 C as a possible change of mechanism around 1150 C (abstract). For magmatic temperatures below 1100 C Diffusor recommends Dohmen & Chakraborty (2007).",
+      "Table 4 gives 95 % confidence bounds on Ea and log D0 without their covariance. Sampling the two independently would greatly overstate the spread of D, so the coefficient is held fixed in the Monte Carlo."
+    ],
+    "alternative_to_published_ratio": [
+      1.063455065407338,
+      1.4127490527631603
+    ],
+    "classification": "Published fitted-width/Dt calculation; not an independent profile fit. Oeser extrapolation, no precision claim."
+  },
+  {
+    "group": "advanced_core",
+    "sample": "SHIV-08-05 17 Ol-3",
+    "part": null,
+    "row": 20,
+    "source_file": "41598_2018_30133_MOESM7_ESM.xlsx",
+    "published_Fo_days": [
+      309.4002146336332,
+      846.069980273238
+    ],
+    "published_Ni_days": [
+      146.23727866439708,
+      423.5895320507338
+    ],
+    "recomputed_Fo_days": [
+      309.4002146336332,
+      846.069980273238
+    ],
+    "equation_Ni_days": [
+      146.23727866439708,
+      423.5895320507338
+    ],
+    "Fo_max_relative_error": 0.0,
+    "Ni_max_relative_error": 0.0,
+    "alternative_Fo_days": [],
+    "registry_original_D_ratio": [],
+    "alternative_warnings": [],
+    "alternative_to_published_ratio": [],
+    "classification": "Published fitted-width/Dt calculation; no matching a/b/c orientation row for alternative D. "
+  },
+  {
+    "group": "advanced_core",
+    "sample": "SHIV-08-05 3-5 Ol-20",
+    "part": null,
+    "row": 21,
+    "source_file": "41598_2018_30133_MOESM7_ESM.xlsx",
+    "published_Fo_days": [
+      432.54658034261917,
+      1182.819724708602
+    ],
+    "published_Ni_days": [
+      204.44211675740573,
+      592.1851210556921
+    ],
+    "recomputed_Fo_days": [
+      432.5465803426191,
+      1182.8197247086018
+    ],
+    "equation_Ni_days": [
+      204.44211675740567,
+      592.185121055692
+    ],
+    "Fo_max_relative_error": 2.220446049250313e-16,
+    "Ni_max_relative_error": 3.3306690738754696e-16,
+    "alternative_Fo_days": [
+      318.4213769986847,
+      1092.7961679343096
+    ],
+    "registry_original_D_ratio": [
+      0.9970321218468418,
+      0.9968439500988725
+    ],
+    "alternative_warnings": [
+      "log fO2 = -2.22 (Pa) is outside the calibration range (-5 to -5 log10 Pa (Table 4 fits at fO2 ~ 1e-5 Pa)) of Oeser et al. (2026)",
+      "P = 0.60 GPa is outside the calibration range (100000 to 101325 Pa (atmospheric; 1 bar to 1 atm)) of Oeser et al. (2026)",
+      "XFe is outside the calibration range (0.085 to 0.085 XFe (San Carlos olivine, Fo91.5)) of Oeser et al. (2026)",
+      "Fitted for 1100-1250 C at fO2 ~ 1e-5 Pa. The authors read the high activation energies (230-370 kJ/mol) and the change of anisotropy at 1150 C as a possible change of mechanism around 1150 C (abstract). For magmatic temperatures below 1100 C Diffusor recommends Dohmen & Chakraborty (2007).",
+      "Table 4 gives 95 % confidence bounds on Ea and log D0 without their covariance. Sampling the two independently would greatly overstate the spread of D, so the coefficient is held fixed in the Monte Carlo.",
+      "log fO2 = -2.11 (Pa) is outside the calibration range (-5 to -5 log10 Pa (Table 4 fits at fO2 ~ 1e-5 Pa)) of Oeser et al. (2026)",
+      "P = 1.00 GPa is outside the calibration range (100000 to 101325 Pa (atmospheric; 1 bar to 1 atm)) of Oeser et al. (2026)",
+      "XFe is outside the calibration range (0.085 to 0.085 XFe (San Carlos olivine, Fo91.5)) of Oeser et al. (2026)",
+      "Fitted for 1100-1250 C at fO2 ~ 1e-5 Pa. The authors read the high activation energies (230-370 kJ/mol) and the change of anisotropy at 1150 C as a possible change of mechanism around 1150 C (abstract). For magmatic temperatures below 1100 C Diffusor recommends Dohmen & Chakraborty (2007).",
+      "Table 4 gives 95 % confidence bounds on Ea and log D0 without their covariance. Sampling the two independently would greatly overstate the spread of D, so the coefficient is held fixed in the Monte Carlo."
+    ],
+    "alternative_to_published_ratio": [
+      0.7361551136214367,
+      0.9238907207127691
+    ],
+    "classification": "Published fitted-width/Dt calculation; not an independent profile fit. Oeser extrapolation, no precision claim."
+  },
+  {
+    "group": "core_overgrowth",
+    "sample": "SHIV-08-05 17 Ol-6-1",
+    "part": null,
+    "row": 4,
+    "source_file": "41598_2018_30133_MOESM8_ESM.xlsx",
+    "published_Fo_days": [
+      11.938866905317399,
+      23.075555213413576
+    ],
+    "published_Ni_days": [
+      3.374554449828072,
+      6.690987590221526
+    ],
+    "recomputed_Fo_days": [
+      11.938866905317399,
+      23.075555213413573
+    ],
+    "equation_Ni_days": [
+      3.374554449828072,
+      6.690987590221527
+    ],
+    "Fo_max_relative_error": 1.1102230246251565e-16,
+    "Ni_max_relative_error": 2.220446049250313e-16,
+    "alternative_Fo_days": [
+      11.785774044020634,
+      22.182648311213967
+    ],
+    "registry_original_D_ratio": [
+      0.9969918895575561,
+      0.9968659373233698
+    ],
+    "alternative_warnings": [
+      "log fO2 = -2.22 (Pa) is outside the calibration range (-5 to -5 log10 Pa (Table 4 fits at fO2 ~ 1e-5 Pa)) of Oeser et al. (2026)",
+      "P = 0.60 GPa is outside the calibration range (100000 to 101325 Pa (atmospheric; 1 bar to 1 atm)) of Oeser et al. (2026)",
+      "XFe is outside the calibration range (0.085 to 0.085 XFe (San Carlos olivine, Fo91.5)) of Oeser et al. (2026)",
+      "Fitted for 1100-1250 C at fO2 ~ 1e-5 Pa. The authors read the high activation energies (230-370 kJ/mol) and the change of anisotropy at 1150 C as a possible change of mechanism around 1150 C (abstract). For magmatic temperatures below 1100 C Diffusor recommends Dohmen & Chakraborty (2007).",
+      "Table 4 gives 95 % confidence bounds on Ea and log D0 without their covariance. Sampling the two independently would greatly overstate the spread of D, so the coefficient is held fixed in the Monte Carlo.",
+      "log fO2 = -2.11 (Pa) is outside the calibration range (-5 to -5 log10 Pa (Table 4 fits at fO2 ~ 1e-5 Pa)) of Oeser et al. (2026)",
+      "P = 1.00 GPa is outside the calibration range (100000 to 101325 Pa (atmospheric; 1 bar to 1 atm)) of Oeser et al. (2026)",
+      "XFe is outside the calibration range (0.085 to 0.085 XFe (San Carlos olivine, Fo91.5)) of Oeser et al. (2026)",
+      "Fitted for 1100-1250 C at fO2 ~ 1e-5 Pa. The authors read the high activation energies (230-370 kJ/mol) and the change of anisotropy at 1150 C as a possible change of mechanism around 1150 C (abstract). For magmatic temperatures below 1100 C Diffusor recommends Dohmen & Chakraborty (2007).",
+      "Table 4 gives 95 % confidence bounds on Ea and log D0 without their covariance. Sampling the two independently would greatly overstate the spread of D, so the coefficient is held fixed in the Monte Carlo."
+    ],
+    "alternative_to_published_ratio": [
+      0.9871769354235301,
+      0.9613050739649994
+    ],
+    "classification": "Published fitted-width/Dt calculation; not an independent profile fit. Oeser extrapolation, no precision claim."
+  },
+  {
+    "group": "core_overgrowth",
+    "sample": "SHIV-08-05 17 Ol-6-2",
+    "part": 1,
+    "row": 5,
+    "source_file": "41598_2018_30133_MOESM8_ESM.xlsx",
+    "published_Fo_days": [
+      5.650450012286413,
+      10.921243387098647
+    ],
+    "published_Ni_days": [
+      0.6742517911407259,
+      1.3368906723188545
+    ],
+    "recomputed_Fo_days": [
+      5.650450012286412,
+      10.921243387098647
+    ],
+    "equation_Ni_days": [
+      0.674251791140726,
+      1.3368906723188545
+    ],
+    "Fo_max_relative_error": 1.1102230246251565e-16,
+    "Ni_max_relative_error": 2.220446049250313e-16,
+    "alternative_Fo_days": [
+      3.6568971179967216,
+      7.39484599775132
+    ],
+    "registry_original_D_ratio": [
+      0.996991889557556,
+      0.9968659373233698
+    ],
+    "alternative_warnings": [
+      "log fO2 = -2.22 (Pa) is outside the calibration range (-5 to -5 log10 Pa (Table 4 fits at fO2 ~ 1e-5 Pa)) of Oeser et al. (2026)",
+      "P = 0.60 GPa is outside the calibration range (100000 to 101325 Pa (atmospheric; 1 bar to 1 atm)) of Oeser et al. (2026)",
+      "XFe is outside the calibration range (0.085 to 0.085 XFe (San Carlos olivine, Fo91.5)) of Oeser et al. (2026)",
+      "Fitted for 1100-1250 C at fO2 ~ 1e-5 Pa. The authors read the high activation energies (230-370 kJ/mol) and the change of anisotropy at 1150 C as a possible change of mechanism around 1150 C (abstract). For magmatic temperatures below 1100 C Diffusor recommends Dohmen & Chakraborty (2007).",
+      "Table 4 gives 95 % confidence bounds on Ea and log D0 without their covariance. Sampling the two independently would greatly overstate the spread of D, so the coefficient is held fixed in the Monte Carlo.",
+      "log fO2 = -2.11 (Pa) is outside the calibration range (-5 to -5 log10 Pa (Table 4 fits at fO2 ~ 1e-5 Pa)) of Oeser et al. (2026)",
+      "P = 1.00 GPa is outside the calibration range (100000 to 101325 Pa (atmospheric; 1 bar to 1 atm)) of Oeser et al. (2026)",
+      "XFe is outside the calibration range (0.085 to 0.085 XFe (San Carlos olivine, Fo91.5)) of Oeser et al. (2026)",
+      "Fitted for 1100-1250 C at fO2 ~ 1e-5 Pa. The authors read the high activation energies (230-370 kJ/mol) and the change of anisotropy at 1150 C as a possible change of mechanism around 1150 C (abstract). For magmatic temperatures below 1100 C Diffusor recommends Dohmen & Chakraborty (2007).",
+      "Table 4 gives 95 % confidence bounds on Ea and log D0 without their covariance. Sampling the two independently would greatly overstate the spread of D, so the coefficient is held fixed in the Monte Carlo."
+    ],
+    "alternative_to_published_ratio": [
+      0.647186880698903,
+      0.6771066018441555
+    ],
+    "classification": "Published fitted-width/Dt calculation; not an independent profile fit. Oeser extrapolation, no precision claim."
+  },
+  {
+    "group": "core_overgrowth",
+    "sample": "SHIV-08-05 17 Ol-6-2",
+    "part": 2,
+    "row": 6,
+    "source_file": "41598_2018_30133_MOESM8_ESM.xlsx",
+    "published_Fo_days": [
+      4.701405830772985,
+      9.086921789901833
+    ],
+    "published_Ni_days": [
+      0.38888592468261934,
+      0.7710739105708603
+    ],
+    "recomputed_Fo_days": [
+      4.701405830772985,
+      9.086921789901833
+    ],
+    "equation_Ni_days": [
+      0.38888592468261934,
+      0.7710739105708603
+    ],
+    "Fo_max_relative_error": 0.0,
+    "Ni_max_relative_error": 0.0,
+    "alternative_Fo_days": [
+      3.042688174517602,
+      6.152814734384041
+    ],
+    "registry_original_D_ratio": [
+      0.996991889557556,
+      0.9968659373233698
+    ],
+    "alternative_warnings": [
+      "log fO2 = -2.22 (Pa) is outside the calibration range (-5 to -5 log10 Pa (Table 4 fits at fO2 ~ 1e-5 Pa)) of Oeser et al. (2026)",
+      "P = 0.60 GPa is outside the calibration range (100000 to 101325 Pa (atmospheric; 1 bar to 1 atm)) of Oeser et al. (2026)",
+      "XFe is outside the calibration range (0.085 to 0.085 XFe (San Carlos olivine, Fo91.5)) of Oeser et al. (2026)",
+      "Fitted for 1100-1250 C at fO2 ~ 1e-5 Pa. The authors read the high activation energies (230-370 kJ/mol) and the change of anisotropy at 1150 C as a possible change of mechanism around 1150 C (abstract). For magmatic temperatures below 1100 C Diffusor recommends Dohmen & Chakraborty (2007).",
+      "Table 4 gives 95 % confidence bounds on Ea and log D0 without their covariance. Sampling the two independently would greatly overstate the spread of D, so the coefficient is held fixed in the Monte Carlo.",
+      "log fO2 = -2.11 (Pa) is outside the calibration range (-5 to -5 log10 Pa (Table 4 fits at fO2 ~ 1e-5 Pa)) of Oeser et al. (2026)",
+      "P = 1.00 GPa is outside the calibration range (100000 to 101325 Pa (atmospheric; 1 bar to 1 atm)) of Oeser et al. (2026)",
+      "XFe is outside the calibration range (0.085 to 0.085 XFe (San Carlos olivine, Fo91.5)) of Oeser et al. (2026)",
+      "Fitted for 1100-1250 C at fO2 ~ 1e-5 Pa. The authors read the high activation energies (230-370 kJ/mol) and the change of anisotropy at 1150 C as a possible change of mechanism around 1150 C (abstract). For magmatic temperatures below 1100 C Diffusor recommends Dohmen & Chakraborty (2007).",
+      "Table 4 gives 95 % confidence bounds on Ea and log D0 without their covariance. Sampling the two independently would greatly overstate the spread of D, so the coefficient is held fixed in the Monte Carlo."
+    ],
+    "alternative_to_published_ratio": [
+      0.6471868806989028,
+      0.6771066018441555
+    ],
+    "classification": "Published fitted-width/Dt calculation; not an independent profile fit. Oeser extrapolation, no precision claim."
+  },
+  {
+    "group": "core_overgrowth",
+    "sample": "SHIV-08-05-17 Ol-6-3",
+    "part": null,
+    "row": 7,
+    "source_file": "41598_2018_30133_MOESM8_ESM.xlsx",
+    "published_Fo_days": [
+      4.1130637078646,
+      7.94976855339974
+    ],
+    "published_Ni_days": [
+      0.4854825293726426,
+      0.96260339775143
+    ],
+    "recomputed_Fo_days": [
+      4.1130637078646,
+      7.949768553399741
+    ],
+    "equation_Ni_days": [
+      0.48548252937264275,
+      0.9626033977514303
+    ],
+    "Fo_max_relative_error": 2.220446049250313e-16,
+    "Ni_max_relative_error": 4.440892098500626e-16,
+    "alternative_Fo_days": [
+      3.833977021786291,
+      7.433741975869515
+    ],
+    "registry_original_D_ratio": [
+      0.9969918895575564,
+      0.9968659373233699
+    ],
+    "alternative_warnings": [
+      "log fO2 = -2.22 (Pa) is outside the calibration range (-5 to -5 log10 Pa (Table 4 fits at fO2 ~ 1e-5 Pa)) of Oeser et al. (2026)",
+      "P = 0.60 GPa is outside the calibration range (100000 to 101325 Pa (atmospheric; 1 bar to 1 atm)) of Oeser et al. (2026)",
+      "XFe is outside the calibration range (0.085 to 0.085 XFe (San Carlos olivine, Fo91.5)) of Oeser et al. (2026)",
+      "Fitted for 1100-1250 C at fO2 ~ 1e-5 Pa. The authors read the high activation energies (230-370 kJ/mol) and the change of anisotropy at 1150 C as a possible change of mechanism around 1150 C (abstract). For magmatic temperatures below 1100 C Diffusor recommends Dohmen & Chakraborty (2007).",
+      "Table 4 gives 95 % confidence bounds on Ea and log D0 without their covariance. Sampling the two independently would greatly overstate the spread of D, so the coefficient is held fixed in the Monte Carlo.",
+      "log fO2 = -2.11 (Pa) is outside the calibration range (-5 to -5 log10 Pa (Table 4 fits at fO2 ~ 1e-5 Pa)) of Oeser et al. (2026)",
+      "P = 1.00 GPa is outside the calibration range (100000 to 101325 Pa (atmospheric; 1 bar to 1 atm)) of Oeser et al. (2026)",
+      "XFe is outside the calibration range (0.085 to 0.085 XFe (San Carlos olivine, Fo91.5)) of Oeser et al. (2026)",
+      "Fitted for 1100-1250 C at fO2 ~ 1e-5 Pa. The authors read the high activation energies (230-370 kJ/mol) and the change of anisotropy at 1150 C as a possible change of mechanism around 1150 C (abstract). For magmatic temperatures below 1100 C Diffusor recommends Dohmen & Chakraborty (2007).",
+      "Table 4 gives 95 % confidence bounds on Ea and log D0 without their covariance. Sampling the two independently would greatly overstate the spread of D, so the coefficient is held fixed in the Monte Carlo."
+    ],
+    "alternative_to_published_ratio": [
+      0.9321462768629947,
+      0.9350891068005314
+    ],
+    "classification": "Published fitted-width/Dt calculation; not an independent profile fit. Oeser extrapolation, no precision claim."
+  },
+  {
+    "group": "core_overgrowth",
+    "sample": "SHIV-08-05-17 Ol-6-5",
+    "part": null,
+    "row": 8,
+    "source_file": "41598_2018_30133_MOESM8_ESM.xlsx",
+    "published_Fo_days": [
+      5.081721144576401,
+      9.821998836306356
+    ],
+    "published_Ni_days": [
+      0.6754920696021517,
+      1.339349867426594
+    ],
+    "recomputed_Fo_days": [
+      5.0817211445764014,
+      9.821998836306358
+    ],
+    "equation_Ni_days": [
+      0.6754920696021516,
+      1.339349867426594
+    ],
+    "Fo_max_relative_error": 2.220446049250313e-16,
+    "Ni_max_relative_error": 1.1102230246251565e-16,
+    "alternative_Fo_days": [
+      4.812645664794509,
+      9.103155711770091
+    ],
+    "registry_original_D_ratio": [
+      0.996991889557556,
+      0.9968659373233698
+    ],
+    "alternative_warnings": [
+      "log fO2 = -2.22 (Pa) is outside the calibration range (-5 to -5 log10 Pa (Table 4 fits at fO2 ~ 1e-5 Pa)) of Oeser et al. (2026)",
+      "P = 0.60 GPa is outside the calibration range (100000 to 101325 Pa (atmospheric; 1 bar to 1 atm)) of Oeser et al. (2026)",
+      "XFe is outside the calibration range (0.085 to 0.085 XFe (San Carlos olivine, Fo91.5)) of Oeser et al. (2026)",
+      "Fitted for 1100-1250 C at fO2 ~ 1e-5 Pa. The authors read the high activation energies (230-370 kJ/mol) and the change of anisotropy at 1150 C as a possible change of mechanism around 1150 C (abstract). For magmatic temperatures below 1100 C Diffusor recommends Dohmen & Chakraborty (2007).",
+      "Table 4 gives 95 % confidence bounds on Ea and log D0 without their covariance. Sampling the two independently would greatly overstate the spread of D, so the coefficient is held fixed in the Monte Carlo.",
+      "log fO2 = -2.11 (Pa) is outside the calibration range (-5 to -5 log10 Pa (Table 4 fits at fO2 ~ 1e-5 Pa)) of Oeser et al. (2026)",
+      "P = 1.00 GPa is outside the calibration range (100000 to 101325 Pa (atmospheric; 1 bar to 1 atm)) of Oeser et al. (2026)",
+      "XFe is outside the calibration range (0.085 to 0.085 XFe (San Carlos olivine, Fo91.5)) of Oeser et al. (2026)",
+      "Fitted for 1100-1250 C at fO2 ~ 1e-5 Pa. The authors read the high activation energies (230-370 kJ/mol) and the change of anisotropy at 1150 C as a possible change of mechanism around 1150 C (abstract). For magmatic temperatures below 1100 C Diffusor recommends Dohmen & Chakraborty (2007).",
+      "Table 4 gives 95 % confidence bounds on Ea and log D0 without their covariance. Sampling the two independently would greatly overstate the spread of D, so the coefficient is held fixed in the Monte Carlo."
+    ],
+    "alternative_to_published_ratio": [
+      0.9470503256423133,
+      0.9268129495313
+    ],
+    "classification": "Published fitted-width/Dt calculation; not an independent profile fit. Oeser extrapolation, no precision claim."
+  },
+  {
+    "group": "core_overgrowth",
+    "sample": "SHIV-08-05-17 Ol-6-6",
+    "part": null,
+    "row": 9,
+    "source_file": "41598_2018_30133_MOESM8_ESM.xlsx",
+    "published_Fo_days": [
+      8.405136452761415,
+      16.2455274717559
+    ],
+    "published_Ni_days": [
+      2.547902208359027,
+      5.051920871538118
+    ],
+    "recomputed_Fo_days": [
+      8.405136452761415,
+      16.2455274717559
+    ],
+    "equation_Ni_days": [
+      2.5479022083590275,
+      5.051920871538119
+    ],
+    "Fo_max_relative_error": 0.0,
+    "Ni_max_relative_error": 2.220446049250313e-16,
+    "alternative_Fo_days": [
+      5.363690422306128,
+      10.848922492637035
+    ],
+    "registry_original_D_ratio": [
+      0.9969918895575562,
+      0.9968659373233701
+    ],
+    "alternative_warnings": [
+      "log fO2 = -2.22 (Pa) is outside the calibration range (-5 to -5 log10 Pa (Table 4 fits at fO2 ~ 1e-5 Pa)) of Oeser et al. (2026)",
+      "P = 0.60 GPa is outside the calibration range (100000 to 101325 Pa (atmospheric; 1 bar to 1 atm)) of Oeser et al. (2026)",
+      "XFe is outside the calibration range (0.085 to 0.085 XFe (San Carlos olivine, Fo91.5)) of Oeser et al. (2026)",
+      "Fitted for 1100-1250 C at fO2 ~ 1e-5 Pa. The authors read the high activation energies (230-370 kJ/mol) and the change of anisotropy at 1150 C as a possible change of mechanism around 1150 C (abstract). For magmatic temperatures below 1100 C Diffusor recommends Dohmen & Chakraborty (2007).",
+      "Table 4 gives 95 % confidence bounds on Ea and log D0 without their covariance. Sampling the two independently would greatly overstate the spread of D, so the coefficient is held fixed in the Monte Carlo.",
+      "log fO2 = -2.11 (Pa) is outside the calibration range (-5 to -5 log10 Pa (Table 4 fits at fO2 ~ 1e-5 Pa)) of Oeser et al. (2026)",
+      "P = 1.00 GPa is outside the calibration range (100000 to 101325 Pa (atmospheric; 1 bar to 1 atm)) of Oeser et al. (2026)",
+      "XFe is outside the calibration range (0.085 to 0.085 XFe (San Carlos olivine, Fo91.5)) of Oeser et al. (2026)",
+      "Fitted for 1100-1250 C at fO2 ~ 1e-5 Pa. The authors read the high activation energies (230-370 kJ/mol) and the change of anisotropy at 1150 C as a possible change of mechanism around 1150 C (abstract). For magmatic temperatures below 1100 C Diffusor recommends Dohmen & Chakraborty (2007).",
+      "Table 4 gives 95 % confidence bounds on Ea and log D0 without their covariance. Sampling the two independently would greatly overstate the spread of D, so the coefficient is held fixed in the Monte Carlo."
+    ],
+    "alternative_to_published_ratio": [
+      0.6381443599935783,
+      0.6678098025132593
+    ],
+    "classification": "Published fitted-width/Dt calculation; not an independent profile fit. Oeser extrapolation, no precision claim."
+  },
+  {
+    "group": "core_overgrowth",
+    "sample": "SHIV-08-05 3-3 Ol-29-1",
+    "part": null,
+    "row": 10,
+    "source_file": "41598_2018_30133_MOESM8_ESM.xlsx",
+    "published_Fo_days": [
+      3.7980070223362756,
+      7.34082400280542
+    ],
+    "published_Ni_days": [
+      1.1105607659994254,
+      2.2019938969625024
+    ],
+    "recomputed_Fo_days": [
+      3.798007022336276,
+      7.34082400280542
+    ],
+    "equation_Ni_days": [
+      1.1105607659994257,
+      2.2019938969625024
+    ],
+    "Fo_max_relative_error": 2.220446049250313e-16,
+    "Ni_max_relative_error": 2.220446049250313e-16,
+    "alternative_Fo_days": [],
+    "registry_original_D_ratio": [],
+    "alternative_warnings": [],
+    "alternative_to_published_ratio": [],
+    "classification": "Published fitted-width/Dt calculation; no matching a/b/c orientation row for alternative D. "
+  },
+  {
+    "group": "core_overgrowth",
+    "sample": "SHIV-08-05 3-3 Ol-29-2",
+    "part": null,
+    "row": 11,
+    "source_file": "41598_2018_30133_MOESM8_ESM.xlsx",
+    "published_Fo_days": [
+      2.4237945502296427,
+      4.684733100164174
+    ],
+    "published_Ni_days": [
+      1.7129505097323061,
+      3.39639818343024
+    ],
+    "recomputed_Fo_days": [
+      2.4237945502296427,
+      4.684733100164174
+    ],
+    "equation_Ni_days": [
+      1.7129505097323063,
+      3.39639818343024
+    ],
+    "Fo_max_relative_error": 0.0,
+    "Ni_max_relative_error": 2.220446049250313e-16,
+    "alternative_Fo_days": [],
+    "registry_original_D_ratio": [],
+    "alternative_warnings": [],
+    "alternative_to_published_ratio": [],
+    "classification": "Published fitted-width/Dt calculation; no matching a/b/c orientation row for alternative D. "
+  },
+  {
+    "group": "core_overgrowth",
+    "sample": "SHIV-08-05 3-6 Ol-13",
+    "part": null,
+    "row": 12,
+    "source_file": "41598_2018_30133_MOESM8_ESM.xlsx",
+    "published_Fo_days": [
+      10.43801511449584,
+      20.17469463418821
+    ],
+    "published_Ni_days": [
+      2.7093130827723937,
+      5.371962575912355
+    ],
+    "recomputed_Fo_days": [
+      10.43801511449584,
+      20.174694634188214
+    ],
+    "equation_Ni_days": [
+      2.7093130827723937,
+      5.371962575912356
+    ],
+    "Fo_max_relative_error": 2.220446049250313e-16,
+    "Ni_max_relative_error": 2.220446049250313e-16,
+    "alternative_Fo_days": [
+      4.956539691663464,
+      9.876610321078342
+    ],
+    "registry_original_D_ratio": [
+      0.9969918895575559,
+      0.9968659373233695
+    ],
+    "alternative_warnings": [
+      "log fO2 = -2.22 (Pa) is outside the calibration range (-5 to -5 log10 Pa (Table 4 fits at fO2 ~ 1e-5 Pa)) of Oeser et al. (2026)",
+      "P = 0.60 GPa is outside the calibration range (100000 to 101325 Pa (atmospheric; 1 bar to 1 atm)) of Oeser et al. (2026)",
+      "XFe is outside the calibration range (0.085 to 0.085 XFe (San Carlos olivine, Fo91.5)) of Oeser et al. (2026)",
+      "Fitted for 1100-1250 C at fO2 ~ 1e-5 Pa. The authors read the high activation energies (230-370 kJ/mol) and the change of anisotropy at 1150 C as a possible change of mechanism around 1150 C (abstract). For magmatic temperatures below 1100 C Diffusor recommends Dohmen & Chakraborty (2007).",
+      "Table 4 gives 95 % confidence bounds on Ea and log D0 without their covariance. Sampling the two independently would greatly overstate the spread of D, so the coefficient is held fixed in the Monte Carlo.",
+      "log fO2 = -2.11 (Pa) is outside the calibration range (-5 to -5 log10 Pa (Table 4 fits at fO2 ~ 1e-5 Pa)) of Oeser et al. (2026)",
+      "P = 1.00 GPa is outside the calibration range (100000 to 101325 Pa (atmospheric; 1 bar to 1 atm)) of Oeser et al. (2026)",
+      "XFe is outside the calibration range (0.085 to 0.085 XFe (San Carlos olivine, Fo91.5)) of Oeser et al. (2026)",
+      "Fitted for 1100-1250 C at fO2 ~ 1e-5 Pa. The authors read the high activation energies (230-370 kJ/mol) and the change of anisotropy at 1150 C as a possible change of mechanism around 1150 C (abstract). For magmatic temperatures below 1100 C Diffusor recommends Dohmen & Chakraborty (2007).",
+      "Table 4 gives 95 % confidence bounds on Ea and log D0 without their covariance. Sampling the two independently would greatly overstate the spread of D, so the coefficient is held fixed in the Monte Carlo."
+    ],
+    "alternative_to_published_ratio": [
+      0.4748546191296511,
+      0.4895543898018339
+    ],
+    "classification": "Published fitted-width/Dt calculation; not an independent profile fit. Oeser extrapolation, no precision claim."
+  }
+]

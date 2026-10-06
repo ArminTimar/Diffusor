@@ -32,6 +32,15 @@ names the diffusion law, solver, boundary conditions and uncertainty model of
 that run, followed by the references it cites. The checks that are run against
 published values are listed under [Verification](#verification).
 
+The **File > Published validation library** browser includes 316 measured
+profiles from eight studies. The Lynn (2024) single-event examples also load
+the published conditions, orientations and tabulated initial states. Data-only
+entries identify the setup that still needs to be supplied. The
+[validation report](examples/validation/report.md) compares published times,
+reconstructed fits and alternative diffusion laws, and explains which checks
+are exact age calculations, approximate profile reconstructions or coefficient
+comparisons. Extracted measurements retain their source rows and workbook hashes.
+
 ## Installation on Windows
 
 1. Install Python 3.10 or newer from [python.org](https://www.python.org/downloads/).
@@ -279,7 +288,9 @@ al. 2012) name the laws they were computed from.
 
 ## Exported results
 
-**File > Export results** writes, for each run:
+**File > Export results** first asks which outputs you want, with a tick box for
+each, and then for the folder. What you switch off stays off the next time. It
+can write, for each run:
 
 * the results as JSON, including the coefficient provenance, the uncertainty
   model and the Monte Carlo statistics;
@@ -310,8 +321,11 @@ a search field, and saves the list as BibTeX.
 ## Example datasets
 
 One example per mineral is bundled and listed on the Data step with its
-provenance. One is measured data from a published supplementary table. The
-others were generated with Diffusor's forward model at a set time and given
+provenance. The list is grouped by mineral, then by study, then by example; it
+starts closed, and a study with many profiles takes one row until it is opened.
+Two studies supply published profiles from their supplementary tables: one
+orthopyroxene traverse from Ostorero et al. (2022) and 18 olivine traverses from
+Lynn et al. (2024). The others were generated with Diffusor's forward model at a set time and given
 Gaussian noise; they are marked as synthetic in the catalogue, in the
 interface and in every exported methods paragraph. The conditions of each
 example are taken from a published study, and a value that the chosen law does
@@ -319,7 +333,8 @@ not use is labelled as a placeholder.
 
 | dataset | kind | source | known time | fitted by Diffusor |
 | --- | --- | --- | --- | --- |
-| Orthopyroxene Fe-Mg, Kizimen 2010 | measured | crystal K9_L10C4, Supplementary Data 2 of Ostorero et al. (2022) | 2.32 yr (+7.16/−1.75), published | 2.5 yr |
+| Orthopyroxene Fe-Mg, Kizimen 2010 | published | crystal K9_L10C4, Supplementary Data 2 of Ostorero et al. (2022) | 2.32 yr (+7.16/−1.75), published | 2.5 yr |
+| Olivine Fe-Mg, Kilauea 2020, 18 crystals | published | Lynn et al. (2024), EarthChem doi:10.60520/IEDA/113087 | 14 to 521 d (± 30 %), published | 0.75 to 1.06 times the published time, all 18 within ± 30 % |
 | Orthopyroxene Fe-Mg | synthetic | Dias et al. (2025), 950 °C, NNO+1, arc andesite conditions | 1.5 yr | 1.41 yr |
 | Clinopyroxene Fe-Mg | synthetic | Mueller et al. (2013), 1100 °C, conditions after Petrone et al. (2016, 2018) | 45 d | 42 d |
 | Olivine Fe-Mg | synthetic | Dohmen & Chakraborty (2007), 1150 °C, FMQ−1, conditions after Hartley et al. (2016) | 120 d | 116 d |
@@ -366,6 +381,19 @@ high-resolution BSE grey-value profiles that are not included in the
 supplement, whereas the 2 µm microprobe traverse resolves the 4 µm zone with
 few points. With the Dias et al. (2025) law instead, the same traverse gives
 12 years.
+
+The Lynn et al. (2024) examples load the inputs archived with each profile in
+the EarthChem workbook: 1200 ± 10 °C, 42 MPa, log fO2 = −8.2 (bar), the three
+EBSD angles to a, b and c, and the tabulated initial profile, which Diffusor
+interpolates linearly between the analysed positions. They use the paper's
+law, Dohmen & Chakraborty (2007) with its pressure term (eq. 2 of the paper),
+with D<sub>a</sub> = D<sub>b</sub> = D<sub>c</sub>/6 along the measured
+orientation, fixed compositions at both ends and only the time free. The paper's
+Methods give 45 MPa; the workbook value is used. The sub-grid interface and the
+numerical grid of the authors' MATLAB model are not published, so the refits
+agree with the published times (ratios 0.75 to 1.06; Ol 20 is 25 % shorter)
+rather than reproduce them digit for digit. Ol 8 records two diffusion events
+and is not offered as an example.
 
 Earlier versions included a plagioclase traverse from Druitt et al. (2012)
 (Santorini). It was removed because the example modelled it with a different
@@ -552,7 +580,7 @@ with Sievwright et al. (2020) within half a log unit for Ti, Mn and Co.
 
 ## Verification
 
-The test suite contains 424 tests and runs on Windows, macOS and Linux
+The test suite contains 485 tests and runs on Windows, macOS and Linux
 with Python 3.10 and 3.13 on every change to the repository (see the badge at
 the top). It does not access the network. The tests cover the following.
 
@@ -595,9 +623,24 @@ may remain. Please report any you find.
 | Plagioclase Sr, difference from Giletti & Casserly (1994) at An36 and 750 °C (Audétat et al. 2026) | 2.8 log units | 2.77 |
 | Magnetite, minimum of D with fO2 for 21 elements at 1150 °C (Sievwright et al. 2020, Table 5) | log fO2 and log D at the minimum, as printed | minimum computed from the two printed branches differs by at most 0.09 (log fO2) and 0.04 (log D) |
 | Opx K9_L10C4, Kizimen (Ostorero et al. 2022, Supplementary Data 4) | 2.32 yr (+7.16/−1.75) | 2.5 yr |
+| Olivine Fe-Mg, 18 Kilauea 2020 profiles refitted with the archived inputs (Lynn et al. 2024) | 14 to 521 d, ± 30 % | 0.75 to 1.06 times the published time; largest RMS difference from the archived model curve 0.10 mol% Fo |
+| Olivine Fo ages from the fitted widths and Dt products of Tables SM4-A, SM5-A and SM6-A (Gordeychik et al. 2018) | 32 ages | relative difference below 4e-16 |
+| Opx Fe-Mg perpendicular to c at 966 °C, NNO, after Dohmen et al. (2016) (Araya et al. 2024, section 5.2) | log D = −19.78 | −19.782 (a axis) |
+| Olivine 3311_2_ol6, Fo only, interface position fitted (Mourey et al. 2023) | 395 d (+149/−106) | 406 d, with equation 3 of the paper read in bar |
 | Garnet D matrix at X<sub>Fe</sub> 0.61, X<sub>Mn</sub> 0.20, X<sub>Mg</sub> 0.18, X<sub>Ca</sub> 0.01 (Chakraborty & Ganguly 1992, eq. 5) | nine printed elements | within 0.45 %, with tracer coefficients chosen to reproduce them (see below) |
 | Olivine D<sub>Fe-Mg</sub> from the Fe and Mg tracer fits, 1100 to 1250 °C, a, b and c (Oeser et al. 2026, eq. 6 and Table 4) | the paper's own D<sub>Fe-Mg</sub> fit | within 0.2 log units (largest 0.18) |
 | Garnet Mn tracer at 510 °C, 2 GPa, eclogite garnet (Chen & Chu 2024) | about 1e-24 m²/s (an order of magnitude, not a fitted value) | 2.2e-24 m²/s |
+
+The last four rows come from the published-study validation in
+[examples/validation/report.md](examples/validation/report.md), which also
+lists what each downloaded supplement does not contain. Two reconstructions of
+Sundermeyer et al. (2020) do not reproduce the published ages (49 and 579 d
+against 277 and 358 d at Piton de la Fournaise), because the authors' fit
+windows, initial profiles and, for the Eifel case, fO2 are not published; they
+are reported as such and are not offered as examples. The extractions and runs
+were prepared with OpenAI ChatGPT and rechecked with Anthropic Claude (Claude
+Opus 5.5), which reran every script and compared the inputs with the source
+workbooks and with rendered pages of the papers.
 
 The garnet check tests the form of the ideal-solution matrix (eq. 2), not the
 tracer coefficients. The paper does not print the tracer coefficients behind

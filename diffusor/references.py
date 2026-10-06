@@ -61,6 +61,10 @@ def _r(**kw) -> Reference:
 
 
 REFERENCES: Dict[str, Reference] = {r.key: r for r in [
+    _r(key="lynn2024kilauea", authors="Lynn, K. J. and Nadeau, P. A. and Ruth, D. C. S. and Chang, J. C. and Dotray, P. J. and Johanson, I. A.", year=2024,
+       title="Olivine diffusion constrains months-scale magma transport within Kilauea volcano's summit reservoir system prior to the 2020 eruption",
+       journal="Bulletin of Volcanology", volume="86", pages="31", doi="10.1007/s00445-024-01714-y",
+       note="Data: doi:10.60520/IEDA/113087; workbook inputs take precedence where they differ from the text."),
     _r(key="cherniak1993apatite", authors="Cherniak, D. J. and Ryerson, F. J.", year=1993,
        title="A study of strontium diffusion in apatite using Rutherford backscattering spectroscopy and ion implantation",
        journal="Geochimica et Cosmochimica Acta", volume="57", pages="4653-4662", doi="10.1016/0016-7037(93)90190-8"),

@@ -1,0 +1,65 @@
+{
+  "published_logD": -19.78,
+  "recomputed_logD": -19.78233235063597,
+  "source": "Araya et al. 2024, sections 5.1.4 and 5.2, doi:10.1029/2023JB028558",
+  "assumptions": "a axis reproduces the quoted D; 1 bar buffer reference; XFe=.09 disables the old composition correction. These are not fully specified per-profile inputs.",
+  "comparisons": [
+    {
+      "axis": "a",
+      "XFe": 0.09,
+      "alternative_logD": -19.735500322408292,
+      "time_multiplier_for_fixed_Dt": 0.9026103775438713,
+      "warnings": [
+        "log fO2 = -5.76 (Pa) is outside the calibration range (-11 to -7 log10 Pa) of Dias et al. (2025)",
+        "XFe is outside the calibration range (0.1 to 0.4 XFe) of Dias et al. (2025)"
+      ]
+    },
+    {
+      "axis": "a",
+      "XFe": 0.31,
+      "alternative_logD": -19.303423358360355,
+      "time_multiplier_for_fixed_Dt": 0.33375160152293,
+      "warnings": [
+        "log fO2 = -5.76 (Pa) is outside the calibration range (-11 to -7 log10 Pa) of Dias et al. (2025)"
+      ]
+    },
+    {
+      "axis": "a",
+      "XFe": 0.39,
+      "alternative_logD": -19.146304462342925,
+      "time_multiplier_for_fixed_Dt": 0.2324365722951673,
+      "warnings": [
+        "log fO2 = -5.76 (Pa) is outside the calibration range (-11 to -7 log10 Pa) of Dias et al. (2025)"
+      ]
+    },
+    {
+      "axis": "b",
+      "XFe": 0.09,
+      "alternative_logD": -19.191432278058016,
+      "time_multiplier_for_fixed_Dt": 0.25788867929824894,
+      "warnings": [
+        "log fO2 = -5.76 (Pa) is outside the calibration range (-11 to -7 log10 Pa) of Dias et al. (2025)",
+        "XFe is outside the calibration range (0.1 to 0.4 XFe) of Dias et al. (2025)"
+      ]
+    },
+    {
+      "axis": "b",
+      "XFe": 0.31,
+      "alternative_logD": -18.75935531401008,
+      "time_multiplier_for_fixed_Dt": 0.09535760043512284,
+      "warnings": [
+        "log fO2 = -5.76 (Pa) is outside the calibration range (-11 to -7 log10 Pa) of Dias et al. (2025)"
+      ]
+    },
+    {
+      "axis": "b",
+      "XFe": 0.39,
+      "alternative_logD": -18.60223641799265,
+      "time_multiplier_for_fixed_Dt": 0.06641044922719065,
+      "warnings": [
+        "log fO2 = -5.76 (Pa) is outside the calibration range (-11 to -7 log10 Pa) of Dias et al. (2025)"
+      ]
+    }
+  ],
+  "scope": "Constant-D sensitivity only. XFe .31-.39 brackets the reported core Mg# 61-69. No new ages inferred without profiles/orientations and composition-dependent refits."
+}

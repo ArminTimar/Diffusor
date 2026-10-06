@@ -24,6 +24,7 @@ from typing import Dict, List, Optional, Sequence, Tuple
 import numpy as np
 from scipy.optimize import least_squares
 
+from ..solvers.boundary import dirichlet
 from ..thermo.units import human_time
 from .model import DiffusionModel
 from .objective import FitStatistics, residuals, statistics
@@ -70,6 +71,22 @@ class FitResult:
         return "\n".join(lines)
 
 
+def follow_plateaus(model: DiffusionModel, old: Dict[str, float], new: Dict[str, float]) -> None:
+    """Move a fixed end that sat on a plateau to the plateau's new value, in place.
+
+    The numerical solver holds a fixed-concentration end at the value in its boundary
+    condition. When a plateau is fitted, or drawn in a Monte Carlo, that end has to
+    follow it, or the profile is pinned at the old value while the fitted plateau
+    drifts away unconstrained. Only an end whose value equals the old plateau is
+    moved, so a boundary set on purpose to another composition is left alone.
+    """
+    for side, key in (("bc_left", "C_left"), ("bc_right", "C_right")):
+        bc = getattr(model, side)
+        if (key in old and key in new and bc.kind == "dirichlet" and not callable(bc.value)
+                and np.isclose(float(bc.value), float(old[key]))):
+            setattr(model, side, dirichlet(float(new[key])))
+
+
 def _apply_free(model: DiffusionModel, values: Dict[str, float]) -> DiffusionModel:
     """Return a shallow copy of the model with nuisance parameters applied."""
     import copy
@@ -80,6 +97,7 @@ def _apply_free(model: DiffusionModel, values: Dict[str, float]) -> DiffusionMod
     for k in ("x0", "C_left", "C_right"):
         if k in values:
             m.initial.params[k] = float(values[k])
+    follow_plateaus(m, model.initial.params, m.initial.params)
     if "beam_sigma" in values:
         m.beam_sigma_um = max(0.0, float(values["beam_sigma"]))
     return m

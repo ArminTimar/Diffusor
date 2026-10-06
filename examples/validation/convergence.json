@@ -1,0 +1,70 @@
+[
+  {
+    "key": "lynn2024_ol_1",
+    "study": "lynn2024",
+    "sample": "Ol 1",
+    "published_days": 187,
+    "published_sigma_days": 56,
+    "n_nodes": 801,
+    "classification": "archived-input reconstruction",
+    "original_days": 192.47216584651895,
+    "original_rmse_Fo": 0.1299957223588566,
+    "original_success": true,
+    "original_warnings": [
+      "Eq. 27 applies at fO2 above 1e-10 Pa (TaMED). At or below it use the PED entry (eq. 28).",
+      "The paper prints no temperature, pressure or composition limits for eq. 27. The 700-1200 C range is that of the Part I experiments (Dohmen et al. 2007), the pressure range reaches the 12 GPa data of Holzapfel et al. (2007) used in Fig. 7b, and the X_Fe range of 0 to 0.5 is Diffusor's choice (the m = 3 term derives from data in Chakraborty 1997, p. 424).",
+      "The paper's single compromise equation (eq. 29, erratum: -8.27, 226 kJ/mol, 3 (X_Fe - 0.14)) is not implemented.",
+      "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+    ],
+    "published_time_curve_rmse_Fo": 0.02935731260200925,
+    "alternative_days": 142.61734715575557,
+    "alternative_rmse_Fo": 0.13398546768153596,
+    "alternative_success": true,
+    "alternative_warnings": [
+      "log fO2 = -3.20 (Pa) is outside the calibration range (-5 to -5 log10 Pa (Table 4 fits at fO2 ~ 1e-5 Pa)) of Oeser et al. (2026)",
+      "P = 0.04 GPa is outside the calibration range (100000 to 101325 Pa (atmospheric; 1 bar to 1 atm)) of Oeser et al. (2026)",
+      "XFe is outside the calibration range (0.085 to 0.085 XFe (San Carlos olivine, Fo91.5)) of Oeser et al. (2026)",
+      "Fitted for 1100-1250 C at fO2 ~ 1e-5 Pa. The authors read the high activation energies (230-370 kJ/mol) and the change of anisotropy at 1150 C as a possible change of mechanism around 1150 C (abstract). For magmatic temperatures below 1100 C Diffusor recommends Dohmen & Chakraborty (2007).",
+      "Table 4 gives 95 % confidence bounds on Ea and log D0 without their covariance. Sampling the two independently would greatly overstate the spread of D, so the coefficient is held fixed in the Monte Carlo.",
+      "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+    ],
+    "original_to_published_ratio": 1.029262918965342,
+    "alternative_to_original_ratio": 0.7409764758894095,
+    "within_published_interval": true,
+    "alternative_scope": "Oeser 2026 tracer-derived interdiffusion: sensitivity only; atmospheric-pressure, high-silica, ~1e-5 Pa fO2 calibration. No claim of greater precision."
+  },
+  {
+    "key": "lynn2024_ol_9",
+    "study": "lynn2024",
+    "sample": "Ol 9",
+    "published_days": 97,
+    "published_sigma_days": 29.099999999999998,
+    "n_nodes": 801,
+    "classification": "archived-input reconstruction",
+    "original_days": 89.33244814897184,
+    "original_rmse_Fo": 0.26687781144932743,
+    "original_success": true,
+    "original_warnings": [
+      "Eq. 27 applies at fO2 above 1e-10 Pa (TaMED). At or below it use the PED entry (eq. 28).",
+      "The paper prints no temperature, pressure or composition limits for eq. 27. The 700-1200 C range is that of the Part I experiments (Dohmen et al. 2007), the pressure range reaches the 12 GPa data of Holzapfel et al. (2007) used in Fig. 7b, and the X_Fe range of 0 to 0.5 is Diffusor's choice (the m = 3 term derives from data in Chakraborty 1997, p. 424).",
+      "The paper's single compromise equation (eq. 29, erratum: -8.27, 226 kJ/mol, 3 (X_Fe - 0.14)) is not implemented.",
+      "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+    ],
+    "published_time_curve_rmse_Fo": 0.04972741168667971,
+    "alternative_days": 73.38987140713984,
+    "alternative_rmse_Fo": 0.2716908212907488,
+    "alternative_success": true,
+    "alternative_warnings": [
+      "log fO2 = -3.20 (Pa) is outside the calibration range (-5 to -5 log10 Pa (Table 4 fits at fO2 ~ 1e-5 Pa)) of Oeser et al. (2026)",
+      "P = 0.04 GPa is outside the calibration range (100000 to 101325 Pa (atmospheric; 1 bar to 1 atm)) of Oeser et al. (2026)",
+      "XFe is outside the calibration range (0.085 to 0.085 XFe (San Carlos olivine, Fo91.5)) of Oeser et al. (2026)",
+      "Fitted for 1100-1250 C at fO2 ~ 1e-5 Pa. The authors read the high activation energies (230-370 kJ/mol) and the change of anisotropy at 1150 C as a possible change of mechanism around 1150 C (abstract). For magmatic temperatures below 1100 C Diffusor recommends Dohmen & Chakraborty (2007).",
+      "Table 4 gives 95 % confidence bounds on Ea and log D0 without their covariance. Sampling the two independently would greatly overstate the spread of D, so the coefficient is held fixed in the Monte Carlo.",
+      "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+    ],
+    "original_to_published_ratio": 0.9209530737007405,
+    "alternative_to_original_ratio": 0.8215365516990425,
+    "within_published_interval": true,
+    "alternative_scope": "Oeser 2026 tracer-derived interdiffusion: sensitivity only; atmospheric-pressure, high-silica, ~1e-5 Pa fO2 calibration. No claim of greater precision."
+  }
+]

@@ -1,0 +1,67 @@
+{
+  "study": "mourey2023",
+  "sample": "3311_2_ol6",
+  "published_days": 395,
+  "published_plus_days": 149,
+  "published_minus_days": 106,
+  "classification": "conditional Fo-only reconstruction, not exact replication",
+  "assumptions": [
+    "Source T=1183 C, P=60 MPa and EBSD=(24.7,65.3,89). Equation 3 gives log fO2 = 8.912-25160/T \"in Pa\" for the QFM buffer named in the text. Read in bar it is -8.37 at 1183 C, 0.09 log units from Diffusor's QFM; read in Pa it is about 5 log units below QFM. Both readings are run.",
+    "Source Fo core=89.15 and rim=80.91. Fixed compositions at both measured endpoints.",
+    "All 25 measured Fo points, uniform weights, no beam correction, plane geometry.",
+    "The source jointly located the initial rim using Ca, Ni and Fo. Here t and x0 are fitted to Fo only.",
+    "Equation 2 prints the composition term as 3*(XMg-0.9); Dohmen & Chakraborty (2007, as corrected by their erratum) give 3*(XFe-0.1). The printed-forms branch keeps 3*(XMg-0.9) and the Pa reading.",
+    "The main branch uses the Dohmen & Chakraborty (2007) TaMED law with the erratum and reads equation 3 in bar. These are Diffusor's readings, not a statement about the authors' code.",
+    "Alternative-law run changes only the coefficient. Oeser atmospheric-pressure and fO2 calibration is extrapolated."
+  ],
+  "fits": [
+    {
+      "label": "printed forms of equations 2-3",
+      "coefficient": "mourey2023_equation2_literal",
+      "days": 2225.6653411082098,
+      "success": true,
+      "warnings": [
+        "Eq. 27 applies at fO2 above 1e-10 Pa (TaMED). At or below it use the PED entry (eq. 28).",
+        "The paper prints no temperature, pressure or composition limits for eq. 27. The 700-1200 C range is that of the Part I experiments (Dohmen et al. 2007), the pressure range reaches the 12 GPa data of Holzapfel et al. (2007) used in Fig. 7b, and the X_Fe range of 0 to 0.5 is Diffusor's choice (the m = 3 term derives from data in Chakraborty 1997, p. 424).",
+        "The paper's single compromise equation (eq. 29, erratum: -8.27, 226 kJ/mol, 3 (X_Fe - 0.14)) is not implemented.",
+        "the diffusion length 2*sqrt(Dt) = 44.5 um is a large fraction of the distance from the interface to the end of the profile (38.8 um). The far field has been reached, so the semi-infinite assumption is breaking down. Measure a longer traverse or model the whole crystal with an explicit geometry.",
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ],
+      "rmse_Fo": 0.04825610670318536,
+      "initial_interface_um": 38.7831404916936
+    },
+    {
+      "label": "canonical D, equation 3 interpreted in bar",
+      "coefficient": "ol_FeMg_dohmen_chakraborty2007_tamed",
+      "days": 406.42188268407017,
+      "success": true,
+      "warnings": [
+        "Eq. 27 applies at fO2 above 1e-10 Pa (TaMED). At or below it use the PED entry (eq. 28).",
+        "The paper prints no temperature, pressure or composition limits for eq. 27. The 700-1200 C range is that of the Part I experiments (Dohmen et al. 2007), the pressure range reaches the 12 GPa data of Holzapfel et al. (2007) used in Fig. 7b, and the X_Fe range of 0 to 0.5 is Diffusor's choice (the m = 3 term derives from data in Chakraborty 1997, p. 424).",
+        "The paper's single compromise equation (eq. 29, erratum: -8.27, 226 kJ/mol, 3 (X_Fe - 0.14)) is not implemented.",
+        "the diffusion length 2*sqrt(Dt) = 70.0 um is a large fraction of the distance from the interface to the end of the profile (2.9 um). The far field has been reached, so the semi-infinite assumption is breaking down. Measure a longer traverse or model the whole crystal with an explicit geometry.",
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ],
+      "rmse_Fo": 0.052251478536356935,
+      "initial_interface_um": 2.867169696785149
+    },
+    {
+      "label": "Oeser D, same bar interpretation",
+      "coefficient": "ol_FeMg_oeser2026",
+      "days": 304.9912610412057,
+      "success": true,
+      "warnings": [
+        "log fO2 = -3.37 (Pa) is outside the calibration range (-5 to -5 log10 Pa (Table 4 fits at fO2 ~ 1e-5 Pa)) of Oeser et al. (2026)",
+        "P = 0.06 GPa is outside the calibration range (100000 to 101325 Pa (atmospheric; 1 bar to 1 atm)) of Oeser et al. (2026)",
+        "XFe is outside the calibration range (0.085 to 0.085 XFe (San Carlos olivine, Fo91.5)) of Oeser et al. (2026)",
+        "Fitted for 1100-1250 C at fO2 ~ 1e-5 Pa. The authors read the high activation energies (230-370 kJ/mol) and the change of anisotropy at 1150 C as a possible change of mechanism around 1150 C (abstract). For magmatic temperatures below 1100 C Diffusor recommends Dohmen & Chakraborty (2007).",
+        "Table 4 gives 95 % confidence bounds on Ea and log D0 without their covariance. Sampling the two independently would greatly overstate the spread of D, so the coefficient is held fixed in the Monte Carlo.",
+        "the diffusion length 2*sqrt(Dt) = 65.8 um is a large fraction of the distance from the interface to the end of the profile (18.2 um). The far field has been reached, so the semi-infinite assumption is breaking down. Measure a longer traverse or model the whole crystal with an explicit geometry.",
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ],
+      "rmse_Fo": 0.04906784449545135,
+      "initial_interface_um": 18.162639580258578
+    }
+  ],
+  "alternative_to_original_ratio": 0.750430215585338
+}

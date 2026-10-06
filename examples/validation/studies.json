@@ -1,0 +1,91 @@
+[
+  {
+    "key": "lynn2024",
+    "citation": "Lynn et al. (2024), Kilauea 2020",
+    "doi": "10.1007/s00445-024-01714-y",
+    "data_doi": "10.60520/IEDA/113087",
+    "status": "18 single-event archived-input reconstructions and alternative-D refits. Ol 8 has two events and is data-only."
+  },
+  {
+    "key": "mutch2019",
+    "citation": "Mutch et al. (2019), Borgarhraun",
+    "doi": "10.1038/s41561-019-0376-9",
+    "data_doi": "10.5285/0ad0959d-aa0e-4b79-9077-20216a02922a",
+    "status": "20 measured Fo/Ni/Mn profiles and initial arrays. Angles and posterior medians available, but no per-profile fO2 mapping and no replica of the study-specific joint Bayesian inversion. See mutch_notes.md."
+  },
+  {
+    "key": "mourey2023",
+    "citation": "Mourey et al. (2023), Kilauea 2018",
+    "doi": "10.1007/s00445-023-01633-4",
+    "status": "56 measured traverses extracted. A single-event Fo-only reconstruction of 3311_2_ol6 is run three ways: the printed forms of equations 2 and 3, the Dohmen & Chakraborty (2007, erratum) law with equation 3 read in bar, and Oeser D. The joint Ca/Ni/Fo boundary placement of the paper is not published."
+  },
+  {
+    "key": "sundermeyer2020_reunion",
+    "citation": "Sundermeyer et al. (2020), Piton de la Fournaise",
+    "doi": "10.1007/s00410-019-1642-y",
+    "status": "100 measured traverses. Two explicit reconstructed-window comparisons do not reproduce the reported ages. Available TaMED proxy and Oeser results retained with matching/proxy temperature provenance. See reunion_notes.md."
+  },
+  {
+    "key": "sundermeyer2020_eifel",
+    "citation": "Sundermeyer et al. (2020), Eifel",
+    "doi": "10.1007/s00410-020-01715-y",
+    "status": "61 measured traverses. E41-4-1 conditional comparison and grid check completed using source effective T and angles. Missing fO2 and exact event window prevent exact replication. See eifel_notes.md."
+  },
+  {
+    "key": "gordeychik2018",
+    "citation": "Gordeychik et al. (2018), Shiveluch",
+    "doi": "10.1038/s41598-018-30133-1",
+    "status": "Measured traverses extracted and 32 published fitted-width/Dt Fo age calculations independently recomputed. This is not an independent refit of the selected profile points. Five Ni cells of Table SM4-A follow a different formula from equation SM4.4; both versions are kept."
+  },
+  {
+    "key": "ruprecht2013",
+    "citation": "Ruprecht & Plank (2013), Irazu",
+    "doi": "10.1038/nature12342",
+    "status": "Normalised LA-ICPMS profiles extracted, including Ni. Full composition/fO2-dependent Ni calibration and profile masks are required for the published model; the registry's Fo90 fixed-fO2 fit is not a replacement."
+  },
+  {
+    "key": "ruth2018",
+    "citation": "Ruth et al. (2018), Llaima",
+    "doi": "10.1038/s41467-018-05086-8",
+    "data_doi": "10.1594/IEDA/111160",
+    "status": "Measured traverses extracted from legacy XLS. Per-traverse EBSD angles and numerical initial states are not in that downloaded composition workbook. Some published models use calibrated BSE rather than the EPMA traverse."
+  },
+  {
+    "key": "shea2026",
+    "citation": "Shea et al. (2026), Kilauea Iki",
+    "data_doi": "10.1130/GEOL.S.34036920.v1",
+    "status": "Workbook contains core/rim populations and crystal sizes, not 1-D profiles. The supplement models 3-D anisotropic crystals with evolving rim composition and lava-lake cooling histories, including pre-lake diffusion. No fabricated traverse or 1-D replacement added."
+  },
+  {
+    "key": "rasmussen2018",
+    "citation": "Rasmussen et al. (2018), Shishaldin",
+    "doi": "10.1016/j.epsl.2018.01.001",
+    "status": "Downloaded XLSX contains core/rim compositions and model-result table C.7, not the fitted BSE intensity traverses. DOCX methods/figures do not supply numerical traverses."
+  },
+  {
+    "key": "araya2024",
+    "citation": "Araya et al. (2024), Sakurajima",
+    "doi": "10.1029/2023JB028558",
+    "data_doi": "10.5281/zenodo.10976450",
+    "status": "Downloaded workbooks contain crystal compositions, not the fitted BSE profiles. Recomputed the stated D and added a conditional constant-D comparison, not new ages."
+  },
+  {
+    "key": "ban2026",
+    "citation": "Ban et al. (2026), Azumayama",
+    "doi": "10.1186/s40623-025-02356-w",
+    "status": "Supplement contains plotted BSE profiles and model curves, not numeric profile tables. Digitisation and image calibration would be approximate and have not been represented as exact source data."
+  },
+  {
+    "key": "ostorero2022",
+    "citation": "Ostorero et al. (2022), Kizimen",
+    "doi": "10.1038/s43247-022-00622-3",
+    "data_doi": "10.5281/zenodo.7307563",
+    "status": "Existing measured K9_L10C4 example retained and rechecked with original and Dias 2025 laws. EPMA surrogate for the published BSE fit."
+  },
+  {
+    "key": "sievwright2020",
+    "citation": "Sievwright et al. (2020), magnetite experiments",
+    "doi": "10.1007/s00410-020-01679-z",
+    "status": "Experimental coefficient source already represented by the registry and existing source tests, rather than a new natural-timescale application."
+  }
+]

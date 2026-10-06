@@ -1,0 +1,144 @@
+[
+  {
+    "sample": "150915-1-3",
+    "published_days": 49.0,
+    "published_minus_days": 12.0,
+    "published_plus_days": 8.0,
+    "initial_fo": 0.837,
+    "boundary_fo": 0.805,
+    "angles_to_axes_deg": [
+      21.7,
+      87.0,
+      68.5
+    ],
+    "dx_um": 3.1,
+    "temperature_c": 1139.839,
+    "temperature_basis": "mean of the three listed 150915-1 olivine-hosted MI temperatures; this crystal has no same-ID MI analysis",
+    "profile_file": "sundermeyer2020_reunion_150915_1_3.csv",
+    "mask_min_source_distance_um": 211.18172,
+    "mask_max_source_distance_um": 264.18172,
+    "mask_note": "retain the right-hand outer-core-to-margin event only; start when Fo first departs the tabulated outer-core Fo by >0.2; omit final low-Fo late-rim point at 268.18 um. This is an explicit reconstruction of the selected gradient, not a source-tabulated mask.",
+    "mask_classification": "approximate event-window reconstruction",
+    "source": "Sundermeyer et al. (2020), doi:10.1007/s00410-019-1642-y",
+    "source_setup": "Online Resource 3, REU 150915-1; measured Fo profile Online Resource 1, sample sheet REU 150915-1",
+    "conditions": {
+      "pressure_kbar": 1.0,
+      "fo2_buffer": "NNO-0.5",
+      "fo2_log10_bar": -8.750926907428152,
+      "fo2_log10_pa": -3.750926907428152
+    },
+    "mask_points": 11,
+    "fits": {
+      "source_law": {
+        "coefficient": "ol_FeMg_dohmen_chakraborty2007_tamed",
+        "fit_days": 276.7301289814515,
+        "fit_success": true,
+        "fit_message": "`ftol` termination condition is satisfied.",
+        "fit_rmse_fo_mol_pct": 0.5916047630853275,
+        "published_time_rmse_fo_mol_pct": 1.3190837455619049,
+        "D_m2_s_at_initial_fo": 3.231612679408952e-17,
+        "warnings": [
+          "Eq. 27 applies at fO2 above 1e-10 Pa (TaMED). At or below it use the PED entry (eq. 28).",
+          "The paper prints no temperature, pressure or composition limits for eq. 27. The 700-1200 C range is that of the Part I experiments (Dohmen et al. 2007), the pressure range reaches the 12 GPa data of Holzapfel et al. (2007) used in Fig. 7b, and the X_Fe range of 0 to 0.5 is Diffusor's choice (the m = 3 term derives from data in Chakraborty 1997, p. 424).",
+          "The paper's single compromise equation (eq. 29, erratum: -8.27, 226 kJ/mol, 3 (X_Fe - 0.14)) is not implemented.",
+          "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+        ],
+        "fit_to_published_ratio": 5.647553652682684
+      },
+      "alternative_law": {
+        "coefficient": "ol_FeMg_oeser2026",
+        "fit_days": 351.33659522602534,
+        "fit_success": true,
+        "fit_message": "`ftol` termination condition is satisfied.",
+        "fit_rmse_fo_mol_pct": 0.5943265111771918,
+        "published_time_rmse_fo_mol_pct": 1.435649478503363,
+        "D_m2_s_at_initial_fo": 2.5978764943260168e-17,
+        "warnings": [
+          "log fO2 = -3.75 (Pa) is outside the calibration range (-5 to -5 log10 Pa (Table 4 fits at fO2 ~ 1e-5 Pa)) of Oeser et al. (2026)",
+          "P = 0.10 GPa is outside the calibration range (100000 to 101325 Pa (atmospheric; 1 bar to 1 atm)) of Oeser et al. (2026)",
+          "XFe is outside the calibration range (0.085 to 0.085 XFe (San Carlos olivine, Fo91.5)) of Oeser et al. (2026)",
+          "Fitted for 1100-1250 C at fO2 ~ 1e-5 Pa. The authors read the high activation energies (230-370 kJ/mol) and the change of anisotropy at 1150 C as a possible change of mechanism around 1150 C (abstract). For magmatic temperatures below 1100 C Diffusor recommends Dohmen & Chakraborty (2007).",
+          "Table 4 gives 95 % confidence bounds on Ea and log D0 without their covariance. Sampling the two independently would greatly overstate the spread of D, so the coefficient is held fixed in the Monte Carlo.",
+          "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+        ],
+        "alternative_to_source_time_ratio": 1.269600084816115
+      }
+    }
+  },
+  {
+    "sample": "150915-1-9",
+    "published_days": 579.0,
+    "published_minus_days": 72.0,
+    "published_plus_days": 104.0,
+    "initial_fo": 0.8475,
+    "boundary_fo": 0.819,
+    "angles_to_axes_deg": [
+      55.1,
+      37.3,
+      78.6
+    ],
+    "dx_um": 1.98288,
+    "temperature_c": 1139.576,
+    "temperature_basis": "matching 150915-1-9 MI analysis in Online Resource 2",
+    "profile_file": "sundermeyer2020_reunion_150915_1_9.csv",
+    "mask_min_source_distance_um": 227.882614,
+    "mask_max_source_distance_um": 319.372774,
+    "mask_note": "right-hand core-to-margin gradient only; start at the first point >0.2 Fo from the tabulated core composition when approaching from the core plateau; end at the archived boundary-composition point. The left-hand side of this transect has a separate rim/gradient and is excluded.",
+    "mask_classification": "approximate event-window reconstruction",
+    "source": "Sundermeyer et al. (2020), doi:10.1007/s00410-019-1642-y",
+    "source_setup": "Online Resource 3, REU 150915-1; measured Fo profile Online Resource 1, sample sheet REU 150915-1",
+    "conditions": {
+      "pressure_kbar": 1.0,
+      "fo2_buffer": "NNO-0.5",
+      "fo2_log10_bar": -8.754205443943128,
+      "fo2_log10_pa": -3.7542054439431283
+    },
+    "mask_points": 8,
+    "fits": {
+      "source_law": {
+        "coefficient": "ol_FeMg_dohmen_chakraborty2007_tamed",
+        "fit_days": 358.11920065204134,
+        "fit_success": true,
+        "fit_message": "`ftol` termination condition is satisfied.",
+        "fit_rmse_fo_mol_pct": 0.20305817574327406,
+        "published_time_rmse_fo_mol_pct": 0.32443297712583663,
+        "D_m2_s_at_initial_fo": 2.1377556608811088e-17,
+        "warnings": [
+          "Eq. 27 applies at fO2 above 1e-10 Pa (TaMED). At or below it use the PED entry (eq. 28).",
+          "The paper prints no temperature, pressure or composition limits for eq. 27. The 700-1200 C range is that of the Part I experiments (Dohmen et al. 2007), the pressure range reaches the 12 GPa data of Holzapfel et al. (2007) used in Fig. 7b, and the X_Fe range of 0 to 0.5 is Diffusor's choice (the m = 3 term derives from data in Chakraborty 1997, p. 424).",
+          "The paper's single compromise equation (eq. 29, erratum: -8.27, 226 kJ/mol, 3 (X_Fe - 0.14)) is not implemented.",
+          "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+        ],
+        "fit_to_published_ratio": 0.6185132999171699
+      },
+      "alternative_law": {
+        "coefficient": "ol_FeMg_oeser2026",
+        "fit_days": 248.84314651419461,
+        "fit_success": true,
+        "fit_message": "`ftol` termination condition is satisfied.",
+        "fit_rmse_fo_mol_pct": 0.20076172270096895,
+        "published_time_rmse_fo_mol_pct": 0.51874519148903,
+        "D_m2_s_at_initial_fo": 3.133506061773974e-17,
+        "warnings": [
+          "log fO2 = -3.75 (Pa) is outside the calibration range (-5 to -5 log10 Pa (Table 4 fits at fO2 ~ 1e-5 Pa)) of Oeser et al. (2026)",
+          "P = 0.10 GPa is outside the calibration range (100000 to 101325 Pa (atmospheric; 1 bar to 1 atm)) of Oeser et al. (2026)",
+          "XFe is outside the calibration range (0.085 to 0.085 XFe (San Carlos olivine, Fo91.5)) of Oeser et al. (2026)",
+          "Fitted for 1100-1250 C at fO2 ~ 1e-5 Pa. The authors read the high activation energies (230-370 kJ/mol) and the change of anisotropy at 1150 C as a possible change of mechanism around 1150 C (abstract). For magmatic temperatures below 1100 C Diffusor recommends Dohmen & Chakraborty (2007).",
+          "Table 4 gives 95 % confidence bounds on Ea and log D0 without their covariance. Sampling the two independently would greatly overstate the spread of D, so the coefficient is held fixed in the Monte Carlo.",
+          "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+        ],
+        "alternative_to_source_time_ratio": 0.6948612251482645
+      }
+    },
+    "domain_sensitivity": {
+      "law": "ol_FeMg_dohmen_chakraborty2007_tamed",
+      "base_extension_um": 20.0,
+      "extended_extension_um": 120.0,
+      "base_nodes": 401,
+      "extended_nodes": 835,
+      "base_fit_days": 358.11920065204134,
+      "extended_fit_days": 357.102740865715,
+      "relative_change": -0.002838328088735853
+    }
+  }
+]

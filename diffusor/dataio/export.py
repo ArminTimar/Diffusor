@@ -308,17 +308,53 @@ def result_dict(fit_result, mc_result=None, profile=None) -> Dict:
     return d
 
 
+# What a run can write, in the order the export dialog lists it. ``needs_mc`` marks the
+# one output that exists only after a Monte Carlo run.
+EXPORT_ITEMS = (
+    ("json", "Results (JSON)", "All numbers of the run, with conditions and warnings", False),
+    ("profile", "Profile table (CSV)",
+     "Data, model, residuals and initial profile, point by point", False),
+    ("methods", "Methods paragraph (TXT)",
+     "What was done, with equations, versions and references", False),
+    ("workbook", "Workbook (Excel)",
+     "Results, profile table with a chart, and the methods in one file", False),
+    ("montecarlo", "Monte Carlo times (CSV)", "The fitted time of every Monte Carlo draw", True),
+    ("figure", "Figure (PNG)", "At 300 dpi", False),
+    ("figure_svg", "Figure for editing (SVG)",
+     "For Inkscape or CorelDRAW: text stays text, every point is an object", False),
+    ("figure_pdf", "Figure for editing (PDF)", "The same vector figure as a PDF", False),
+)
+
+
+def export_keys(has_monte_carlo: bool) -> List[str]:
+    """The outputs available for a run, in dialog order."""
+    return [k for k, _, _, needs_mc in EXPORT_ITEMS if has_monte_carlo or not needs_mc]
+
+
 def save_results(directory, fit_result, mc_result=None, profile=None,
-                 figure=None, basename: str = "diffusor_run") -> Dict[str, str]:
-    """Write JSON, the profile CSV, the methods block and (optionally) the figure."""
+                 figure=None, basename: str = "diffusor_run",
+                 include: Optional[Sequence[str]] = None) -> Dict[str, str]:
+    """Write the chosen outputs of a run into ``directory`` and return their paths.
+
+    ``include`` lists the keys of :data:`EXPORT_ITEMS` to write; None writes every
+    output available. A key for something that does not exist (the Monte Carlo
+    times without a Monte Carlo) is skipped.
+    """
+    unknown = set(include or ()) - {k for k, *_ in EXPORT_ITEMS}
+    if unknown:
+        raise ValueError(f"unknown export items: {sorted(unknown)}")
+    chosen = set(export_keys(mc_result is not None)) if include is None else set(include)
+
     out = Path(directory)
     out.mkdir(parents=True, exist_ok=True)
     written: Dict[str, str] = {}
+    results = result_dict(fit_result, mc_result, profile)
+    methods = methods_paragraph(fit_result, mc_result, profile)
 
-    j = out / f"{basename}_results.json"
-    j.write_text(json.dumps(result_dict(fit_result, mc_result, profile), indent=2,
-                            default=_fmt), encoding="utf-8")
-    written["json"] = str(j)
+    if "json" in chosen:
+        j = out / f"{basename}_results.json"
+        j.write_text(json.dumps(results, indent=2, default=_fmt), encoding="utf-8")
+        written["json"] = str(j)
 
     import pandas as pd
     df = pd.DataFrame({"x_um": fit_result.x_data,
@@ -337,36 +373,41 @@ def save_results(directory, fit_result, mc_result=None, profile=None,
         order = np.argsort(xp)
         df["C_model_p16"] = np.interp(fit_result.x_data, xp[order], lo[order])
         df["C_model_p84"] = np.interp(fit_result.x_data, xp[order], hi[order])
-    p = out / f"{basename}_profile.csv"
-    df.to_csv(p, index=False)
-    written["profile"] = str(p)
+    if "profile" in chosen:
+        p = out / f"{basename}_profile.csv"
+        df.to_csv(p, index=False)
+        written["profile"] = str(p)
 
-    m = out / f"{basename}_methods.txt"
-    m.write_text(methods_paragraph(fit_result, mc_result, profile), encoding="utf-8")
-    written["methods"] = str(m)
+    if "methods" in chosen:
+        m = out / f"{basename}_methods.txt"
+        m.write_text(methods, encoding="utf-8")
+        written["methods"] = str(m)
 
-    from .workbook import save_workbook
-    written["workbook"] = save_workbook(
-        out / f"{basename}_results.xlsx", fit_result, df,
-        result_dict(fit_result, mc_result, profile), m.read_text(encoding="utf-8"), mc_result)
+    if "workbook" in chosen:
+        from .workbook import save_workbook
+        written["workbook"] = save_workbook(
+            out / f"{basename}_results.xlsx", fit_result, df, results, methods, mc_result)
 
-    if mc_result is not None:
+    if "montecarlo" in chosen and mc_result is not None:
         t = out / f"{basename}_montecarlo_times.csv"
         pd.DataFrame({"t_seconds": mc_result.times,
                       "t_years": mc_result.times / 3.15576e7}).to_csv(t, index=False)
         written["montecarlo"] = str(t)
 
-    if figure is None:
-        from .figures import report_figure
-        figure = report_figure(fit_result, mc_result)
-    if figure is not None:
-        f = out / f"{basename}_figure.png"
-        figure.savefig(f, dpi=300, bbox_inches="tight")
-        written["figure"] = str(f)
-        # for editing in Inkscape or CorelDRAW: text stays text, every point is an object
-        from .vector import save_vector
-        for suffix in ("svg", "pdf"):
-            f = out / f"{basename}_figure.{suffix}"
-            save_vector(figure, f, bbox_inches="tight")
-            written[f"figure_{suffix}"] = str(f)
+    if chosen & {"figure", "figure_svg", "figure_pdf"}:
+        if figure is None:
+            from .figures import report_figure
+            figure = report_figure(fit_result, mc_result)
+        if figure is not None:
+            if "figure" in chosen:
+                f = out / f"{basename}_figure.png"
+                figure.savefig(f, dpi=300, bbox_inches="tight")
+                written["figure"] = str(f)
+            # for editing in Inkscape or CorelDRAW: text stays text, every point is an object
+            from .vector import save_vector
+            for suffix in ("svg", "pdf"):
+                if f"figure_{suffix}" in chosen:
+                    f = out / f"{basename}_figure.{suffix}"
+                    save_vector(figure, f, bbox_inches="tight")
+                    written[f"figure_{suffix}"] = str(f)
     return written

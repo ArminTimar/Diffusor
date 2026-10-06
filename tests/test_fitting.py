@@ -341,3 +341,33 @@ def test_nan_and_inf_uncertainties_are_replaced_with_a_warning():
     assert w[0] == 1.0 and w[2] == 0.5
     with pytest.warns(UserWarning):
         assert np.allclose(weights_from_sigma(np.array([np.nan, np.nan]), 2), 1.0)
+
+
+def test_fixed_ends_follow_the_fitted_plateaus():
+    """A fixed end that sat on a plateau moves with it; one set elsewhere stays."""
+    from diffusor.fitting.fit import _apply_free
+    m = make_model(comp_dependent=False)
+    got = _apply_free(m, {"C_left": 0.33, "C_right": 0.15})
+    assert got.bc_left.value == pytest.approx(0.33) and got.bc_right.value == pytest.approx(0.15)
+    assert m.bc_left.value == 0.30 and m.bc_right.value == 0.18, "the original is untouched"
+    m.bc_right = dirichlet(0.10)                      # chosen on purpose, not on the plateau
+    got = _apply_free(m, {"C_left": 0.33, "C_right": 0.15})
+    assert got.bc_left.value == pytest.approx(0.33) and got.bc_right.value == pytest.approx(0.10)
+
+
+def test_numerical_fit_with_free_plateaus_recovers_the_time_and_the_plateaus():
+    """The profile ends are pinned at the plateaus, so fitting the plateaus must move the
+    ends too. Otherwise the plateaus run to their limits and the time comes out wrong."""
+    m = make_model(comp_dependent=False)
+    m.force_numerical = True
+    t_true = 2.0 * SEC_PER_YEAR
+    x = np.linspace(-40, 40, 81)
+    C = m.profile(t_true, x)
+    start = make_model(comp_dependent=False)
+    start.force_numerical = True
+    start.initial.params.update(C_left=0.27, C_right=0.21)       # a poor first guess
+    start.bc_left, start.bc_right = dirichlet(0.27), dirichlet(0.21)
+    r = fit_time(start, x, C, free_parameters=("t", "C_left", "C_right"))
+    assert r.t_seconds == pytest.approx(t_true, rel=0.1)
+    assert r.free["C_left"] == pytest.approx(0.30, abs=0.01)
+    assert r.free["C_right"] == pytest.approx(0.18, abs=0.01)

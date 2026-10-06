@@ -30,6 +30,7 @@ from ..coefficients import Conditions, get as get_coefficient, list_coefficients
 from ..coefficients.plagioclase import (ACTIVITY_SETS, ACTIVITY_SPECIES, DEFAULT_ACTIVITY_SET,
                                          activity_A, activity_note)
 from ..dataio import ProfileSpec, build_profile, read_table, save_results, suggest_spec
+from ..dataio.export import EXPORT_ITEMS, export_keys
 from ..dataio.image_profiles import is_extraction_workbook, read_extraction
 from ..dataio.images import PILLOW_SUFFIXES, RAW_SUFFIXES
 from ..fitting import DiffusionModel, UncertaintyBudget
@@ -43,6 +44,8 @@ from ..solvers.initial import guess_step_from_data
 from ..thermo import available_buffers, log_fo2_from_delta
 from ..thermo.units import human_time
 from . import format_help, richtext, theme
+from .example_tree import ExampleTree
+from .export_dialog import ExportDialog
 from .plot_widget import DataPreview, ProfilePlot
 from .widgets import (EquationView, FitScrollArea, WrapLabel, callout, card, collapsible,
                       divider, field, ghost_button, install_no_wheel, note, page_columns, pair,
@@ -147,6 +150,19 @@ def _style_application(app):
         app.setStyleSheet(theme.stylesheet())
         _APP_SETUP[app] = install_no_wheel(app)
     return _APP_SETUP[app]
+
+
+def _points_phrase(p) -> str:
+    """What was loaded: "28 of 109 points, from 4.2 to 59.5 um. The fit window (4 to 60 um)
+    leaves out the other 81." Without a window it is just the count and the range."""
+    n, out = len(p), p.n_outside_window
+    span = f"from {p.x.min():.1f} to {p.x.max():.1f} um."
+    if not out:
+        return f"{n} points, {span}"
+    window = p.spec.window_text() if p.spec is not None else ""
+    left = f"The fit window ({window}) leaves out the other {out}." if window else \
+        f"The fit window leaves out the other {out}."
+    return f"{n} of {n + out} points, {span} {left}"
 
 
 def _repolish(w, name):
@@ -447,6 +463,7 @@ class MainWindow(QMainWindow):
     def _build_menu(self):
         m = self.menuBar().addMenu("&File")
         for text, fn in (("Load profile...", self.load_file),
+                         ("Published validation library...", self.show_validation_library),
                          ("Extract profile from image...", self.show_image_extractor),
                          ("Export results...", self.export_results),
                          ("Export figure for Inkscape or CorelDRAW...", self.export_figure),
@@ -564,16 +581,10 @@ class MainWindow(QMainWindow):
         self._show_data_view(recent=bool(self._recent()))
 
         ex_card, ebody = card("Examples")
-        self.lst_examples = QListWidget()
-        self.lst_examples.setMouseTracking(True)
-        for d in ds.DATASETS:
-            it = QListWidgetItem(self._example_label(d, loaded=False))
-            it.setData(Qt.UserRole, d.key)
-            if not d.exists:
-                it.setFlags(it.flags() & ~Qt.ItemIsEnabled)
-            self.lst_examples.addItem(it)
+        self.lst_examples = ExampleTree()
+        self.lst_examples.populate(self._example_groups())
         self.lst_examples.currentItemChanged.connect(self._example_selected)
-        self.lst_examples.itemDoubleClicked.connect(lambda _it: self.load_example())
+        self.lst_examples.itemDoubleClicked.connect(self._example_double_clicked)
         ebody.addWidget(self.lst_examples, 1)
         self.lbl_example = note("Pick an example to see where it comes from.", "Hint")
         ebody.addWidget(self.lbl_example)
@@ -603,10 +614,29 @@ class MainWindow(QMainWindow):
         return page_columns([load_card, (data_card, 1)], [(ex_card, 1), r])
 
     @staticmethod
+    def _example_groups():
+        """The examples as mineral, then study, then example, for the tree."""
+        by_mineral: Dict[str, Dict[str, list]] = {}
+        for d in ds.DATASETS:
+            by_mineral.setdefault(d.mineral, {}).setdefault(d.study_name, []).append(d)
+        order = [k for k in MINERALS if k in by_mineral] + [k for k in by_mineral if k not in MINERALS]
+        groups = []
+        for key in order:
+            studies = by_mineral[key]
+            # published studies first, A to Z, then the synthetic examples
+            names = sorted(studies, key=lambda s: (s == ds.SYNTHETIC_STUDY, s.lower()))
+            groups.append((get_mineral(key).name, [
+                (name, [(d.key, MainWindow._example_label(d, loaded=False), d.exists)
+                        for d in studies[name]]) for name in names]))
+        return groups
+
+    @staticmethod
     def _example_label(d, loaded: bool) -> str:
-        kind = "measured" if d.kind == "measured" else "synthetic"
-        text = f"{d.name.split(' (')[0]}   ·   {kind}"
-        return text + ("   ·   loaded" if loaded else "")
+        return d.short_name + ("   ·   loaded" if loaded else "")
+
+    def _example_double_clicked(self, item, _column=0):
+        if ExampleTree.key_of(item) is not None:
+            self.load_example()
 
     def _mark_loaded_example(self, key: Optional[str]):
         self._loaded_key = key
@@ -618,12 +648,15 @@ class MainWindow(QMainWindow):
             f = it.font()
             f.setBold(on)
             it.setFont(f)
+            if on:
+                self.lst_examples.reveal(it)
 
     def _example_selected(self, item, _prev=None):
-        if item is None:
+        key = ExampleTree.key_of(item)
+        if key is None:
             return
-        d = ds.get(item.data(Qt.UserRole))
-        src = (f"Measured. {cite(d.citation)}." if d.kind == "measured"
+        d = ds.get(key)
+        src = (f"{cite(d.citation)}." if d.kind == "measured"
                else "Synthetic, made by Diffusor with a known answer.")
         mineral = get_mineral(d.mineral).name
         self.lbl_example.setText(f"{src} {mineral}, {d.species}.")
@@ -633,8 +666,8 @@ class MainWindow(QMainWindow):
         item = self.lst_examples.currentItem()
         if self.step != DATA and self.dataset is not None:
             d = self.dataset
-        elif item is not None:
-            d = ds.get(item.data(Qt.UserRole))
+        elif ExampleTree.key_of(item) is not None:
+            d = ds.get(ExampleTree.key_of(item))
         elif self.dataset is not None:
             d = self.dataset
         if d is None:
@@ -1097,7 +1130,7 @@ class MainWindow(QMainWindow):
                 self._summary_line("cut by hand", f"{p.n_excluded} of {len(p)} points")
             if self.dataset is not None:
                 self._summary_line("provenance",
-                                   "measured, published" if self.dataset.kind == "measured"
+                                   "published" if self.dataset.kind == "measured"
                                    else "synthetic")
         else:
             self._summary_line("", "no data loaded")
@@ -1141,7 +1174,9 @@ class MainWindow(QMainWindow):
 
         self._summary_head("Model", MODEL)
         self._summary_line("geometry", self.cmb_geom.currentText())
-        if self._equilibrium_ic():
+        if self._table_ic():
+            self._summary_line("initial profile", "published tabulated profile, linearly interpolated")
+        elif self._equilibrium_ic():
             self._summary_line("initial profile", "equilibrium with the anorthite zoning")
         else:
             self._summary_line("initial profile",
@@ -1226,11 +1261,11 @@ class MainWindow(QMainWindow):
             self._load(Path(path), dataset=None)
 
     def load_example(self):
-        item = self.lst_examples.currentItem()
-        if item is None:
+        key = ExampleTree.key_of(self.lst_examples.currentItem())
+        if key is None:
             QMessageBox.information(self, "Nothing selected", "Pick an example from the list.")
             return
-        d = ds.get(item.data(Qt.UserRole))
+        d = ds.get(key)
         if not d.exists:
             QMessageBox.warning(self, "File missing", f"{d.filename} is not in the examples folder.")
             return
@@ -1380,6 +1415,42 @@ class MainWindow(QMainWindow):
         self.image_extractor.show()
         self.image_extractor.raise_()
 
+    def show_validation_library(self):
+        """Browse the published files without inventing settings for incomplete studies."""
+        from ..validation import ROOT, records
+        from .validation_library import ValidationLibraryDialog
+        dlg = ValidationLibraryDialog(records(), self)
+        if dlg.exec() != QDialog.Accepted or dlg.selected is None:
+            return
+        self._load_validation_record(dlg.selected)
+
+    def _load_validation_record(self, r):
+        from ..validation import ROOT
+        path = ROOT / r["file"]
+        preset = ds.BY_KEY.get(r["key"])
+        species = "Ni" if r["study"] == "ruprecht2013" else "Fe-Mg"
+        spec = ProfileSpec(**preset.spec) if preset else ProfileSpec(
+            distance_column="Distance_um", column_a="Ni_ppm" if species == "Ni" else "Fo_mol",
+            mode="A", distance_unit="um")
+        if not self._use_table(read_table(path), spec, path, preset, (None, False)):
+            return
+        if preset is None:
+            i = self.cmb_mineral.findData("olivine")
+            self.cmb_mineral.setCurrentIndex(i)
+            self.cmb_species.setCurrentText(species)
+            self.cmb_ol_coordinate.setCurrentIndex(2)
+            message = (f"Profile from {r['study']}, {r['sample']}. "
+                       "This file has no verified model preset. Review the conditions, "
+                       "orientation, fit window and initial state before fitting. " + r["notes"])
+            self.lbl_data.setText(message)
+            self.profile.notes.append(message + f" Source: {r['source_file']}, {r['source_sheet']}.")
+            for step in (CONDITIONS, MODEL, COEFFICIENT):
+                self._show_prefill(step, "Data only: this study has no verified model preset. "
+                                   "The displayed settings are retained from your session. "
+                                   "Set the study's conditions and model before fitting.")
+            self._log(message)
+        self._go(DATA)
+
     def _use_table(self, df, spec, path: Path, dataset: Optional[ds.ExampleDataset],
                    an) -> bool:
         try:
@@ -1393,14 +1464,12 @@ class MainWindow(QMainWindow):
             p = self.profile
             if dataset is not None:
                 self._apply_dataset_settings(dataset, df)
-                msg = (f"<b>{dataset.name.split(' (')[0]}</b>, {len(p)} points from "
-                       f"{p.x.min():.1f} to {p.x.max():.1f} um. The example also filled in the "
-                       "mineral, conditions, model, coefficient and analytical resolution. "
-                       "Each step shows what it set.")
+                msg = (f"<b>{dataset.name.split(' (')[0]}</b>, {_points_phrase(p)} The example "
+                       "also filled in the mineral, conditions, model, coefficient and "
+                       "analytical resolution. Each step shows what it set.")
                 self._mark_loaded_example(dataset.key)
             else:
-                msg = (f"<b>{path.name}</b>, {len(p)} points from {p.x.min():.1f} to "
-                       f"{p.x.max():.1f} um.")
+                msg = f"<b>{path.name}</b>, {_points_phrase(p)}"
                 self._mark_loaded_example(None)
                 if an[0]:
                     vals = self.profile.column(an[0])
@@ -1452,12 +1521,19 @@ class MainWindow(QMainWindow):
         fo2 += f" ± {s.get('sigma_delta', 0.3):g}"
         axis = s.get("axis")
         self.cmb_axis.setCurrentIndex({"a": 1, "b": 2, "c": 3}.get(axis, 0))
+        if "angles_deg" in s:
+            self.cmb_axis.setCurrentIndex(4)
+            for widget, value in zip((self.sp_alpha, self.sp_beta, self.sp_gamma), s["angles_deg"]):
+                widget.setValue(value)
+        self.chk_cooling.setChecked(False)
+        self.sp_nodes.setValue(s.get("n_nodes", 301))
         self.cmb_geom.setCurrentText(s.get("geometry", "plane"))
         for cmb, key in ((self.cmb_bcl, "bc_left"), (self.cmb_bcr, "bc_right")):
             i = cmb.findData(s.get(key, "far"))
             cmb.setCurrentIndex(i if i >= 0 else 0)
         self.chk_comp_dep.setChecked(bool(s.get("composition_dependent", False)))
         self.chk_free_plateaus.setChecked(bool(s.get("fit_plateaus", False)))
+        self.chk_free_x0.setChecked(bool(s.get("fit_x0", True)))
         self.cmb_ol_coordinate.setCurrentIndex(s.get("olivine_coordinate", 0))
         if "x_composition" in s:
             self._set_xcomp(s["x_composition"], "explicit")
@@ -1481,8 +1557,7 @@ class MainWindow(QMainWindow):
             self._log(f"anorthite read from '{an_col}' "
                       f"(X_An {np.nanmin(vals):.2f} to {np.nanmax(vals):.2f})")
         self._refresh_ic_options()
-        self._select_ic("equilibrium_plag" if s.get("initial_condition") == "equilibrium_plag"
-                        else "step")
+        self._select_ic(s.get("initial_condition", "step"))
         labels = [p[0] for p in RESOLUTION_PRESETS]
         self.cmb_resolution.setCurrentIndex(labels.index(s.get("resolution", "No correction")))
         if "beam_width_um" in s:
@@ -1643,6 +1718,8 @@ class MainWindow(QMainWindow):
         self.cmb_ic.blockSignals(True)
         self.cmb_ic.clear()
         self.cmb_ic.addItem("Sharp step between two plateaus", "step")
+        if self._table_initial_available():
+            self.cmb_ic.addItem("Published tabulated initial profile", "table")
         if self.cmb_mineral.currentData() == "plagioclase" and self.an_values is not None:
             self.cmb_ic.addItem("Equilibrium with the anorthite zoning", "equilibrium_plag")
         self.cmb_ic.blockSignals(False)
@@ -1656,14 +1733,26 @@ class MainWindow(QMainWindow):
     def _equilibrium_ic(self) -> bool:
         return self.cmb_ic.currentData() == "equilibrium_plag" and self.an_values is not None
 
+    def _table_initial_available(self) -> bool:
+        return (self.dataset is not None and self.profile is not None
+                and bool(self.dataset.settings.get("initial_column")))
+
+    def _table_ic(self) -> bool:
+        return self.cmb_ic.currentData() == "table" and self._table_initial_available()
+
     def _on_ic_changed(self):
         equil = self.cmb_ic.currentData() == "equilibrium_plag"
-        self._step_controls.setVisible(not equil)
-        self.chk_free_x0.setEnabled(not equil)
-        self.chk_free_plateaus.setEnabled(not equil)
+        fixed = equil or self._table_ic()
+        self._step_controls.setVisible(not fixed)
+        self.chk_free_x0.setEnabled(not fixed)
+        self.chk_free_plateaus.setEnabled(not fixed)
         plag_an = self.cmb_mineral.currentData() == "plagioclase" and self.an_values is not None
         self._activity_field.setVisible(plag_an)
         texts = []
+        if self._table_ic():
+            texts.append("The published initial profile is interpolated between tabulated positions. "
+                         "Its endpoint compositions set the fixed boundaries. Only time is fitted. "
+                         "The original sub-grid interface and numerical grid are not published.")
         if equil:
             texts.append("The trace element starts in equilibrium with the measured anorthite "
                          "profile, C = C0 exp(A X_An / RT) (Dohmen et al. 2017, eq. A13). That is the "
@@ -1836,6 +1925,12 @@ class MainWindow(QMainWindow):
         """
         if self.profile is None:
             return
+        if self._table_ic():
+            values = self.profile.column(self.dataset.settings["initial_column"])
+            self.sp_cl.setValue(float(values[0]))
+            self.sp_cr.setValue(float(values[-1]))
+            self._sync_composition(replace_explicit=from_button, report=True)
+            return
         kept = self._fit_profile()
         ic = guess_step_from_data(kept.x, kept.C)
         self.sp_x0.setValue(ic.params["x0"])
@@ -1942,7 +2037,14 @@ class MainWindow(QMainWindow):
         cond = self._conditions(coef)
         mineral = get_mineral(self.cmb_mineral.currentData())
         species = self.cmb_species.currentText()
-        if self._equilibrium_ic():
+        if self._table_ic():
+            values = self.profile.column(self.dataset.settings["initial_column"])
+            if not np.all(np.isfinite(values)):
+                raise ValueError("Published initial profile contains missing values in the fit window")
+            ic = InitialCondition("table", {"x_table": self.profile.x.copy(), "C_table": values.copy()},
+                                  description="Published tabulated initial profile (linear interpolation)")
+            c_left, c_right = float(values[0]), float(values[-1])
+        elif self._equilibrium_ic():
             ic = InitialCondition(
                 "equilibrium_plag",
                 {"x_an_x": np.asarray(self.profile.x, dtype=float),
@@ -2004,7 +2106,7 @@ class MainWindow(QMainWindow):
 
     def _free_parameters(self):
         free = ["t"]
-        if self._equilibrium_ic():
+        if self._equilibrium_ic() or self._table_ic():
             return free
         if self.chk_free_x0.isChecked():
             free.append("x0")
@@ -2332,12 +2434,25 @@ class MainWindow(QMainWindow):
         if self.fit_result is None:
             QMessageBox.information(self, "Nothing to export", "Run a fit first.")
             return
+        # what the user switched off last time stays off; outputs that are not available now
+        # (the Monte Carlo times before a Monte Carlo) keep their earlier choice
+        settings = self._settings()
+        skipped = [k for k in str(settings.value("export/skipped", "") or "").split(",") if k]
+        everything = [k for k, *_ in EXPORT_ITEMS]
+        dlg = ExportDialog(self, has_monte_carlo=self.mc_result is not None,
+                           chosen=[k for k in everything if k not in skipped])
+        if dlg.exec() != QDialog.Accepted:
+            return
+        include = dlg.selected()
+        offered = export_keys(self.mc_result is not None)
+        settings.setValue("export/skipped", ",".join(
+            [k for k in offered if k not in include] + [k for k in skipped if k not in offered]))
         d = QFileDialog.getExistingDirectory(self, "Export into folder", self.output_dir())
         if not d:
             return
         try:
             written = save_results(d, self.fit_result, self.mc_result, self._fit_profile(),
-                                   figure=self.plot.figure)
+                                   figure=self.plot.figure, include=include)
             self._log("exported\n" + "\n".join(f"{k}: {v}" for k, v in written.items()))
             QMessageBox.information(self, "Exported", "Written:\n" + "\n".join(written.values()))
         except Exception:
@@ -2449,4 +2564,7 @@ class MainWindow(QMainWindow):
             "of published diffusion coefficients, and Monte Carlo error propagation.<br><br>"
             "Every equation and coefficient carries its citation. View > Methods lists the "
             "references used by the current run, and Help > All references lists every "
-            "source in the app."))
+            "source in the app.<br><br>"
+            "Created by Armin Timar.<br>"
+            "Copyright &copy; 2026 Armin Timar. MIT licence.<br>"
+            "github.com/ArminTimar/Diffusor"))

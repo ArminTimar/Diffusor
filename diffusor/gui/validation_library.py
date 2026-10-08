@@ -15,10 +15,11 @@ class ValidationLibraryDialog(QDialog):
         self.search.setPlaceholderText('Filter by study or crystal name')
         layout.addWidget(self.search)
         self.items=QListWidget()
+        from ..datasets import BY_KEY
         for r in records:
-            ready=r['study']=='lynn2024' and r.get('setup') and r['sample']!='Ol 8'
-            status='model preset' if ready else 'data only, setup required'
-            item=QListWidgetItem(f"{r['study']} / {r['sample']} — {r['n_points']} points — {status}")
+            status='model preset' if r['key'] in BY_KEY else 'data only, setup required'
+            item=QListWidgetItem(f"{r['study']} / {r['sample']} — {r.get('mineral','olivine')} — "
+                                 f"{r['n_points']} points — {status}")
             item.setData(Qt.UserRole,r)
             self.items.addItem(item)
         layout.addWidget(self.items,1)

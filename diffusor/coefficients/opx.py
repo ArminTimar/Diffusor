@@ -472,7 +472,11 @@ _add(DiffusionCoefficient(
     verified_from=("Ganguly & Tazzoli (1994) eq. 12 (p. 934), read from the rendered page on 2 October "
                    "2026, and Ostorero et al. (2022) eq. 1. The fO2 term is the form of Allan et al. "
                    "(2013) as quoted by Dohmen et al. (2016) eq. 3; Ganguly & Tazzoli only speculate "
-                   "an fO2^(1/6) dependence (p. 935), and Diffusor did not consult Allan et al. (2013) itself"),
+                   "an fO2^(1/6) dependence (p. 935). Allan et al. (2013) eq. 3 (p. 157), read from the "
+                   "rendered page on 8 October 2026, prints D_Fe-Mg = (-5.54 + 2.6 X_Fe - 12530/T) x "
+                   "(fO2(sample, T)/fO2(IW buffer, T))^(1/6) without a power of ten or units on the "
+                   "bracket; Diffusor reads the bracket as log10 D in cm2/s, as in Ganguly & Tazzoli "
+                   "eq. 12, which gives the same law as Dohmen et al. (2016) eq. 3"),
     secondary_citations=("dohmen2016", "ostorero2022"),
     calibration_notes=("The first three terms are Ganguly & Tazzoli (1994) eq. 12, valid for 500-800 C, "
                        "fO2 from the iron-wustite (IW) buffer to 0.8 log units above IW, and XFe 0.10-0.50. "

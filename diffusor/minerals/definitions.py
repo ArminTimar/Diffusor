@@ -101,8 +101,9 @@ CLINOPYROXENE = Mineral(
     notes=("Formula of the diopside-hedenbergite series: DHZ 2013, p. 95. Monoclinic, space "
            "group C2/c: DHZ 2013, p. 112 (augite has the more general formula "
            "(Ca,Mg,Fe2+,Al)2(Si,Al)2O6, p. 95). "
-           "Mueller et al. (2013) measured along [001] only. Anisotropy of Fe-Mg in cpx "
-           "is not well constrained (Cherniak & Dimanov 2010)."),
+           "Mueller et al. (2013) measured along [001] only. The (Fe,Mn)-Mg interdiffusion "
+           "studies reviewed by Cherniak & Dimanov (2010, p. 654) were made along the c axis "
+           "only, so the anisotropy of Fe-Mg in cpx is not known from them."),
 )
 
 PLAGIOCLASE = Mineral(

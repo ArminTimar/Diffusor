@@ -1,0 +1,114 @@
+{
+  "chamberlain2014": {
+    "Sr in sanidine": {
+      "rows": 17,
+      "max_relative_difference": 8.227362593082876e-05
+    },
+    "Ba in sanidine": {
+      "rows": 54,
+      "max_relative_difference": 8.645665815742998e-05
+    },
+    "Ti in quartz": {
+      "rows": 151,
+      "max_relative_difference": 5.3634455654982816e-05
+    }
+  },
+  "petrone2018": {
+    "rows_checked": 71,
+    "finite_reservoir_rows_skipped": 19,
+    "within_5_percent_or_rounding": 62,
+    "median_ratio": 1.00576815971687,
+    "outside": [
+      {
+        "row": 14,
+        "crystal": "CPX105",
+        "block": 3,
+        "T_C": 1080,
+        "sqrt4Dt_um": 2.701,
+        "printed_years": 2.2,
+        "recomputed_years": 2.860030889073874,
+        "ratio": 1.3000140404881244
+      },
+      {
+        "row": 26,
+        "crystal": "CPX21",
+        "block": 2,
+        "T_C": 1145,
+        "sqrt4Dt_um": 1.237,
+        "printed_years": 0.05,
+        "recomputed_years": 0.11474539191383959,
+        "ratio": 2.294907838276792
+      },
+      {
+        "row": 26,
+        "crystal": "CPX21",
+        "block": 3,
+        "T_C": 1140,
+        "sqrt4Dt_um": 1.036,
+        "printed_years": 1.26,
+        "recomputed_years": 0.09091281763397217,
+        "ratio": 0.07215302986823188
+      },
+      {
+        "row": 33,
+        "crystal": "CPX10",
+        "block": 3,
+        "T_C": 1150,
+        "sqrt4Dt_um": 1.52534617759846,
+        "printed_years": 0.2,
+        "recomputed_years": 0.15459474133736265,
+        "ratio": 0.7729737066868132
+      },
+      {
+        "row": 36,
+        "crystal": "CPX20",
+        "block": 3,
+        "T_C": 1145,
+        "sqrt4Dt_um": 1.198,
+        "printed_years": 0.27,
+        "recomputed_years": 0.10762408953279683,
+        "ratio": 0.39860773901035856
+      },
+      {
+        "row": 50,
+        "crystal": "CPX15",
+        "block": 1,
+        "T_C": 1165,
+        "sqrt4Dt_um": 3.628,
+        "printed_years": 0.74,
+        "recomputed_years": 0.6114633271009959,
+        "ratio": 0.8263017933797242
+      },
+      {
+        "row": 51,
+        "crystal": "CPX23",
+        "block": 2,
+        "T_C": 1150,
+        "sqrt4Dt_um": 2.51,
+        "printed_years": 0.29,
+        "recomputed_years": 0.41860587936631055,
+        "ratio": 1.443468549539002
+      },
+      {
+        "row": 51,
+        "crystal": "CPX23",
+        "block": 3,
+        "T_C": 1045,
+        "sqrt4Dt_um": 2.269,
+        "printed_years": 6.03,
+        "recomputed_years": 5.2616840318892635,
+        "ratio": 0.8725844165653837
+      },
+      {
+        "row": 55,
+        "crystal": "CPX 108",
+        "block": 3,
+        "T_C": 1045,
+        "sqrt4Dt_um": 0.5657,
+        "printed_years": 0.31,
+        "recomputed_years": 0.3270605257429014,
+        "ratio": 1.0550339540093594
+      }
+    ]
+  }
+}

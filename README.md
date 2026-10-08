@@ -32,9 +32,12 @@ names the diffusion law, solver, boundary conditions and uncertainty model of
 that run, followed by the references it cites. The checks that are run against
 published values are listed under [Verification](#verification).
 
-The **File > Published validation library** browser includes 316 measured
-profiles from eight studies. The Lynn (2024) single-event examples also load
-the published conditions, orientations and tabulated initial states. Data-only
+The **File > Published validation library** browser includes 492 measured
+profiles from twelve studies of olivine, sanidine, orthopyroxene,
+clinopyroxene and titanomagnetite. The Lynn (2024) single-event examples also
+load the published conditions, orientations and tabulated initial states, and
+the Iovine et al. (2017) examples the published law, temperature and initial
+step. Data-only
 entries identify the setup that still needs to be supplied. The
 [validation report](examples/validation/report.md) compares published times,
 reconstructed fits and alternative diffusion laws, and explains which checks
@@ -323,9 +326,9 @@ a search field, and saves the list as BibTeX.
 One example per mineral is bundled and listed on the Data step with its
 provenance. The list is grouped by mineral, then by study, then by example; it
 starts closed, and a study with many profiles takes one row until it is opened.
-Two studies supply published profiles from their supplementary tables: one
-orthopyroxene traverse from Ostorero et al. (2022) and 18 olivine traverses from
-Lynn et al. (2024). The others were generated with Diffusor's forward model at a set time and given
+Three studies supply published profiles from their supplementary tables: one
+orthopyroxene traverse from Ostorero et al. (2022), 18 olivine traverses from
+Lynn et al. (2024) and 20 sanidine Ba traverses from Iovine et al. (2017). The others were generated with Diffusor's forward model at a set time and given
 Gaussian noise; they are marked as synthetic in the catalogue, in the
 interface and in every exported methods paragraph. The conditions of each
 example are taken from a published study, and a value that the chosen law does
@@ -335,6 +338,7 @@ not use is labelled as a placeholder.
 | --- | --- | --- | --- | --- |
 | Orthopyroxene Fe-Mg, Kizimen 2010 | published | crystal K9_L10C4, Supplementary Data 2 of Ostorero et al. (2022) | 2.32 yr (+7.16/−1.75), published | 2.5 yr |
 | Olivine Fe-Mg, Kilauea 2020, 18 crystals | published | Lynn et al. (2024), EarthChem doi:10.60520/IEDA/113087 | 14 to 521 d (± 30 %), published | 0.75 to 1.06 times the published time, all 18 within ± 30 % |
+| Sanidine Ba, Agnano-Monte Spina, 20 greyscale and X-ray traverses | published | Iovine et al. (2017), Electronic Supplementary Material 1 to 3 | 1 to 151 yr at 930 °C, published (Tables 1 and 2) | 0.90 to 1.28 times the published time |
 | Orthopyroxene Fe-Mg | synthetic | Dias et al. (2025), 950 °C, NNO+1, arc andesite conditions | 1.5 yr | 1.41 yr |
 | Clinopyroxene Fe-Mg | synthetic | Mueller et al. (2013), 1100 °C, conditions after Petrone et al. (2016, 2018) | 45 d | 42 d |
 | Olivine Fe-Mg | synthetic | Dohmen & Chakraborty (2007), 1150 °C, FMQ−1, conditions after Hartley et al. (2016) | 120 d | 116 d |
@@ -580,7 +584,7 @@ with Sievwright et al. (2020) within half a log unit for Ti, Mn and Co.
 
 ## Verification
 
-The test suite contains 485 tests and runs on Windows, macOS and Linux
+The test suite contains 489 tests and runs on Windows, macOS and Linux
 with Python 3.10 and 3.13 on every change to the repository (see the badge at
 the top). It does not access the network. The tests cover the following.
 
@@ -627,11 +631,15 @@ may remain. Please report any you find.
 | Olivine Fo ages from the fitted widths and Dt products of Tables SM4-A, SM5-A and SM6-A (Gordeychik et al. 2018) | 32 ages | relative difference below 4e-16 |
 | Opx Fe-Mg perpendicular to c at 966 °C, NNO, after Dohmen et al. (2016) (Araya et al. 2024, section 5.2) | log D = −19.78 | −19.782 (a axis) |
 | Olivine 3311_2_ol6, Fo only, interface position fitted (Mourey et al. 2023) | 395 d (+149/−106) | 406 d, with equation 3 of the paper read in bar |
+| Sanidine Ba, 23 greyscale and X-ray traverses at 930 °C, Cherniak (2002) law, sharp step with free plateaus (Iovine et al. 2017, Tables 1 and 2) | 1 to 151 yr | 0.90 to 1.28 times the published time, 18 of 23 equal after rounding to whole years |
+| Sr, Ba and Ti times at T ± 30 °C (Chamberlain et al. 2014, Electronic Appendix 7), from the Table 1 laws | 222 rows | relative difference below 1e-4 |
+| Cpx Fe-Mg times from √(4Dt) and T with the printed Dimanov & Sautter (2000) values (Petrone et al. 2018, Table S4, semi-infinite rows) | 71 times | 62 within 5 % or rounding |
 | Garnet D matrix at X<sub>Fe</sub> 0.61, X<sub>Mn</sub> 0.20, X<sub>Mg</sub> 0.18, X<sub>Ca</sub> 0.01 (Chakraborty & Ganguly 1992, eq. 5) | nine printed elements | within 0.45 %, with tracer coefficients chosen to reproduce them (see below) |
 | Olivine D<sub>Fe-Mg</sub> from the Fe and Mg tracer fits, 1100 to 1250 °C, a, b and c (Oeser et al. 2026, eq. 6 and Table 4) | the paper's own D<sub>Fe-Mg</sub> fit | within 0.2 log units (largest 0.18) |
 | Garnet Mn tracer at 510 °C, 2 GPa, eclogite garnet (Chen & Chu 2024) | about 1e-24 m²/s (an order of magnitude, not a fitted value) | 2.2e-24 m²/s |
 
-The last four rows come from the published-study validation in
+The Kizimen, Kilauea, Gordeychik, Araya, Mourey, Iovine, Chamberlain and
+Petrone rows come from the published-study validation in
 [examples/validation/report.md](examples/validation/report.md), which also
 lists what each downloaded supplement does not contain. Two reconstructions of
 Sundermeyer et al. (2020) do not reproduce the published ages (49 and 579 d
@@ -640,7 +648,11 @@ windows, initial profiles and, for the Eifel case, fO2 are not published; they
 are reported as such and are not offered as examples. The extractions and runs
 were prepared with OpenAI ChatGPT and rechecked with Anthropic Claude (Claude
 Opus 5.5), which reran every script and compared the inputs with the source
-workbooks and with rendered pages of the papers.
+workbooks and with rendered pages of the papers. The Iovine, Chamberlain and
+Petrone checks and the Lynn Mauna Loa, Sato and Morgado traverses were added
+later: Claude Haiku subagents read the papers and supplements, and Claude Opus
+5.5 checked the laws, conditions and published times on rendered pages and ran
+the refits.
 
 The garnet check tests the form of the ideal-solution matrix (eq. 2), not the
 tracer coefficients. The paper does not print the tracer coefficients behind

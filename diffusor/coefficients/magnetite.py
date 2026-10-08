@@ -37,7 +37,7 @@ def _add(c):
 # pure magnetite (x_Ti = 0) and for x_Ti = 0.2.
 TABLE12_PURE = {
     "Cr": (5.12e-13, -7.3, 3.84e5, 752.5),
-    "Al": (3.24e-13, -64.9, 6.92e1, 681.0),
+    "Al": (3.24e-13, -64.9, 6.92e3, 681.0),   # D_I0 printed "6.92x10" in Table 12; see below
     "Fe": (1.68e-14, -123.1, 9.79e3, 618.2),
     "Co": (2.20e-15, -144.8, 8.22e3, 612.0),
     "Mn": (2.02e-16, -176.7, 2.48e3, 604.6),
@@ -71,8 +71,16 @@ TABLE12_XTI02 = {
 #   x_Ti = 0.2 Fe, Co, Mn, Ti: 1100-1300 C (1373-1573 K), measured in that paper
 # A law that interpolates between the two compositions is limited to the overlap
 # of the two windows, because the interpolation needs both end members.  Cr and
-# Al are not Aggarwal & Dieckmann results (Table 12 cites Dieckmann et al. 1987,
-# not available); their windows are those printed in Table 10.
+# Al are not Aggarwal & Dieckmann results: Table 12 cites Dieckmann, Hilton & Mason
+# (1987), whose Table 1 (p. 61) gives the Cr data at 1210-1410 C and the Al values
+# at 1280-1500 C, the windows printed in Table 10.
+#
+# Al interstitial D0.  Table 12 prints D_I,0 = "6.92x10" m2/s, the only entry without
+# a visible exponent.  Dieckmann et al. (1987, p. 61, summarizing expressions, read
+# from the rendered page on 8 October 2026) print D0_Al[I] = 6.92e7 exp(-81900 K/T)
+# cm2/s, i.e. 6.92e3 m2/s and 681.0 kJ/mol; their other three Cr and Al expressions
+# convert exactly to the Table 12 values.  Diffusor uses 6.92e3 (6.92e1 until
+# 8 October 2026, which put the interstitial branch 2 log units low).
 TABLE12_T_WINDOWS = {
     #        pure magnetite              x_Ti = 0.2
     "Cr": ((1483.0, 1683.0), None),
@@ -93,7 +101,7 @@ def _table12_T_range(species: str) -> Range:
         text += f", x_Ti = 0.2 {ti02[0]:.0f}-{ti02[1]:.0f} K; overlap used"
     basis = ("Table 5 of Aggarwal & Dieckmann 2002b, from which the Table 12 rows can be refitted"
              if species in ("Fe", "Co", "Mn", "Ti")
-             else "Table 10 of Van Orman & Crispin 2010, the source of this row being unavailable")
+             else "Table 1 of Dieckmann, Hilton & Mason 1987, the data this row is fitted to")
     return Range(lo, hi, f"K (temperatures of the data behind the law: {text}; {basis}. "
                          "Table 12 prints no range, so the law is an extrapolation outside it)")
 
@@ -284,12 +292,19 @@ def _table12_notes(sp: str) -> str:
                    "to Dieckmann et al. (1978).")
     if sp == "Cr":
         out.append("The text (p. 794) credits the Cr tracer data to Dieckmann et al. (1978) and "
-                   "Hodge (1978), and Table 10 to Dieckmann et al. (1978).")
+                   "Hodge (1978), and Table 10 to Dieckmann et al. (1978). The row is the "
+                   "summarizing expression of Dieckmann, Hilton & Mason (1987, p. 61) converted "
+                   "from cm2/s and K to m2/s and kJ/mol, fitted to their Table 1 values at "
+                   "1210-1410 C.")
     if sp == "Al":
         out.append("Unlike the other rows, the Al law is not a radiotracer result: the text "
                    "(p. 794) describes it as a re-analysis by Dieckmann et al. (1987) of "
                    "interdiffusion data of Petuskey (1977), extrapolated to pure magnetite "
-                   "(Table 10 gives the Al window 1553-1773 K). Table 12 writes it as D* like the others.")
+                   "(Table 10 gives the Al window 1553-1773 K). Table 12 writes it as D* like the others. "
+                   "Table 12 prints the interstitial D0 as '6.92x10' m2/s with no visible exponent; "
+                   "Dieckmann et al. (1987, p. 61) give 6.92e7 cm2/s = 6.92e3 m2/s, which Diffusor "
+                   "uses. With it the row reproduces their Table 1 values at 1280-1500 C within "
+                   "0.06 log units.")
     if sp in TABLE12_XTI02:
         out.append(_COMPOSITION_NOTE)
     else:
@@ -366,9 +381,13 @@ for _sp in ("Ti", "Fe", "Mn", "Co", "Cr", "Al"):
                        "(p. 821) and its footnote giving the vacancy/interstitial sum"
                        + ("; the rows were also reproduced by refitting the partial coefficients of "
                           "Aggarwal & Dieckmann (2002b) Table 5 (p. 713) read from the rendered page"
-                          if _sp in ("Fe", "Co", "Mn", "Ti") else "")),
+                          if _sp in ("Fe", "Co", "Mn", "Ti") else
+                          "; the row was checked against the summarizing expressions and Table 1 of "
+                          "Dieckmann, Hilton & Mason (1987, p. 61) and Table 1 of Dieckmann et al. "
+                          "(1978, p. 779), read from the rendered pages on 8 October 2026")),
         secondary_citations=(("tomiya2013", "aggarwal_dieckmann2002", "aggarwal_dieckmann2002a")
-                             if _sp in ("Fe", "Co", "Mn", "Ti") else ("tomiya2013",)),
+                             if _sp in ("Fe", "Co", "Mn", "Ti")
+                             else ("dieckmann1987", "dieckmann1978", "tomiya2013")),
         recommended=(_sp in ("Ti", "Fe")),
         notes=_table12_notes(_sp),
     ))
@@ -392,7 +411,8 @@ SIEVWRIGHT_T_K = 1423.15
 # (1987) as in the paper, at 1150 C and 1 bar: -10.017 to -4.127 (computed with
 # diffusor.thermo.buffers.log_fo2_from_delta(..., parameterisation="oneill")).  The
 # Frost (1991) FMQ used elsewhere in Diffusor would give -9.90 to -4.01.  Rounded
-# outward to two decimals.
+# outward to two decimals.  1423.15 K is 3 K above the 1420 K upper limit printed for
+# the O'Neill (1987) expression, so that evaluation issues a BufferRangeWarning.
 SIEVWRIGHT_FO2_RANGE = (-10.02, -4.12)
 SIEVWRIGHT_TABLE5 = {
     "Mn": (-9.07, -18.8, -7.22, -13.61),
@@ -515,8 +535,8 @@ for _sp in SIEVWRIGHT_TABLE5:
                   "1150 C-only entry is 'chemical', as in the paper. Over FMQ-1 to FMQ+4.89 at "
                   "1150 C (using the Table 12 laws outside their own data windows for Co, Cr and Al) "
                   "this entry and the pure-magnetite Table 12 entry differ by at most 0.50 log units "
-                  "for Ti, 0.14 for Mn, 0.22 for Co, 0.43 for Cr (0.13 above FMQ+2) and 2.0 for Al "
-                  "(at FMQ-1; 0.19 above FMQ+2). Far from 1150 C the result "
+                  "for Ti, 0.14 for Mn, 0.22 for Co, 0.43 for Cr (0.13 above FMQ+2) and 0.19 for Al. "
+                  "Far from 1150 C the result "
                   "rests on the borrowed energies." if _scaled else
                   "No temperature dependence was measured; evaluating this entry away from "
                   "1150 C raises an error. V3+ and V4+ rows describe the same fitted V data, "

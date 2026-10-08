@@ -87,7 +87,7 @@ RESOLUTION_PRESETS = [
     ("LA-ICP-MS spot", "spot", 10.0, None,
      "Druitt et al. (2012) used a 10 um laser spot."),
     ("LA-ICP-MS line scan", "slit", 7.5, None,
-     "Grocolas et al. (2025) scanned with a 7.5 um wide slit."),
+     "Grocolas et al. (2025, Adamello plutonic rocks) scanned with a 7.5 um wide slit."),
     ("SIMS spot", "spot", 12.0, None,
      "Druitt et al. (2012) used 10 to 15 um ion beams."),
     ("Custom sigma", None, 0.0, None,
@@ -1428,17 +1428,25 @@ class MainWindow(QMainWindow):
         from ..validation import ROOT
         path = ROOT / r["file"]
         preset = ds.BY_KEY.get(r["key"])
-        species = "Ni" if r["study"] == "ruprecht2013" else "Fe-Mg"
-        spec = ProfileSpec(**preset.spec) if preset else ProfileSpec(
-            distance_column="Distance_um", column_a="Ni_ppm" if species == "Ni" else "Fo_mol",
-            mode="A", distance_unit="um")
+        # olivine records written before mineral fields existed carry none
+        mineral = r.get("mineral", "olivine")
+        species = r.get("species") or ("Ni" if r["study"] == "ruprecht2013" else "Fe-Mg")
+        if preset:
+            spec = ProfileSpec(**preset.spec)
+        elif r.get("spec"):
+            spec = ProfileSpec(**r["spec"])
+        else:
+            spec = ProfileSpec(distance_column="Distance_um",
+                               column_a="Ni_ppm" if species == "Ni" else "Fo_mol",
+                               mode="A", distance_unit="um")
         if not self._use_table(read_table(path), spec, path, preset, (None, False)):
             return
         if preset is None:
-            i = self.cmb_mineral.findData("olivine")
+            i = self.cmb_mineral.findData(mineral)
             self.cmb_mineral.setCurrentIndex(i)
             self.cmb_species.setCurrentText(species)
-            self.cmb_ol_coordinate.setCurrentIndex(2)
+            if mineral == "olivine":
+                self.cmb_ol_coordinate.setCurrentIndex(2)
             message = (f"Profile from {r['study']}, {r['sample']}. "
                        "This file has no verified model preset. Review the conditions, "
                        "orientation, fit window and initial state before fitting. " + r["notes"])

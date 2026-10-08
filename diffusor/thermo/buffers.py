@@ -30,8 +30,9 @@ Two parameterisations are offered:
     682 C.  Table 1 states that the expressions "may be strongly curved at low
     pressures" and advises against extrapolating below the limits indicated.
     When the requested temperature is outside the printed range of the buffer
-    (IW and WM below 565 C, where wuestite is not stable and the table lists
-    a different buffer; above 1200 C, or 1100 C for HM; below 400 C for FMQ,
+    (IW and WM below 565 C, where the table stops them and lists the
+    iron-magnetite buffer IM for 300-565 C instead, which Diffusor does not
+    implement; above 1200 C, or 1100 C for HM; below 400 C for FMQ,
     300 C for HM, 150 C for QIF, 600 C for NNO),
     :class:`BufferRangeWarning` is issued and the nearest printed row is
     extrapolated.  :func:`buffer_range_status` tests a temperature without

@@ -79,7 +79,8 @@ def calibrate(grey_anchors, comp_anchors, degree: int = 1) -> GreyscaleCalibrati
     """Fit grey value -> composition on microprobe anchor points.
 
     Source of the approach: Petrone et al. (2016) Nature Communications 7:12946,
-    Methods; Morgan et al. (2004) EPSL 222:933-946.
+    Methods; Allan et al. (2013) CMP 166:143-164, Fig. 7. Morgan et al. (2004,
+    EPSL 222:933-946) used BSE contrast grades without a composition calibration.
     """
     g = np.asarray(grey_anchors, dtype=float)
     c = np.asarray(comp_anchors, dtype=float)

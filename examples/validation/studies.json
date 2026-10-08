@@ -23,7 +23,7 @@
     "key": "sundermeyer2020_reunion",
     "citation": "Sundermeyer et al. (2020), Piton de la Fournaise",
     "doi": "10.1007/s00410-019-1642-y",
-    "status": "100 measured traverses. Two explicit reconstructed-window comparisons do not reproduce the reported ages. Available TaMED proxy and Oeser results retained with matching/proxy temperature provenance. See reunion_notes.md."
+    "status": "100 measured traverses. Two explicit reconstructed-window comparisons do not reproduce the reported ages. TaMED (the Chakraborty 2010 expression the paper cites) and Oeser results retained with matching/proxy temperature provenance. See reunion_notes.md."
   },
   {
     "key": "sundermeyer2020_eifel",
@@ -87,5 +87,64 @@
     "citation": "Sievwright et al. (2020), magnetite experiments",
     "doi": "10.1007/s00410-020-01679-z",
     "status": "Experimental coefficient source already represented by the registry and existing source tests, rather than a new natural-timescale application."
+  },
+  {
+    "key": "iovine2017",
+    "citation": "Iovine et al. (2017), Agnano-Monte Spina",
+    "doi": "10.1007/s00445-017-1101-4",
+    "status": "23 greyscale and X-ray traverses refitted with the paper’s law (Cherniak 2002), 930 °C and a sharp initial step with free plateaus: 0.90–1.28 times the Table 1 and 2 times. The 20 with at least ten points are presets. The EMP BaO traverses and two traverses that cross two steps are data only, because the fitted part is not published."
+  },
+  {
+    "key": "lynn_ml2022",
+    "citation": "Lynn et al., Mauna Loa 2022 (supplementary workbook)",
+    "status": "59 olivine traverses with the workbook’s T, P, log fO₂, EBSD angles and median times (sheet S6). The workbook names no diffusion law and the article is not in the local source set, so the traverses are data only. The two pyroxene sheets are not extracted."
+  },
+  {
+    "key": "sato2022",
+    "citation": "Sato et al. (2022), Zao",
+    "doi": "10.1016/j.jvolgeores.2022.107686",
+    "status": "58 EPMA pyroxene traverses (Supplementary Table 8). Seven crystals have EPMA-based times in Supplementary Table 9 (Dohmen et al. 2016 law as printed on p. 11, 1025 °C, NNO). The fitted part of each traverse and the step position are not published, and erf fits to different parts of one traverse differ by more than an order of magnitude, so the traverses are data only."
+  },
+  {
+    "key": "morgado2019",
+    "citation": "Morgado et al. (2019), Calbuco",
+    "doi": "10.1007/s00410-019-1596-0",
+    "status": "16 titanomagnetite traverses from ilmenite–titanomagnetite pairs (SM1). The paper models them with the Aragon et al. (1984) point-defect law and an interface at equilibrium. The domain length, far boundary and forward model are not published, and the Table 3 times are minimum re-equilibration times of nearly flat profiles, so the traverses are data only."
+  },
+  {
+    "key": "chamberlain2014",
+    "citation": "Chamberlain et al. (2014), Bishop Tuff",
+    "doi": "10.1007/s00410-014-1034-2",
+    "status": "No numeric traverses: the profiles are shown as figures in the electronic appendices. The ±30 °C columns of Electronic Appendix 7 (17 Sr, 54 Ba and 151 Ti rows) recompute from the Table 1 laws to within 1×10⁻⁴."
+  },
+  {
+    "key": "petrone2018",
+    "citation": "Petrone et al. (2018), Stromboli",
+    "doi": "10.1016/j.epsl.2018.03.055",
+    "status": "No numeric traverses. 62 of 71 semi-infinite rows of Table S4 recompute from √(4Dt), T and the Dimanov & Sautter (2000) values printed in Supplementary Material 1 (D₀ = 9.5×10⁻⁵ m²/s, 406 kJ/mol) within 5% or rounding. The other nine are listed in the results file. 19 finite-reservoir rows need the NIDIS finite-reservoir solution and are not recomputed."
+  },
+  {
+    "key": "petrone2022",
+    "citation": "Petrone et al. (2022), Stromboli",
+    "doi": "10.1038/s41467-022-35405-z",
+    "status": "Timescales are in Table 1 of the article. The downloaded supplement holds figures and spot analyses, with no numeric traverses and no erf parameters."
+  },
+  {
+    "key": "mangler2022",
+    "citation": "Mangler et al. (2022), Popocatépetl",
+    "doi": "10.1130/G49365.1",
+    "status": "Table S1 lists the orthopyroxene Fe–Mg times with their temperatures. The profiles are shown only as figures, so no traverse is extracted."
+  },
+  {
+    "key": "polo_sanchez2023",
+    "citation": "Polo-Sanchez et al. (2023), Santorini",
+    "doi": "10.3389/feart.2023.1128083",
+    "status": "The Table 1 workbook lists orthopyroxene and clinopyroxene times per zone. Data Sheet 3 shows the modelled profiles as figures only, so no traverse is extracted."
+  },
+  {
+    "key": "seitz2018",
+    "citation": "Seitz et al. (2018), Patagonia",
+    "doi": "10.3389/feart.2018.00095",
+    "status": "The supplementary table holds whole-rock analyses and sample locations. The NanoSIMS Ti traverses are shown only as figures."
   }
 ]

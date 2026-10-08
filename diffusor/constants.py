@@ -15,7 +15,7 @@ K_BOLTZMANN = 1.380649e-23   # J K^-1          (exact, 2019 SI redefinition)
 N_AVOGADRO = 6.02214076e23   # mol^-1          (exact, 2019 SI redefinition)
 # The molar gas constant is the exact product N_A k_B = 8.31446261815324... J mol^-1 K^-1.
 # CODATA 2018 prints it as 8.314 462 618..., a truncation at nine decimals; the product is
-# used here so that the value is exact to double precision (the difference, 1.8e-11 relative,
+# used here so that the value is exact to double precision (the difference, 1.84e-11 relative,
 # has no numerical consequence).
 R_GAS = N_AVOGADRO * K_BOLTZMANN   # J mol^-1 K^-1
 EV_TO_J = 1.602176634e-19    # J per eV        (exact)
@@ -32,7 +32,9 @@ SEC_PER_YEAR = 365.25 * SEC_PER_DAY   # Julian year a = 365.25 d = 31.5576 Ms, I
 CM2_TO_M2 = 1.0e-4
 UM_TO_M = 1.0e-6
 
-# --- atomic weights, g mol^-1 (IUPAC 2021, conventional values) --------------
+# --- atomic weights, g mol^-1 (IUPAC 2021 Table 1: the standard atomic weight where it is
+# a single value (Na, Al, Mn, Rb ...), the conventional (abridged) value where it is an
+# interval (O, Mg, Si ...)) ----------------------------------------------------
 ATOMIC_MASS = {
     "O": 15.999,
     "Na": 22.98976928,

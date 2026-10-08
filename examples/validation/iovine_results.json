@@ -1,0 +1,381 @@
+{
+  "study": "iovine2017",
+  "T_C": 930.0,
+  "coefficient": "kfs_Ba_cherniak2002",
+  "classification": "refit of the published greyscale and X-ray traverses with the paper's law, temperature, sharp initial step and free plateaus",
+  "n": 23,
+  "n_equal_after_rounding": 18,
+  "ratio_min": 0.8988078496621554,
+  "ratio_max": 1.2750783790906883,
+  "ratio_median": 0.9914316028177396,
+  "fits": [
+    {
+      "key": "iovine2017_a_cx4_grey_l2",
+      "sample": "A CX4 grey L2",
+      "kind": "Grey_value",
+      "published_table": "Table 1",
+      "published_label": "A cx4_L2",
+      "published_years": 16,
+      "diffusor_years": 15.889009276593052,
+      "ratio": 0.9930630797870658,
+      "n_points": 32,
+      "rmse_relative_to_step": 0.031243743671539374,
+      "success": true,
+      "warnings": [
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "iovine2017_a_cx5_grey_l2_p1",
+      "sample": "A CX5 grey L2 P1",
+      "kind": "Grey_value",
+      "published_table": "Table 1",
+      "published_label": "A cx5_L2",
+      "published_years": 9,
+      "diffusor_years": 9.247019908981308,
+      "ratio": 1.0274466565534786,
+      "n_points": 27,
+      "rmse_relative_to_step": 0.02039597097426864,
+      "success": true,
+      "warnings": [
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "iovine2017_a_cx5_grey_l2_p2",
+      "sample": "A CX5 grey L2 P2",
+      "kind": "Grey_value",
+      "published_table": "Table 1",
+      "published_label": "A cx5_L2 2°",
+      "published_years": 1,
+      "diffusor_years": 1.2750783790906883,
+      "ratio": 1.2750783790906883,
+      "n_points": 18,
+      "rmse_relative_to_step": 0.006402121128728031,
+      "success": true,
+      "warnings": [
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "iovine2017_a_cx6_grey_l1",
+      "sample": "A CX6 grey L1",
+      "kind": "Grey_value",
+      "published_table": "Table 1",
+      "published_label": "A cx6",
+      "published_years": 6,
+      "diffusor_years": 5.5270122297210795,
+      "ratio": 0.9211687049535132,
+      "n_points": 28,
+      "rmse_relative_to_step": 0.01635891740683746,
+      "success": true,
+      "warnings": [
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "iovine2017_b_cx1_grey_l1_p1",
+      "sample": "B CX1 grey L1 P1",
+      "kind": "Grey_value",
+      "published_table": "Table 1",
+      "published_label": "B cx1_L1",
+      "published_years": 4,
+      "diffusor_years": 3.5952313986486217,
+      "ratio": 0.8988078496621554,
+      "n_points": 18,
+      "rmse_relative_to_step": 0.03234994488114643,
+      "success": true,
+      "warnings": [
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "iovine2017_b_cx1_grey_l1_p2",
+      "sample": "B CX1 grey L1 P2",
+      "kind": "Grey_value",
+      "published_table": "Table 1",
+      "published_label": "B cx1_L1 2°",
+      "published_years": 2,
+      "diffusor_years": 2.3271559592897533,
+      "ratio": 1.1635779796448766,
+      "n_points": 10,
+      "rmse_relative_to_step": 0.034931565398537014,
+      "success": true,
+      "warnings": [
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "iovine2017_b_cx1_grey_l2_p1",
+      "sample": "B CX1 grey L2 P1",
+      "kind": "Grey_value",
+      "published_table": "Table 1",
+      "published_label": "B cx1_L2",
+      "published_years": 23,
+      "diffusor_years": 22.398887597897986,
+      "ratio": 0.9738646781694776,
+      "n_points": 18,
+      "rmse_relative_to_step": 0.018316209972639788,
+      "success": true,
+      "warnings": [
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "iovine2017_b_cx1_grey_l2_p2",
+      "sample": "B CX1 grey L2 P2",
+      "kind": "Grey_value",
+      "published_table": "Table 1",
+      "published_label": "B cx1_L2 2°",
+      "published_years": 4,
+      "diffusor_years": 3.674608091617376,
+      "ratio": 0.918652022904344,
+      "n_points": 8,
+      "rmse_relative_to_step": 0.011561136170224553,
+      "success": true,
+      "warnings": [
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "iovine2017_b_cx2_grey_l1",
+      "sample": "B CX2 grey L1",
+      "kind": "Grey_value",
+      "published_table": "Table 1",
+      "published_label": "B cx2_L1",
+      "published_years": 5,
+      "diffusor_years": 4.661143180913045,
+      "ratio": 0.9322286361826089,
+      "n_points": 11,
+      "rmse_relative_to_step": 0.028820939193233343,
+      "success": true,
+      "warnings": [
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "iovine2017_b_cx2_grey_l2",
+      "sample": "B CX2 grey L2",
+      "kind": "Grey_value",
+      "published_table": "Table 1",
+      "published_label": "B cx2_L2",
+      "published_years": 5,
+      "diffusor_years": 5.0466355801004745,
+      "ratio": 1.009327116020095,
+      "n_points": 13,
+      "rmse_relative_to_step": 0.021593873064940188,
+      "success": true,
+      "warnings": [
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "iovine2017_b_cx2_xray_l1_p1",
+      "sample": "B CX2 xray L1 P1",
+      "kind": "Ba_counts",
+      "published_table": "Table 2",
+      "published_label": "B Bcx2_L1",
+      "published_years": 20,
+      "diffusor_years": 19.800846127242625,
+      "ratio": 0.9900423063621313,
+      "n_points": 41,
+      "rmse_relative_to_step": 0.04749361763633539,
+      "success": true,
+      "warnings": [
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "iovine2017_b_cx2_xray_l1_p2",
+      "sample": "B CX2 xray L1 P2",
+      "kind": "Ba_counts",
+      "published_table": "Table 2",
+      "published_label": "B Bcx2_L1 2nd",
+      "published_years": 23,
+      "diffusor_years": 25.208270703352557,
+      "ratio": 1.0960117697109808,
+      "n_points": 47,
+      "rmse_relative_to_step": 0.04026912633965451,
+      "success": true,
+      "warnings": [
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "iovine2017_b_cx3_grey",
+      "sample": "B CX3 grey",
+      "kind": "Grey_value",
+      "published_table": "Table 1",
+      "published_label": "B cx3",
+      "published_years": 33,
+      "diffusor_years": 33.24847548103863,
+      "ratio": 1.0075295600314738,
+      "n_points": 20,
+      "rmse_relative_to_step": 0.013630971575207299,
+      "success": true,
+      "warnings": [
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "iovine2017_b_cx10_grey_l1_p1",
+      "sample": "B CX10 grey L1 P1",
+      "kind": "Grey_value",
+      "published_table": "Table 1",
+      "published_label": "B cx10_L1",
+      "published_years": 15,
+      "diffusor_years": 14.63561320944903,
+      "ratio": 0.975707547296602,
+      "n_points": 8,
+      "rmse_relative_to_step": 0.0195170694084203,
+      "success": true,
+      "warnings": [
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "iovine2017_b_cx10_grey_l1_p2",
+      "sample": "B CX10 grey L1 P2",
+      "kind": "Grey_value",
+      "published_table": "Table 1",
+      "published_label": "B cx10_L1 2°",
+      "published_years": 24,
+      "diffusor_years": 23.79435846762575,
+      "ratio": 0.9914316028177396,
+      "n_points": 15,
+      "rmse_relative_to_step": 0.014428248207395897,
+      "success": true,
+      "warnings": [
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "iovine2017_b_cx10_grey_l2",
+      "sample": "B CX10 grey L2",
+      "kind": "Grey_value",
+      "published_table": "Table 1",
+      "published_label": "B cx10_L2",
+      "published_years": 8,
+      "diffusor_years": 7.970109475218173,
+      "ratio": 0.9962636844022716,
+      "n_points": 8,
+      "rmse_relative_to_step": 0.014522418639260334,
+      "success": true,
+      "warnings": [
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "iovine2017_b_cx10_xray_p1",
+      "sample": "B CX10 xray P1",
+      "kind": "Ba_counts",
+      "published_table": "Table 2",
+      "published_label": "B Bcx10_L1",
+      "published_years": 4,
+      "diffusor_years": 4.3553532617599595,
+      "ratio": 1.0888383154399899,
+      "n_points": 36,
+      "rmse_relative_to_step": 0.0386810805298149,
+      "success": true,
+      "warnings": [
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "iovine2017_b_cx10_xray_p2",
+      "sample": "B CX10 xray P2",
+      "kind": "Ba_counts",
+      "published_table": "Table 2",
+      "published_label": "B Bcx10_L2",
+      "published_years": 7,
+      "diffusor_years": 7.822357414909677,
+      "ratio": 1.1174796307013823,
+      "n_points": 40,
+      "rmse_relative_to_step": 0.044710861213070295,
+      "success": true,
+      "warnings": [
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "iovine2017_d_cx3_grey_l2",
+      "sample": "D CX3 grey L2",
+      "kind": "Grey_value",
+      "published_table": "Table 1",
+      "published_label": "D cx3_L2",
+      "published_years": 32,
+      "diffusor_years": 31.529956430493577,
+      "ratio": 0.9853111384529243,
+      "n_points": 12,
+      "rmse_relative_to_step": 0.01856210186487779,
+      "success": true,
+      "warnings": [
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "iovine2017_d_cx6_grey_l1",
+      "sample": "D CX6 grey L1",
+      "kind": "Grey_value",
+      "published_table": "Table 1",
+      "published_label": "D cx6_L1",
+      "published_years": 151,
+      "diffusor_years": 149.40596157306953,
+      "ratio": 0.9894434541262883,
+      "n_points": 44,
+      "rmse_relative_to_step": 0.010709654127523711,
+      "success": true,
+      "warnings": [
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "iovine2017_d_cx6_grey_l2",
+      "sample": "D CX6 grey L2",
+      "kind": "Grey_value",
+      "published_table": "Table 1",
+      "published_label": "D cx6_L2",
+      "published_years": 95,
+      "diffusor_years": 93.30342135234558,
+      "ratio": 0.9821412773931114,
+      "n_points": 32,
+      "rmse_relative_to_step": 0.012474735254577537,
+      "success": true,
+      "warnings": [
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "iovine2017_dcx7_grey",
+      "sample": "DCX7 grey",
+      "kind": "Grey_value",
+      "published_table": "Table 1",
+      "published_label": "D cx7",
+      "published_years": 8,
+      "diffusor_years": 7.87205669496115,
+      "ratio": 0.9840070868701437,
+      "n_points": 30,
+      "rmse_relative_to_step": 0.015030684789871757,
+      "success": true,
+      "warnings": [
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "iovine2017_dcx7_xray",
+      "sample": "DCX7 xray",
+      "kind": "Ba_counts",
+      "published_table": "Table 2",
+      "published_label": "D Dcx7",
+      "published_years": 3,
+      "diffusor_years": 3.23494021829179,
+      "ratio": 1.0783134060972632,
+      "n_points": 58,
+      "rmse_relative_to_step": 0.02266885699368496,
+      "success": true,
+      "warnings": [
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    }
+  ]
+}

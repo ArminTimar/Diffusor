@@ -49,6 +49,12 @@ def _add(c):
 # (1998) a negative one, and the second was used by Costa et al. (2003) and
 # Druitt et al. (2012). Dohmen et al. (2017, p. 556) call the Bindeman values
 # potentially incorrect. The set is therefore a choice that every run records.
+# Dohmen & Blundy (2014) itself (eq. 34, Table 8, p. 1365; read from the rendered pages
+# on 8 October 2026) writes RT ln(Theta K) = G(T) + A_i + B_i X_an + C_i X_an^2, so there
+# A_i is the constant term and the X_an slope is B_i (+ C_i). Table 8 is for 1200 C only,
+# per stability field: B_Mg = 11.41 (C-1) and 19.41 (I-1), B_Sr = -21.90 and -13.90,
+# B_Ba = -39.70 and -31.70, the same signs as the 2017 Table 1 values used here. The
+# 900 C column appears only in the 2017 table.
 ACTIVITY_SPECIES = ("Mg", "Sr", "Ba", "Li", "K", "Rb")
 ACTIVITY_SETS = {
     "dohmen_blundy2014": {
@@ -71,8 +77,9 @@ ACTIVITY_SETS = {
 DEFAULT_ACTIVITY_SET = "dohmen_blundy2014"
 ACTIVITY_A_CITATION = "dohmen2017"
 ACTIVITY_A_NOTE = (
-    "A_i (kJ/mol) from Dohmen, Faak & Blundy (2017) Table 1. Dohmen & Blundy (2014) give values at "
-    "900 and 1200 C; Diffusor uses the column nearer the run temperature and does not interpolate. "
+    "A_i (kJ/mol) from Dohmen, Faak & Blundy (2017) Table 1, which lists Dohmen & Blundy (2014) "
+    "values at 900 and 1200 C; Diffusor uses the column nearer the run temperature and does not "
+    "interpolate. "
     "Bindeman et al. (1998) give one value per element. The two sets differ in sign for Mg.")
 
 
@@ -275,8 +282,8 @@ _add(DiffusionCoefficient(
     secondary_citations=("faak2013", "vanorman2014"),
     recommended=True,
     notes=("Parameterised from the Faak et al. (2013) and Van Orman et al. (2014) experiments "
-           "(LaTourrette & Wasserburg 1998 is excluded because aSiO2 of their glass is hard to "
-           "estimate). Mg diffusion is faster at higher silica activity (Faak et al. 2013). "
+           "(Audetat et al. exclude LaTourrette & Wasserburg 1998 because aSiO2 of their glass is "
+           "hard to estimate). Mg diffusion is faster at higher silica activity (Faak et al. 2013). "
            "Diffusor evaluates it at aSiO2 = 1 by default, which corresponds to quartz "
            "saturation (aSiO2 is defined relative to quartz). For a silica-undersaturated melt D "
            "is lower by up to 1.87 log units at aSiO2 = 0. The review recommends this law, "

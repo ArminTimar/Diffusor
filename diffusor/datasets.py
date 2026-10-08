@@ -521,7 +521,67 @@ def _validation_datasets():
     return result
 
 
+def _iovine_datasets():
+    """Iovine et al. (2017) sanidine Ba traverses with the paper's own setup.
+
+    Only traverses that Table 1 or 2 of the paper assigns a time to, that cross a single
+    step, and that hold at least ten points become presets.
+    """
+    import json
+    manifest = EXAMPLES_DIR / "validation" / "manifest.json"
+    if not manifest.exists():
+        return []
+    refits = EXAMPLES_DIR / "validation" / "iovine_results.json"
+    refit_years = ({v["key"]: v["diffusor_years"] for v in json.loads(refits.read_text(encoding="utf8"))["fits"]}
+                   if refits.exists() else {})
+    kinds = {"Grey_value": "greyscale", "Ba_counts": "X-ray"}
+    result = []
+    for r in json.loads(manifest.read_text(encoding="utf8")):
+        s = r.get("setup")
+        if r["study"] != "iovine2017" or not s or r["n_points"] < 10:
+            continue
+        label = f"{s['member']} {s['published_label']}"
+        kind = kinds[r["value_column"]]
+        result.append(ExampleDataset(
+            key=r["key"], name=f"Sanidine Ba, Agnano-Monte Spina {label} ({kind})",
+            study="Iovine et al. 2017, Agnano-Monte Spina", short=f"{label}, {kind}",
+            mineral="kfeldspar", species="Ba", filename="validation/" + r["file"],
+            kind="measured", citation="iovine2017",
+            provenance=(f"Iovine et al. (2017), Bulletin of Volcanology 79:18, Electronic Supplementary "
+                        f"Material {r['source_file'].split('/')[-1]}. {r['notes']} "
+                        "See examples/validation/manifest.json for the source cells and SHA256.\n\n"
+                        "The values are fitted as recorded. The Ba law has a constant D, so a linear "
+                        "calibration of grey values or count rates to Ba would not change the time."),
+            spec=dict(r["spec"]),
+            settings=dict(T_C=s["T_C"], sigma_T_K=26.5, P_MPa=100.0, sigma_P_MPa=0.0,
+                          buffer="NNO", delta_buffer=1.3, sigma_delta=0.0,
+                          coefficient=s["coefficient"], geometry="plane", composition_dependent=False,
+                          bc_left="far", bc_right="far", initial_condition="step",
+                          fit_plateaus=True, fit_x0=True, n_nodes=401, resolution="No correction"),
+            expected=(f"{s['published_table']} of Iovine et al. (2017) gives {s['published_years']:g} years at "
+                      "930 C. "
+                      + (f"With the same law, temperature and sharp initial step Diffusor fits "
+                         f"{refit_years[r['key']]:.1f} years. " if r["key"] in refit_years else "")
+                      + "examples/validation/report.md compares all 23 traverses."),
+            notes=("The paper fits each traverse with the erfc solution of a sharp step whose two plateaus "
+                   "continue (Fig. 5e), which is what this preset sets: the step position and both plateau "
+                   "values are fitted with the time. The paper states no uncertainty for single times. "
+                   "Fig. 7 shows the effect of +/-26.5 C."),
+            sources=dict(T=("930 C, the average of the two-feldspar temperatures of 882 to 973 C "
+                            "(Putirka 2008, at 100 MPa; p. 7-8), at which Tables 1 and 2 are calculated. "
+                            "+/-26.5 C is the average uncertainty of those temperatures given in the "
+                            "Fig. 7 caption (p. 11)."),
+                         P=("100 MPa, the pressure of the two-feldspar calculation (p. 7). The Ba law "
+                            "has no pressure term."),
+                         fO2=("NNO+1.3, from the phase-equilibrium experiments of Roach (2005) quoted on "
+                              "p. 7. The Ba law has no fO2 term."),
+                         resolution="The paper describes no beam or pixel correction, so none is added.",
+                         initial="Sharp step with both plateaus continuing (Fig. 5e).")))
+    return result
+
+
 DATASETS.extend(_validation_datasets())
+DATASETS.extend(_iovine_datasets())
 BY_KEY: Dict[str, ExampleDataset] = {d.key: d for d in DATASETS}
 
 

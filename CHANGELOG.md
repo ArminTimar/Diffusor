@@ -4,6 +4,43 @@ What changed between releases, newest first. The text under a version heading
 is what goes into the GitHub release, so it is written for someone deciding
 whether to update. Commit messages hold the details.
 
+## 0.4.1 (8 October 2026)
+
+### Added
+
+- **Sanidine Ba examples from Iovine et al. (2017).** 20 greyscale and X-ray
+  traverses across sanidine rims from the Agnano-Monte Spina eruption (Campi
+  Flegrei) are ready-to-run examples under K-feldspar, with the paper's
+  Cherniak (2002) law, 930 °C and a sharp initial step whose plateaus continue.
+  Refitted, 23 traverses give 0.90 to 1.28 times the times of Tables 1 and 2.
+- **Validation library: four more studies, 492 profiles in all.** It now holds
+  traverses of olivine (Lynn et al., Mauna Loa 2022 workbook), sanidine
+  (Iovine et al. 2017), ortho- and clinopyroxene (Sato et al. 2022, Zao) and
+  titanomagnetite (Morgado et al. 2019, Calbuco). Each entry shows its mineral,
+  and data-only entries open with their own mineral and columns. The report
+  says for each study why its traverses are or are not presets.
+- The validation report recomputes the ±30 °C timescales of Chamberlain et al.
+  (2014) and the √(4Dt) timescales of Petrone et al. (2018) from their own laws,
+  and lists what the supplements of Mangler et al. (2022), Polo-Sanchez et al.
+  (2023), Petrone et al. (2022) and Seitz et al. (2018) contain.
+
+### Fixed
+
+- **Magnetite Al (Van Orman & Crispin 2010 Table 12).** The interstitial D0 is
+  now 6.92 × 10³ m²/s. Table 12 prints it as "6.92×10" without a visible
+  exponent, and Diffusor had used 6.92 × 10¹. The value comes from the
+  expression Table 12 cites, Dieckmann, Hilton & Mason (1987, p. 61):
+  6.92 × 10⁷ cm²/s. Al diffusivities at low fO2, where the interstitial branch
+  dominates, are up to about 100 times higher than before; at higher fO2 they
+  are unchanged.
+
+### Changed
+
+- Notes and provenance of several entries were checked against 23 newly
+  obtained source papers and reworded where they described a source
+  imprecisely. The Réunion validation cases now state that the TaMED law is the
+  Chakraborty (2010) expression the study cites.
+
 ## 0.4.0 (7 October 2026)
 
 ### Added

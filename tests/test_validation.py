@@ -17,9 +17,13 @@ def test_manifest_has_unique_profiles_with_valid_units_and_source_rows():
     for r in rr:
         df=pd.read_csv(ROOT/r['file'])
         assert len(df)==r['n_points']>=3
-        assert df.Fo_mol.between(0,100).all(),r['key']
+        value=r.get('value_column','Fo_mol')
+        assert np.isfinite(df[value]).all(),r['key']
+        if value=='Fo_mol':
+            assert df.Fo_mol.between(0,100).all(),r['key']
         assert np.isfinite(df.Distance_um).all()
-        assert df.source_row.is_unique
+        source=df.source_row if 'source_row' in df else df.source_cell
+        assert source.is_unique,r['key']
         assert len(r['source_sha256'])==64
     mutch=next(r for r in rr if r['key']=='mutch2019_borg14_ol_c2_p1')
     df=pd.read_csv(ROOT/mutch['file'])
@@ -117,3 +121,60 @@ def test_lynn_gui_uses_identical_archived_model_and_resets_cooling():
     finally:
         window.close()
         app.processEvents()
+
+
+def test_iovine_refits_reproduce_tables_1_and_2():
+    """Iovine et al. (2017), 930 C, Cherniak (2002) Ba law, sharp step with free plateaus."""
+    result=json.loads((ROOT/'iovine_results.json').read_text(encoding='utf8'))
+    assert result['n']==23 and result['coefficient']=='kfs_Ba_cherniak2002'
+    assert all(.85<r['ratio']<1.3 for r in result['fits'])
+    assert result['n_equal_after_rounding']>=18
+    # the paper's Table 1 time is printed as a whole year; the two-step traverses stay data-only
+    rr={r['key']:r for r in records() if r['study']=='iovine2017'}
+    assert rr['iovine2017_a_cx6_grey_l1']['setup']['published_years']==6
+    assert rr['iovine2017_b_cx1_xray']['setup'] is None
+    assert rr['iovine2017_a_cx5_grey_l1']['setup'] is None
+    assert len(rr)==43
+
+
+def test_iovine_preset_fits_like_the_check_script():
+    import os
+    os.environ.setdefault('QT_QPA_PLATFORM','offscreen')
+    from PySide6.QtWidgets import QApplication
+    from diffusor.gui.main_window import MainWindow
+    from diffusor.datasets import get
+    from diffusor.dataio import ProfileSpec,read_table
+    from diffusor.constants import SEC_PER_YEAR
+    from diffusor.fitting import fit_time
+    app=QApplication.instance() or QApplication([])
+    window=MainWindow()
+    try:
+        d=get('iovine2017_d_cx6_grey_l1')
+        assert d.mineral=='kfeldspar' and d.citation=='iovine2017'
+        assert window._use_table(read_table(d.path),ProfileSpec(**d.spec),d.path,d,(None,False))
+        assert window._checked_keys()==['kfs_Ba_cherniak2002']
+        assert window._boundaries_far()
+        assert set(window._free_parameters())=={'t','x0','C_left','C_right'}
+        p=window.profile
+        r=fit_time(window._model('kfs_Ba_cherniak2002'),p.x,p.C,p.sigma,window._free_parameters())
+        saved=next(v for v in json.loads((ROOT/'iovine_results.json').read_text(encoding='utf8'))['fits']
+                   if v['key']==d.key)
+        assert r.t_seconds/SEC_PER_YEAR==pytest.approx(saved['diffusor_years'],rel=.01)
+        assert r.t_seconds/SEC_PER_YEAR==pytest.approx(151,rel=.05)   # Table 1, D cx6_L1
+        # a data-only pyroxene traverse opens as opx Fe-Mg from its oxides, without a preset
+        record=next(r for r in records() if r['key']=='sato2022_okp_4_4_3_px_16_no1')
+        window._load_validation_record(record)
+        assert window.cmb_mineral.currentData()=='opx' and window.dataset is None
+        assert window.profile.spec.column_a=='FeO_wt' and window.profile.spec.column_b=='MgO_wt'
+    finally:
+        window.close()
+        app.processEvents()
+
+
+def test_published_timescale_tables_recompute_from_their_own_laws():
+    result=json.loads((ROOT/'timescale_tables_results.json').read_text(encoding='utf8'))
+    for sheet,rows in (('Sr in sanidine',17),('Ba in sanidine',54),('Ti in quartz',151)):
+        assert result['chamberlain2014'][sheet]['rows']==rows
+        assert result['chamberlain2014'][sheet]['max_relative_difference']<1e-4
+    petrone=result['petrone2018']
+    assert petrone['rows_checked']==71 and petrone['within_5_percent_or_rounding']==62

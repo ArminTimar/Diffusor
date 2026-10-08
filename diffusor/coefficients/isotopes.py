@@ -25,8 +25,8 @@ scale of any reference material by an amount that is not quantified here.
 Berglund & Wieser state that the representative values may match no real
 sample and recommend samples of precisely known composition for precise work.
 Only a modelled delta difference (not an absolute delta value) should be compared
-with published data. A test shifts the 6Li abundance by 1 % (about 10 per mil in
-the reference ratio) and the modelled Li profile changes by under 1 % of its
+with published data. A test raises the 6Li abundance by 1 % of its value (which lowers
+the 7Li/6Li reference ratio by about 10.7 per mil) and the modelled Li profile changes by under 1 % of its
 range; no such test was made for Mg and Fe.
 """
 from __future__ import annotations

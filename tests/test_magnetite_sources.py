@@ -46,6 +46,23 @@ def test_cr_and_al_are_pure_magnetite_laws_and_al_is_not_a_tracer_law():
     assert "Petuskey" in al.notes
 
 
+def test_cr_and_al_rows_are_the_1987_summarizing_expressions():
+    # Dieckmann, Hilton & Mason (1987) p. 61: D0 [cm2/s], exponent [K]; Table 12 prints the
+    # Al interstitial D0 as "6.92x10" without a visible exponent.
+    R = 8.314462618
+    expr = {"Cr": (5.12e-9, -880.0, 3.84e9, 90500.0), "Al": (3.24e-9, -7800.0, 6.92e7, 81900.0)}
+    for sp, (dv, kv, di, ki) in expr.items():
+        DV0, QV, DI0, QI = TABLE12_PURE[sp]
+        assert DV0 == pytest.approx(dv * 1e-4) and DI0 == pytest.approx(di * 1e-4)
+        assert QV == pytest.approx(kv * R / 1e3, abs=0.05) and QI == pytest.approx(ki * R / 1e3, abs=0.05)
+    # and their Table 1 values for Al (log10 cm2/s) at 1280, 1380 and 1500 C
+    for T_C, lv, li in [(1280, -6.32, -15.03), (1380, -6.42, -13.74), (1500, -6.59, -12.19)]:
+        T = T_C + 273.15
+        DV0, QV, DI0, QI = TABLE12_PURE["Al"]
+        assert np.log10(DV0 * np.exp(-QV * 1e3 / (R * T)) * 1e4) == pytest.approx(lv, abs=0.06)
+        assert np.log10(DI0 * np.exp(-QI * 1e3 / (R * T)) * 1e4) == pytest.approx(li, abs=0.07)
+
+
 # --- x_Ti interpolation of Table 12 --------------------------------------------------
 @pytest.mark.parametrize("sp", ["Ti", "Fe", "Co", "Mn"])
 def test_table12_end_members_are_the_printed_rows(sp):
@@ -133,7 +150,7 @@ def test_sievwright_vs_table12_differences_quoted_in_the_notes():
     lo = log_fo2_from_delta("FMQ", -1.0, 1423.15, 1e5, "oneill")
     hi = log_fo2_from_delta("FMQ", 4.89, 1423.15, 1e5, "oneill")
     lfs = np.linspace(lo, hi, 300)
-    limits = {"Ti": 0.51, "Mn": 0.15, "Co": 0.23, "Cr": 0.44, "Al": 2.0}
+    limits = {"Ti": 0.51, "Mn": 0.15, "Co": 0.23, "Cr": 0.44, "Al": 0.2}
     for sp, lim in limits.items():
         s, v = get(f"mt_{sp}_sievwright2020"), get(f"mt_{sp}_vanorman_crispin2010")
         d = [abs(np.log10(s.D(Conditions(1423.15, log_fo2_bar=l)))

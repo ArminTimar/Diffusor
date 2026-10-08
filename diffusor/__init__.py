@@ -13,4 +13,4 @@ io            profile loading, greyscale calibration, result export
 gui           PySide6 desktop application
 """
 
-__version__ = "0.4.0"
+__version__ = "0.4.1"

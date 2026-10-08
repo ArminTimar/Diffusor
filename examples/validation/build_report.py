@@ -20,6 +20,10 @@ def main():
     g=load('gordeychik_results.json'); opx=load('ostorero_results.json'); araya=load('araya_results.json')
     mourey=load('mourey_results.json')
     reunion=load('reunion_results.json'); eifel=load('eifel_results.json')
+    iovine=load('iovine_results.json'); tables=load('timescale_tables_results.json')
+    from diffusor.datasets import BY_KEY
+    presets=Counter(r['study'] for r in records if r['key'] in BY_KEY)
+    numbers={8:'eight',9:'nine',10:'ten',11:'eleven',12:'twelve',13:'thirteen',14:'fourteen'}
     published=np.array([r['published_days'] for r in results])
     fitted=np.array([r['original_days'] for r in results])
     alternative=np.array([r['alternative_days'] for r in results])
@@ -56,9 +60,9 @@ def main():
     axs[0].legend(fontsize=7,frameon=False)
     fig.savefig(ROOT/'profiles.png',dpi=180)
     plt.close(fig)
-    lines=['# Published-study validation — 7 October 2026','',
-       f'{len(records)} measured profiles from eight downloaded studies are available in **File > Published validation library**. '
-       'Eighteen Lynn profiles also have ready-to-run model presets in the usual example list. '
+    lines=['# Published-study validation — 8 October 2026','',
+       f'{len(records)} measured profiles from {numbers.get(len(counts),len(counts))} downloaded studies are available in **File > Published validation library**. '
+       f"{presets['lynn2024']} Lynn olivine profiles and {presets['iovine2017']} Iovine sanidine profiles also have ready-to-run model presets in the usual example list. "
        'The remaining library entries are explicitly data-only. They require model setup before fitting.', '',
        '## What replicated','',
        f'**Lynn et al. (2024): all {len(results)} single-event reconstructions lie within the published uncertainty intervals.** '
@@ -95,6 +99,22 @@ def main():
              '![Measured, initial and fitted profiles](profiles.png)','',
              'Full curves: [fits/](fits/). Machine-readable fit results and calibration warnings: [results.json](results.json). '
              'Grid checks: [convergence.json](convergence.json).','',
+             '## Iovine et al. (2017): sanidine Ba at Agnano-Monte Spina','',
+             f"**{iovine['n']} greyscale and X-ray traverses give {iovine['ratio_min']:.2f}–{iovine['ratio_max']:.2f} times the published times "
+             f"(median {iovine['ratio_median']:.2f}); {iovine['n_equal_after_rounding']} round to the published whole year.** "
+             'The paper fits each traverse with the erfc solution of a sharp step whose two plateaus continue (Fig. 5e), '
+             'with the Cherniak (2002) Ba law (D₀ = 0.29 m²/s, 455 kJ/mol, Fig. 5f) at 930 °C, the average two-feldspar temperature (p. 7–8). '
+             'Diffusor uses the same law, temperature and initial step, and fits the time, the step position and both plateaus. '
+             'D is constant, so a linear calibration of grey values or count rates to Ba does not change the time, and the values are fitted as recorded. '
+             'The workbooks and Fig. 4 label distances “mm”; the values are micrometres. '
+             'Table labels “L1 2°” and “L1 2nd” are read as the second profile of line 1; the fits support that reading but the paper does not define the suffix. '
+             'The EMP BaO times of Table 1 were fitted to parts of the 10 µm traverses that are not tabulated, so those traverses are data only. '
+             'Two traverses cross two compositional steps (A cx5 greyscale line 1, B cx1 X-ray); for the X-ray scan the inner step gives 2.1–2.7 yr and the outer step 4.4 yr, against 5 yr in Table 2. They are data only.','',
+             '| Traverse | Table | Published (yr) | Diffusor (yr) | Ratio |','|---|---|---:|---:|---:|']
+    for r in iovine['fits']:
+        lines.append(f"| {r['sample']} | {r['published_table']}, {r['published_label']} | {r['published_years']:g} | {r['diffusor_years']:.2f} | {r['ratio']:.2f} |")
+    lines+=['',f"Traverses with at least ten points ({presets['iovine2017']}) are presets in the example list under K-feldspar. "
+             'The paper gives no uncertainty for single times; Fig. 7 shows the effect of ±26.5 °C. [Results](iovine_results.json).','',
              '## Other executable checks','',
              '**Gordeychik et al. (2018).** All 32 published Fo age rows in Tables SM4-A, SM5-A and SM6-A reproduce to relative error below 4×10⁻¹⁶. '
              'These checks use the published fitted diffusion widths or Dt products and geometric factors. '
@@ -131,12 +151,25 @@ def main():
               'The 406-day result rests on these two readings. It does not establish what the authors’ code used. '
               'The initial rim position is fitted to Fo alone here, whereas the paper used Ca and Ni as additional constraints. '
               '[All three branches and assumptions](mourey_results.json).','',
+              '**Chamberlain et al. (2014).** The supplement holds no numeric traverses. '
+              'In Electronic Appendix 7 the columns headed “+ timescale (−30 °C)” and “− timescale (+30 °C)” are the best-fit time scaled by D(T)/D(T∓30 K). '
+              'With the Table 1 laws (Sr 8.4 m²/s and 450 kJ/mol, Ba 0.29 m²/s and 455 kJ/mol, Ti 7×10⁻⁸ m²/s and 273 kJ/mol) they recompute for all '
+              + '{} Sr, {} Ba and {} Ti'.format(*(tables['chamberlain2014'][k]['rows'] for k in ('Sr in sanidine','Ba in sanidine','Ti in quartz')))
+              + ' rows to within 1×10⁻⁴ of the stored values. '
+              'They are absolute times at the two temperatures, not increments.','',
+              f"**Petrone et al. (2018).** Table S4 gives √(4Dt) and T for each modelled boundary. For the {tables['petrone2018']['rows_checked']} rows fitted with the semi-infinite erf, "
+              't = (√(4Dt))²/4D with the Dimanov & Sautter (2000) values printed in Supplementary Material 1 (p. 13: D₀ = 9.5×10⁻⁵ m²/s, 406 kJ/mol) '
+              f"reproduces {tables['petrone2018']['within_5_percent_or_rounding']} printed times within 5% or rounding (median ratio {tables['petrone2018']['median_ratio']:.3f}). "
+              f"The other {len(tables['petrone2018']['outside'])} are listed in the results file. "
+              f"{tables['petrone2018']['finite_reservoir_rows_skipped']} rows use the finite-reservoir solution of NIDIS and are not recomputed. "
+              'Diffusor’s registry entry for this law carries D₀ = 9.55×10⁻⁵ m²/s, the value that reproduces the D values printed by Petrone et al. (2016); the check uses the 2018 value. '
+              '[Results](timescale_tables_results.json).','',
               '## Coverage and remaining requirements','',
               '| Study | Extracted profiles | What the downloaded material permits |','|---|---:|---|']
     section=['## Sundermeyer reconstructions: published ages not reproduced','',
         'These runs are executable sensitivity examples, not verified GUI presets. '
         'The original point selection and parts of the setup are unavailable. '
-        'Réunion uses the available TaMED law as a proxy for the cited Chakraborty (2010) implementation. '
+        'Réunion uses the TaMED law, which is the fO₂ > 10⁻¹⁰ Pa expression that Chakraborty (2010, p. 617) prints and the paper cites; at NNO−0.5 that branch applies. '
         'Eifel uses an explicitly assumed log fO₂ = −5 Pa because the downloaded source does not state it.','',
         '| Study / crystal | Published (d) | TaMED reconstruction (d) | Oeser comparison (d) |',
         '|---|---:|---:|---:|']
@@ -155,11 +188,12 @@ def main():
     index=lines.index('## Coverage and remaining requirements')
     lines[index:index]=section
     for s in studies:
-        link='https://doi.org/'+s.get('doi',s.get('data_doi',''))
-        lines.append(f"| [{s['citation']}]({link}) | {counts[s['key']] if counts[s['key']] else '—'} | {s['status']} |")
+        doi=s.get('doi',s.get('data_doi'))
+        name=f"[{s['citation']}](https://doi.org/{doi})" if doi else s['citation']
+        lines.append(f"| {name} | {counts[s['key']] if counts[s['key']] else '—'} | {s['status']} |")
     lines+=['','A workbook of core/rim compositions is not a measured diffusion traverse. '
             'A case requiring different dimensions, multiple events or a Bayesian joint inversion has not been labelled an exact replication merely because a scalar curve can be fitted. '
-            'The supplements of Weller et al. (2026), Lynn et al. (2024, Mauna Loa) and Kahl et al. (2023) have not been downloaded yet.','',
+            'The supplements of Weller et al. (2026) and Kahl et al. (2023) have not been downloaded yet, and the article that goes with the Lynn et al. Mauna Loa 2022 workbook is not in the local source set.','',
             '## Reproduce','',
             'Run from the repository root in the project environment:','',
             '```text','python examples/validation/extract.py','python -m diffusor.validation',
@@ -167,27 +201,28 @@ def main():
             'python examples/validation/check_ostorero.py','python examples/validation/check_araya.py',
             'python examples/validation/check_mourey.py',
             'python examples/validation/check_reunion.py','python examples/validation/check_eifel.py',
+            'python examples/validation/check_iovine.py','python examples/validation/check_timescale_tables.py',
             'python examples/validation/export_curves.py','python examples/validation/build_report.py','```','',
             'The extractors read the original supplementary workbooks, downloaded from the DOIs above into `papers/Supplementaries and data/<study>/`, '
-            'and need openpyxl and xlrd (Ruth XLS only). '
+            'and need openpyxl and xlrd (Ruth XLS only). check_timescale_tables.py also reads the Chamberlain and Petrone workbooks there. '
             'Install the optional extraction dependency with `python -m pip install ".[validation]"`. '
             'Fitting and checks run offline from the bundled extracted files. '
             'For the 801-node checks use `python -m diffusor.validation --key lynn2024_ol_1 --key lynn2024_ol_9 --nodes 801 --output examples/validation/convergence.json`.','',
-            'Each CSV retains `source_row`; the [manifest](manifest.json) stores source file, sheet, SHA256, sample and setup status. '
+            'Each CSV retains `source_row` (or `source_cell` for the transposed Iovine sheets); the [manifest](manifest.json) stores source file, sheet, SHA256, sample and setup status. '
             'Original order and repeated distances are preserved. Review repeated positions before using a data-only file in a model. '
             'Mutch Fo and its uncertainty were converted from mole fraction to mol%; Gordeychik distances from mm to µm. '
             'No synthetic points or interpolated measurements were inserted. '
             '[Browse every extracted profile](catalogue.md). '
-            '[Independent extraction audit](data_audit.md) checked all 11,758 source rows.','']
+            '[Independent extraction audit](data_audit.md) checked all 11,758 source rows of the first eight studies.','']
     lines += ['`tests/test_validation.py` rechecks the manifest, the Lynn model setup, the GUI preset and the Gordeychik arithmetic on every test run. '
               'Wheel contents and loading were verified in an isolated installation. '
               '[Mutch input requirements](mutch_notes.md) explain why its joint inversion has not been replaced by an assumed single-species fit.','']
     (ROOT/'report.md').write_text('\n'.join(lines),encoding='utf8')
     catalogue=['# Extracted measured profiles','','These are measurements. Only entries marked **preset** have a bundled model setup.','',
-               '| Study / crystal | Points | Setup | CSV |','|---|---:|---|---|']
+               '| Study / crystal | Mineral | Points | Setup | CSV |','|---|---|---:|---|---|']
     for r in records:
-        ready=r['study']=='lynn2024' and r.get('setup') and r['sample']!='Ol 8'
-        catalogue.append(f"| {r['study']} / {r['sample']} | {r['n_points']} | {'preset' if ready else 'data only'} | [profile]({r['file']}) |")
+        catalogue.append(f"| {r['study']} / {r['sample']} | {r.get('mineral','olivine')} | {r['n_points']} | "
+                         f"{'preset' if r['key'] in BY_KEY else 'data only'} | [profile]({r['file']}) |")
     (ROOT/'catalogue.md').write_text('\n'.join(catalogue)+'\n',encoding='utf8')
 
 

@@ -85,7 +85,7 @@ def main():
     parser.add_argument('--nodes',type=int,default=401)
     parser.add_argument('--output',type=Path,default=ROOT/'results.json')
     args=parser.parse_args()
-    selected=[r for r in records() if r.get('setup') and r['sample']!='Ol 8']
+    selected=[r for r in records() if r['study']=='lynn2024' and r.get('setup') and r['sample']!='Ol 8']
     if args.key:
         selected=[r for r in selected if r['key'] in args.key]
         if len(selected)!=len(set(args.key)):

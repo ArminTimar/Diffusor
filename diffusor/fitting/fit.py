@@ -113,8 +113,9 @@ def scan_time(model: DiffusionModel, x_data, C_data, sigma=None,
               free=None, overrides=None) -> Tuple[float, np.ndarray, np.ndarray]:
     """Coarse logarithmic scan of chi2 against time.
 
-    Default range is 100 s to about 100 kyr, which brackets everything from
-    syn-eruptive ascent to long crustal residence (Costa et al. 2020).
+    Default range is 100 s to 3.2e14 s (about 10 Myr). Costa et al. (2020) give
+    diffusion timescales from seconds to hundreds of thousands of years; the upper
+    bound is wider to leave room for the Monte Carlo (see T_MAX_DEFAULT).
     """
     if not n:
         # about six points per decade, so a wider range is not scanned more coarsely

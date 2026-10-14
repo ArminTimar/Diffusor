@@ -24,9 +24,10 @@ from PySide6.QtWidgets import (QApplication, QCheckBox, QComboBox, QDialog, QDia
                                QSplitter, QStackedWidget, QTableWidget, QTableWidgetItem,
                                QVBoxLayout, QWidget)
 
+from .. import crystal_setup as cs
 from .. import datasets as ds
 from .. import updates
-from ..coefficients import Conditions, get as get_coefficient, list_coefficients
+from ..coefficients import get as get_coefficient, list_coefficients
 from ..coefficients.plagioclase import (ACTIVITY_SETS, ACTIVITY_SPECIES, DEFAULT_ACTIVITY_SET,
                                          activity_A, activity_note)
 from ..dataio import ProfileSpec, build_profile, read_table, save_results, suggest_spec
@@ -43,6 +44,7 @@ from ..solvers.history import ThermalHistory
 from ..solvers.initial import guess_step_from_data
 from ..thermo import available_buffers, log_fo2_from_delta
 from ..thermo.units import human_time
+from ..crystal_setup import EXCHANGE_SPECIES, WT_PERCENT_VARIABLES
 from . import format_help, richtext, theme
 from .example_tree import ExampleTree
 from .export_dialog import ExportDialog
@@ -58,13 +60,6 @@ from .workers import CompareWorker, FitWorker, MonteCarloWorker, UpdateWorker, s
 STEPS = ["Data", "Mineral", "Coefficient", "Conditions", "Model", "Uncertainty", "Results"]
 DATA, MINERAL, COEFFICIENT, CONDITIONS, MODEL, UNCERTAINTY, RESULTS = range(len(STEPS))
 
-# For these species the profile is the mineral's own composition variable (X_Fe, X_An,
-# ...). For every other species it is a concentration (TiO2 wt%, Sr ppm) that says
-# nothing about the host composition the law needs.
-# species whose profile is the composition variable the law depends on (melt H2O: D grows with C_H2Ot)
-EXCHANGE_SPECIES = ("Fe-Mg", "Fe-Ti", "NaSi-CaAl", "Na-K", "H2O")
-# composition variables given in wt% rather than as a mole fraction
-WT_PERCENT_VARIABLES = ("H2Ot",)
 
 # how many of the user's own profile files the Data step remembers
 RECENT_MAX = 10
@@ -332,6 +327,8 @@ class MainWindow(QMainWindow):
         self.profile = None
         self.dataset: Optional[ds.ExampleDataset] = None
         self.an_values = None
+        self._an_column: Optional[str] = None   # the anorthite column and whether it is in %
+        self._an_percent = True
         # Where the representative composition came from: "default", "profile" (the
         # profile mean, written by the program and taken back when it stops applying)
         # or "explicit" (typed in, or set by an example or an anorthite column).
@@ -466,12 +463,17 @@ class MainWindow(QMainWindow):
     def _build_menu(self):
         m = self.menuBar().addMenu("&File")
         for text, fn in (("Load profile...", self.load_file),
+                         ("Open crystal setup...", lambda: self.open_setup()),
+                         ("Save crystal setup...", self.save_setup),
+                         (None, None),
                          ("Published validation library...", self.show_validation_library),
                          ("Extract profile from image...", self.show_image_extractor),
                          ("Export results...", self.export_results),
                          ("Export figure for Inkscape or CorelDRAW...", self.export_figure),
                          ("Shared-duration study...", self.show_joint_study),
                          ("Multicomponent and isotope study...", self.show_multicomponent_study),
+                         ("Batch of crystals...", self.show_batch_study),
+                         ("Timescale population...", self.show_population_study),
                          (None, None),
                          ("Quit", self.close)):
             if text is None:
@@ -1468,6 +1470,7 @@ class MainWindow(QMainWindow):
             self.profile = build_profile(df, spec, source=str(path))
             self.dataset = dataset
             self.an_values = None
+            self._an_column, self._an_percent = None, True
             self._release_composition()     # the last profile's mean is not this one's
             for lab in self._prefill.values():
                 lab.setVisible(False)
@@ -1483,6 +1486,7 @@ class MainWindow(QMainWindow):
                 msg = f"<b>{path.name}</b>, {_points_phrase(p)}"
                 self._mark_loaded_example(None)
                 if an[0]:
+                    self._an_column, self._an_percent = an[0], bool(an[1])
                     vals = self.profile.column(an[0])
                     self.an_values = vals / 100.0 if an[1] else vals
                 self._refresh_ic_options()
@@ -1564,6 +1568,7 @@ class MainWindow(QMainWindow):
             if s.get("an_is_percent"):
                 vals = vals / 100.0
             self.an_values = vals
+            self._an_column, self._an_percent = an_col, bool(s.get("an_is_percent"))
             self._set_xcomp(float(np.nanmean(vals)), "explicit")
             self._log(f"anorthite read from '{an_col}' "
                       f"(X_An {np.nanmin(vals):.2f} to {np.nanmax(vals):.2f})")
@@ -1961,29 +1966,9 @@ class MainWindow(QMainWindow):
 
     # -- representative composition --------------------------------------------
     def _profile_as_composition(self) -> Optional[np.ndarray]:
-        """The loaded profile in the law's composition coordinate, or None.
-
-        Only for an exchange species is the profile the mineral's composition
-        variable; olivine Fe-Mg goes through the chosen coordinate (X_Fe, X_Fo or
-        Fo mol%). A TiO2 wt% or ppm profile is a concentration, and its mean put
-        into x_Ti or X_An would be nonsense (5 wt% TiO2 became x_Ti = 1, and D 250
-        times too large). Values outside 0-1 are refused for the same reason
-        (0-100 for melt water, whose variable is C_H2Ot in wt%).
-        """
-        if self.profile is None or self.an_values is not None:
-            return None
-        mineral = get_mineral(self.cmb_mineral.currentData())
-        species = self.cmb_species.currentText()
-        if species not in EXCHANGE_SPECIES or mineral.composition_variable.key == "none":
-            return None
-        scale, offset = 1.0, 0.0
-        if mineral.key == "olivine" and species == "Fe-Mg":
-            scale, offset = self.cmb_ol_coordinate.currentData()
-        X = offset + scale * np.asarray(self._fit_profile().C, dtype=float)
-        top = 100.0 if mineral.composition_variable.key in WT_PERCENT_VARIABLES else 1.0
-        if not (np.all(np.isfinite(X)) and 0.0 <= X.min() and X.max() <= top):
-            return None
-        return X
+        """The loaded profile in the law's composition coordinate, or None
+        (see :func:`crystal_setup.profile_composition`)."""
+        return cs.profile_composition(self.current_settings(), self.profile, self.an_values)
 
     def _set_xcomp(self, value: float, source: str):
         self._xcomp_writing = True
@@ -2037,122 +2022,150 @@ class MainWindow(QMainWindow):
             keys = [self.lst_coef.currentItem().data(Qt.UserRole)]
         return keys
 
-    def _conditions(self, coef) -> Conditions:
-        T = self.sp_T.value() + 273.15
-        P = self.sp_P.value() * 1e6
-        lf = (log_fo2_from_delta(self.cmb_buffer.currentText(), self.sp_dbuf.value(), T, P)
-              if self.cmb_fo2_mode.currentIndex() == 0 else self.sp_dbuf.value())
-        mineral = get_mineral(self.cmb_mineral.currentData())
-        X = {}
-        for k in coef.requires:
-            X.setdefault(k, self.sp_xcomp.value())
-        axis = {1: "a", 2: "b", 3: "c"}.get(self.cmb_axis.currentIndex())
-        angles = ((self.sp_alpha.value(), self.sp_beta.value(), self.sp_gamma.value())
-                  if self.cmb_axis.currentIndex() == 4 else None)
-        return Conditions(T_K=T, P_Pa=P, log_fo2_bar=lf, X=X, axis=axis, angles_deg=angles)
-
-    def _boundary(self, cmb, plateau: float):
-        return zero_flux() if cmb.currentData() in ("rim_closed", "centre") else dirichlet(plateau)
+    def current_data(self) -> Optional[cs.CrystalData]:
+        """The loaded profile as a setup's data, with the points cut on the plot."""
+        p = self.profile
+        if p is None or p.raw is None or p.spec is None:
+            return None
+        return cs.CrystalData(table=p.raw, spec=p.spec, source=p.source,
+                              an_column=self._an_column, an_is_percent=self._an_percent,
+                              dataset_key=self.dataset.key if self.dataset is not None else None,
+                              excluded=None if p.excluded is None else p.excluded.tolist())
 
     def _model(self, coef_key: str) -> DiffusionModel:
-        coef = get_coefficient(coef_key)
-        cond = self._conditions(coef)
-        mineral = get_mineral(self.cmb_mineral.currentData())
-        species = self.cmb_species.currentText()
-        if self._table_ic():
-            values = self.profile.column(self.dataset.settings["initial_column"])
-            if not np.all(np.isfinite(values)):
-                raise ValueError("Published initial profile contains missing values in the fit window")
-            ic = InitialCondition("table", {"x_table": self.profile.x.copy(), "C_table": values.copy()},
-                                  description="Published tabulated initial profile (linear interpolation)")
-            c_left, c_right = float(values[0]), float(values[-1])
-        elif self._equilibrium_ic():
-            ic = InitialCondition(
-                "equilibrium_plag",
-                {"x_an_x": np.asarray(self.profile.x, dtype=float),
-                 "x_an_values": np.asarray(self.an_values, dtype=float),
-                 "T_K": cond.T_K, "species": species,
-                 "activity_set": self.cmb_activity.currentData() or DEFAULT_ACTIVITY_SET,
-                 "C_ref": float(self.sp_cl.value()),
-                 "X_An_ref": float(self.an_values[0])},
-                description=("equilibrium profile C0 exp(A X_An / RT) anchored at "
-                             + format(self.sp_cl.value(), ".4g")
-                             + " where X_An = " + format(float(self.an_values[0]), ".3f")
-                             + " (Dohmen et al. 2017 App. eq. A13)"))
-            c_left = float(self.sp_cl.value())
-            c_right = float(self.sp_cr.value())
-        else:
-            params = {"x0": self.sp_x0.value(), "C_left": self.sp_cl.value(),
-                      "C_right": self.sp_cr.value()}
-            if self.sp_smooth.value() > 0:
-                params["smooth"] = self.sp_smooth.value()
-            ic = InitialCondition("step", params)
-            c_left, c_right = params["C_left"], params["C_right"]
-        bcl = self._boundary(self.cmb_bcl, c_left)
-        bcr = self._boundary(self.cmb_bcr, c_right)
-        hist = (ThermalHistory.linear(cond.T_K, self.sp_Tend.value() + 273.15, 1.0)
-                if self.chk_cooling.isChecked() else None)
-        exchange = species in EXCHANGE_SPECIES
-        comp_key = mineral.composition_variable.key if self.chk_comp_dep.isChecked() and exchange else None
-        comp_scale, comp_offset = 1.0, 0.0
-        if mineral.key == "olivine" and species == "Fe-Mg":
-            comp_scale, comp_offset = self.cmb_ol_coordinate.currentData()
-            comp_key = "XFe" if self.chk_comp_dep.isChecked() else None
-        if comp_key and comp_key not in coef.requires:
-            comp_key = None
-
-        A_kJ = 0.0
-        an_grid = None
-        activity_set = self.cmb_activity.currentData() or DEFAULT_ACTIVITY_SET
-        if mineral.key == "plagioclase" and species in ACTIVITY_SPECIES and self.an_values is not None:
-            A_kJ = activity_A(species, cond.T_K, activity_set)
-        n_nodes = self.sp_nodes.value()
-        x_grid = None
-        if self.profile is not None:
-            lo = float(self.profile.x.min())
-            if self.dataset is not None and "domain_start_um" in self.dataset.settings:
-                # the crystal rim lies before the first analysis that was kept
-                lo = min(lo, float(self.dataset.settings["domain_start_um"]))
-            x_grid = np.linspace(lo, float(self.profile.x.max()), n_nodes)
-            if A_kJ and self.an_values is not None:
-                an_grid = np.interp(x_grid, self.profile.x, self.an_values)
-        return DiffusionModel(
-            coefficient=coef, conditions=cond, initial=ic,
-            geometry=Geometry(self.cmb_geom.currentText()),
-            bc_left=bcl, bc_right=bcr, history=hist,
-            beam_sigma_um=self.sp_beam.value(), n_nodes=n_nodes, x_grid=x_grid,
-            comp_key=comp_key, composition_dependent=bool(comp_key),
-            comp_scale=comp_scale, comp_offset=comp_offset,
-            an_profile=an_grid, activity_A_kJ=A_kJ if an_grid is not None else 0.0,
-            activity_set=activity_set if an_grid is not None else "",
-            force_numerical=self.cmb_solver.currentIndex() == 1,
-            boundaries_far=self._boundaries_far(),
-            fo2_buffer=((self.cmb_buffer.currentText(), self.sp_dbuf.value())
-                        if self.cmb_fo2_mode.currentIndex() == 0 else None))
+        return cs.build_model(self.current_settings(), self.current_data(), coef_key,
+                              profile=self.profile, an_values=self.an_values)
 
     def _free_parameters(self):
-        free = ["t"]
-        if self._equilibrium_ic() or self._table_ic():
-            return free
-        if self.chk_free_x0.isChecked():
-            free.append("x0")
-        if self.chk_free_plateaus.isChecked():
-            free += ["C_left", "C_right"]
-        return free
+        return cs.free_parameters(self.current_settings(), self.current_data(), self.an_values)
 
     def _budget(self) -> UncertaintyBudget:
-        return UncertaintyBudget(
-            sigma_T_K=self.sp_T_sig.value() if self.chk_mc_T.isChecked() else 0.0,
-            fo2_mode="buffer" if self.cmb_fo2_mode.currentIndex() == 0 else "absolute",
-            buffer=self.cmb_buffer.currentText(),
-            delta_buffer=self.sp_dbuf.value(),
-            sigma_delta_buffer=self.sp_dbuf_sig.value() if self.chk_mc_f.isChecked() else 0.0,
-            sigma_log_fo2=self.sp_dbuf_sig.value() if self.chk_mc_f.isChecked() else 0.0,
-            sigma_P_Pa=self.sp_P_sig.value() * 1e6 if self.chk_mc_P.isChecked() else 0.0,
-            sample_coefficient=self.chk_mc_D.isChecked(),
-            coefficient_mode=self.cmb_dmode.currentData(),
-            sample_measurement_noise=self.chk_mc_n.isChecked(),
-            sigma_distance_scale=self.sp_xscale_sig.value() if self.chk_mc_x.isChecked() else 0.0)
+        return cs.budget(self.current_settings())
+
+    # ---------------------------------------------------------------- settings
+    def current_settings(self) -> Dict:
+        """Every setting of the steps as a flat dictionary (the keys of crystal_setup.DEFAULTS)."""
+        return {
+            "mineral": self.cmb_mineral.currentData(), "species": self.cmb_species.currentText(),
+            "coefficients": self._checked_keys() if self.lst_coef.count() else [],
+            "axis": cs.AXES[self.cmb_axis.currentIndex()],
+            "angles_deg": [self.sp_alpha.value(), self.sp_beta.value(), self.sp_gamma.value()],
+            "T_C": self.sp_T.value(), "sigma_T_K": self.sp_T_sig.value(),
+            "cooling": self.chk_cooling.isChecked(), "T_end_C": self.sp_Tend.value(),
+            "P_MPa": self.sp_P.value(), "sigma_P_MPa": self.sp_P_sig.value(),
+            "fo2_mode": cs.FO2_MODES[self.cmb_fo2_mode.currentIndex()],
+            "buffer": self.cmb_buffer.currentText(), "fo2_value": self.sp_dbuf.value(),
+            "sigma_fo2": self.sp_dbuf_sig.value(),
+            "x_composition": self.sp_xcomp.value(), "x_composition_source": self._xcomp_source,
+            "composition_dependent": self.chk_comp_dep.isChecked(),
+            "olivine_coordinate": max(0, self.cmb_ol_coordinate.currentIndex()),
+            "geometry": self.cmb_geom.currentText(),
+            "bc_left": self.cmb_bcl.currentData(), "bc_right": self.cmb_bcr.currentData(),
+            "initial_condition": self.cmb_ic.currentData() or "step",
+            "activity_set": self.cmb_activity.currentData() or DEFAULT_ACTIVITY_SET,
+            "x0_um": self.sp_x0.value(), "C_left": self.sp_cl.value(), "C_right": self.sp_cr.value(),
+            "smooth_um": self.sp_smooth.value(),
+            "fit_x0": self.chk_free_x0.isChecked(), "fit_plateaus": self.chk_free_plateaus.isChecked(),
+            "solver": cs.SOLVERS[self.cmb_solver.currentIndex()], "n_nodes": self.sp_nodes.value(),
+            "resolution": self.cmb_resolution.currentText(),
+            "beam_width_um": self.sp_width.value(), "beam_sigma_um": self.sp_beam.value(),
+            "distance_scale_sigma": self.sp_xscale_sig.value(),
+            "mc_draws": self.sp_draws.value(), "mc_seed": self.sp_seed.value(),
+            "mc_temperature": self.chk_mc_T.isChecked(), "mc_fo2": self.chk_mc_f.isChecked(),
+            "mc_pressure": self.chk_mc_P.isChecked(), "mc_coefficient": self.chk_mc_D.isChecked(),
+            "mc_noise": self.chk_mc_n.isChecked(), "mc_distance": self.chk_mc_x.isChecked(),
+            "mc_contributions": self.chk_contrib.isChecked(),
+            "coefficient_sampling": self.cmb_dmode.currentData(),
+        }
+
+    def apply_settings(self, settings: Dict) -> List[str]:
+        """Set every step from a settings dictionary; return what could not be set.
+
+        The order follows the dependencies between the steps: the mineral decides the
+        species, the species the coefficients, the coefficient the composition box, and
+        the initial-profile choices depend on the data. The step position and plateaus
+        come last, because choosing a mineral or an initial profile may guess them anew.
+        """
+        s = cs.complete(settings)
+        problems = []
+        i = self.cmb_mineral.findData(s["mineral"])
+        if i < 0:
+            problems.append(f"mineral {s['mineral']!r} is not available")
+        else:
+            self.cmb_mineral.setCurrentIndex(i)
+        if s["species"]:
+            if self.cmb_species.findText(s["species"]) < 0:
+                problems.append(f"species {s['species']!r} is not available for this mineral")
+            else:
+                self.cmb_species.setCurrentText(s["species"])
+        self._refresh_coefficients()
+        available = [self.lst_coef.item(i).data(Qt.UserRole) for i in range(self.lst_coef.count())]
+        missing = [k for k in s["coefficients"] if k not in available]
+        if missing:
+            problems.append("coefficients not in this version: " + ", ".join(missing))
+        if s["coefficients"] and len(missing) < len(s["coefficients"]):
+            self.lst_coef.blockSignals(True)
+            for i in range(self.lst_coef.count()):
+                it = self.lst_coef.item(i)
+                it.setCheckState(Qt.Checked if it.data(Qt.UserRole) in s["coefficients"]
+                                 else Qt.Unchecked)
+            self.lst_coef.blockSignals(False)
+            first = next(k for k in s["coefficients"] if k in available)
+            self.lst_coef.setCurrentRow(available.index(first))
+            self._on_coefficients_ticked()
+        self.cmb_axis.setCurrentIndex(cs.AXES.index(s["axis"]) if s["axis"] in cs.AXES else 0)
+        for widget, value in zip((self.sp_alpha, self.sp_beta, self.sp_gamma), s["angles_deg"]):
+            widget.setValue(float(value))
+        self.sp_T.setValue(s["T_C"])
+        self.sp_T_sig.setValue(s["sigma_T_K"])
+        self.chk_cooling.setChecked(bool(s["cooling"]))
+        self.sp_Tend.setValue(s["T_end_C"])
+        self.sp_P.setValue(s["P_MPa"])
+        self.sp_P_sig.setValue(s["sigma_P_MPa"])
+        self.cmb_fo2_mode.setCurrentIndex(cs.FO2_MODES.index(s["fo2_mode"]))
+        self.cmb_buffer.setCurrentText(s["buffer"])
+        self.sp_dbuf.setValue(s["fo2_value"])
+        self.sp_dbuf_sig.setValue(s["sigma_fo2"])
+        self.chk_comp_dep.setChecked(bool(s["composition_dependent"]))
+        self.cmb_ol_coordinate.setCurrentIndex(int(s["olivine_coordinate"]))
+        self.cmb_geom.setCurrentText(s["geometry"])
+        for cmb, key in ((self.cmb_bcl, "bc_left"), (self.cmb_bcr, "bc_right")):
+            i = cmb.findData(s[key])
+            cmb.setCurrentIndex(i if i >= 0 else 0)
+        i = self.cmb_activity.findData(s["activity_set"])
+        if i >= 0:
+            self.cmb_activity.setCurrentIndex(i)
+        self._refresh_ic_options()
+        self._select_ic(s["initial_condition"])
+        if self.cmb_ic.currentData() != s["initial_condition"]:
+            problems.append(f"initial profile {s['initial_condition']!r} does not apply to "
+                            "these data; a step is used")
+        self.sp_smooth.setValue(s["smooth_um"])
+        self.chk_free_x0.setChecked(bool(s["fit_x0"]))
+        self.chk_free_plateaus.setChecked(bool(s["fit_plateaus"]))
+        self.cmb_solver.setCurrentIndex(cs.SOLVERS.index(s["solver"]))
+        self.sp_nodes.setValue(int(s["n_nodes"]))
+        labels = [r[0] for r in RESOLUTION_PRESETS]
+        self.cmb_resolution.setCurrentIndex(labels.index(s["resolution"])
+                                            if s["resolution"] in labels else 0)
+        self.sp_width.setValue(s["beam_width_um"])
+        self.sp_beam.setValue(s["beam_sigma_um"])
+        self.sp_xscale_sig.setValue(s["distance_scale_sigma"])
+        self.sp_draws.setValue(int(s["mc_draws"]))
+        self.sp_seed.setValue(int(s["mc_seed"]))
+        for box, key in ((self.chk_mc_T, "mc_temperature"), (self.chk_mc_f, "mc_fo2"),
+                         (self.chk_mc_P, "mc_pressure"), (self.chk_mc_D, "mc_coefficient"),
+                         (self.chk_mc_n, "mc_noise"), (self.chk_mc_x, "mc_distance"),
+                         (self.chk_contrib, "mc_contributions")):
+            box.setChecked(bool(s[key]))
+        i = self.cmb_dmode.findData(s["coefficient_sampling"])
+        self.cmb_dmode.setCurrentIndex(i if i >= 0 else 0)
+        self._set_xcomp(s["x_composition"], s["x_composition_source"])
+        self._xcomp_fallback = None
+        self.sp_x0.setValue(s["x0_um"])
+        self.sp_cl.setValue(s["C_left"])
+        self.sp_cr.setValue(s["C_right"])
+        return problems
 
     def _y_label(self) -> str:
         mineral = get_mineral(self.cmb_mineral.currentData())
@@ -2196,7 +2209,7 @@ class MainWindow(QMainWindow):
         self._log("stop requested")
 
     def closeEvent(self, event):
-        for name in ("joint_study", "multicomponent_study"):
+        for name in ("joint_study", "multicomponent_study", "batch_study"):
             study = getattr(self, name, None)
             if study is not None and study.thread is not None and study.thread.isRunning():
                 study.abort()
@@ -2448,6 +2461,103 @@ class MainWindow(QMainWindow):
             self.multicomponent_study = MulticomponentStudyDialog(self)
         self.multicomponent_study.show()
         self.multicomponent_study.raise_()
+
+    def show_batch_study(self):
+        from .batch_study import BatchStudyDialog
+        if not hasattr(self, "batch_study"):
+            self.batch_study = BatchStudyDialog(self)
+        self.batch_study.show()
+        self.batch_study.raise_()
+
+    # ---------------------------------------------------------------- crystal setups
+    def save_setup(self):
+        """Save the data, the points cut, every setting and the current result."""
+        data = self.current_data()
+        if data is None:
+            QMessageBox.information(self, "Nothing to save", "Load a profile first.")
+            return
+        name = Path(data.source).stem if data.source else "crystal"
+        start = str(Path(self.output_dir()) / name) if self.output_dir() else name
+        path, _ = QFileDialog.getSaveFileName(self, "Save crystal setup", start + cs.SUFFIX,
+                                              "Diffusor setups (*.diffusor)")
+        if not path:
+            return
+        result = None if self._stale else cs.result_to_json(self.fit_result, self.mc_result)
+        try:
+            written = cs.save_setup(path, self.current_settings(), data, result)
+        except Exception:
+            QMessageBox.critical(self, "Could not save the setup", traceback.format_exc())
+            return
+        self._log(f"crystal setup saved: {written}"
+                  + ("" if result else " (no current result was saved with it)"))
+
+    def open_setup(self, path=None):
+        if path is None:
+            start = str(self._settings().value("recent/last_dir", "") or "")
+            path, _ = QFileDialog.getOpenFileName(
+                self, "Open crystal setup", start if start and Path(start).is_dir() else "",
+                "Diffusor setups (*.diffusor);;All files (*)")
+            if not path:
+                return
+        try:
+            crystal = cs.load_setup(path)
+        except ValueError as exc:
+            QMessageBox.warning(self, "Could not open the setup", str(exc))
+            return
+        except Exception:
+            QMessageBox.critical(self, "Could not open the setup", traceback.format_exc())
+            return
+        self._settings().setValue("recent/last_dir", str(Path(path).resolve().parent))
+        self.open_crystal(crystal, Path(path).name)
+
+    def open_crystal(self, crystal: "cs.Crystal", name: str = "", refit: bool = True) -> bool:
+        """Load a crystal's data and settings into the steps.
+
+        With a saved result the fit is run again, so the plot and the numbers on screen
+        belong to these settings; the saved Monte Carlo times are not redrawn.
+        """
+        if self._running():
+            self._status("Wait for the running calculation or press Stop.")
+            return False
+        data = crystal.data
+        source = Path(data.source) if data.source else Path(name or crystal.label)
+        if not self._use_table(data.table, data.spec, source, data.dataset,
+                               (data.an_column, data.an_is_percent)):
+            return False
+        if data.excluded is not None and any(data.excluded):
+            self._on_points_cut(np.asarray(data.excluded, dtype=bool))
+        problems = self.apply_settings(crystal.settings)
+        name = name or crystal.label
+        for lab in self._prefill.values():
+            lab.setVisible(False)
+        for step in (MINERAL, COEFFICIENT, CONDITIONS, MODEL):
+            self._show_prefill(step, f"Set by the saved setup {name}.")
+        self.btn_sources.setVisible(data.dataset is not None)
+        self.lbl_data.setText(f"<b>{name}</b>, {_points_phrase(self.profile)} The saved "
+                              "setup filled in every step.")
+        self._log(f"crystal setup opened: {name}" + "".join(f"\nnote: {m}" for m in problems))
+        self._rebuild_summary()
+        if problems:
+            QMessageBox.warning(self, "Part of the setup could not be restored", "\n".join(problems))
+        r = crystal.result
+        if r and refit:
+            saved = f"saved result {human_time(r['t_seconds'])}"
+            mc = r.get("montecarlo")
+            if mc and mc.get("times_s"):
+                t = np.asarray(mc["times_s"], dtype=float)
+                saved += (f", Monte Carlo median {human_time(float(np.median(t)))} "
+                          f"({len(t)} draws; run the Monte Carlo again to redraw it)")
+            self._log(saved)
+            self._go(RESULTS)
+            self.run_fit()
+        return True
+
+    def show_population_study(self):
+        from .population_study import PopulationStudyDialog
+        if not hasattr(self, "population_study"):
+            self.population_study = PopulationStudyDialog(self)
+        self.population_study.show()
+        self.population_study.raise_()
 
     def show_joint_study(self):
         from .joint_study import JointStudyDialog

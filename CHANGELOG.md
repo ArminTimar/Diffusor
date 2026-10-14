@@ -4,6 +4,32 @@ What changed between releases, newest first. The text under a version heading
 is what goes into the GitHub release, so it is written for someone deciding
 whether to update. Commit messages hold the details.
 
+## Unreleased
+
+### Added
+
+- **Crystal setups (File > Save crystal setup, Open crystal setup).** A `.diffusor`
+  file holds one crystal's data table, column mapping, points cut from the fit,
+  every setting and its current result. Opening it restores all steps and fits
+  again.
+- **Batch of crystals (File > Batch of crystals).** A table with one row per
+  crystal and one column per setting. Values in the first row apply to all
+  crystals; values in a crystal's row are that crystal's own and shown in bold.
+  Each added profile finds its own step and plateaus. Crystals open in the main
+  window for inspection and their changed settings are taken back into the table.
+  The batch fits all crystals, with or without Monte Carlo, with the same model as
+  the main window, and sends the results to the timescale population window. A
+  batch is saved as one `.diffusor` file.
+
+- **Timescale populations (File > Timescale population).** The timescales of
+  many crystals are compared in one figure: ranked times with their 68 % and
+  95 % intervals, a summed probability density per group and the cumulative
+  distribution, on one logarithmic time axis. Timescales come from the current
+  run, from exported results files (with their Monte Carlo times) or from a
+  CSV or Excel table, and are grouped by eruption, sample or any other label.
+  The export holds the timescales, group statistics, density curves, a methods
+  text and the figure as PNG, SVG and PDF.
+
 ## 0.5.0 (14 October 2026)
 
 ### Added

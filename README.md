@@ -263,6 +263,76 @@ residuals should be inspected before the profiles are interpreted as recording
 a single event. The export contains a study workbook and a full report for each
 profile.
 
+## Crystal setups and batches
+
+**File > Save crystal setup** writes one crystal to a `.diffusor` file: the profile
+table as it was loaded, the column mapping, the points cut from the fit on the plot,
+every setting of the steps and, when it is current, the fitted time and the Monte
+Carlo times. **File > Open crystal setup** restores the data and all settings and
+fits again, so the plot and the numbers on screen belong to the restored settings.
+The file is self-contained: it does not need the original data file.
+
+**File > Batch of crystals** fits many profiles that share most of their settings.
+The window is a table with one row per crystal and one column per setting
+(diffusion law, temperature, pressure, oxygen fugacity, host composition, traverse
+direction and angles, boundaries, step position, plateaus, fitted parameters, beam
+width and others; *Columns* chooses which are shown). The first row, *All
+crystals*, holds the settings of every crystal: a value entered there applies to
+all crystals, and Diffusor asks whether crystals that have their own value should
+keep it. A value entered in a crystal's row belongs to that crystal only and is
+shown in bold; the context menu returns it to the shared value or copies it to all
+crystals.
+
+A batch starts from the settings of the main window. Profiles added with *Add
+profiles* share one column mapping (the mapping dialog opens again for a file
+whose columns differ), and each takes its step position and plateaus from its own
+data. Crystals can also be added from saved setups, from another batch, or from
+the main window. *Open in main window* loads one crystal into the steps to inspect
+its fit or move its step; *Take back from main window* returns the changed
+settings to its row. *Fit* and *Fit and Monte Carlo* run the selected crystals, or
+all of them, one after another, using the same model as the main window; the table
+shows the status, best-fit time, Monte Carlo 68 % interval and reduced χ² of each,
+and a crystal whose fit produced warnings is marked for checking. *Send to
+population* passes the results to the timescale population window with their
+groups. A batch is saved as one `.diffusor` file holding the shared settings and
+every crystal's data, own values and result.
+
+## Timescale populations
+
+**File > Timescale population** compares the timescales of many crystals in one
+figure. Timescales are added from the run in the main window, from a batch of
+crystals, from saved crystal setups and batches (`.diffusor`), from results files
+saved with *Export results* (`*_results.json`, with the Monte Carlo times read from
+the `*_montecarlo_times.csv` beside it when that file was exported), or from a CSV
+or Excel table with one row per crystal. Each timescale belongs to
+a group, such as an eruption, a sample or a mineral, and up to eight groups are
+drawn with their own colour and marker. The figure has three panels on one
+logarithmic time axis, each of which can be switched off:
+
+* **Ranked timescales**: the best-fit time of each crystal with its 68 % and
+  95 % intervals, sorted within each group.
+* **Summed probability density**: for each group, the mean of its crystals'
+  probability densities in log<sub>10</sub> time, each normalised to one, so
+  every crystal has the same weight. A crystal with Monte Carlo times
+  contributes a Gaussian kernel density estimate of log<sub>10</sub> t with the
+  rule-of-thumb bandwidth of Silverman (1986); a crystal with only a 68 %
+  interval contributes two half-normals joined at the median, each holding
+  half of the probability, so the 16th and 84th percentiles fall at the given
+  bounds. A crystal without an uncertainty appears only in the other two
+  panels.
+* **Cumulative distribution**: the empirical distribution of the best-fit
+  times of each group.
+
+A table is read by its column names, ignoring case: a label (`label`,
+`crystal`, `name` or `id`), an optional group (`group`, `eruption`,
+`population` or `event`), the time (`time`, `t`, `best` or `median`), and
+optionally a 68 % interval (`p16` and `p84`, or `lower` and `upper`), a 95 %
+interval (`p2.5` and `p97.5`) or a standard deviation in log<sub>10</sub> units
+(`sigma_log10`). The unit of a column is given in its name, for example
+`time (days)` or `p16_yr`, or in a `unit` column; otherwise it is asked for when
+the table is loaded. The export contains the timescales and group statistics
+as CSV, the density curves, a methods text and the figure as PNG, SVG and PDF.
+
 ## Multicomponent and isotope profiles
 
 **File > Multicomponent and isotope study** has two tabs.
@@ -604,7 +674,7 @@ with Sievwright et al. (2020) within half a log unit for Ti, Mn and Co.
 
 ## Verification
 
-The test suite contains 515 tests and runs on Windows, macOS and Linux
+The test suite contains 549 tests and runs on Windows, macOS and Linux
 with Python 3.10 and 3.13 on every change to the repository (see the badge at
 the top). It does not access the network. The tests cover the following.
 

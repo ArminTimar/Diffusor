@@ -97,3 +97,121 @@ def joint_figure(result):
         residual = fig.add_subplot(grid[2*i+1], sharex=ax)
         _profile(ax, residual, fit, name=name)
     return fig
+
+
+# validated categorical order (colour-vision-deficiency separation checked); a group
+# also gets its own marker, so identity never rests on colour alone
+GROUP_COLOURS = ("#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4", "#008300", "#4a3aa7", "#e34948")
+GROUP_MARKERS = ("o", "s", "D", "^", "v", "P", "X", "h")
+POPULATION_PANELS = ("ranked", "density", "cumulative")
+
+
+def population_figure(records, panels=POPULATION_PANELS, unit=None):
+    """Ranked times, summed densities and cumulative curves on one shared time axis."""
+    from matplotlib.lines import Line2D
+    from matplotlib.ticker import FuncFormatter
+    from ..population import (TIME_UNITS, UNIT_NAMES, auto_unit, group_density,
+                              group_name, groups_of, log_grid)
+    if not records:
+        raise ValueError("the population is empty")
+    panels = [p for p in POPULATION_PANELS if p in panels] or ["ranked"]
+    groups = groups_of(records)
+    if len(groups) > len(GROUP_COLOURS):
+        raise ValueError(f"{len(groups)} groups; a figure can tell at most {len(GROUP_COLOURS)} "
+                         "apart. Merge groups or plot them in separate figures.")
+    unit = unit or auto_unit(records)
+    f = TIME_UNITS[unit]
+    colour = {g: GROUP_COLOURS[i] for i, g in enumerate(groups)}
+    marker = {g: GROUP_MARKERS[i] for i, g in enumerate(groups)}
+    members = {g: [r for r in records if r.group == g] for g in groups}
+    named = len(groups) > 1 or groups[0] != ""
+
+    heights = {"ranked": max(2.6, min(6.5, 0.16 * len(records) + 1.4)), "density": 2.4, "cumulative": 2.2}
+    fig = Figure(figsize=(9, sum(heights[p] for p in panels) + 1.0), facecolor="#fafcfb",
+                 layout="constrained")
+    FigureCanvasAgg(fig)
+    t_all = np.array([r.t_best for r in records])
+    fig.suptitle(f"DIFFUSOR  /  TIMESCALE POPULATION\n{len(records)} timescales · "
+                 f"median {human_time(float(np.median(t_all)))}", x=.06, ha="left", color=INK, fontsize=14)
+    grid = fig.add_gridspec(len(panels), 1, height_ratios=[heights[p] for p in panels])
+    lg = log_grid(records)
+    axes, first = {}, None
+    for i, p in enumerate(panels):
+        ax = fig.add_subplot(grid[i], sharex=first)
+        first = first or ax
+        _style(ax)
+        ax.set_xscale("log")
+        ax.grid(axis="x", which="major", color="#edf1f2", linewidth=.7)
+        axes[p] = ax
+    first.set_xlim(10 ** lg[0] / f, 10 ** lg[-1] / f)
+
+    def title(ax, text):
+        ax.set_title(text, loc="left", fontsize=11, color=INK, fontweight="bold", pad=8)
+
+    if "ranked" in axes:
+        ax = axes["ranked"]
+        title(ax, "Ranked timescales")
+        y, ticks, labels = 0, [], []
+        for g in groups:
+            for r in sorted(members[g], key=lambda r: r.t_best):
+                c = colour[g]
+                if r.p2_5 and r.p97_5:
+                    ax.plot([r.p2_5 / f, r.p97_5 / f], [y, y], color=c, linewidth=.9, alpha=.55,
+                            solid_capstyle="round")
+                if r.has_interval:
+                    ax.plot([r.p16 / f, r.p84 / f], [y, y], color=c, linewidth=2.4, solid_capstyle="round")
+                ax.plot(r.t_best / f, y, marker[g], color=c, markersize=6.5,
+                        markeredgecolor="white", markeredgewidth=.9, zorder=3)
+                ticks.append(y)
+                labels.append(r.label)
+                y += 1
+            y += 1 if len(groups) > 1 else 0      # a gap between groups
+        ax.set_ylim(-1, y)
+        if len(records) <= 30:
+            ax.set_yticks(ticks, labels, fontsize=7)
+        else:
+            ax.set_yticks([])
+            ax.set_ylabel("Crystals, shortest at the bottom", color=INK)
+        ax.grid(axis="y", visible=False)
+
+    if "density" in axes:
+        ax = axes["density"]
+        title(ax, "Summed probability density")
+        x = 10 ** lg / f
+        drawn = 0
+        for g in groups:
+            d, n = group_density(members[g], lg)
+            if d is None:
+                continue
+            ax.fill_between(x, d, color=colour[g], alpha=.10, linewidth=0)
+            ax.plot(x, d, color=colour[g], linewidth=2)
+            drawn += 1
+        if not drawn:
+            ax.text(.5, .5, "No timescale has an uncertainty, so there is no density to draw.",
+                    transform=ax.transAxes, ha="center", va="center", color=MUTED, fontsize=9)
+        ax.set_ylim(bottom=0)
+        ax.set_ylabel("Density per log$_{10}$ t", color=INK)
+
+    if "cumulative" in axes:
+        ax = axes["cumulative"]
+        title(ax, "Cumulative distribution of best-fit times")
+        for g in groups:
+            t = np.sort([r.t_best for r in members[g]]) / f
+            frac = np.arange(1, t.size + 1) / t.size
+            ax.step(np.r_[t[0], t], np.r_[0, frac], where="post", color=colour[g], linewidth=2)
+        ax.set_ylim(0, 1.03)
+        ax.set_ylabel("Fraction of crystals", color=INK)
+
+    fmt = FuncFormatter(lambda v, _: f"{v:g}")
+    for p, ax in axes.items():
+        ax.xaxis.set_major_formatter(fmt)
+        if p != panels[-1]:
+            ax.tick_params(labelbottom=False)
+    axes[panels[-1]].set_xlabel(f"Time ({UNIT_NAMES[unit]})", color=INK)
+    if named:
+        handles = [Line2D([], [], color=colour[g], marker=marker[g], markersize=6.5, linewidth=2,
+                          markeredgecolor="white", label=f"{group_name(g)} (n = {len(members[g])})")
+                   for g in groups]
+        axes[panels[0]].legend(handles=handles, loc="best", frameon=True, fancybox=False,
+                               framealpha=.95, facecolor="white", edgecolor="#ccd7d9", fontsize=8)
+    return fig

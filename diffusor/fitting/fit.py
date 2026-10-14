@@ -173,8 +173,12 @@ def fit_time(model: DiffusionModel, x_data, C_data, sigma=None,
             p0.append(float(model.initial.params.get("x0", np.mean(x_data))))
             lo.append(float(x_data.min())); hi.append(float(x_data.max()))
         elif nme in ("C_left", "C_right"):
-            p0.append(float(model.initial.params.get(nme, c_lo if nme == "C_left" else c_hi)))
-            lo.append(c_lo - c_pad); hi.append(c_hi + c_pad)
+            start = float(model.initial.params.get(nme, c_lo if nme == "C_left" else c_hi))
+            p0.append(start)
+            # a plateau held at a crystal rim can lie beyond every measured point (the
+            # outermost analysis rejected, the rim outside the traverse), so the bounds
+            # always include the starting value
+            lo.append(min(c_lo - c_pad, start - 1e-9)); hi.append(max(c_hi + c_pad, start + 1e-9))
         elif nme == "beam_sigma":
             p0.append(max(model.beam_sigma_um, 0.5))
             lo.append(0.0); hi.append(max(0.1 * span, 1.0))

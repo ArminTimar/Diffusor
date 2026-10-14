@@ -197,6 +197,9 @@ class DiffusionCoefficient:
     fixed_temperature_K: Optional[float] = None
     # Keys of the tracer laws an interdiffusion law was computed from (diffusor.coefficients.transport)
     derived_from: Sequence[str] = ()
+    # A law as a published application study printed and used it (diffusor.coefficients.study_laws):
+    # the registry key of the calibration it was taken from, if that calibration is an entry
+    variant_of: str = ""
 
     def __post_init__(self):
         if self.kind not in TRANSPORT_KINDS:
@@ -380,6 +383,8 @@ class DiffusionCoefficient:
                       f"  validation      : {self.validation_level}"])
         if self.derived_from:
             lines.append(f"  computed from   : {', '.join(self.derived_from)}")
+        if self.variant_of:
+            lines.append(f"  study form of   : {self.variant_of}")
         if self.transported_variable:
             lines.append(f"  state variable  : {self.transported_variable}")
         if self.reference_state:

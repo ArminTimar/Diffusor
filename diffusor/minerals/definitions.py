@@ -115,6 +115,7 @@ PLAGIOCLASE = Mineral(
         "Sr": Species("Sr", "Sr", "trace", "depends on An content"),
         "Ba": Species("Ba", "Ba", "trace", "depends on An content"),
         "Li": Species("Li", "Li", "trace"),
+        "K": Species("K", "K", "trace", "depends on An content"),
         "NaSi-CaAl": Species("NaSi-CaAl", "coupled NaSi-CaAl interdiffusion", "interdiffusion",
                              "the anorthite profile itself, normally treated as frozen"),
     },
@@ -189,6 +190,8 @@ GARNET = Mineral(
                          "almandine-pyrope garnet with little Mn and Ca"),
         "Fe": Species("Fe", "Fe tracer", "tracer"),
         "Mg": Species("Mg", "Mg tracer", "tracer"),
+        "Ca": Species("Ca", "Ca-(Fe,Mg) interdiffusion", "interdiffusion",
+                      "effective binary coefficient (Vielzeuf et al. 2007)"),
     },
     isotropic=True,
     notes=("Space group Ia3d, general formula X3Y2Si3O12: DHZ 2013, p. 18. The ideal "
@@ -198,6 +201,24 @@ GARNET = Mineral(
            "multicomponent exchange with large off-diagonal terms (Chakraborty & Ganguly 1992), "
            "which File > Multicomponent and isotope study models. The scalar Fe-Mg law here is "
            "for near-binary almandine-pyrope garnet."),
+)
+
+# Water in silicate melt: the composition variable is the diffusing quantity itself, in wt%.
+H2O_T = CompositionVariable(
+    "H2Ot", "C_H2Ot", "total dissolved water (H2O molecules plus OH groups), wt% (Behrens et al. 2004)",
+    default_mode="A", citation="behrens2004")
+MELT = Mineral(
+    key="melt", name="Silicate melt (glass)", formula="-", system="amorphous (isotropic)",
+    axes=("a", "b", "c"),
+    composition_variable=H2O_T,
+    species={"H2O": Species("H2O", "H2Ot, total water", "interdiffusion",
+                            "effective binary interdiffusion of water with the rest of the melt")},
+    isotropic=True,
+    notes=("A melt or glass is isotropic, so the axes a, b and c are Diffusor's convention only. Behrens et al. "
+           "(2004) treat bulk water diffusion as effective binary interdiffusion between H2O and the rest of the "
+           "melt, since microprobe traverses showed no change in the relative proportions of the anhydrous "
+           "components (abstract). D depends on the water content, so the profile itself (C_H2Ot in wt%) is "
+           "the composition variable."),
 )
 
 MINERALS = {m.key: m for m in (OLIVINE, ORTHOPYROXENE, CLINOPYROXENE, PLAGIOCLASE, KFELDSPAR,
@@ -245,6 +266,8 @@ for _key, _name, _formula, _system, _species in (
                   "hence the tetragonal system.")
     MINERALS[_key] = Mineral(_key, _name, _formula, _system, ("a", "b", "c"),
                             {s: Species(s, s, "trace") for s in _species}, TRACE, notes=_note)
+
+MINERALS["melt"] = MELT          # last in the lists: a phase, not a mineral
 
 for _sp in ("Ni", "Zn", "Sc", "Ga", "In", "Y", "Lu", "V3+", "V4+", "Zr", "Hf", "U", "Nb", "Ta", "Mo"):
     MAGNETITE.species[_sp] = Species(_sp, _sp, "trace")

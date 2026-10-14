@@ -20,7 +20,7 @@ def main():
     g=load('gordeychik_results.json'); opx=load('ostorero_results.json'); araya=load('araya_results.json')
     mourey=load('mourey_results.json')
     reunion=load('reunion_results.json'); eifel=load('eifel_results.json')
-    iovine=load('iovine_results.json'); tables=load('timescale_tables_results.json')
+    iovine=load('iovine_results.json'); tables=load('timescale_tables_results.json'); lynnml=load('lynn_ml_results.json')
     from diffusor.datasets import BY_KEY
     presets=Counter(r['study'] for r in records if r['key'] in BY_KEY)
     numbers={8:'eight',9:'nine',10:'ten',11:'eleven',12:'twelve',13:'thirteen',14:'fourteen'}
@@ -60,9 +60,9 @@ def main():
     axs[0].legend(fontsize=7,frameon=False)
     fig.savefig(ROOT/'profiles.png',dpi=180)
     plt.close(fig)
-    lines=['# Published-study validation — 8 October 2026','',
+    lines=['# Published-study validation — 9 October 2026','',
        f'{len(records)} measured profiles from {numbers.get(len(counts),len(counts))} downloaded studies are available in **File > Published validation library**. '
-       f"{presets['lynn2024']} Lynn olivine profiles and {presets['iovine2017']} Iovine sanidine profiles also have ready-to-run model presets in the usual example list. "
+       f"{presets['lynn2024'] + presets['lynn_ml2022']} Lynn olivine profiles (Kilauea 2020 and Mauna Loa 2022) and {presets['iovine2017']} Iovine sanidine profiles also have ready-to-run model presets in the usual example list. "
        'The remaining library entries are explicitly data-only. They require model setup before fitting.', '',
        '## What replicated','',
        f'**Lynn et al. (2024): all {len(results)} single-event reconstructions lie within the published uncertainty intervals.** '
@@ -115,6 +115,19 @@ def main():
         lines.append(f"| {r['sample']} | {r['published_table']}, {r['published_label']} | {r['published_years']:g} | {r['diffusor_years']:.2f} | {r['ratio']:.2f} |")
     lines+=['',f"Traverses with at least ten points ({presets['iovine2017']}) are presets in the example list under K-feldspar. "
              'The paper gives no uncertainty for single times; Fig. 7 shows the effect of ±26.5 °C. [Results](iovine_results.json).','',
+             '## Lynn et al. (2024): olivine at Mauna Loa 2022','',
+             f"**{lynnml['n_within_95']} of {lynnml['n']} reconstructions lie inside the published 95% intervals; the median ratio to the published median is {lynnml['ratio_median']:.2f} "
+             f"({lynnml['ratio_min']:.2f}–{lynnml['ratio_max']:.2f}).** "
+             'The paper (Nature Communications 15:9451, Methods pp. 7–8) models Fo with the Dohmen & Chakraborty (2007) law along c, six times faster than along a and b, projected on the EBSD angles; '
+             'a step at x_s with rim and core held at Fo_r and Fo_c; and samples Δt, T, P, fO₂, x_s, Fo_r and Fo_c by MCMC with Fo σ = 0.1 mol%, reporting posterior medians and equal-tailed 95% intervals (Supplementary Data 1, sheet S6). '
+             'Diffusor uses the same law, angles, initial and boundary conditions, holds T, P and fO₂ at the values printed on each crystal’s sheet (the centres of the paper’s priors), and fits Δt, x_s and both plateaus by least squares to the points marked Valid = 1, with the rim at x = 0. '
+             'A best fit at fixed conditions and a posterior median are not the same statistic, so agreement within the interval is the test. '
+             'ORI-4_ol18, the shortest profile (published 1.13 d, 95% 1.01–1.50 d), gives 0.91 d; its fit needs 801 grid nodes (0.9121 d, 0.9123 d on 1601), the others use 401. '
+             'All 59 traverses are presets in the example list under olivine.','',
+             '| Crystal | Location | Published median (95%) (d) | Diffusor (d) | Ratio |','|---|---|---:|---:|---:|']
+    for r in lynnml['fits']:
+        lines.append(f"| {r['sample']} | {r['location']} | {r['published_median_days']:.2f} ({r['published_95_days'][0]:.2f}–{r['published_95_days'][1]:.2f}) | {r['diffusor_days']:.2f} | {r['ratio']:.2f} |")
+    lines+=['','[Results](lynn_ml_results.json).','',
              '## Other executable checks','',
              '**Gordeychik et al. (2018).** All 32 published Fo age rows in Tables SM4-A, SM5-A and SM6-A reproduce to relative error below 4×10⁻¹⁶. '
              'These checks use the published fitted diffusion widths or Dt products and geometric factors. '
@@ -158,11 +171,12 @@ def main():
               + ' rows to within 1×10⁻⁴ of the stored values. '
               'They are absolute times at the two temperatures, not increments.','',
               f"**Petrone et al. (2018).** Table S4 gives √(4Dt) and T for each modelled boundary. For the {tables['petrone2018']['rows_checked']} rows fitted with the semi-infinite erf, "
-              't = (√(4Dt))²/4D with the Dimanov & Sautter (2000) values printed in Supplementary Material 1 (p. 13: D₀ = 9.5×10⁻⁵ m²/s, 406 kJ/mol) '
-              f"reproduces {tables['petrone2018']['within_5_percent_or_rounding']} printed times within 5% or rounding (median ratio {tables['petrone2018']['median_ratio']:.3f}). "
+              't = (√(4Dt))²/4D with the Dimanov & Sautter (2000) law (406 kJ/mol) and D₀ = 9.55×10⁻⁵ m²/s '
+              f"reproduces {tables['petrone2018']['within_5_percent_or_rounding']} printed times within 5% or rounding (median ratio {tables['petrone2018']['median_ratio']:.4f}). "
               f"The other {len(tables['petrone2018']['outside'])} are listed in the results file. "
               f"{tables['petrone2018']['finite_reservoir_rows_skipped']} rows use the finite-reservoir solution of NIDIS and are not recomputed. "
-              'Diffusor’s registry entry for this law carries D₀ = 9.55×10⁻⁵ m²/s, the value that reproduces the D values printed by Petrone et al. (2016); the check uses the 2018 value. '
+              'Supplementary Material 1 (p. 13) prints D₀ = 9.5×10⁻⁵ m²/s, which gives a median ratio of '
+              f"{tables['petrone2018']['median_ratio_with_printed_D0']:.4f}; 9.55×10⁻⁵ m²/s, the value of Diffusor’s registry entry, is the one that reproduces the D values NIDIS prints (Petrone et al. 2016), and it also centres these times. "
               '[Results](timescale_tables_results.json).','',
               '## Coverage and remaining requirements','',
               '| Study | Extracted profiles | What the downloaded material permits |','|---|---:|---|']
@@ -193,7 +207,7 @@ def main():
         lines.append(f"| {name} | {counts[s['key']] if counts[s['key']] else '—'} | {s['status']} |")
     lines+=['','A workbook of core/rim compositions is not a measured diffusion traverse. '
             'A case requiring different dimensions, multiple events or a Bayesian joint inversion has not been labelled an exact replication merely because a scalar curve can be fitted. '
-            'The supplements of Weller et al. (2026) and Kahl et al. (2023) have not been downloaded yet, and the article that goes with the Lynn et al. Mauna Loa 2022 workbook is not in the local source set.','',
+            'The supplements of Weller et al. (2026) and Kahl et al. (2023) have not been downloaded yet.','',
             '## Reproduce','',
             'Run from the repository root in the project environment:','',
             '```text','python examples/validation/extract.py','python -m diffusor.validation',
@@ -201,7 +215,8 @@ def main():
             'python examples/validation/check_ostorero.py','python examples/validation/check_araya.py',
             'python examples/validation/check_mourey.py',
             'python examples/validation/check_reunion.py','python examples/validation/check_eifel.py',
-            'python examples/validation/check_iovine.py','python examples/validation/check_timescale_tables.py',
+            'python examples/validation/check_iovine.py','python examples/validation/check_lynn_ml.py',
+            'python examples/validation/check_timescale_tables.py',
             'python examples/validation/export_curves.py','python examples/validation/build_report.py','```','',
             'The extractors read the original supplementary workbooks, downloaded from the DOIs above into `papers/Supplementaries and data/<study>/`, '
             'and need openpyxl and xlrd (Ruth XLS only). check_timescale_tables.py also reads the Chamberlain and Petrone workbooks there. '

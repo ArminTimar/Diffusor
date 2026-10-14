@@ -580,8 +580,70 @@ def _iovine_datasets():
     return result
 
 
+def _lynn_mauna_loa_datasets():
+    """Lynn et al. (2024) Mauna Loa 2022 olivine traverses with the paper's model.
+
+    Built from the manifest records of study ``lynn_ml2022``; the refit quoted in
+    ``expected`` comes from ``lynn_ml_results.json`` (examples/validation/check_lynn_ml.py).
+    """
+    import json
+    manifest = EXAMPLES_DIR / "validation" / "manifest.json"
+    refits = EXAMPLES_DIR / "validation" / "lynn_ml_results.json"
+    if not (manifest.exists() and refits.exists()):
+        return []
+    fits = {v["key"]: v for v in json.loads(refits.read_text(encoding="utf8"))["fits"]}
+    result = []
+    for r in json.loads(manifest.read_text(encoding="utf8")):
+        if r["study"] != "lynn_ml2022" or r["key"] not in fits:
+            continue
+        s, ts, f = r["source_conditions"], r["source_timescale"], fits[r["key"]]
+        lo, hi = f["published_95_days"]
+        result.append(ExampleDataset(
+            key=r["key"], name=f"Olivine, Mauna Loa 2022 {r['sample']}",
+            study="Lynn et al. 2024, Mauna Loa 2022", short=f"{r['sample']} ({ts['location']})",
+            mineral="olivine", species="Fe-Mg", filename="validation/" + r["file"],
+            kind="measured", citation="lynn2024maunaloa",
+            provenance=(f"Lynn et al. (2024), Nature Communications 15:9451, Supplementary Data 1, sheet "
+                        f"'{r['source_sheet']}' (sample {ts['sample']}). EPMA Fo along a traverse from the rim "
+                        "(Dist, micrometres). Rows with Valid = 0 in the workbook are kept in the file and left "
+                        "out of the fit. See examples/validation/manifest.json for the source rows and SHA256."),
+            spec=dict(distance_column="Distance_um", column_a="Fo_mol", mode="A", distance_unit="um",
+                      keep_column="Valid"),
+            settings=dict(T_C=s["T_C"], sigma_T_K=13.0, P_MPa=s["P_MPa"], sigma_P_MPa=0.0,
+                          fo2_absolute=s["log_fo2_bar"], sigma_delta=0.04, angles_deg=s["angles_deg"],
+                          coefficient="ol_FeMg_dohmen_chakraborty2007_tamed", geometry="plane",
+                          composition_dependent=True, olivine_coordinate=2, initial_condition="step",
+                          bc_left="rim_melt", bc_right="far", fit_plateaus=True, fit_x0=True,
+                          n_nodes=int(f.get("n_nodes", 401)), resolution="No correction",
+                          domain_start_um=0.0,
+                          initial_step=dict(C_left=float(ts["rim_Fo"]), C_right=float(ts["core_Fo"]))),
+            expected=(f"Lynn et al. (2024) report a median of {ts['median_days']:.1f} days (95% interval "
+                      f"{lo:.1f} to {hi:.1f}), sheet S6. With the same law, the sheet's T, P, fO2 and "
+                      f"angles and a step whose position and plateaus are fitted, Diffusor fits "
+                      f"{f['diffusor_days']:.1f} days. examples/validation/report.md compares all 59."),
+            notes=("The paper samples the time, T, P, fO2, the step position and both plateaus by MCMC and "
+                   "reports the posterior median. Diffusor holds T, P and fO2 at the sheet values (the "
+                   "centres of the paper's priors) and fits the time, the step and the plateaus by least "
+                   "squares. The rim is at x = 0 and held at the fitted rim composition, and the core end is a "
+                   "plateau. The fit starts from the rim and core Fo of sheet S6."),
+            sources=dict(T=(f"{s['T_C']:g} C from the crystal's sheet; the Methods (p. 7) take it from the "
+                            "Shea et al. olivine-melt thermometer. The +/-13 C is the standard deviation of "
+                            "the paper's temperature prior (p. 8)."),
+                         P=(f"{s['P_MPa']:g} MPa from the sheet, the centre of the upper reservoir at 1-2 km "
+                            "(p. 7). The paper's prior is uniform between 20 and 110 MPa (p. 8); no "
+                            "standard deviation is entered."),
+                         fO2=(f"log10 fO2 {s['log_fo2_bar']:g} bar from the sheet; the paper sets fO2 at "
+                              "QFM+0.4 (p. 7) and uses a +/-10 % relative prior (p. 8), entered as 0.04 "
+                              "log units."),
+                         resolution="The paper's model has no beam term (1 um EPMA beam), so none is added.",
+                         initial=("Step (Heaviside) at x_s, rim and core held at Fo_r and Fo_c (p. 8). The "
+                                  "fit starts from the rim and core Fo of sheet S6."))))
+    return result
+
+
 DATASETS.extend(_validation_datasets())
 DATASETS.extend(_iovine_datasets())
+DATASETS.extend(_lynn_mauna_loa_datasets())
 BY_KEY: Dict[str, ExampleDataset] = {d.key: d for d in DATASETS}
 
 

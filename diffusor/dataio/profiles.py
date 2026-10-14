@@ -77,6 +77,7 @@ class ProfileSpec:
     label: str = ""
     x_min: Optional[float] = None    # keep only points with x_min <= x <= x_max,
     x_max: Optional[float] = None    # in distance_unit; None means no limit
+    keep_column: Optional[str] = None  # rows whose value here is 0 are left out (e.g. a 'Valid' flag)
 
     def describe(self) -> str:
         s = f"x = '{self.distance_column}' [{self.distance_unit}], "
@@ -335,6 +336,13 @@ def build_profile(df: pd.DataFrame, spec: ProfileSpec, source: str = "") -> Prof
     ok = np.isfinite(x) & np.isfinite(C)
     if not np.all(ok):
         notes.append(f"{int((~ok).sum())} rows with missing values were dropped")
+    if spec.keep_column:
+        flag = np.asarray(pd.to_numeric(df[spec.keep_column], errors="coerce"), dtype=float)
+        kept = np.isfinite(flag) & (flag != 0)
+        n_flagged = int((ok & ~kept).sum())
+        ok = ok & kept
+        if n_flagged:
+            notes.append(f"{n_flagged} rows marked 0 in '{spec.keep_column}' were left out")
     n_out = 0
     if spec.x_min is not None or spec.x_max is not None:
         lo = -np.inf if spec.x_min is None else float(length_to_m(spec.x_min, spec.distance_unit)) * 1.0e6

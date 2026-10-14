@@ -1,0 +1,1664 @@
+{
+  "study": "lynn_ml2022",
+  "coefficient": "ol_FeMg_dohmen_chakraborty2007_tamed",
+  "classification": "best fit at the sheet T, P, fO2 and angles; the paper reports MCMC posterior medians",
+  "n": 59,
+  "n_within_95": 58,
+  "ratio_median": 1.0658986279040217,
+  "ratio_min": 0.8103569247937921,
+  "ratio_max": 1.3398820806655507,
+  "fits": [
+    {
+      "key": "lynn_ml2022_ori_1_ol1",
+      "sample": "ORI-1_ol1",
+      "location": "Northeast Rift Zone",
+      "published_median_days": 9.87688358408299,
+      "published_95_days": [
+        5.954483413615,
+        14.5493444490564
+      ],
+      "diffusor_days": 12.66626503081975,
+      "ratio": 1.2824151386406908,
+      "within_95": true,
+      "fitted": {
+        "x0_um": 19.996200000000005,
+        "Fo_rim": 80.36785933361828,
+        "Fo_core": 87.93965319485142
+      },
+      "n_points": 48,
+      "rmse_Fo": 0.0807662560199894,
+      "success": true,
+      "warnings": [
+        "Eq. 27 applies at fO2 above 1e-10 Pa (TaMED). At or below it use the PED entry (eq. 28).",
+        "The paper prints no temperature, pressure or composition limits for eq. 27. The 700-1200 C range is that of the Part I experiments (Dohmen et al. 2007), the pressure range reaches the 12 GPa data of Holzapfel et al. (2007) used in Fig. 7b, and the X_Fe range of 0 to 0.5 is Diffusor's choice (the m = 3 term derives from data in Chakraborty 1997, p. 424).",
+        "The paper's single compromise equation (eq. 29, erratum: -8.27, 226 kJ/mol, 3 (X_Fe - 0.14)) is not implemented.",
+        "the diffusion length 2*sqrt(Dt) = 30.6 um is a large fraction of the distance from the interface to the end of the profile (20.0 um). The far field has been reached, so the semi-infinite assumption is breaking down. Measure a longer traverse or model the whole crystal with an explicit geometry.",
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "lynn_ml2022_ori_1_ol3",
+      "sample": "ORI-1_ol3",
+      "location": "Northeast Rift Zone",
+      "published_median_days": 28.978000773342,
+      "published_95_days": [
+        16.9998191539382,
+        41.0217610742695
+      ],
+      "diffusor_days": 26.90192990788604,
+      "ratio": 0.9283570015166188,
+      "within_95": true,
+      "fitted": {
+        "x0_um": 0.444060201746751,
+        "Fo_rim": 80.96929575233986,
+        "Fo_core": 88.70537108293358
+      },
+      "n_points": 43,
+      "rmse_Fo": 0.10853253917304082,
+      "success": true,
+      "warnings": [
+        "Eq. 27 applies at fO2 above 1e-10 Pa (TaMED). At or below it use the PED entry (eq. 28).",
+        "The paper prints no temperature, pressure or composition limits for eq. 27. The 700-1200 C range is that of the Part I experiments (Dohmen et al. 2007), the pressure range reaches the 12 GPa data of Holzapfel et al. (2007) used in Fig. 7b, and the X_Fe range of 0 to 0.5 is Diffusor's choice (the m = 3 term derives from data in Chakraborty 1997, p. 424).",
+        "The paper's single compromise equation (eq. 29, erratum: -8.27, 226 kJ/mol, 3 (X_Fe - 0.14)) is not implemented.",
+        "the diffusion length 2*sqrt(Dt) = 17.5 um is a large fraction of the distance from the interface to the end of the profile (0.4 um). The far field has been reached, so the semi-infinite assumption is breaking down. Measure a longer traverse or model the whole crystal with an explicit geometry.",
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "lynn_ml2022_ori_1_ol4",
+      "sample": "ORI-1_ol4",
+      "location": "Northeast Rift Zone",
+      "published_median_days": 9.22900934715007,
+      "published_95_days": [
+        6.67170525913421,
+        12.9108581182848
+      ],
+      "diffusor_days": 8.473820766055635,
+      "ratio": 0.918172302932206,
+      "within_95": true,
+      "fitted": {
+        "x0_um": 14.968714067657075,
+        "Fo_rim": 77.68130648951973,
+        "Fo_core": 88.61123467862802
+      },
+      "n_points": 19,
+      "rmse_Fo": 0.1342773189856961,
+      "success": true,
+      "warnings": [
+        "Eq. 27 applies at fO2 above 1e-10 Pa (TaMED). At or below it use the PED entry (eq. 28).",
+        "The paper prints no temperature, pressure or composition limits for eq. 27. The 700-1200 C range is that of the Part I experiments (Dohmen et al. 2007), the pressure range reaches the 12 GPa data of Holzapfel et al. (2007) used in Fig. 7b, and the X_Fe range of 0 to 0.5 is Diffusor's choice (the m = 3 term derives from data in Chakraborty 1997, p. 424).",
+        "The paper's single compromise equation (eq. 29, erratum: -8.27, 226 kJ/mol, 3 (X_Fe - 0.14)) is not implemented.",
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "lynn_ml2022_ori_1_ol5",
+      "sample": "ORI-1_ol5",
+      "location": "Northeast Rift Zone",
+      "published_median_days": 40.962348177078,
+      "published_95_days": [
+        28.5159483362009,
+        57.6835171668257
+      ],
+      "diffusor_days": 50.49649471783918,
+      "ratio": 1.2327539060882344,
+      "within_95": true,
+      "fitted": {
+        "x0_um": 8.028540000000001,
+        "Fo_rim": 82.49433276555783,
+        "Fo_core": 89.31495172459466
+      },
+      "n_points": 29,
+      "rmse_Fo": 0.08611965292311805,
+      "success": true,
+      "warnings": [
+        "Eq. 27 applies at fO2 above 1e-10 Pa (TaMED). At or below it use the PED entry (eq. 28).",
+        "The paper prints no temperature, pressure or composition limits for eq. 27. The 700-1200 C range is that of the Part I experiments (Dohmen et al. 2007), the pressure range reaches the 12 GPa data of Holzapfel et al. (2007) used in Fig. 7b, and the X_Fe range of 0 to 0.5 is Diffusor's choice (the m = 3 term derives from data in Chakraborty 1997, p. 424).",
+        "The paper's single compromise equation (eq. 29, erratum: -8.27, 226 kJ/mol, 3 (X_Fe - 0.14)) is not implemented.",
+        "the diffusion length 2*sqrt(Dt) = 26.2 um is a large fraction of the distance from the interface to the end of the profile (8.0 um). The far field has been reached, so the semi-infinite assumption is breaking down. Measure a longer traverse or model the whole crystal with an explicit geometry.",
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "lynn_ml2022_ori_1_ol6",
+      "sample": "ORI-1_ol6",
+      "location": "Northeast Rift Zone",
+      "published_median_days": 15.2264194772887,
+      "published_95_days": [
+        8.69340518423572,
+        23.0370815453479
+      ],
+      "diffusor_days": 16.320390674989277,
+      "ratio": 1.0718469105184127,
+      "within_95": true,
+      "fitted": {
+        "x0_um": 0.2377827871916014,
+        "Fo_rim": 80.94424170528826,
+        "Fo_core": 84.56562811054035
+      },
+      "n_points": 37,
+      "rmse_Fo": 0.10041005606914188,
+      "success": true,
+      "warnings": [
+        "Eq. 27 applies at fO2 above 1e-10 Pa (TaMED). At or below it use the PED entry (eq. 28).",
+        "The paper prints no temperature, pressure or composition limits for eq. 27. The 700-1200 C range is that of the Part I experiments (Dohmen et al. 2007), the pressure range reaches the 12 GPa data of Holzapfel et al. (2007) used in Fig. 7b, and the X_Fe range of 0 to 0.5 is Diffusor's choice (the m = 3 term derives from data in Chakraborty 1997, p. 424).",
+        "The paper's single compromise equation (eq. 29, erratum: -8.27, 226 kJ/mol, 3 (X_Fe - 0.14)) is not implemented.",
+        "the diffusion length 2*sqrt(Dt) = 14.3 um is a large fraction of the distance from the interface to the end of the profile (0.2 um). The far field has been reached, so the semi-infinite assumption is breaking down. Measure a longer traverse or model the whole crystal with an explicit geometry.",
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "lynn_ml2022_ori_1_ol7",
+      "sample": "ORI-1_ol7",
+      "location": "Northeast Rift Zone",
+      "published_median_days": 47.0933694843396,
+      "published_95_days": [
+        32.2521086562775,
+        66.672951107853
+      ],
+      "diffusor_days": 56.13135712828209,
+      "ratio": 1.1919163513442796,
+      "within_95": true,
+      "fitted": {
+        "x0_um": 8.010390000000001,
+        "Fo_rim": 81.07646290116597,
+        "Fo_core": 88.05167010224562
+      },
+      "n_points": 40,
+      "rmse_Fo": 0.15526706611298127,
+      "success": true,
+      "warnings": [
+        "Eq. 27 applies at fO2 above 1e-10 Pa (TaMED). At or below it use the PED entry (eq. 28).",
+        "The paper prints no temperature, pressure or composition limits for eq. 27. The 700-1200 C range is that of the Part I experiments (Dohmen et al. 2007), the pressure range reaches the 12 GPa data of Holzapfel et al. (2007) used in Fig. 7b, and the X_Fe range of 0 to 0.5 is Diffusor's choice (the m = 3 term derives from data in Chakraborty 1997, p. 424).",
+        "The paper's single compromise equation (eq. 29, erratum: -8.27, 226 kJ/mol, 3 (X_Fe - 0.14)) is not implemented.",
+        "the diffusion length 2*sqrt(Dt) = 31.8 um is a large fraction of the distance from the interface to the end of the profile (8.0 um). The far field has been reached, so the semi-infinite assumption is breaking down. Measure a longer traverse or model the whole crystal with an explicit geometry.",
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "lynn_ml2022_ori_1_ol8",
+      "sample": "ORI-1_ol8",
+      "location": "Northeast Rift Zone",
+      "published_median_days": 73.020175974361,
+      "published_95_days": [
+        51.531046699809,
+        101.799192690969
+      ],
+      "diffusor_days": 84.92903628929754,
+      "ratio": 1.163089997470261,
+      "within_95": true,
+      "fitted": {
+        "x0_um": 5.048760000000005,
+        "Fo_rim": 79.80291487972092,
+        "Fo_core": 87.84676468027607
+      },
+      "n_points": 35,
+      "rmse_Fo": 0.08984923554992412,
+      "success": true,
+      "warnings": [
+        "Eq. 27 applies at fO2 above 1e-10 Pa (TaMED). At or below it use the PED entry (eq. 28).",
+        "The paper prints no temperature, pressure or composition limits for eq. 27. The 700-1200 C range is that of the Part I experiments (Dohmen et al. 2007), the pressure range reaches the 12 GPa data of Holzapfel et al. (2007) used in Fig. 7b, and the X_Fe range of 0 to 0.5 is Diffusor's choice (the m = 3 term derives from data in Chakraborty 1997, p. 424).",
+        "The paper's single compromise equation (eq. 29, erratum: -8.27, 226 kJ/mol, 3 (X_Fe - 0.14)) is not implemented.",
+        "the diffusion length 2*sqrt(Dt) = 30.1 um is a large fraction of the distance from the interface to the end of the profile (5.0 um). The far field has been reached, so the semi-infinite assumption is breaking down. Measure a longer traverse or model the whole crystal with an explicit geometry.",
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "lynn_ml2022_ori_1_ol9",
+      "sample": "ORI-1_ol9",
+      "location": "Northeast Rift Zone",
+      "published_median_days": 7.41640158025562,
+      "published_95_days": [
+        4.99580069611257,
+        10.5988955631413
+      ],
+      "diffusor_days": 8.010164319651643,
+      "ratio": 1.0800607589773419,
+      "within_95": true,
+      "fitted": {
+        "x0_um": 0.3769881718848579,
+        "Fo_rim": 82.6747497704111,
+        "Fo_core": 87.08355377092856
+      },
+      "n_points": 47,
+      "rmse_Fo": 0.10308713199085315,
+      "success": true,
+      "warnings": [
+        "Eq. 27 applies at fO2 above 1e-10 Pa (TaMED). At or below it use the PED entry (eq. 28).",
+        "The paper prints no temperature, pressure or composition limits for eq. 27. The 700-1200 C range is that of the Part I experiments (Dohmen et al. 2007), the pressure range reaches the 12 GPa data of Holzapfel et al. (2007) used in Fig. 7b, and the X_Fe range of 0 to 0.5 is Diffusor's choice (the m = 3 term derives from data in Chakraborty 1997, p. 424).",
+        "The paper's single compromise equation (eq. 29, erratum: -8.27, 226 kJ/mol, 3 (X_Fe - 0.14)) is not implemented.",
+        "the diffusion length 2*sqrt(Dt) = 22.9 um is a large fraction of the distance from the interface to the end of the profile (0.4 um). The far field has been reached, so the semi-infinite assumption is breaking down. Measure a longer traverse or model the whole crystal with an explicit geometry.",
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "lynn_ml2022_ori_1_ol11",
+      "sample": "ORI-1_ol11",
+      "location": "Northeast Rift Zone",
+      "published_median_days": 21.929502241965,
+      "published_95_days": [
+        14.1873587868113,
+        41.1967470510053
+      ],
+      "diffusor_days": 19.273260647057683,
+      "ratio": 0.8788736029847386,
+      "within_95": true,
+      "fitted": {
+        "x0_um": 8.979356376158188,
+        "Fo_rim": 78.74738106890341,
+        "Fo_core": 88.61933224158768
+      },
+      "n_points": 28,
+      "rmse_Fo": 0.09880109164367484,
+      "success": true,
+      "warnings": [
+        "Eq. 27 applies at fO2 above 1e-10 Pa (TaMED). At or below it use the PED entry (eq. 28).",
+        "The paper prints no temperature, pressure or composition limits for eq. 27. The 700-1200 C range is that of the Part I experiments (Dohmen et al. 2007), the pressure range reaches the 12 GPa data of Holzapfel et al. (2007) used in Fig. 7b, and the X_Fe range of 0 to 0.5 is Diffusor's choice (the m = 3 term derives from data in Chakraborty 1997, p. 424).",
+        "The paper's single compromise equation (eq. 29, erratum: -8.27, 226 kJ/mol, 3 (X_Fe - 0.14)) is not implemented.",
+        "the diffusion length 2*sqrt(Dt) = 13.8 um is a large fraction of the distance from the interface to the end of the profile (9.0 um). The far field has been reached, so the semi-infinite assumption is breaking down. Measure a longer traverse or model the whole crystal with an explicit geometry.",
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "lynn_ml2022_ori_1_ol14",
+      "sample": "ORI-1_ol14",
+      "location": "Northeast Rift Zone",
+      "published_median_days": 19.8232063802389,
+      "published_95_days": [
+        14.4146817172833,
+        27.5084676455507
+      ],
+      "diffusor_days": 19.178239387314196,
+      "ratio": 0.9674640428721132,
+      "within_95": true,
+      "fitted": {
+        "x0_um": 0.4834954532180611,
+        "Fo_rim": 79.42494424795834,
+        "Fo_core": 87.94252380842353
+      },
+      "n_points": 40,
+      "rmse_Fo": 0.2603725171985931,
+      "success": true,
+      "warnings": [
+        "Eq. 27 applies at fO2 above 1e-10 Pa (TaMED). At or below it use the PED entry (eq. 28).",
+        "The paper prints no temperature, pressure or composition limits for eq. 27. The 700-1200 C range is that of the Part I experiments (Dohmen et al. 2007), the pressure range reaches the 12 GPa data of Holzapfel et al. (2007) used in Fig. 7b, and the X_Fe range of 0 to 0.5 is Diffusor's choice (the m = 3 term derives from data in Chakraborty 1997, p. 424).",
+        "The paper's single compromise equation (eq. 29, erratum: -8.27, 226 kJ/mol, 3 (X_Fe - 0.14)) is not implemented.",
+        "the diffusion length 2*sqrt(Dt) = 21.8 um is a large fraction of the distance from the interface to the end of the profile (0.5 um). The far field has been reached, so the semi-infinite assumption is breaking down. Measure a longer traverse or model the whole crystal with an explicit geometry.",
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "lynn_ml2022_ori_1_ol16",
+      "sample": "ORI-1_ol16",
+      "location": "Northeast Rift Zone",
+      "published_median_days": 231.86375022677,
+      "published_95_days": [
+        159.864441653982,
+        327.184688045985
+      ],
+      "diffusor_days": 272.2767576316254,
+      "ratio": 1.1742963588112856,
+      "within_95": true,
+      "fitted": {
+        "x0_um": 8.000690000000075,
+        "Fo_rim": 82.42099460791208,
+        "Fo_core": 87.61356572240504
+      },
+      "n_points": 31,
+      "rmse_Fo": 0.09141703837577468,
+      "success": true,
+      "warnings": [
+        "Eq. 27 applies at fO2 above 1e-10 Pa (TaMED). At or below it use the PED entry (eq. 28).",
+        "The paper prints no temperature, pressure or composition limits for eq. 27. The 700-1200 C range is that of the Part I experiments (Dohmen et al. 2007), the pressure range reaches the 12 GPa data of Holzapfel et al. (2007) used in Fig. 7b, and the X_Fe range of 0 to 0.5 is Diffusor's choice (the m = 3 term derives from data in Chakraborty 1997, p. 424).",
+        "The paper's single compromise equation (eq. 29, erratum: -8.27, 226 kJ/mol, 3 (X_Fe - 0.14)) is not implemented.",
+        "the diffusion length 2*sqrt(Dt) = 59.8 um is a large fraction of the distance from the interface to the end of the profile (8.0 um). The far field has been reached, so the semi-infinite assumption is breaking down. Measure a longer traverse or model the whole crystal with an explicit geometry.",
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "lynn_ml2022_ori_1_ol18",
+      "sample": "ORI-1_ol18",
+      "location": "Northeast Rift Zone",
+      "published_median_days": 16.6809697496325,
+      "published_95_days": [
+        10.6003172915597,
+        24.3238129389512
+      ],
+      "diffusor_days": 21.485008396931057,
+      "ratio": 1.2879951657129765,
+      "within_95": true,
+      "fitted": {
+        "x0_um": 6.023100000000001,
+        "Fo_rim": 84.35862830615851,
+        "Fo_core": 88.62875341842896
+      },
+      "n_points": 31,
+      "rmse_Fo": 0.07174437978607169,
+      "success": true,
+      "warnings": [
+        "Eq. 27 applies at fO2 above 1e-10 Pa (TaMED). At or below it use the PED entry (eq. 28).",
+        "The paper prints no temperature, pressure or composition limits for eq. 27. The 700-1200 C range is that of the Part I experiments (Dohmen et al. 2007), the pressure range reaches the 12 GPa data of Holzapfel et al. (2007) used in Fig. 7b, and the X_Fe range of 0 to 0.5 is Diffusor's choice (the m = 3 term derives from data in Chakraborty 1997, p. 424).",
+        "The paper's single compromise equation (eq. 29, erratum: -8.27, 226 kJ/mol, 3 (X_Fe - 0.14)) is not implemented.",
+        "the diffusion length 2*sqrt(Dt) = 29.3 um is a large fraction of the distance from the interface to the end of the profile (6.0 um). The far field has been reached, so the semi-infinite assumption is breaking down. Measure a longer traverse or model the whole crystal with an explicit geometry.",
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "lynn_ml2022_ori_2_ol1",
+      "sample": "ORI-2_ol1",
+      "location": "South Caldera",
+      "published_median_days": 224.772028138763,
+      "published_95_days": [
+        160.960598579534,
+        312.738289021019
+      ],
+      "diffusor_days": 225.8535372852361,
+      "ratio": 1.0048115824528014,
+      "within_95": true,
+      "fitted": {
+        "x0_um": 2.045062851139482,
+        "Fo_rim": 82.15209837537277,
+        "Fo_core": 89.3112683269382
+      },
+      "n_points": 29,
+      "rmse_Fo": 0.14387886158440022,
+      "success": true,
+      "warnings": [
+        "Eq. 27 applies at fO2 above 1e-10 Pa (TaMED). At or below it use the PED entry (eq. 28).",
+        "The paper prints no temperature, pressure or composition limits for eq. 27. The 700-1200 C range is that of the Part I experiments (Dohmen et al. 2007), the pressure range reaches the 12 GPa data of Holzapfel et al. (2007) used in Fig. 7b, and the X_Fe range of 0 to 0.5 is Diffusor's choice (the m = 3 term derives from data in Chakraborty 1997, p. 424).",
+        "The paper's single compromise equation (eq. 29, erratum: -8.27, 226 kJ/mol, 3 (X_Fe - 0.14)) is not implemented.",
+        "the diffusion length 2*sqrt(Dt) = 49.7 um is a large fraction of the distance from the interface to the end of the profile (2.0 um). The far field has been reached, so the semi-infinite assumption is breaking down. Measure a longer traverse or model the whole crystal with an explicit geometry.",
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "lynn_ml2022_ori_2_ol2",
+      "sample": "ORI-2_ol2",
+      "location": "South Caldera",
+      "published_median_days": 9.11164061142389,
+      "published_95_days": [
+        6.12235589648218,
+        13.0119547290583
+      ],
+      "diffusor_days": 11.617684425744079,
+      "ratio": 1.2750376053219425,
+      "within_95": true,
+      "fitted": {
+        "x0_um": 9.991680000000002,
+        "Fo_rim": 83.1193416403625,
+        "Fo_core": 88.8923427215822
+      },
+      "n_points": 22,
+      "rmse_Fo": 0.10498309920173195,
+      "success": true,
+      "warnings": [
+        "Eq. 27 applies at fO2 above 1e-10 Pa (TaMED). At or below it use the PED entry (eq. 28).",
+        "The paper prints no temperature, pressure or composition limits for eq. 27. The 700-1200 C range is that of the Part I experiments (Dohmen et al. 2007), the pressure range reaches the 12 GPa data of Holzapfel et al. (2007) used in Fig. 7b, and the X_Fe range of 0 to 0.5 is Diffusor's choice (the m = 3 term derives from data in Chakraborty 1997, p. 424).",
+        "The paper's single compromise equation (eq. 29, erratum: -8.27, 226 kJ/mol, 3 (X_Fe - 0.14)) is not implemented.",
+        "the diffusion length 2*sqrt(Dt) = 29.0 um is a large fraction of the distance from the interface to the end of the profile (10.0 um). The far field has been reached, so the semi-infinite assumption is breaking down. Measure a longer traverse or model the whole crystal with an explicit geometry.",
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "lynn_ml2022_ori_2_ol3",
+      "sample": "ORI-2_ol3",
+      "location": "South Caldera",
+      "published_median_days": 29.0642451485592,
+      "published_95_days": [
+        19.2427988855189,
+        41.7000465362931
+      ],
+      "diffusor_days": 29.780221479028434,
+      "ratio": 1.0246342654629284,
+      "within_95": true,
+      "fitted": {
+        "x0_um": 0.19548334242755358,
+        "Fo_rim": 81.64249251243781,
+        "Fo_core": 85.98748084013312
+      },
+      "n_points": 27,
+      "rmse_Fo": 0.10389540452106348,
+      "success": true,
+      "warnings": [
+        "Eq. 27 applies at fO2 above 1e-10 Pa (TaMED). At or below it use the PED entry (eq. 28).",
+        "The paper prints no temperature, pressure or composition limits for eq. 27. The 700-1200 C range is that of the Part I experiments (Dohmen et al. 2007), the pressure range reaches the 12 GPa data of Holzapfel et al. (2007) used in Fig. 7b, and the X_Fe range of 0 to 0.5 is Diffusor's choice (the m = 3 term derives from data in Chakraborty 1997, p. 424).",
+        "The paper's single compromise equation (eq. 29, erratum: -8.27, 226 kJ/mol, 3 (X_Fe - 0.14)) is not implemented.",
+        "the diffusion length 2*sqrt(Dt) = 19.4 um is a large fraction of the distance from the interface to the end of the profile (0.2 um). The far field has been reached, so the semi-infinite assumption is breaking down. Measure a longer traverse or model the whole crystal with an explicit geometry.",
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "lynn_ml2022_ori_2_ol4",
+      "sample": "ORI-2_ol4",
+      "location": "South Caldera",
+      "published_median_days": 30.8115508046444,
+      "published_95_days": [
+        21.924787774596,
+        43.0929323759639
+      ],
+      "diffusor_days": 31.903954594870214,
+      "ratio": 1.0354543592158674,
+      "within_95": true,
+      "fitted": {
+        "x0_um": 0.793754706367185,
+        "Fo_rim": 82.60819714122958,
+        "Fo_core": 88.22997355678079
+      },
+      "n_points": 26,
+      "rmse_Fo": 0.16699573053921052,
+      "success": true,
+      "warnings": [
+        "Eq. 27 applies at fO2 above 1e-10 Pa (TaMED). At or below it use the PED entry (eq. 28).",
+        "The paper prints no temperature, pressure or composition limits for eq. 27. The 700-1200 C range is that of the Part I experiments (Dohmen et al. 2007), the pressure range reaches the 12 GPa data of Holzapfel et al. (2007) used in Fig. 7b, and the X_Fe range of 0 to 0.5 is Diffusor's choice (the m = 3 term derives from data in Chakraborty 1997, p. 424).",
+        "The paper's single compromise equation (eq. 29, erratum: -8.27, 226 kJ/mol, 3 (X_Fe - 0.14)) is not implemented.",
+        "the diffusion length 2*sqrt(Dt) = 33.4 um is a large fraction of the distance from the interface to the end of the profile (0.8 um). The far field has been reached, so the semi-infinite assumption is breaking down. Measure a longer traverse or model the whole crystal with an explicit geometry.",
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "lynn_ml2022_ori_2_ol5",
+      "sample": "ORI-2_ol5",
+      "location": "South Caldera",
+      "published_median_days": 14.5208218727108,
+      "published_95_days": [
+        10.4426233940494,
+        20.0918877886542
+      ],
+      "diffusor_days": 13.62267938953401,
+      "ratio": 0.9381479580804801,
+      "within_95": true,
+      "fitted": {
+        "x0_um": 0.3669909310641947,
+        "Fo_rim": 80.56908853619554,
+        "Fo_core": 89.32825004096084
+      },
+      "n_points": 26,
+      "rmse_Fo": 0.2911462272539722,
+      "success": true,
+      "warnings": [
+        "Eq. 27 applies at fO2 above 1e-10 Pa (TaMED). At or below it use the PED entry (eq. 28).",
+        "The paper prints no temperature, pressure or composition limits for eq. 27. The 700-1200 C range is that of the Part I experiments (Dohmen et al. 2007), the pressure range reaches the 12 GPa data of Holzapfel et al. (2007) used in Fig. 7b, and the X_Fe range of 0 to 0.5 is Diffusor's choice (the m = 3 term derives from data in Chakraborty 1997, p. 424).",
+        "The paper's single compromise equation (eq. 29, erratum: -8.27, 226 kJ/mol, 3 (X_Fe - 0.14)) is not implemented.",
+        "the diffusion length 2*sqrt(Dt) = 20.7 um is a large fraction of the distance from the interface to the end of the profile (0.4 um). The far field has been reached, so the semi-infinite assumption is breaking down. Measure a longer traverse or model the whole crystal with an explicit geometry.",
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "lynn_ml2022_ori_2_ol6",
+      "sample": "ORI-2_ol6",
+      "location": "South Caldera",
+      "published_median_days": 49.3987019261109,
+      "published_95_days": [
+        34.1313391141527,
+        70.0698451288608
+      ],
+      "diffusor_days": 51.565038701541155,
+      "ratio": 1.043854123508561,
+      "within_95": true,
+      "fitted": {
+        "x0_um": 1.3489820041294345,
+        "Fo_rim": 80.758915241005,
+        "Fo_core": 85.58429134963637
+      },
+      "n_points": 31,
+      "rmse_Fo": 0.09692952645974512,
+      "success": true,
+      "warnings": [
+        "Eq. 27 applies at fO2 above 1e-10 Pa (TaMED). At or below it use the PED entry (eq. 28).",
+        "The paper prints no temperature, pressure or composition limits for eq. 27. The 700-1200 C range is that of the Part I experiments (Dohmen et al. 2007), the pressure range reaches the 12 GPa data of Holzapfel et al. (2007) used in Fig. 7b, and the X_Fe range of 0 to 0.5 is Diffusor's choice (the m = 3 term derives from data in Chakraborty 1997, p. 424).",
+        "The paper's single compromise equation (eq. 29, erratum: -8.27, 226 kJ/mol, 3 (X_Fe - 0.14)) is not implemented.",
+        "the diffusion length 2*sqrt(Dt) = 56.4 um is a large fraction of the distance from the interface to the end of the profile (1.3 um). The far field has been reached, so the semi-infinite assumption is breaking down. Measure a longer traverse or model the whole crystal with an explicit geometry.",
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "lynn_ml2022_ori_2_ol7",
+      "sample": "ORI-2_ol7",
+      "location": "South Caldera",
+      "published_median_days": 87.4369724404173,
+      "published_95_days": [
+        61.8275460552196,
+        122.402646278424
+      ],
+      "diffusor_days": 88.47664127097654,
+      "ratio": 1.011890494393178,
+      "within_95": true,
+      "fitted": {
+        "x0_um": 1.2948213209356345,
+        "Fo_rim": 81.06177046082176,
+        "Fo_core": 87.40975582688878
+      },
+      "n_points": 27,
+      "rmse_Fo": 0.16023745713238968,
+      "success": true,
+      "warnings": [
+        "Eq. 27 applies at fO2 above 1e-10 Pa (TaMED). At or below it use the PED entry (eq. 28).",
+        "The paper prints no temperature, pressure or composition limits for eq. 27. The 700-1200 C range is that of the Part I experiments (Dohmen et al. 2007), the pressure range reaches the 12 GPa data of Holzapfel et al. (2007) used in Fig. 7b, and the X_Fe range of 0 to 0.5 is Diffusor's choice (the m = 3 term derives from data in Chakraborty 1997, p. 424).",
+        "The paper's single compromise equation (eq. 29, erratum: -8.27, 226 kJ/mol, 3 (X_Fe - 0.14)) is not implemented.",
+        "the diffusion length 2*sqrt(Dt) = 63.1 um is a large fraction of the distance from the interface to the end of the profile (1.3 um). The far field has been reached, so the semi-infinite assumption is breaking down. Measure a longer traverse or model the whole crystal with an explicit geometry.",
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "lynn_ml2022_ori_2_ol8",
+      "sample": "ORI-2_ol8",
+      "location": "South Caldera",
+      "published_median_days": 37.7181888073988,
+      "published_95_days": [
+        26.8177224270222,
+        52.218896487783
+      ],
+      "diffusor_days": 38.46070975410972,
+      "ratio": 1.0196860180774445,
+      "within_95": true,
+      "fitted": {
+        "x0_um": 0.9406249664194968,
+        "Fo_rim": 82.0720889265858,
+        "Fo_core": 88.24502187296012
+      },
+      "n_points": 18,
+      "rmse_Fo": 0.20469700079480907,
+      "success": true,
+      "warnings": [
+        "Eq. 27 applies at fO2 above 1e-10 Pa (TaMED). At or below it use the PED entry (eq. 28).",
+        "The paper prints no temperature, pressure or composition limits for eq. 27. The 700-1200 C range is that of the Part I experiments (Dohmen et al. 2007), the pressure range reaches the 12 GPa data of Holzapfel et al. (2007) used in Fig. 7b, and the X_Fe range of 0 to 0.5 is Diffusor's choice (the m = 3 term derives from data in Chakraborty 1997, p. 424).",
+        "The paper's single compromise equation (eq. 29, erratum: -8.27, 226 kJ/mol, 3 (X_Fe - 0.14)) is not implemented.",
+        "the diffusion length 2*sqrt(Dt) = 25.0 um is a large fraction of the distance from the interface to the end of the profile (0.9 um). The far field has been reached, so the semi-infinite assumption is breaking down. Measure a longer traverse or model the whole crystal with an explicit geometry.",
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "lynn_ml2022_ori_2_ol9",
+      "sample": "ORI-2_ol9",
+      "location": "South Caldera",
+      "published_median_days": 12.2666706100463,
+      "published_95_days": [
+        8.15838719246841,
+        17.8495223882412
+      ],
+      "diffusor_days": 14.80144794276349,
+      "ratio": 1.2066393900429044,
+      "within_95": true,
+      "fitted": {
+        "x0_um": 3.0002600000000004,
+        "Fo_rim": 84.69301584430038,
+        "Fo_core": 88.44531460405378
+      },
+      "n_points": 29,
+      "rmse_Fo": 0.11002119539008769,
+      "success": true,
+      "warnings": [
+        "Eq. 27 applies at fO2 above 1e-10 Pa (TaMED). At or below it use the PED entry (eq. 28).",
+        "The paper prints no temperature, pressure or composition limits for eq. 27. The 700-1200 C range is that of the Part I experiments (Dohmen et al. 2007), the pressure range reaches the 12 GPa data of Holzapfel et al. (2007) used in Fig. 7b, and the X_Fe range of 0 to 0.5 is Diffusor's choice (the m = 3 term derives from data in Chakraborty 1997, p. 424).",
+        "The paper's single compromise equation (eq. 29, erratum: -8.27, 226 kJ/mol, 3 (X_Fe - 0.14)) is not implemented.",
+        "the diffusion length 2*sqrt(Dt) = 20.0 um is a large fraction of the distance from the interface to the end of the profile (3.0 um). The far field has been reached, so the semi-infinite assumption is breaking down. Measure a longer traverse or model the whole crystal with an explicit geometry.",
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "lynn_ml2022_ori_2_ol10",
+      "sample": "ORI-2_ol10",
+      "location": "South Caldera",
+      "published_median_days": 64.9050034822115,
+      "published_95_days": [
+        44.3951264532802,
+        92.727326568731
+      ],
+      "diffusor_days": 69.18215415579499,
+      "ratio": 1.0658986279040217,
+      "within_95": true,
+      "fitted": {
+        "x0_um": 2.591347893916888,
+        "Fo_rim": 80.4711147910783,
+        "Fo_core": 84.54542142017901
+      },
+      "n_points": 26,
+      "rmse_Fo": 0.06138186560645688,
+      "success": true,
+      "warnings": [
+        "Eq. 27 applies at fO2 above 1e-10 Pa (TaMED). At or below it use the PED entry (eq. 28).",
+        "The paper prints no temperature, pressure or composition limits for eq. 27. The 700-1200 C range is that of the Part I experiments (Dohmen et al. 2007), the pressure range reaches the 12 GPa data of Holzapfel et al. (2007) used in Fig. 7b, and the X_Fe range of 0 to 0.5 is Diffusor's choice (the m = 3 term derives from data in Chakraborty 1997, p. 424).",
+        "The paper's single compromise equation (eq. 29, erratum: -8.27, 226 kJ/mol, 3 (X_Fe - 0.14)) is not implemented.",
+        "the diffusion length 2*sqrt(Dt) = 68.1 um is a large fraction of the distance from the interface to the end of the profile (2.6 um). The far field has been reached, so the semi-infinite assumption is breaking down. Measure a longer traverse or model the whole crystal with an explicit geometry.",
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "lynn_ml2022_ori_2_ol11",
+      "sample": "ORI-2_ol11",
+      "location": "South Caldera",
+      "published_median_days": 51.8262056004496,
+      "published_95_days": [
+        35.7293138074332,
+        74.0678105866596
+      ],
+      "diffusor_days": 60.9854834135709,
+      "ratio": 1.1767306270448215,
+      "within_95": true,
+      "fitted": {
+        "x0_um": 3.968060000000004,
+        "Fo_rim": 84.11619996292357,
+        "Fo_core": 88.89024441648469
+      },
+      "n_points": 20,
+      "rmse_Fo": 0.15564185737096467,
+      "success": true,
+      "warnings": [
+        "Eq. 27 applies at fO2 above 1e-10 Pa (TaMED). At or below it use the PED entry (eq. 28).",
+        "The paper prints no temperature, pressure or composition limits for eq. 27. The 700-1200 C range is that of the Part I experiments (Dohmen et al. 2007), the pressure range reaches the 12 GPa data of Holzapfel et al. (2007) used in Fig. 7b, and the X_Fe range of 0 to 0.5 is Diffusor's choice (the m = 3 term derives from data in Chakraborty 1997, p. 424).",
+        "The paper's single compromise equation (eq. 29, erratum: -8.27, 226 kJ/mol, 3 (X_Fe - 0.14)) is not implemented.",
+        "the diffusion length 2*sqrt(Dt) = 28.0 um is a large fraction of the distance from the interface to the end of the profile (4.0 um). The far field has been reached, so the semi-infinite assumption is breaking down. Measure a longer traverse or model the whole crystal with an explicit geometry.",
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "lynn_ml2022_ori_2_ol12",
+      "sample": "ORI-2_ol12",
+      "location": "South Caldera",
+      "published_median_days": 173.597039867666,
+      "published_95_days": [
+        124.835629042486,
+        240.50515319526
+      ],
+      "diffusor_days": 196.50305659776026,
+      "ratio": 1.1319493509080318,
+      "within_95": true,
+      "fitted": {
+        "x0_um": 9.034110000000043,
+        "Fo_rim": 80.78180638276426,
+        "Fo_core": 88.6396254483576
+      },
+      "n_points": 30,
+      "rmse_Fo": 0.1250971650042316,
+      "success": true,
+      "warnings": [
+        "Eq. 27 applies at fO2 above 1e-10 Pa (TaMED). At or below it use the PED entry (eq. 28).",
+        "The paper prints no temperature, pressure or composition limits for eq. 27. The 700-1200 C range is that of the Part I experiments (Dohmen et al. 2007), the pressure range reaches the 12 GPa data of Holzapfel et al. (2007) used in Fig. 7b, and the X_Fe range of 0 to 0.5 is Diffusor's choice (the m = 3 term derives from data in Chakraborty 1997, p. 424).",
+        "The paper's single compromise equation (eq. 29, erratum: -8.27, 226 kJ/mol, 3 (X_Fe - 0.14)) is not implemented.",
+        "the diffusion length 2*sqrt(Dt) = 87.4 um is a large fraction of the distance from the interface to the end of the profile (9.0 um). The far field has been reached, so the semi-infinite assumption is breaking down. Measure a longer traverse or model the whole crystal with an explicit geometry.",
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "lynn_ml2022_ori_3_ol1",
+      "sample": "ORI-3_ol1",
+      "location": "Moku‘āweoweo",
+      "published_median_days": 32.0587730689739,
+      "published_95_days": [
+        23.4583903430697,
+        44.1756640459921
+      ],
+      "diffusor_days": 31.153876476027126,
+      "ratio": 0.971773823315075,
+      "within_95": true,
+      "fitted": {
+        "x0_um": 0.6099657572709714,
+        "Fo_rim": 80.48320777815395,
+        "Fo_core": 88.66016195225966
+      },
+      "n_points": 24,
+      "rmse_Fo": 0.2827709684428058,
+      "success": true,
+      "warnings": [
+        "Eq. 27 applies at fO2 above 1e-10 Pa (TaMED). At or below it use the PED entry (eq. 28).",
+        "The paper prints no temperature, pressure or composition limits for eq. 27. The 700-1200 C range is that of the Part I experiments (Dohmen et al. 2007), the pressure range reaches the 12 GPa data of Holzapfel et al. (2007) used in Fig. 7b, and the X_Fe range of 0 to 0.5 is Diffusor's choice (the m = 3 term derives from data in Chakraborty 1997, p. 424).",
+        "The paper's single compromise equation (eq. 29, erratum: -8.27, 226 kJ/mol, 3 (X_Fe - 0.14)) is not implemented.",
+        "the diffusion length 2*sqrt(Dt) = 25.6 um is a large fraction of the distance from the interface to the end of the profile (0.6 um). The far field has been reached, so the semi-infinite assumption is breaking down. Measure a longer traverse or model the whole crystal with an explicit geometry.",
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "lynn_ml2022_ori_3_ol2",
+      "sample": "ORI-3_ol2",
+      "location": "Moku‘āweoweo",
+      "published_median_days": 53.0522049353045,
+      "published_95_days": [
+        37.5432210727097,
+        74.6822668212114
+      ],
+      "diffusor_days": 62.804085556062056,
+      "ratio": 1.18381668834782,
+      "within_95": true,
+      "fitted": {
+        "x0_um": 4.000000000002205,
+        "Fo_rim": 82.11797278260107,
+        "Fo_core": 87.77199639835999
+      },
+      "n_points": 27,
+      "rmse_Fo": 0.16276330466475963,
+      "success": true,
+      "warnings": [
+        "Eq. 27 applies at fO2 above 1e-10 Pa (TaMED). At or below it use the PED entry (eq. 28).",
+        "The paper prints no temperature, pressure or composition limits for eq. 27. The 700-1200 C range is that of the Part I experiments (Dohmen et al. 2007), the pressure range reaches the 12 GPa data of Holzapfel et al. (2007) used in Fig. 7b, and the X_Fe range of 0 to 0.5 is Diffusor's choice (the m = 3 term derives from data in Chakraborty 1997, p. 424).",
+        "The paper's single compromise equation (eq. 29, erratum: -8.27, 226 kJ/mol, 3 (X_Fe - 0.14)) is not implemented.",
+        "the diffusion length 2*sqrt(Dt) = 31.2 um is a large fraction of the distance from the interface to the end of the profile (4.0 um). The far field has been reached, so the semi-infinite assumption is breaking down. Measure a longer traverse or model the whole crystal with an explicit geometry.",
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "lynn_ml2022_ori_3_ol3",
+      "sample": "ORI-3_ol3",
+      "location": "Moku‘āweoweo",
+      "published_median_days": 66.0561014625822,
+      "published_95_days": [
+        46.1231087111928,
+        92.7734180054157
+      ],
+      "diffusor_days": 75.72943643036669,
+      "ratio": 1.1464412030622786,
+      "within_95": true,
+      "fitted": {
+        "x0_um": 5.011980000006943,
+        "Fo_rim": 81.28858093455156,
+        "Fo_core": 87.69774021083157
+      },
+      "n_points": 25,
+      "rmse_Fo": 0.10485729692836523,
+      "success": true,
+      "warnings": [
+        "Eq. 27 applies at fO2 above 1e-10 Pa (TaMED). At or below it use the PED entry (eq. 28).",
+        "The paper prints no temperature, pressure or composition limits for eq. 27. The 700-1200 C range is that of the Part I experiments (Dohmen et al. 2007), the pressure range reaches the 12 GPa data of Holzapfel et al. (2007) used in Fig. 7b, and the X_Fe range of 0 to 0.5 is Diffusor's choice (the m = 3 term derives from data in Chakraborty 1997, p. 424).",
+        "The paper's single compromise equation (eq. 29, erratum: -8.27, 226 kJ/mol, 3 (X_Fe - 0.14)) is not implemented.",
+        "the diffusion length 2*sqrt(Dt) = 56.0 um is a large fraction of the distance from the interface to the end of the profile (5.0 um). The far field has been reached, so the semi-infinite assumption is breaking down. Measure a longer traverse or model the whole crystal with an explicit geometry.",
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "lynn_ml2022_ori_3_ol4",
+      "sample": "ORI-3_ol4",
+      "location": "Moku‘āweoweo",
+      "published_median_days": 101.336908055229,
+      "published_95_days": [
+        73.4618504327457,
+        140.582395323686
+      ],
+      "diffusor_days": 100.51494855198179,
+      "ratio": 0.9918888436698775,
+      "within_95": true,
+      "fitted": {
+        "x0_um": 2.877067414695507,
+        "Fo_rim": 81.13953805447345,
+        "Fo_core": 88.89511475458801
+      },
+      "n_points": 22,
+      "rmse_Fo": 0.20742541637829803,
+      "success": true,
+      "warnings": [
+        "Eq. 27 applies at fO2 above 1e-10 Pa (TaMED). At or below it use the PED entry (eq. 28).",
+        "The paper prints no temperature, pressure or composition limits for eq. 27. The 700-1200 C range is that of the Part I experiments (Dohmen et al. 2007), the pressure range reaches the 12 GPa data of Holzapfel et al. (2007) used in Fig. 7b, and the X_Fe range of 0 to 0.5 is Diffusor's choice (the m = 3 term derives from data in Chakraborty 1997, p. 424).",
+        "The paper's single compromise equation (eq. 29, erratum: -8.27, 226 kJ/mol, 3 (X_Fe - 0.14)) is not implemented.",
+        "the diffusion length 2*sqrt(Dt) = 66.5 um is a large fraction of the distance from the interface to the end of the profile (2.9 um). The far field has been reached, so the semi-infinite assumption is breaking down. Measure a longer traverse or model the whole crystal with an explicit geometry.",
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "lynn_ml2022_ori_3_ol5",
+      "sample": "ORI-3_ol5",
+      "location": "Moku‘āweoweo",
+      "published_median_days": 27.1699984128955,
+      "published_95_days": [
+        19.6483831977067,
+        37.4786678077193
+      ],
+      "diffusor_days": 26.9410316060532,
+      "ratio": 0.9915728075002895,
+      "within_95": true,
+      "fitted": {
+        "x0_um": 1.0995669967178645,
+        "Fo_rim": 81.49187749339788,
+        "Fo_core": 89.06961128070638
+      },
+      "n_points": 27,
+      "rmse_Fo": 0.17844666486154728,
+      "success": true,
+      "warnings": [
+        "Eq. 27 applies at fO2 above 1e-10 Pa (TaMED). At or below it use the PED entry (eq. 28).",
+        "The paper prints no temperature, pressure or composition limits for eq. 27. The 700-1200 C range is that of the Part I experiments (Dohmen et al. 2007), the pressure range reaches the 12 GPa data of Holzapfel et al. (2007) used in Fig. 7b, and the X_Fe range of 0 to 0.5 is Diffusor's choice (the m = 3 term derives from data in Chakraborty 1997, p. 424).",
+        "The paper's single compromise equation (eq. 29, erratum: -8.27, 226 kJ/mol, 3 (X_Fe - 0.14)) is not implemented.",
+        "the diffusion length 2*sqrt(Dt) = 35.0 um is a large fraction of the distance from the interface to the end of the profile (1.1 um). The far field has been reached, so the semi-infinite assumption is breaking down. Measure a longer traverse or model the whole crystal with an explicit geometry.",
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "lynn_ml2022_ori_3_ol6",
+      "sample": "ORI-3_ol6",
+      "location": "Moku‘āweoweo",
+      "published_median_days": 52.6084925903616,
+      "published_95_days": [
+        37.5529127565261,
+        73.1283761660103
+      ],
+      "diffusor_days": 58.73521940325228,
+      "ratio": 1.1164588930649793,
+      "within_95": true,
+      "fitted": {
+        "x0_um": 6.020990000015913,
+        "Fo_rim": 80.93435097953775,
+        "Fo_core": 87.45380243387443
+      },
+      "n_points": 25,
+      "rmse_Fo": 0.15546653984418854,
+      "success": true,
+      "warnings": [
+        "Eq. 27 applies at fO2 above 1e-10 Pa (TaMED). At or below it use the PED entry (eq. 28).",
+        "The paper prints no temperature, pressure or composition limits for eq. 27. The 700-1200 C range is that of the Part I experiments (Dohmen et al. 2007), the pressure range reaches the 12 GPa data of Holzapfel et al. (2007) used in Fig. 7b, and the X_Fe range of 0 to 0.5 is Diffusor's choice (the m = 3 term derives from data in Chakraborty 1997, p. 424).",
+        "The paper's single compromise equation (eq. 29, erratum: -8.27, 226 kJ/mol, 3 (X_Fe - 0.14)) is not implemented.",
+        "the diffusion length 2*sqrt(Dt) = 61.1 um is a large fraction of the distance from the interface to the end of the profile (6.0 um). The far field has been reached, so the semi-infinite assumption is breaking down. Measure a longer traverse or model the whole crystal with an explicit geometry.",
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "lynn_ml2022_ori_3_ol7",
+      "sample": "ORI-3_ol7",
+      "location": "Moku‘āweoweo",
+      "published_median_days": 61.9097350604629,
+      "published_95_days": [
+        42.4404813647366,
+        87.1464629091322
+      ],
+      "diffusor_days": 65.39988630572611,
+      "ratio": 1.0563748373636979,
+      "within_95": true,
+      "fitted": {
+        "x0_um": 1.35171569489809,
+        "Fo_rim": 83.5979831877963,
+        "Fo_core": 88.1194008450464
+      },
+      "n_points": 27,
+      "rmse_Fo": 0.08229594533755895,
+      "success": true,
+      "warnings": [
+        "Eq. 27 applies at fO2 above 1e-10 Pa (TaMED). At or below it use the PED entry (eq. 28).",
+        "The paper prints no temperature, pressure or composition limits for eq. 27. The 700-1200 C range is that of the Part I experiments (Dohmen et al. 2007), the pressure range reaches the 12 GPa data of Holzapfel et al. (2007) used in Fig. 7b, and the X_Fe range of 0 to 0.5 is Diffusor's choice (the m = 3 term derives from data in Chakraborty 1997, p. 424).",
+        "The paper's single compromise equation (eq. 29, erratum: -8.27, 226 kJ/mol, 3 (X_Fe - 0.14)) is not implemented.",
+        "the diffusion length 2*sqrt(Dt) = 31.7 um is a large fraction of the distance from the interface to the end of the profile (1.4 um). The far field has been reached, so the semi-infinite assumption is breaking down. Measure a longer traverse or model the whole crystal with an explicit geometry.",
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "lynn_ml2022_ori_3_ol8",
+      "sample": "ORI-3_ol8",
+      "location": "Moku‘āweoweo",
+      "published_median_days": 83.1844293557495,
+      "published_95_days": [
+        58.8811973778608,
+        116.080998590287
+      ],
+      "diffusor_days": 96.64675768842663,
+      "ratio": 1.1618371182797163,
+      "within_95": true,
+      "fitted": {
+        "x0_um": 8.00000000015795,
+        "Fo_rim": 82.11042161305596,
+        "Fo_core": 87.99445973745702
+      },
+      "n_points": 25,
+      "rmse_Fo": 0.14801233332377275,
+      "success": true,
+      "warnings": [
+        "Eq. 27 applies at fO2 above 1e-10 Pa (TaMED). At or below it use the PED entry (eq. 28).",
+        "The paper prints no temperature, pressure or composition limits for eq. 27. The 700-1200 C range is that of the Part I experiments (Dohmen et al. 2007), the pressure range reaches the 12 GPa data of Holzapfel et al. (2007) used in Fig. 7b, and the X_Fe range of 0 to 0.5 is Diffusor's choice (the m = 3 term derives from data in Chakraborty 1997, p. 424).",
+        "The paper's single compromise equation (eq. 29, erratum: -8.27, 226 kJ/mol, 3 (X_Fe - 0.14)) is not implemented.",
+        "the diffusion length 2*sqrt(Dt) = 82.7 um is a large fraction of the distance from the interface to the end of the profile (8.0 um). The far field has been reached, so the semi-infinite assumption is breaking down. Measure a longer traverse or model the whole crystal with an explicit geometry.",
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "lynn_ml2022_ori_3_ol10",
+      "sample": "ORI-3_ol10",
+      "location": "Moku‘āweoweo",
+      "published_median_days": 27.8955276288336,
+      "published_95_days": [
+        19.9267516372724,
+        38.5952563589703
+      ],
+      "diffusor_days": 32.96651851701533,
+      "ratio": 1.181785085969846,
+      "within_95": true,
+      "fitted": {
+        "x0_um": 4.998040000000007,
+        "Fo_rim": 81.91297020934927,
+        "Fo_core": 88.91857716378489
+      },
+      "n_points": 22,
+      "rmse_Fo": 0.18586196382258152,
+      "success": true,
+      "warnings": [
+        "Eq. 27 applies at fO2 above 1e-10 Pa (TaMED). At or below it use the PED entry (eq. 28).",
+        "The paper prints no temperature, pressure or composition limits for eq. 27. The 700-1200 C range is that of the Part I experiments (Dohmen et al. 2007), the pressure range reaches the 12 GPa data of Holzapfel et al. (2007) used in Fig. 7b, and the X_Fe range of 0 to 0.5 is Diffusor's choice (the m = 3 term derives from data in Chakraborty 1997, p. 424).",
+        "The paper's single compromise equation (eq. 29, erratum: -8.27, 226 kJ/mol, 3 (X_Fe - 0.14)) is not implemented.",
+        "the diffusion length 2*sqrt(Dt) = 35.0 um is a large fraction of the distance from the interface to the end of the profile (5.0 um). The far field has been reached, so the semi-infinite assumption is breaking down. Measure a longer traverse or model the whole crystal with an explicit geometry.",
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "lynn_ml2022_ori_3_ol11",
+      "sample": "ORI-3_ol11",
+      "location": "Moku‘āweoweo",
+      "published_median_days": 53.2707604605949,
+      "published_95_days": [
+        38.8543995961395,
+        73.3078078228911
+      ],
+      "diffusor_days": 53.9258527212104,
+      "ratio": 1.0122974077139386,
+      "within_95": true,
+      "fitted": {
+        "x0_um": 1.3129694136581578,
+        "Fo_rim": 82.25744834858496,
+        "Fo_core": 88.64305868585183
+      },
+      "n_points": 27,
+      "rmse_Fo": 0.1714090113435952,
+      "success": true,
+      "warnings": [
+        "Eq. 27 applies at fO2 above 1e-10 Pa (TaMED). At or below it use the PED entry (eq. 28).",
+        "The paper prints no temperature, pressure or composition limits for eq. 27. The 700-1200 C range is that of the Part I experiments (Dohmen et al. 2007), the pressure range reaches the 12 GPa data of Holzapfel et al. (2007) used in Fig. 7b, and the X_Fe range of 0 to 0.5 is Diffusor's choice (the m = 3 term derives from data in Chakraborty 1997, p. 424).",
+        "The paper's single compromise equation (eq. 29, erratum: -8.27, 226 kJ/mol, 3 (X_Fe - 0.14)) is not implemented.",
+        "the diffusion length 2*sqrt(Dt) = 56.0 um is a large fraction of the distance from the interface to the end of the profile (1.3 um). The far field has been reached, so the semi-infinite assumption is breaking down. Measure a longer traverse or model the whole crystal with an explicit geometry.",
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "lynn_ml2022_ori_3_ol12",
+      "sample": "ORI-3_ol12",
+      "location": "Moku‘āweoweo",
+      "published_median_days": 70.585117817887,
+      "published_95_days": [
+        50.863602684644,
+        97.7572350421647
+      ],
+      "diffusor_days": 70.04557462766144,
+      "ratio": 0.9923561338862166,
+      "within_95": true,
+      "fitted": {
+        "x0_um": 1.3244562488041338,
+        "Fo_rim": 81.64711358638007,
+        "Fo_core": 89.16263256540363
+      },
+      "n_points": 25,
+      "rmse_Fo": 0.1721712002324025,
+      "success": true,
+      "warnings": [
+        "Eq. 27 applies at fO2 above 1e-10 Pa (TaMED). At or below it use the PED entry (eq. 28).",
+        "The paper prints no temperature, pressure or composition limits for eq. 27. The 700-1200 C range is that of the Part I experiments (Dohmen et al. 2007), the pressure range reaches the 12 GPa data of Holzapfel et al. (2007) used in Fig. 7b, and the X_Fe range of 0 to 0.5 is Diffusor's choice (the m = 3 term derives from data in Chakraborty 1997, p. 424).",
+        "The paper's single compromise equation (eq. 29, erratum: -8.27, 226 kJ/mol, 3 (X_Fe - 0.14)) is not implemented.",
+        "the diffusion length 2*sqrt(Dt) = 43.0 um is a large fraction of the distance from the interface to the end of the profile (1.3 um). The far field has been reached, so the semi-infinite assumption is breaking down. Measure a longer traverse or model the whole crystal with an explicit geometry.",
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "lynn_ml2022_ori_3_ol14",
+      "sample": "ORI-3_ol14",
+      "location": "Moku‘āweoweo",
+      "published_median_days": 37.5540263304799,
+      "published_95_days": [
+        27.0250203182089,
+        52.1457452193216
+      ],
+      "diffusor_days": 38.06454681160334,
+      "ratio": 1.0135942941678424,
+      "within_95": true,
+      "fitted": {
+        "x0_um": 2.607497753225586,
+        "Fo_rim": 82.38525465907126,
+        "Fo_core": 87.90910394120068
+      },
+      "n_points": 25,
+      "rmse_Fo": 0.19336811852601857,
+      "success": true,
+      "warnings": [
+        "Eq. 27 applies at fO2 above 1e-10 Pa (TaMED). At or below it use the PED entry (eq. 28).",
+        "The paper prints no temperature, pressure or composition limits for eq. 27. The 700-1200 C range is that of the Part I experiments (Dohmen et al. 2007), the pressure range reaches the 12 GPa data of Holzapfel et al. (2007) used in Fig. 7b, and the X_Fe range of 0 to 0.5 is Diffusor's choice (the m = 3 term derives from data in Chakraborty 1997, p. 424).",
+        "The paper's single compromise equation (eq. 29, erratum: -8.27, 226 kJ/mol, 3 (X_Fe - 0.14)) is not implemented.",
+        "the diffusion length 2*sqrt(Dt) = 53.8 um is a large fraction of the distance from the interface to the end of the profile (2.6 um). The far field has been reached, so the semi-infinite assumption is breaking down. Measure a longer traverse or model the whole crystal with an explicit geometry.",
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "lynn_ml2022_ori_3_ol16",
+      "sample": "ORI-3_ol16",
+      "location": "Moku‘āweoweo",
+      "published_median_days": 75.0249876271417,
+      "published_95_days": [
+        52.3879748564456,
+        104.831532599392
+      ],
+      "diffusor_days": 77.85909182140962,
+      "ratio": 1.0377754703320021,
+      "within_95": true,
+      "fitted": {
+        "x0_um": 3.8363562503219217,
+        "Fo_rim": 81.63939725630236,
+        "Fo_core": 87.69837638263238
+      },
+      "n_points": 28,
+      "rmse_Fo": 0.09644851418785891,
+      "success": true,
+      "warnings": [
+        "Eq. 27 applies at fO2 above 1e-10 Pa (TaMED). At or below it use the PED entry (eq. 28).",
+        "The paper prints no temperature, pressure or composition limits for eq. 27. The 700-1200 C range is that of the Part I experiments (Dohmen et al. 2007), the pressure range reaches the 12 GPa data of Holzapfel et al. (2007) used in Fig. 7b, and the X_Fe range of 0 to 0.5 is Diffusor's choice (the m = 3 term derives from data in Chakraborty 1997, p. 424).",
+        "The paper's single compromise equation (eq. 29, erratum: -8.27, 226 kJ/mol, 3 (X_Fe - 0.14)) is not implemented.",
+        "the diffusion length 2*sqrt(Dt) = 73.3 um is a large fraction of the distance from the interface to the end of the profile (3.8 um). The far field has been reached, so the semi-infinite assumption is breaking down. Measure a longer traverse or model the whole crystal with an explicit geometry.",
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "lynn_ml2022_ori_3_ol17",
+      "sample": "ORI-3_ol17",
+      "location": "Moku‘āweoweo",
+      "published_median_days": 65.5514278670118,
+      "published_95_days": [
+        48.0260508949933,
+        90.0914820650229
+      ],
+      "diffusor_days": 70.36630963140257,
+      "ratio": 1.0734519738328052,
+      "within_95": true,
+      "fitted": {
+        "x0_um": 3.9865200000000005,
+        "Fo_rim": 80.51300044561698,
+        "Fo_core": 86.95947103986522
+      },
+      "n_points": 23,
+      "rmse_Fo": 0.15306537626797764,
+      "success": true,
+      "warnings": [
+        "Eq. 27 applies at fO2 above 1e-10 Pa (TaMED). At or below it use the PED entry (eq. 28).",
+        "The paper prints no temperature, pressure or composition limits for eq. 27. The 700-1200 C range is that of the Part I experiments (Dohmen et al. 2007), the pressure range reaches the 12 GPa data of Holzapfel et al. (2007) used in Fig. 7b, and the X_Fe range of 0 to 0.5 is Diffusor's choice (the m = 3 term derives from data in Chakraborty 1997, p. 424).",
+        "The paper's single compromise equation (eq. 29, erratum: -8.27, 226 kJ/mol, 3 (X_Fe - 0.14)) is not implemented.",
+        "the diffusion length 2*sqrt(Dt) = 47.2 um is a large fraction of the distance from the interface to the end of the profile (4.0 um). The far field has been reached, so the semi-infinite assumption is breaking down. Measure a longer traverse or model the whole crystal with an explicit geometry.",
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "lynn_ml2022_ori_4_ol1",
+      "sample": "ORI-4_ol1",
+      "location": "South Caldera",
+      "published_median_days": 75.4997168686502,
+      "published_95_days": [
+        52.9997399308247,
+        105.153054790115
+      ],
+      "diffusor_days": 71.70668379724793,
+      "ratio": 0.9497609629715413,
+      "within_95": true,
+      "fitted": {
+        "x0_um": 0.811972032035607,
+        "Fo_rim": 81.31034692604402,
+        "Fo_core": 88.06774134046209
+      },
+      "n_points": 37,
+      "rmse_Fo": 0.11660444727881952,
+      "success": true,
+      "warnings": [
+        "Eq. 27 applies at fO2 above 1e-10 Pa (TaMED). At or below it use the PED entry (eq. 28).",
+        "The paper prints no temperature, pressure or composition limits for eq. 27. The 700-1200 C range is that of the Part I experiments (Dohmen et al. 2007), the pressure range reaches the 12 GPa data of Holzapfel et al. (2007) used in Fig. 7b, and the X_Fe range of 0 to 0.5 is Diffusor's choice (the m = 3 term derives from data in Chakraborty 1997, p. 424).",
+        "The paper's single compromise equation (eq. 29, erratum: -8.27, 226 kJ/mol, 3 (X_Fe - 0.14)) is not implemented.",
+        "the diffusion length 2*sqrt(Dt) = 33.3 um is a large fraction of the distance from the interface to the end of the profile (0.8 um). The far field has been reached, so the semi-infinite assumption is breaking down. Measure a longer traverse or model the whole crystal with an explicit geometry.",
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "lynn_ml2022_ori_4_ol2",
+      "sample": "ORI-4_ol2",
+      "location": "South Caldera",
+      "published_median_days": 36.7265002159259,
+      "published_95_days": [
+        25.3631964514948,
+        51.8226587585901
+      ],
+      "diffusor_days": 36.29210556680142,
+      "ratio": 0.9881721741366438,
+      "within_95": true,
+      "fitted": {
+        "x0_um": 0.20424957501415475,
+        "Fo_rim": 81.98211223083617,
+        "Fo_core": 88.09722482722138
+      },
+      "n_points": 27,
+      "rmse_Fo": 0.12049186555917478,
+      "success": true,
+      "warnings": [
+        "Eq. 27 applies at fO2 above 1e-10 Pa (TaMED). At or below it use the PED entry (eq. 28).",
+        "The paper prints no temperature, pressure or composition limits for eq. 27. The 700-1200 C range is that of the Part I experiments (Dohmen et al. 2007), the pressure range reaches the 12 GPa data of Holzapfel et al. (2007) used in Fig. 7b, and the X_Fe range of 0 to 0.5 is Diffusor's choice (the m = 3 term derives from data in Chakraborty 1997, p. 424).",
+        "The paper's single compromise equation (eq. 29, erratum: -8.27, 226 kJ/mol, 3 (X_Fe - 0.14)) is not implemented.",
+        "the diffusion length 2*sqrt(Dt) = 20.4 um is a large fraction of the distance from the interface to the end of the profile (0.2 um). The far field has been reached, so the semi-infinite assumption is breaking down. Measure a longer traverse or model the whole crystal with an explicit geometry.",
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "lynn_ml2022_ori_4_ol3",
+      "sample": "ORI-4_ol3",
+      "location": "South Caldera",
+      "published_median_days": 32.2019838909727,
+      "published_95_days": [
+        22.8427682967453,
+        44.9321655976074
+      ],
+      "diffusor_days": 37.86043133626555,
+      "ratio": 1.1757173553173257,
+      "within_95": true,
+      "fitted": {
+        "x0_um": 5.025900000000124,
+        "Fo_rim": 82.04202649220207,
+        "Fo_core": 88.81176220939814
+      },
+      "n_points": 22,
+      "rmse_Fo": 0.15840794502143668,
+      "success": true,
+      "warnings": [
+        "Eq. 27 applies at fO2 above 1e-10 Pa (TaMED). At or below it use the PED entry (eq. 28).",
+        "The paper prints no temperature, pressure or composition limits for eq. 27. The 700-1200 C range is that of the Part I experiments (Dohmen et al. 2007), the pressure range reaches the 12 GPa data of Holzapfel et al. (2007) used in Fig. 7b, and the X_Fe range of 0 to 0.5 is Diffusor's choice (the m = 3 term derives from data in Chakraborty 1997, p. 424).",
+        "The paper's single compromise equation (eq. 29, erratum: -8.27, 226 kJ/mol, 3 (X_Fe - 0.14)) is not implemented.",
+        "the diffusion length 2*sqrt(Dt) = 34.4 um is a large fraction of the distance from the interface to the end of the profile (5.0 um). The far field has been reached, so the semi-infinite assumption is breaking down. Measure a longer traverse or model the whole crystal with an explicit geometry.",
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "lynn_ml2022_ori_4_ol4",
+      "sample": "ORI-4_ol4",
+      "location": "South Caldera",
+      "published_median_days": 56.3592827407432,
+      "published_95_days": [
+        37.8109237739716,
+        80.2709726533842
+      ],
+      "diffusor_days": 59.50019217251895,
+      "ratio": 1.0557301171880444,
+      "within_95": true,
+      "fitted": {
+        "x0_um": 0.8199676284244216,
+        "Fo_rim": 82.60443513727701,
+        "Fo_core": 87.51535822179574
+      },
+      "n_points": 26,
+      "rmse_Fo": 0.08940958965964439,
+      "success": true,
+      "warnings": [
+        "Eq. 27 applies at fO2 above 1e-10 Pa (TaMED). At or below it use the PED entry (eq. 28).",
+        "The paper prints no temperature, pressure or composition limits for eq. 27. The 700-1200 C range is that of the Part I experiments (Dohmen et al. 2007), the pressure range reaches the 12 GPa data of Holzapfel et al. (2007) used in Fig. 7b, and the X_Fe range of 0 to 0.5 is Diffusor's choice (the m = 3 term derives from data in Chakraborty 1997, p. 424).",
+        "The paper's single compromise equation (eq. 29, erratum: -8.27, 226 kJ/mol, 3 (X_Fe - 0.14)) is not implemented.",
+        "the diffusion length 2*sqrt(Dt) = 27.0 um is a large fraction of the distance from the interface to the end of the profile (0.8 um). The far field has been reached, so the semi-infinite assumption is breaking down. Measure a longer traverse or model the whole crystal with an explicit geometry.",
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "lynn_ml2022_ori_4_ol5",
+      "sample": "ORI-4_ol5",
+      "location": "South Caldera",
+      "published_median_days": 27.8427083566154,
+      "published_95_days": [
+        18.070332141744,
+        40.1211670845205
+      ],
+      "diffusor_days": 29.85173093665096,
+      "ratio": 1.0721561478252606,
+      "within_95": true,
+      "fitted": {
+        "x0_um": 0.42165109344338475,
+        "Fo_rim": 82.53392057793674,
+        "Fo_core": 87.06928685749617
+      },
+      "n_points": 23,
+      "rmse_Fo": 0.08632015248281107,
+      "success": true,
+      "warnings": [
+        "Eq. 27 applies at fO2 above 1e-10 Pa (TaMED). At or below it use the PED entry (eq. 28).",
+        "The paper prints no temperature, pressure or composition limits for eq. 27. The 700-1200 C range is that of the Part I experiments (Dohmen et al. 2007), the pressure range reaches the 12 GPa data of Holzapfel et al. (2007) used in Fig. 7b, and the X_Fe range of 0 to 0.5 is Diffusor's choice (the m = 3 term derives from data in Chakraborty 1997, p. 424).",
+        "The paper's single compromise equation (eq. 29, erratum: -8.27, 226 kJ/mol, 3 (X_Fe - 0.14)) is not implemented.",
+        "the diffusion length 2*sqrt(Dt) = 19.1 um is a large fraction of the distance from the interface to the end of the profile (0.4 um). The far field has been reached, so the semi-infinite assumption is breaking down. Measure a longer traverse or model the whole crystal with an explicit geometry.",
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "lynn_ml2022_ori_4_ol6",
+      "sample": "ORI-4_ol6",
+      "location": "South Caldera",
+      "published_median_days": 16.2085440039971,
+      "published_95_days": [
+        10.314337369623,
+        24.1356323833354
+      ],
+      "diffusor_days": 20.956485785434367,
+      "ratio": 1.2929283333695119,
+      "within_95": true,
+      "fitted": {
+        "x0_um": 9.970430000000002,
+        "Fo_rim": 83.58251539393737,
+        "Fo_core": 88.32729908088383
+      },
+      "n_points": 25,
+      "rmse_Fo": 0.10482782254213924,
+      "success": true,
+      "warnings": [
+        "Eq. 27 applies at fO2 above 1e-10 Pa (TaMED). At or below it use the PED entry (eq. 28).",
+        "The paper prints no temperature, pressure or composition limits for eq. 27. The 700-1200 C range is that of the Part I experiments (Dohmen et al. 2007), the pressure range reaches the 12 GPa data of Holzapfel et al. (2007) used in Fig. 7b, and the X_Fe range of 0 to 0.5 is Diffusor's choice (the m = 3 term derives from data in Chakraborty 1997, p. 424).",
+        "The paper's single compromise equation (eq. 29, erratum: -8.27, 226 kJ/mol, 3 (X_Fe - 0.14)) is not implemented.",
+        "the diffusion length 2*sqrt(Dt) = 34.1 um is a large fraction of the distance from the interface to the end of the profile (10.0 um). The far field has been reached, so the semi-infinite assumption is breaking down. Measure a longer traverse or model the whole crystal with an explicit geometry.",
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "lynn_ml2022_ori_4_ol7",
+      "sample": "ORI-4_ol7",
+      "location": "South Caldera",
+      "published_median_days": 54.2789641747754,
+      "published_95_days": [
+        37.4226190659974,
+        76.3512976551355
+      ],
+      "diffusor_days": 65.64670088279867,
+      "ratio": 1.2094317178091267,
+      "within_95": true,
+      "fitted": {
+        "x0_um": 4.986250000000013,
+        "Fo_rim": 81.25264770008718,
+        "Fo_core": 87.55598940065957
+      },
+      "n_points": 23,
+      "rmse_Fo": 0.09540632855681407,
+      "success": true,
+      "warnings": [
+        "Eq. 27 applies at fO2 above 1e-10 Pa (TaMED). At or below it use the PED entry (eq. 28).",
+        "The paper prints no temperature, pressure or composition limits for eq. 27. The 700-1200 C range is that of the Part I experiments (Dohmen et al. 2007), the pressure range reaches the 12 GPa data of Holzapfel et al. (2007) used in Fig. 7b, and the X_Fe range of 0 to 0.5 is Diffusor's choice (the m = 3 term derives from data in Chakraborty 1997, p. 424).",
+        "The paper's single compromise equation (eq. 29, erratum: -8.27, 226 kJ/mol, 3 (X_Fe - 0.14)) is not implemented.",
+        "the diffusion length 2*sqrt(Dt) = 28.6 um is a large fraction of the distance from the interface to the end of the profile (5.0 um). The far field has been reached, so the semi-infinite assumption is breaking down. Measure a longer traverse or model the whole crystal with an explicit geometry.",
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "lynn_ml2022_ori_4_ol8",
+      "sample": "ORI-4_ol8",
+      "location": "South Caldera",
+      "published_median_days": 28.6272040529619,
+      "published_95_days": [
+        19.7931270400403,
+        40.4291003811925
+      ],
+      "diffusor_days": 35.661662973363484,
+      "ratio": 1.245726369483637,
+      "within_95": true,
+      "fitted": {
+        "x0_um": 12.045600000000002,
+        "Fo_rim": 81.68611194013954,
+        "Fo_core": 88.07328918477654
+      },
+      "n_points": 23,
+      "rmse_Fo": 0.12019379242406704,
+      "success": true,
+      "warnings": [
+        "Eq. 27 applies at fO2 above 1e-10 Pa (TaMED). At or below it use the PED entry (eq. 28).",
+        "The paper prints no temperature, pressure or composition limits for eq. 27. The 700-1200 C range is that of the Part I experiments (Dohmen et al. 2007), the pressure range reaches the 12 GPa data of Holzapfel et al. (2007) used in Fig. 7b, and the X_Fe range of 0 to 0.5 is Diffusor's choice (the m = 3 term derives from data in Chakraborty 1997, p. 424).",
+        "The paper's single compromise equation (eq. 29, erratum: -8.27, 226 kJ/mol, 3 (X_Fe - 0.14)) is not implemented.",
+        "the diffusion length 2*sqrt(Dt) = 41.6 um is a large fraction of the distance from the interface to the end of the profile (12.0 um). The far field has been reached, so the semi-infinite assumption is breaking down. Measure a longer traverse or model the whole crystal with an explicit geometry.",
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "lynn_ml2022_ori_4_ol9",
+      "sample": "ORI-4_ol9",
+      "location": "South Caldera",
+      "published_median_days": 53.642970053821,
+      "published_95_days": [
+        38.251372038555,
+        74.8919090727815
+      ],
+      "diffusor_days": 53.5839829046004,
+      "ratio": 0.9989003750321538,
+      "within_95": true,
+      "fitted": {
+        "x0_um": 0.7232232891809455,
+        "Fo_rim": 81.7670031041334,
+        "Fo_core": 88.15541521369568
+      },
+      "n_points": 20,
+      "rmse_Fo": 0.1931821309115887,
+      "success": true,
+      "warnings": [
+        "Eq. 27 applies at fO2 above 1e-10 Pa (TaMED). At or below it use the PED entry (eq. 28).",
+        "The paper prints no temperature, pressure or composition limits for eq. 27. The 700-1200 C range is that of the Part I experiments (Dohmen et al. 2007), the pressure range reaches the 12 GPa data of Holzapfel et al. (2007) used in Fig. 7b, and the X_Fe range of 0 to 0.5 is Diffusor's choice (the m = 3 term derives from data in Chakraborty 1997, p. 424).",
+        "The paper's single compromise equation (eq. 29, erratum: -8.27, 226 kJ/mol, 3 (X_Fe - 0.14)) is not implemented.",
+        "the diffusion length 2*sqrt(Dt) = 27.1 um is a large fraction of the distance from the interface to the end of the profile (0.7 um). The far field has been reached, so the semi-infinite assumption is breaking down. Measure a longer traverse or model the whole crystal with an explicit geometry.",
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "lynn_ml2022_ori_4_ol10",
+      "sample": "ORI-4_ol10",
+      "location": "South Caldera",
+      "published_median_days": 35.3081154202269,
+      "published_95_days": [
+        25.1096456493743,
+        49.4301457254717
+      ],
+      "diffusor_days": 34.602351191137224,
+      "ratio": 0.980011274442437,
+      "within_95": true,
+      "fitted": {
+        "x0_um": 0.3000471569314445,
+        "Fo_rim": 81.83909942763053,
+        "Fo_core": 88.41655325243558
+      },
+      "n_points": 26,
+      "rmse_Fo": 0.18249408934871472,
+      "success": true,
+      "warnings": [
+        "Eq. 27 applies at fO2 above 1e-10 Pa (TaMED). At or below it use the PED entry (eq. 28).",
+        "The paper prints no temperature, pressure or composition limits for eq. 27. The 700-1200 C range is that of the Part I experiments (Dohmen et al. 2007), the pressure range reaches the 12 GPa data of Holzapfel et al. (2007) used in Fig. 7b, and the X_Fe range of 0 to 0.5 is Diffusor's choice (the m = 3 term derives from data in Chakraborty 1997, p. 424).",
+        "The paper's single compromise equation (eq. 29, erratum: -8.27, 226 kJ/mol, 3 (X_Fe - 0.14)) is not implemented.",
+        "the diffusion length 2*sqrt(Dt) = 25.3 um is a large fraction of the distance from the interface to the end of the profile (0.3 um). The far field has been reached, so the semi-infinite assumption is breaking down. Measure a longer traverse or model the whole crystal with an explicit geometry.",
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "lynn_ml2022_ori_4_ol11",
+      "sample": "ORI-4_ol11",
+      "location": "South Caldera",
+      "published_median_days": 27.4109984821908,
+      "published_95_days": [
+        19.2722736886581,
+        38.3551908490691
+      ],
+      "diffusor_days": 27.27823847083283,
+      "ratio": 0.9951566882379631,
+      "within_95": true,
+      "fitted": {
+        "x0_um": 0.15352682481934893,
+        "Fo_rim": 81.1679446003401,
+        "Fo_core": 87.34248947041257
+      },
+      "n_points": 28,
+      "rmse_Fo": 0.12153688184762891,
+      "success": true,
+      "warnings": [
+        "Eq. 27 applies at fO2 above 1e-10 Pa (TaMED). At or below it use the PED entry (eq. 28).",
+        "The paper prints no temperature, pressure or composition limits for eq. 27. The 700-1200 C range is that of the Part I experiments (Dohmen et al. 2007), the pressure range reaches the 12 GPa data of Holzapfel et al. (2007) used in Fig. 7b, and the X_Fe range of 0 to 0.5 is Diffusor's choice (the m = 3 term derives from data in Chakraborty 1997, p. 424).",
+        "The paper's single compromise equation (eq. 29, erratum: -8.27, 226 kJ/mol, 3 (X_Fe - 0.14)) is not implemented.",
+        "the diffusion length 2*sqrt(Dt) = 21.9 um is a large fraction of the distance from the interface to the end of the profile (0.2 um). The far field has been reached, so the semi-infinite assumption is breaking down. Measure a longer traverse or model the whole crystal with an explicit geometry.",
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "lynn_ml2022_ori_4_ol12",
+      "sample": "ORI-4_ol12",
+      "location": "South Caldera",
+      "published_median_days": 19.8398839719656,
+      "published_95_days": [
+        14.4144072306298,
+        27.4266261854768
+      ],
+      "diffusor_days": 19.90984761983505,
+      "ratio": 1.003526414164937,
+      "within_95": true,
+      "fitted": {
+        "x0_um": 0.8601504215240409,
+        "Fo_rim": 79.73222944565548,
+        "Fo_core": 87.42166594569201
+      },
+      "n_points": 25,
+      "rmse_Fo": 0.24172392773191928,
+      "success": true,
+      "warnings": [
+        "Eq. 27 applies at fO2 above 1e-10 Pa (TaMED). At or below it use the PED entry (eq. 28).",
+        "The paper prints no temperature, pressure or composition limits for eq. 27. The 700-1200 C range is that of the Part I experiments (Dohmen et al. 2007), the pressure range reaches the 12 GPa data of Holzapfel et al. (2007) used in Fig. 7b, and the X_Fe range of 0 to 0.5 is Diffusor's choice (the m = 3 term derives from data in Chakraborty 1997, p. 424).",
+        "The paper's single compromise equation (eq. 29, erratum: -8.27, 226 kJ/mol, 3 (X_Fe - 0.14)) is not implemented.",
+        "the diffusion length 2*sqrt(Dt) = 36.9 um is a large fraction of the distance from the interface to the end of the profile (0.9 um). The far field has been reached, so the semi-infinite assumption is breaking down. Measure a longer traverse or model the whole crystal with an explicit geometry.",
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "lynn_ml2022_ori_4_ol13",
+      "sample": "ORI-4_ol13",
+      "location": "South Caldera",
+      "published_median_days": 46.9176152432664,
+      "published_95_days": [
+        30.912681400933,
+        67.0772462386761
+      ],
+      "diffusor_days": 49.75082299937229,
+      "ratio": 1.0603868662423654,
+      "within_95": true,
+      "fitted": {
+        "x0_um": 0.5574277985537349,
+        "Fo_rim": 81.42292930005566,
+        "Fo_core": 87.13279071143437
+      },
+      "n_points": 27,
+      "rmse_Fo": 0.0784836730911259,
+      "success": true,
+      "warnings": [
+        "Eq. 27 applies at fO2 above 1e-10 Pa (TaMED). At or below it use the PED entry (eq. 28).",
+        "The paper prints no temperature, pressure or composition limits for eq. 27. The 700-1200 C range is that of the Part I experiments (Dohmen et al. 2007), the pressure range reaches the 12 GPa data of Holzapfel et al. (2007) used in Fig. 7b, and the X_Fe range of 0 to 0.5 is Diffusor's choice (the m = 3 term derives from data in Chakraborty 1997, p. 424).",
+        "The paper's single compromise equation (eq. 29, erratum: -8.27, 226 kJ/mol, 3 (X_Fe - 0.14)) is not implemented.",
+        "the diffusion length 2*sqrt(Dt) = 24.4 um is a large fraction of the distance from the interface to the end of the profile (0.6 um). The far field has been reached, so the semi-infinite assumption is breaking down. Measure a longer traverse or model the whole crystal with an explicit geometry.",
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "lynn_ml2022_ori_4_ol15",
+      "sample": "ORI-4_ol15",
+      "location": "South Caldera",
+      "published_median_days": 167.376652545953,
+      "published_95_days": [
+        118.98721095667,
+        233.090804111218
+      ],
+      "diffusor_days": 205.41391492155034,
+      "ratio": 1.2272554851409414,
+      "within_95": true,
+      "fitted": {
+        "x0_um": 16.025300000000005,
+        "Fo_rim": 81.74518054950784,
+        "Fo_core": 87.82497794384923
+      },
+      "n_points": 27,
+      "rmse_Fo": 0.13536665218104915,
+      "success": true,
+      "warnings": [
+        "Eq. 27 applies at fO2 above 1e-10 Pa (TaMED). At or below it use the PED entry (eq. 28).",
+        "The paper prints no temperature, pressure or composition limits for eq. 27. The 700-1200 C range is that of the Part I experiments (Dohmen et al. 2007), the pressure range reaches the 12 GPa data of Holzapfel et al. (2007) used in Fig. 7b, and the X_Fe range of 0 to 0.5 is Diffusor's choice (the m = 3 term derives from data in Chakraborty 1997, p. 424).",
+        "The paper's single compromise equation (eq. 29, erratum: -8.27, 226 kJ/mol, 3 (X_Fe - 0.14)) is not implemented.",
+        "the diffusion length 2*sqrt(Dt) = 84.3 um is a large fraction of the distance from the interface to the end of the profile (16.0 um). The far field has been reached, so the semi-infinite assumption is breaking down. Measure a longer traverse or model the whole crystal with an explicit geometry.",
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "lynn_ml2022_ori_4_ol16",
+      "sample": "ORI-4_ol16",
+      "location": "South Caldera",
+      "published_median_days": 11.838544779303,
+      "published_95_days": [
+        7.43593258616811,
+        17.4145137737547
+      ],
+      "diffusor_days": 15.726727492754554,
+      "ratio": 1.3284341771675483,
+      "within_95": true,
+      "fitted": {
+        "x0_um": 8.006160000000001,
+        "Fo_rim": 84.04809412794482,
+        "Fo_core": 88.88931844618774
+      },
+      "n_points": 23,
+      "rmse_Fo": 0.08418233871209825,
+      "success": true,
+      "warnings": [
+        "Eq. 27 applies at fO2 above 1e-10 Pa (TaMED). At or below it use the PED entry (eq. 28).",
+        "The paper prints no temperature, pressure or composition limits for eq. 27. The 700-1200 C range is that of the Part I experiments (Dohmen et al. 2007), the pressure range reaches the 12 GPa data of Holzapfel et al. (2007) used in Fig. 7b, and the X_Fe range of 0 to 0.5 is Diffusor's choice (the m = 3 term derives from data in Chakraborty 1997, p. 424).",
+        "The paper's single compromise equation (eq. 29, erratum: -8.27, 226 kJ/mol, 3 (X_Fe - 0.14)) is not implemented.",
+        "the diffusion length 2*sqrt(Dt) = 30.1 um is a large fraction of the distance from the interface to the end of the profile (8.0 um). The far field has been reached, so the semi-infinite assumption is breaking down. Measure a longer traverse or model the whole crystal with an explicit geometry.",
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "lynn_ml2022_ori_4_ol17",
+      "sample": "ORI-4_ol17",
+      "location": "South Caldera",
+      "published_median_days": 38.8821134380375,
+      "published_95_days": [
+        21.3105108605193,
+        61.242332095339
+      ],
+      "diffusor_days": 52.097447054031655,
+      "ratio": 1.3398820806655507,
+      "within_95": true,
+      "fitted": {
+        "x0_um": 7.949060000000001,
+        "Fo_rim": 83.96580408738333,
+        "Fo_core": 87.33882639755934
+      },
+      "n_points": 22,
+      "rmse_Fo": 0.053863602321817916,
+      "success": true,
+      "warnings": [
+        "Eq. 27 applies at fO2 above 1e-10 Pa (TaMED). At or below it use the PED entry (eq. 28).",
+        "The paper prints no temperature, pressure or composition limits for eq. 27. The 700-1200 C range is that of the Part I experiments (Dohmen et al. 2007), the pressure range reaches the 12 GPa data of Holzapfel et al. (2007) used in Fig. 7b, and the X_Fe range of 0 to 0.5 is Diffusor's choice (the m = 3 term derives from data in Chakraborty 1997, p. 424).",
+        "The paper's single compromise equation (eq. 29, erratum: -8.27, 226 kJ/mol, 3 (X_Fe - 0.14)) is not implemented.",
+        "the diffusion length 2*sqrt(Dt) = 28.4 um is a large fraction of the distance from the interface to the end of the profile (7.9 um). The far field has been reached, so the semi-infinite assumption is breaking down. Measure a longer traverse or model the whole crystal with an explicit geometry.",
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "lynn_ml2022_ori_4_ol18",
+      "sample": "ORI-4_ol18",
+      "location": "South Caldera",
+      "published_median_days": 1.1255411886143,
+      "published_95_days": [
+        1.00540546678564,
+        1.49590357454378
+      ],
+      "diffusor_days": 0.9120900963342337,
+      "ratio": 0.8103569247937921,
+      "within_95": false,
+      "fitted": {
+        "x0_um": 9.14631658980878,
+        "Fo_rim": 78.74525021754242,
+        "Fo_core": 88.49505131741121
+      },
+      "n_points": 24,
+      "n_nodes": 801,
+      "rmse_Fo": 0.1047339429949801,
+      "success": true,
+      "warnings": [
+        "Eq. 27 applies at fO2 above 1e-10 Pa (TaMED). At or below it use the PED entry (eq. 28).",
+        "The paper prints no temperature, pressure or composition limits for eq. 27. The 700-1200 C range is that of the Part I experiments (Dohmen et al. 2007), the pressure range reaches the 12 GPa data of Holzapfel et al. (2007) used in Fig. 7b, and the X_Fe range of 0 to 0.5 is Diffusor's choice (the m = 3 term derives from data in Chakraborty 1997, p. 424).",
+        "The paper's single compromise equation (eq. 29, erratum: -8.27, 226 kJ/mol, 3 (X_Fe - 0.14)) is not implemented.",
+        "the diffusion length 2*sqrt(Dt) = 5.7 um is a large fraction of the distance from the interface to the end of the profile (9.1 um). The far field has been reached, so the semi-infinite assumption is breaking down. Measure a longer traverse or model the whole crystal with an explicit geometry.",
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "lynn_ml2022_ori_4_ol19",
+      "sample": "ORI-4_ol19",
+      "location": "South Caldera",
+      "published_median_days": 28.7049780689055,
+      "published_95_days": [
+        20.3325702533929,
+        40.311492017837
+      ],
+      "diffusor_days": 33.00110981012536,
+      "ratio": 1.1496650417536327,
+      "within_95": true,
+      "fitted": {
+        "x0_um": 5.032640000084039,
+        "Fo_rim": 81.43439704224048,
+        "Fo_core": 86.85965445771761
+      },
+      "n_points": 27,
+      "rmse_Fo": 0.1396023361384245,
+      "success": true,
+      "warnings": [
+        "Eq. 27 applies at fO2 above 1e-10 Pa (TaMED). At or below it use the PED entry (eq. 28).",
+        "The paper prints no temperature, pressure or composition limits for eq. 27. The 700-1200 C range is that of the Part I experiments (Dohmen et al. 2007), the pressure range reaches the 12 GPa data of Holzapfel et al. (2007) used in Fig. 7b, and the X_Fe range of 0 to 0.5 is Diffusor's choice (the m = 3 term derives from data in Chakraborty 1997, p. 424).",
+        "The paper's single compromise equation (eq. 29, erratum: -8.27, 226 kJ/mol, 3 (X_Fe - 0.14)) is not implemented.",
+        "the diffusion length 2*sqrt(Dt) = 47.2 um is a large fraction of the distance from the interface to the end of the profile (5.0 um). The far field has been reached, so the semi-infinite assumption is breaking down. Measure a longer traverse or model the whole crystal with an explicit geometry.",
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "lynn_ml2022_ori_4_ol20",
+      "sample": "ORI-4_ol20",
+      "location": "South Caldera",
+      "published_median_days": 124.915417792799,
+      "published_95_days": [
+        89.4286577980767,
+        173.438872797072
+      ],
+      "diffusor_days": 125.0640839440874,
+      "ratio": 1.0011901345239465,
+      "within_95": true,
+      "fitted": {
+        "x0_um": 1.2749508744198037,
+        "Fo_rim": 81.38710918927036,
+        "Fo_core": 87.65840120908825
+      },
+      "n_points": 26,
+      "rmse_Fo": 0.14997947327002836,
+      "success": true,
+      "warnings": [
+        "Eq. 27 applies at fO2 above 1e-10 Pa (TaMED). At or below it use the PED entry (eq. 28).",
+        "The paper prints no temperature, pressure or composition limits for eq. 27. The 700-1200 C range is that of the Part I experiments (Dohmen et al. 2007), the pressure range reaches the 12 GPa data of Holzapfel et al. (2007) used in Fig. 7b, and the X_Fe range of 0 to 0.5 is Diffusor's choice (the m = 3 term derives from data in Chakraborty 1997, p. 424).",
+        "The paper's single compromise equation (eq. 29, erratum: -8.27, 226 kJ/mol, 3 (X_Fe - 0.14)) is not implemented.",
+        "the diffusion length 2*sqrt(Dt) = 41.4 um is a large fraction of the distance from the interface to the end of the profile (1.3 um). The far field has been reached, so the semi-infinite assumption is breaking down. Measure a longer traverse or model the whole crystal with an explicit geometry.",
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "lynn_ml2022_ori_4_ol21",
+      "sample": "ORI-4_ol21",
+      "location": "South Caldera",
+      "published_median_days": 48.7069272394025,
+      "published_95_days": [
+        34.4417093133089,
+        68.1850998863459
+      ],
+      "diffusor_days": 56.894016088690435,
+      "ratio": 1.1680887979043937,
+      "within_95": true,
+      "fitted": {
+        "x0_um": 8.005730000000005,
+        "Fo_rim": 81.09461972428346,
+        "Fo_core": 87.69383584921525
+      },
+      "n_points": 25,
+      "rmse_Fo": 0.11568317564128909,
+      "success": true,
+      "warnings": [
+        "Eq. 27 applies at fO2 above 1e-10 Pa (TaMED). At or below it use the PED entry (eq. 28).",
+        "The paper prints no temperature, pressure or composition limits for eq. 27. The 700-1200 C range is that of the Part I experiments (Dohmen et al. 2007), the pressure range reaches the 12 GPa data of Holzapfel et al. (2007) used in Fig. 7b, and the X_Fe range of 0 to 0.5 is Diffusor's choice (the m = 3 term derives from data in Chakraborty 1997, p. 424).",
+        "The paper's single compromise equation (eq. 29, erratum: -8.27, 226 kJ/mol, 3 (X_Fe - 0.14)) is not implemented.",
+        "the diffusion length 2*sqrt(Dt) = 63.8 um is a large fraction of the distance from the interface to the end of the profile (8.0 um). The far field has been reached, so the semi-infinite assumption is breaking down. Measure a longer traverse or model the whole crystal with an explicit geometry.",
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    },
+    {
+      "key": "lynn_ml2022_ori_4_ol22",
+      "sample": "ORI-4_ol22",
+      "location": "South Caldera",
+      "published_median_days": 11.8230536563622,
+      "published_95_days": [
+        8.129580197348,
+        16.8884616037081
+      ],
+      "diffusor_days": 13.979224990405559,
+      "ratio": 1.1823700878565397,
+      "within_95": true,
+      "fitted": {
+        "x0_um": 8.021680000000002,
+        "Fo_rim": 83.23372696933127,
+        "Fo_core": 88.4000259390633
+      },
+      "n_points": 25,
+      "rmse_Fo": 0.12823124327015192,
+      "success": true,
+      "warnings": [
+        "Eq. 27 applies at fO2 above 1e-10 Pa (TaMED). At or below it use the PED entry (eq. 28).",
+        "The paper prints no temperature, pressure or composition limits for eq. 27. The 700-1200 C range is that of the Part I experiments (Dohmen et al. 2007), the pressure range reaches the 12 GPa data of Holzapfel et al. (2007) used in Fig. 7b, and the X_Fe range of 0 to 0.5 is Diffusor's choice (the m = 3 term derives from data in Chakraborty 1997, p. 424).",
+        "The paper's single compromise equation (eq. 29, erratum: -8.27, 226 kJ/mol, 3 (X_Fe - 0.14)) is not implemented.",
+        "the diffusion length 2*sqrt(Dt) = 31.7 um is a large fraction of the distance from the interface to the end of the profile (8.0 um). The far field has been reached, so the semi-infinite assumption is breaking down. Measure a longer traverse or model the whole crystal with an explicit geometry.",
+        "1-D modelling can be biased by 3-D geometry and section orientation; it is not a universal upper bound on time (Shea et al. 2015, Krimer & Costa 2017)."
+      ]
+    }
+  ]
+}

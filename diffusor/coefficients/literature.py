@@ -160,6 +160,18 @@ scalar("qz_Ti_cherniak2007", "quartz", "Ti", "cherniak2007quartz", np.log10(7e-8
            "compare literature before interpreting a time."),
        uncertainty="Quoted Q ±12 kJ/mol (confidence level not stated); log D0 = -7.154 ±0.525 in the results "
                    "text; covariance not transcribed, coefficient uncertainty not sampled.")
+scalar("qz_Ti_jollands2020", "quartz", "Ti", "jollands2020", -8.3, 311,
+       (900, 1490), source="abstract and p. 654, log10 D = -8.3 - 311 kJ/mol / (2.303 R T); Fig. 1B (c-axis)",
+       reference_axis="c", allowed_axes=("c",), p_stated=True,
+       reference_state="1 bar, in air (stated by the authors); no pressure correction",
+       notes=(GROWTH,
+           "Experiments at 1 bar in air between 900 and 1490 C with TiO2-SiO2 or Ti-doped SiO2 sources, profiles "
+           "measured by SIMS depth profiling, all along c (Fig. 1B). The diffusivities are two to three orders of "
+           "magnitude lower than those of Cherniak et al. (2007) in the experimental range (p. 654). The paper "
+           "advises that time scales from the Cherniak et al. law near 700-800 C be multiplied by about 1000 "
+           "(p. 656). The paper prints R in kJ/(K mol) and 2.303 for ln 10."),
+       uncertainty="Quoted log D0 ±0.4 and Q ±12 kJ/mol (level not stated; Fig. 1B shows 95 % envelopes from the "
+                   "standard error of the regression); no covariance given, coefficient held fixed.")
 scalar("rt_Zr_cherniak2007_c", "rutile", "Zr", "cherniak2007rutile", np.log10(9.8e-15), 170,
        (750, 1100), source="abstract p. 267", reference_axis="c", allowed_axes=("c",), p_stated=True,
        kind_stated=True, reference_state="anhydrous (stated by the authors); air, NNO or QFM; 1-atm furnaces",

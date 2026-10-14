@@ -70,17 +70,17 @@ def test_garnet_eq5_matrix_from_eq3_tracers_is_17_to_36_percent_low():
 
 def test_registry_counts_of_the_readme():
     cs = list_coefficients()
-    assert len(cs) == 113 and sum(bool(c.verified) for c in cs) == 112
+    assert len(cs) == 161 and sum(bool(c.verified) for c in cs) == 160
     assert dict(collections.Counter(c.mineral for c in cs)) == {
-        "olivine": 10, "opx": 12, "cpx": 3, "plagioclase": 11, "kfeldspar": 7, "magnetite": 42,
-        "garnet": 3, "quartz": 1, "rutile": 3, "titanite": 2, "apatite": 8, "zircon": 6,
+        "olivine": 29, "opx": 16, "cpx": 6, "plagioclase": 22, "kfeldspar": 7, "magnetite": 48,
+        "garnet": 4, "melt": 3, "quartz": 2, "rutile": 3, "titanite": 2, "apatite": 8, "zircon": 6,
         "monazite": 1, "xenotime": 4}
     with_cov = [c for c in cs if getattr(c, "cov_order", None)]
     scatter = [c for c in cs if c.sigma_logD is not None and not getattr(c, "cov_order", None)]
     neither = [c for c in cs if c.sigma_logD is None and not getattr(c, "cov_order", None)]
-    assert (len(with_cov), len(scatter), len(neither)) == (2, 68, 43)
+    assert (len(with_cov), len(scatter), len(neither)) == (24, 74, 63)
     stated = [c for c in scatter if not c.sigma_logD_basis.startswith("assumed")]
-    assert (len(stated), len(scatter) - len(stated)) == (7, 61)
+    assert (len(stated), len(scatter) - len(stated)) == (11, 63)
 
 
 def test_published_study_rows_of_the_readme():

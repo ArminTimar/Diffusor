@@ -1,6 +1,6 @@
-# Published-study validation — 8 October 2026
+# Published-study validation — 9 October 2026
 
-492 measured profiles from twelve downloaded studies are available in **File > Published validation library**. 18 Lynn olivine profiles and 20 Iovine sanidine profiles also have ready-to-run model presets in the usual example list. The remaining library entries are explicitly data-only. They require model setup before fitting.
+492 measured profiles from twelve downloaded studies are available in **File > Published validation library**. 77 Lynn olivine profiles (Kilauea 2020 and Mauna Loa 2022) and 20 Iovine sanidine profiles also have ready-to-run model presets in the usual example list. The remaining library entries are explicitly data-only. They require model setup before fitting.
 
 ## What replicated
 
@@ -73,6 +73,74 @@ Full curves: [fits/](fits/). Machine-readable fit results and calibration warnin
 
 Traverses with at least ten points (20) are presets in the example list under K-feldspar. The paper gives no uncertainty for single times; Fig. 7 shows the effect of ±26.5 °C. [Results](iovine_results.json).
 
+## Lynn et al. (2024): olivine at Mauna Loa 2022
+
+**58 of 59 reconstructions lie inside the published 95% intervals; the median ratio to the published median is 1.07 (0.81–1.34).** The paper (Nature Communications 15:9451, Methods pp. 7–8) models Fo with the Dohmen & Chakraborty (2007) law along c, six times faster than along a and b, projected on the EBSD angles; a step at x_s with rim and core held at Fo_r and Fo_c; and samples Δt, T, P, fO₂, x_s, Fo_r and Fo_c by MCMC with Fo σ = 0.1 mol%, reporting posterior medians and equal-tailed 95% intervals (Supplementary Data 1, sheet S6). Diffusor uses the same law, angles, initial and boundary conditions, holds T, P and fO₂ at the values printed on each crystal’s sheet (the centres of the paper’s priors), and fits Δt, x_s and both plateaus by least squares to the points marked Valid = 1, with the rim at x = 0. A best fit at fixed conditions and a posterior median are not the same statistic, so agreement within the interval is the test. ORI-4_ol18, the shortest profile (published 1.13 d, 95% 1.01–1.50 d), gives 0.91 d; its fit needs 801 grid nodes (0.9121 d, 0.9123 d on 1601), the others use 401. All 59 traverses are presets in the example list under olivine.
+
+| Crystal | Location | Published median (95%) (d) | Diffusor (d) | Ratio |
+|---|---|---:|---:|---:|
+| ORI-1_ol1 | Northeast Rift Zone | 9.88 (5.95–14.55) | 12.67 | 1.28 |
+| ORI-1_ol3 | Northeast Rift Zone | 28.98 (17.00–41.02) | 26.90 | 0.93 |
+| ORI-1_ol4 | Northeast Rift Zone | 9.23 (6.67–12.91) | 8.47 | 0.92 |
+| ORI-1_ol5 | Northeast Rift Zone | 40.96 (28.52–57.68) | 50.50 | 1.23 |
+| ORI-1_ol6 | Northeast Rift Zone | 15.23 (8.69–23.04) | 16.32 | 1.07 |
+| ORI-1_ol7 | Northeast Rift Zone | 47.09 (32.25–66.67) | 56.13 | 1.19 |
+| ORI-1_ol8 | Northeast Rift Zone | 73.02 (51.53–101.80) | 84.93 | 1.16 |
+| ORI-1_ol9 | Northeast Rift Zone | 7.42 (5.00–10.60) | 8.01 | 1.08 |
+| ORI-1_ol11 | Northeast Rift Zone | 21.93 (14.19–41.20) | 19.27 | 0.88 |
+| ORI-1_ol14 | Northeast Rift Zone | 19.82 (14.41–27.51) | 19.18 | 0.97 |
+| ORI-1_ol16 | Northeast Rift Zone | 231.86 (159.86–327.18) | 272.28 | 1.17 |
+| ORI-1_ol18 | Northeast Rift Zone | 16.68 (10.60–24.32) | 21.49 | 1.29 |
+| ORI-2_ol1 | South Caldera | 224.77 (160.96–312.74) | 225.85 | 1.00 |
+| ORI-2_ol2 | South Caldera | 9.11 (6.12–13.01) | 11.62 | 1.28 |
+| ORI-2_ol3 | South Caldera | 29.06 (19.24–41.70) | 29.78 | 1.02 |
+| ORI-2_ol4 | South Caldera | 30.81 (21.92–43.09) | 31.90 | 1.04 |
+| ORI-2_ol5 | South Caldera | 14.52 (10.44–20.09) | 13.62 | 0.94 |
+| ORI-2_ol6 | South Caldera | 49.40 (34.13–70.07) | 51.57 | 1.04 |
+| ORI-2_ol7 | South Caldera | 87.44 (61.83–122.40) | 88.48 | 1.01 |
+| ORI-2_ol8 | South Caldera | 37.72 (26.82–52.22) | 38.46 | 1.02 |
+| ORI-2_ol9 | South Caldera | 12.27 (8.16–17.85) | 14.80 | 1.21 |
+| ORI-2_ol10 | South Caldera | 64.91 (44.40–92.73) | 69.18 | 1.07 |
+| ORI-2_ol11 | South Caldera | 51.83 (35.73–74.07) | 60.99 | 1.18 |
+| ORI-2_ol12 | South Caldera | 173.60 (124.84–240.51) | 196.50 | 1.13 |
+| ORI-3_ol1 | Moku‘āweoweo | 32.06 (23.46–44.18) | 31.15 | 0.97 |
+| ORI-3_ol2 | Moku‘āweoweo | 53.05 (37.54–74.68) | 62.80 | 1.18 |
+| ORI-3_ol3 | Moku‘āweoweo | 66.06 (46.12–92.77) | 75.73 | 1.15 |
+| ORI-3_ol4 | Moku‘āweoweo | 101.34 (73.46–140.58) | 100.51 | 0.99 |
+| ORI-3_ol5 | Moku‘āweoweo | 27.17 (19.65–37.48) | 26.94 | 0.99 |
+| ORI-3_ol6 | Moku‘āweoweo | 52.61 (37.55–73.13) | 58.74 | 1.12 |
+| ORI-3_ol7 | Moku‘āweoweo | 61.91 (42.44–87.15) | 65.40 | 1.06 |
+| ORI-3_ol8 | Moku‘āweoweo | 83.18 (58.88–116.08) | 96.65 | 1.16 |
+| ORI-3_ol10 | Moku‘āweoweo | 27.90 (19.93–38.60) | 32.97 | 1.18 |
+| ORI-3_ol11 | Moku‘āweoweo | 53.27 (38.85–73.31) | 53.93 | 1.01 |
+| ORI-3_ol12 | Moku‘āweoweo | 70.59 (50.86–97.76) | 70.05 | 0.99 |
+| ORI-3_ol14 | Moku‘āweoweo | 37.55 (27.03–52.15) | 38.06 | 1.01 |
+| ORI-3_ol16 | Moku‘āweoweo | 75.02 (52.39–104.83) | 77.86 | 1.04 |
+| ORI-3_ol17 | Moku‘āweoweo | 65.55 (48.03–90.09) | 70.37 | 1.07 |
+| ORI-4_ol1 | South Caldera | 75.50 (53.00–105.15) | 71.71 | 0.95 |
+| ORI-4_ol2 | South Caldera | 36.73 (25.36–51.82) | 36.29 | 0.99 |
+| ORI-4_ol3 | South Caldera | 32.20 (22.84–44.93) | 37.86 | 1.18 |
+| ORI-4_ol4 | South Caldera | 56.36 (37.81–80.27) | 59.50 | 1.06 |
+| ORI-4_ol5 | South Caldera | 27.84 (18.07–40.12) | 29.85 | 1.07 |
+| ORI-4_ol6 | South Caldera | 16.21 (10.31–24.14) | 20.96 | 1.29 |
+| ORI-4_ol7 | South Caldera | 54.28 (37.42–76.35) | 65.65 | 1.21 |
+| ORI-4_ol8 | South Caldera | 28.63 (19.79–40.43) | 35.66 | 1.25 |
+| ORI-4_ol9 | South Caldera | 53.64 (38.25–74.89) | 53.58 | 1.00 |
+| ORI-4_ol10 | South Caldera | 35.31 (25.11–49.43) | 34.60 | 0.98 |
+| ORI-4_ol11 | South Caldera | 27.41 (19.27–38.36) | 27.28 | 1.00 |
+| ORI-4_ol12 | South Caldera | 19.84 (14.41–27.43) | 19.91 | 1.00 |
+| ORI-4_ol13 | South Caldera | 46.92 (30.91–67.08) | 49.75 | 1.06 |
+| ORI-4_ol15 | South Caldera | 167.38 (118.99–233.09) | 205.41 | 1.23 |
+| ORI-4_ol16 | South Caldera | 11.84 (7.44–17.41) | 15.73 | 1.33 |
+| ORI-4_ol17 | South Caldera | 38.88 (21.31–61.24) | 52.10 | 1.34 |
+| ORI-4_ol18 | South Caldera | 1.13 (1.01–1.50) | 0.91 | 0.81 |
+| ORI-4_ol19 | South Caldera | 28.70 (20.33–40.31) | 33.00 | 1.15 |
+| ORI-4_ol20 | South Caldera | 124.92 (89.43–173.44) | 125.06 | 1.00 |
+| ORI-4_ol21 | South Caldera | 48.71 (34.44–68.19) | 56.89 | 1.17 |
+| ORI-4_ol22 | South Caldera | 11.82 (8.13–16.89) | 13.98 | 1.18 |
+
+[Results](lynn_ml_results.json).
+
 ## Other executable checks
 
 **Gordeychik et al. (2018).** All 32 published Fo age rows in Tables SM4-A, SM5-A and SM6-A reproduce to relative error below 4×10⁻¹⁶. These checks use the published fitted diffusion widths or Dt products and geometric factors. They verify the conversion into ages, not a new fit to the raw profiles or the jointly inferred growth/resorption geometry. The original registry D is about 0.3% below the spreadsheet D, largely reflecting literal constants (2.303 versus ln 10 and the gas constant). The reported width checks use the source D rather than hiding that distinction.
@@ -89,7 +157,7 @@ Where an unambiguous a/b/c orientation match exists, changing D to Oeser gives 0
 
 **Chamberlain et al. (2014).** The supplement holds no numeric traverses. In Electronic Appendix 7 the columns headed “+ timescale (−30 °C)” and “− timescale (+30 °C)” are the best-fit time scaled by D(T)/D(T∓30 K). With the Table 1 laws (Sr 8.4 m²/s and 450 kJ/mol, Ba 0.29 m²/s and 455 kJ/mol, Ti 7×10⁻⁸ m²/s and 273 kJ/mol) they recompute for all 17 Sr, 54 Ba and 151 Ti rows to within 1×10⁻⁴ of the stored values. They are absolute times at the two temperatures, not increments.
 
-**Petrone et al. (2018).** Table S4 gives √(4Dt) and T for each modelled boundary. For the 71 rows fitted with the semi-infinite erf, t = (√(4Dt))²/4D with the Dimanov & Sautter (2000) values printed in Supplementary Material 1 (p. 13: D₀ = 9.5×10⁻⁵ m²/s, 406 kJ/mol) reproduces 62 printed times within 5% or rounding (median ratio 1.006). The other 9 are listed in the results file. 19 rows use the finite-reservoir solution of NIDIS and are not recomputed. Diffusor’s registry entry for this law carries D₀ = 9.55×10⁻⁵ m²/s, the value that reproduces the D values printed by Petrone et al. (2016); the check uses the 2018 value. [Results](timescale_tables_results.json).
+**Petrone et al. (2018).** Table S4 gives √(4Dt) and T for each modelled boundary. For the 71 rows fitted with the semi-infinite erf, t = (√(4Dt))²/4D with the Dimanov & Sautter (2000) law (406 kJ/mol) and D₀ = 9.55×10⁻⁵ m²/s reproduces 63 printed times within 5% or rounding (median ratio 1.0005). The other 8 are listed in the results file. 19 rows use the finite-reservoir solution of NIDIS and are not recomputed. Supplementary Material 1 (p. 13) prints D₀ = 9.5×10⁻⁵ m²/s, which gives a median ratio of 1.0058; 9.55×10⁻⁵ m²/s, the value of Diffusor’s registry entry, is the one that reproduces the D values NIDIS prints (Petrone et al. 2016), and it also centres these times. [Results](timescale_tables_results.json).
 
 ## Sundermeyer reconstructions: published ages not reproduced
 
@@ -124,17 +192,17 @@ Réunion 150915-1-9 has a matching melt-inclusion temperature but a reconstructe
 | [Ostorero et al. (2022), Kizimen](https://doi.org/10.1038/s43247-022-00622-3) | — | Existing measured K9_L10C4 example retained and rechecked with original and Dias 2025 laws. EPMA surrogate for the published BSE fit. |
 | [Sievwright et al. (2020), magnetite experiments](https://doi.org/10.1007/s00410-020-01679-z) | — | Experimental coefficient source already represented by the registry and existing source tests, rather than a new natural-timescale application. |
 | [Iovine et al. (2017), Agnano-Monte Spina](https://doi.org/10.1007/s00445-017-1101-4) | 43 | 23 greyscale and X-ray traverses refitted with the paper’s law (Cherniak 2002), 930 °C and a sharp initial step with free plateaus: 0.90–1.28 times the Table 1 and 2 times. The 20 with at least ten points are presets. The EMP BaO traverses and two traverses that cross two steps are data only, because the fitted part is not published. |
-| Lynn et al., Mauna Loa 2022 (supplementary workbook) | 59 | 59 olivine traverses with the workbook’s T, P, log fO₂, EBSD angles and median times (sheet S6). The workbook names no diffusion law and the article is not in the local source set, so the traverses are data only. The two pyroxene sheets are not extracted. |
+| [Lynn et al. (2024), Mauna Loa 2022](https://doi.org/10.1038/s41467-024-52881-7) | 59 | 59 olivine traverses refitted with the paper’s law (Dohmen & Chakraborty 2007), the sheet’s T, P, fO₂ and EBSD angles, and a step whose position and plateaus are fitted: 58 lie inside the published 95% interval, median ratio 1.07. ORI-4_ol18 (1.13 d published) gives 0.91 d. All 59 are presets. The paper’s values are MCMC posterior medians with T, P and fO₂ sampled; Diffusor holds them at the sheet values. The two pyroxene sheets are not extracted. |
 | [Sato et al. (2022), Zao](https://doi.org/10.1016/j.jvolgeores.2022.107686) | 58 | 58 EPMA pyroxene traverses (Supplementary Table 8). Seven crystals have EPMA-based times in Supplementary Table 9 (Dohmen et al. 2016 law as printed on p. 11, 1025 °C, NNO). The fitted part of each traverse and the step position are not published, and erf fits to different parts of one traverse differ by more than an order of magnitude, so the traverses are data only. |
 | [Morgado et al. (2019), Calbuco](https://doi.org/10.1007/s00410-019-1596-0) | 16 | 16 titanomagnetite traverses from ilmenite–titanomagnetite pairs (SM1). The paper models them with the Aragon et al. (1984) point-defect law and an interface at equilibrium. The domain length, far boundary and forward model are not published, and the Table 3 times are minimum re-equilibration times of nearly flat profiles, so the traverses are data only. |
 | [Chamberlain et al. (2014), Bishop Tuff](https://doi.org/10.1007/s00410-014-1034-2) | — | No numeric traverses: the profiles are shown as figures in the electronic appendices. The ±30 °C columns of Electronic Appendix 7 (17 Sr, 54 Ba and 151 Ti rows) recompute from the Table 1 laws to within 1×10⁻⁴. |
-| [Petrone et al. (2018), Stromboli](https://doi.org/10.1016/j.epsl.2018.03.055) | — | No numeric traverses. 62 of 71 semi-infinite rows of Table S4 recompute from √(4Dt), T and the Dimanov & Sautter (2000) values printed in Supplementary Material 1 (D₀ = 9.5×10⁻⁵ m²/s, 406 kJ/mol) within 5% or rounding. The other nine are listed in the results file. 19 finite-reservoir rows need the NIDIS finite-reservoir solution and are not recomputed. |
+| [Petrone et al. (2018), Stromboli](https://doi.org/10.1016/j.epsl.2018.03.055) | — | No numeric traverses. 63 of 71 semi-infinite rows of Table S4 recompute from √(4Dt), T and the Dimanov & Sautter (2000) law with D₀ = 9.55×10⁻⁵ m²/s and 406 kJ/mol within 5% or rounding (median ratio 1.0005); the D₀ of 9.5×10⁻⁵ m²/s printed in Supplementary Material 1 gives 1.006. The other eight are listed in the results file. 19 finite-reservoir rows need the NIDIS finite-reservoir solution and are not recomputed. |
 | [Petrone et al. (2022), Stromboli](https://doi.org/10.1038/s41467-022-35405-z) | — | Timescales are in Table 1 of the article. The downloaded supplement holds figures and spot analyses, with no numeric traverses and no erf parameters. |
 | [Mangler et al. (2022), Popocatépetl](https://doi.org/10.1130/G49365.1) | — | Table S1 lists the orthopyroxene Fe–Mg times with their temperatures. The profiles are shown only as figures, so no traverse is extracted. |
 | [Polo-Sanchez et al. (2023), Santorini](https://doi.org/10.3389/feart.2023.1128083) | — | The Table 1 workbook lists orthopyroxene and clinopyroxene times per zone. Data Sheet 3 shows the modelled profiles as figures only, so no traverse is extracted. |
 | [Seitz et al. (2018), Patagonia](https://doi.org/10.3389/feart.2018.00095) | — | The supplementary table holds whole-rock analyses and sample locations. The NanoSIMS Ti traverses are shown only as figures. |
 
-A workbook of core/rim compositions is not a measured diffusion traverse. A case requiring different dimensions, multiple events or a Bayesian joint inversion has not been labelled an exact replication merely because a scalar curve can be fitted. The supplements of Weller et al. (2026) and Kahl et al. (2023) have not been downloaded yet, and the article that goes with the Lynn et al. Mauna Loa 2022 workbook is not in the local source set.
+A workbook of core/rim compositions is not a measured diffusion traverse. A case requiring different dimensions, multiple events or a Bayesian joint inversion has not been labelled an exact replication merely because a scalar curve can be fitted. The supplements of Weller et al. (2026) and Kahl et al. (2023) have not been downloaded yet.
 
 ## Reproduce
 
@@ -151,6 +219,7 @@ python examples/validation/check_mourey.py
 python examples/validation/check_reunion.py
 python examples/validation/check_eifel.py
 python examples/validation/check_iovine.py
+python examples/validation/check_lynn_ml.py
 python examples/validation/check_timescale_tables.py
 python examples/validation/export_curves.py
 python examples/validation/build_report.py

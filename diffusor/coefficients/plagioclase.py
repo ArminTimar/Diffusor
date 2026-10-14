@@ -73,6 +73,16 @@ ACTIVITY_SETS = {
             None: {"Mg": -26.1, "Sr": -30.4, "Ba": -55.0, "Li": -6.9, "K": -25.5, "Rb": -40.0},
         },
     },
+    # Mutch et al. (2021) calibrated A_Mg on thin plagioclase rims of the Skuggafjoll eruption:
+    # R T ln K_Mg = A X_An + B with A = -34.099 and B = -17.407 kJ/mol (data set S6, sheet
+    # 'Plagioclase Reg Parameters'; the 1-sigma of A is 2.07, of B 1.64, from the covariance
+    # beside it). DFENS used it for Mg. For Sr and Ba the study used Dohmen & Blundy (2014) and
+    # for K Bindeman et al. (1998) (SI Fig. S5 caption), which are the two sets above.
+    "mutch2021": {
+        "label": "Mutch et al. (2021), DFENS Mg calibration",
+        "citation": "mutch2021",
+        "columns": {None: {"Mg": -34.099}},
+    },
 }
 DEFAULT_ACTIVITY_SET = "dohmen_blundy2014"
 ACTIVITY_A_CITATION = "dohmen2017"

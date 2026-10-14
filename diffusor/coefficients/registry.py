@@ -4,9 +4,9 @@ from __future__ import annotations
 from typing import Dict, List, Optional
 
 from .base import Conditions, DiffusionCoefficient, Parameter, Range
-from . import cpx, garnet, kfeldspar, magnetite, olivine, opx, plagioclase, literature, accessories
+from . import cpx, garnet, kfeldspar, magnetite, melt, olivine, opx, plagioclase, literature, accessories, study_laws
 
-_MODULES = (olivine, opx, cpx, plagioclase, kfeldspar, magnetite, garnet, literature, accessories)
+_MODULES = (olivine, opx, cpx, plagioclase, kfeldspar, magnetite, garnet, melt, literature, accessories, study_laws)
 
 REGISTRY: Dict[str, DiffusionCoefficient] = {}
 for _m in _MODULES:

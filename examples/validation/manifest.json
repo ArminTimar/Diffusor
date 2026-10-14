@@ -4026,7 +4026,7 @@
       "distance_unit": "um"
     },
     "setup": null,
-    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The workbook names no diffusion law and the article is not in the local source set, so no model preset is attached. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
+    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The paper (Nature Commun. 15:9451, Methods pp. 7-8) models Fo with the Dohmen & Chakraborty (2007) law from a step, rim and core held fixed, by MCMC. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
     "source_conditions": {
       "T_C": 1175,
       "P_MPa": 42,
@@ -4069,7 +4069,7 @@
       "distance_unit": "um"
     },
     "setup": null,
-    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The workbook names no diffusion law and the article is not in the local source set, so no model preset is attached. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
+    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The paper (Nature Commun. 15:9451, Methods pp. 7-8) models Fo with the Dohmen & Chakraborty (2007) law from a step, rim and core held fixed, by MCMC. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
     "source_conditions": {
       "T_C": 1168,
       "P_MPa": 42,
@@ -4112,7 +4112,7 @@
       "distance_unit": "um"
     },
     "setup": null,
-    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The workbook names no diffusion law and the article is not in the local source set, so no model preset is attached. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
+    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The paper (Nature Commun. 15:9451, Methods pp. 7-8) models Fo with the Dohmen & Chakraborty (2007) law from a step, rim and core held fixed, by MCMC. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
     "source_conditions": {
       "T_C": 1150,
       "P_MPa": 42,
@@ -4155,7 +4155,7 @@
       "distance_unit": "um"
     },
     "setup": null,
-    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The workbook names no diffusion law and the article is not in the local source set, so no model preset is attached. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
+    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The paper (Nature Commun. 15:9451, Methods pp. 7-8) models Fo with the Dohmen & Chakraborty (2007) law from a step, rim and core held fixed, by MCMC. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
     "source_conditions": {
       "T_C": 1186,
       "P_MPa": 42,
@@ -4198,7 +4198,7 @@
       "distance_unit": "um"
     },
     "setup": null,
-    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The workbook names no diffusion law and the article is not in the local source set, so no model preset is attached. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
+    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The paper (Nature Commun. 15:9451, Methods pp. 7-8) models Fo with the Dohmen & Chakraborty (2007) law from a step, rim and core held fixed, by MCMC. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
     "source_conditions": {
       "T_C": 1168,
       "P_MPa": 42,
@@ -4241,7 +4241,7 @@
       "distance_unit": "um"
     },
     "setup": null,
-    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The workbook names no diffusion law and the article is not in the local source set, so no model preset is attached. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
+    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The paper (Nature Commun. 15:9451, Methods pp. 7-8) models Fo with the Dohmen & Chakraborty (2007) law from a step, rim and core held fixed, by MCMC. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
     "source_conditions": {
       "T_C": 1172,
       "P_MPa": 42,
@@ -4284,7 +4284,7 @@
       "distance_unit": "um"
     },
     "setup": null,
-    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The workbook names no diffusion law and the article is not in the local source set, so no model preset is attached. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
+    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The paper (Nature Commun. 15:9451, Methods pp. 7-8) models Fo with the Dohmen & Chakraborty (2007) law from a step, rim and core held fixed, by MCMC. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
     "source_conditions": {
       "T_C": 1164,
       "P_MPa": 42,
@@ -4327,7 +4327,7 @@
       "distance_unit": "um"
     },
     "setup": null,
-    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The workbook names no diffusion law and the article is not in the local source set, so no model preset is attached. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
+    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The paper (Nature Commun. 15:9451, Methods pp. 7-8) models Fo with the Dohmen & Chakraborty (2007) law from a step, rim and core held fixed, by MCMC. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
     "source_conditions": {
       "T_C": 1175,
       "P_MPa": 42,
@@ -4370,7 +4370,7 @@
       "distance_unit": "um"
     },
     "setup": null,
-    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The workbook names no diffusion law and the article is not in the local source set, so no model preset is attached. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
+    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The paper (Nature Commun. 15:9451, Methods pp. 7-8) models Fo with the Dohmen & Chakraborty (2007) law from a step, rim and core held fixed, by MCMC. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
     "source_conditions": {
       "T_C": 1157,
       "P_MPa": 42,
@@ -4413,7 +4413,7 @@
       "distance_unit": "um"
     },
     "setup": null,
-    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The workbook names no diffusion law and the article is not in the local source set, so no model preset is attached. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
+    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The paper (Nature Commun. 15:9451, Methods pp. 7-8) models Fo with the Dohmen & Chakraborty (2007) law from a step, rim and core held fixed, by MCMC. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
     "source_conditions": {
       "T_C": 1157,
       "P_MPa": 42,
@@ -4456,7 +4456,7 @@
       "distance_unit": "um"
     },
     "setup": null,
-    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The workbook names no diffusion law and the article is not in the local source set, so no model preset is attached. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
+    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The paper (Nature Commun. 15:9451, Methods pp. 7-8) models Fo with the Dohmen & Chakraborty (2007) law from a step, rim and core held fixed, by MCMC. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
     "source_conditions": {
       "T_C": 1179,
       "P_MPa": 42,
@@ -4499,7 +4499,7 @@
       "distance_unit": "um"
     },
     "setup": null,
-    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The workbook names no diffusion law and the article is not in the local source set, so no model preset is attached. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
+    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The paper (Nature Commun. 15:9451, Methods pp. 7-8) models Fo with the Dohmen & Chakraborty (2007) law from a step, rim and core held fixed, by MCMC. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
     "source_conditions": {
       "T_C": 1193,
       "P_MPa": 42,
@@ -4542,7 +4542,7 @@
       "distance_unit": "um"
     },
     "setup": null,
-    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The workbook names no diffusion law and the article is not in the local source set, so no model preset is attached. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
+    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The paper (Nature Commun. 15:9451, Methods pp. 7-8) models Fo with the Dohmen & Chakraborty (2007) law from a step, rim and core held fixed, by MCMC. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
     "source_conditions": {
       "T_C": 1172,
       "P_MPa": 42,
@@ -4585,7 +4585,7 @@
       "distance_unit": "um"
     },
     "setup": null,
-    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The workbook names no diffusion law and the article is not in the local source set, so no model preset is attached. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
+    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The paper (Nature Commun. 15:9451, Methods pp. 7-8) models Fo with the Dohmen & Chakraborty (2007) law from a step, rim and core held fixed, by MCMC. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
     "source_conditions": {
       "T_C": 1189,
       "P_MPa": 42,
@@ -4628,7 +4628,7 @@
       "distance_unit": "um"
     },
     "setup": null,
-    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The workbook names no diffusion law and the article is not in the local source set, so no model preset is attached. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
+    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The paper (Nature Commun. 15:9451, Methods pp. 7-8) models Fo with the Dohmen & Chakraborty (2007) law from a step, rim and core held fixed, by MCMC. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
     "source_conditions": {
       "T_C": 1168,
       "P_MPa": 42,
@@ -4671,7 +4671,7 @@
       "distance_unit": "um"
     },
     "setup": null,
-    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The workbook names no diffusion law and the article is not in the local source set, so no model preset is attached. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
+    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The paper (Nature Commun. 15:9451, Methods pp. 7-8) models Fo with the Dohmen & Chakraborty (2007) law from a step, rim and core held fixed, by MCMC. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
     "source_conditions": {
       "T_C": 1175,
       "P_MPa": 42,
@@ -4714,7 +4714,7 @@
       "distance_unit": "um"
     },
     "setup": null,
-    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The workbook names no diffusion law and the article is not in the local source set, so no model preset is attached. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
+    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The paper (Nature Commun. 15:9451, Methods pp. 7-8) models Fo with the Dohmen & Chakraborty (2007) law from a step, rim and core held fixed, by MCMC. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
     "source_conditions": {
       "T_C": 1164,
       "P_MPa": 42,
@@ -4757,7 +4757,7 @@
       "distance_unit": "um"
     },
     "setup": null,
-    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The workbook names no diffusion law and the article is not in the local source set, so no model preset is attached. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
+    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The paper (Nature Commun. 15:9451, Methods pp. 7-8) models Fo with the Dohmen & Chakraborty (2007) law from a step, rim and core held fixed, by MCMC. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
     "source_conditions": {
       "T_C": 1164,
       "P_MPa": 42,
@@ -4800,7 +4800,7 @@
       "distance_unit": "um"
     },
     "setup": null,
-    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The workbook names no diffusion law and the article is not in the local source set, so no model preset is attached. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
+    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The paper (Nature Commun. 15:9451, Methods pp. 7-8) models Fo with the Dohmen & Chakraborty (2007) law from a step, rim and core held fixed, by MCMC. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
     "source_conditions": {
       "T_C": 1164,
       "P_MPa": 42,
@@ -4843,7 +4843,7 @@
       "distance_unit": "um"
     },
     "setup": null,
-    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The workbook names no diffusion law and the article is not in the local source set, so no model preset is attached. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
+    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The paper (Nature Commun. 15:9451, Methods pp. 7-8) models Fo with the Dohmen & Chakraborty (2007) law from a step, rim and core held fixed, by MCMC. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
     "source_conditions": {
       "T_C": 1172,
       "P_MPa": 42,
@@ -4886,7 +4886,7 @@
       "distance_unit": "um"
     },
     "setup": null,
-    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The workbook names no diffusion law and the article is not in the local source set, so no model preset is attached. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
+    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The paper (Nature Commun. 15:9451, Methods pp. 7-8) models Fo with the Dohmen & Chakraborty (2007) law from a step, rim and core held fixed, by MCMC. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
     "source_conditions": {
       "T_C": 1189,
       "P_MPa": 42,
@@ -4929,7 +4929,7 @@
       "distance_unit": "um"
     },
     "setup": null,
-    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The workbook names no diffusion law and the article is not in the local source set, so no model preset is attached. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
+    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The paper (Nature Commun. 15:9451, Methods pp. 7-8) models Fo with the Dohmen & Chakraborty (2007) law from a step, rim and core held fixed, by MCMC. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
     "source_conditions": {
       "T_C": 1164,
       "P_MPa": 42,
@@ -4972,7 +4972,7 @@
       "distance_unit": "um"
     },
     "setup": null,
-    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The workbook names no diffusion law and the article is not in the local source set, so no model preset is attached. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
+    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The paper (Nature Commun. 15:9451, Methods pp. 7-8) models Fo with the Dohmen & Chakraborty (2007) law from a step, rim and core held fixed, by MCMC. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
     "source_conditions": {
       "T_C": 1186,
       "P_MPa": 42,
@@ -5015,7 +5015,7 @@
       "distance_unit": "um"
     },
     "setup": null,
-    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The workbook names no diffusion law and the article is not in the local source set, so no model preset is attached. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
+    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The paper (Nature Commun. 15:9451, Methods pp. 7-8) models Fo with the Dohmen & Chakraborty (2007) law from a step, rim and core held fixed, by MCMC. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
     "source_conditions": {
       "T_C": 1172,
       "P_MPa": 42,
@@ -5058,7 +5058,7 @@
       "distance_unit": "um"
     },
     "setup": null,
-    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The workbook names no diffusion law and the article is not in the local source set, so no model preset is attached. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
+    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The paper (Nature Commun. 15:9451, Methods pp. 7-8) models Fo with the Dohmen & Chakraborty (2007) law from a step, rim and core held fixed, by MCMC. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
     "source_conditions": {
       "T_C": 1168,
       "P_MPa": 42,
@@ -5101,7 +5101,7 @@
       "distance_unit": "um"
     },
     "setup": null,
-    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The workbook names no diffusion law and the article is not in the local source set, so no model preset is attached. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
+    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The paper (Nature Commun. 15:9451, Methods pp. 7-8) models Fo with the Dohmen & Chakraborty (2007) law from a step, rim and core held fixed, by MCMC. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
     "source_conditions": {
       "T_C": 1175,
       "P_MPa": 42,
@@ -5144,7 +5144,7 @@
       "distance_unit": "um"
     },
     "setup": null,
-    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The workbook names no diffusion law and the article is not in the local source set, so no model preset is attached. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
+    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The paper (Nature Commun. 15:9451, Methods pp. 7-8) models Fo with the Dohmen & Chakraborty (2007) law from a step, rim and core held fixed, by MCMC. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
     "source_conditions": {
       "T_C": 1172,
       "P_MPa": 42,
@@ -5187,7 +5187,7 @@
       "distance_unit": "um"
     },
     "setup": null,
-    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The workbook names no diffusion law and the article is not in the local source set, so no model preset is attached. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
+    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The paper (Nature Commun. 15:9451, Methods pp. 7-8) models Fo with the Dohmen & Chakraborty (2007) law from a step, rim and core held fixed, by MCMC. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
     "source_conditions": {
       "T_C": 1168,
       "P_MPa": 42,
@@ -5230,7 +5230,7 @@
       "distance_unit": "um"
     },
     "setup": null,
-    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The workbook names no diffusion law and the article is not in the local source set, so no model preset is attached. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
+    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The paper (Nature Commun. 15:9451, Methods pp. 7-8) models Fo with the Dohmen & Chakraborty (2007) law from a step, rim and core held fixed, by MCMC. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
     "source_conditions": {
       "T_C": 1168,
       "P_MPa": 42,
@@ -5273,7 +5273,7 @@
       "distance_unit": "um"
     },
     "setup": null,
-    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The workbook names no diffusion law and the article is not in the local source set, so no model preset is attached. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
+    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The paper (Nature Commun. 15:9451, Methods pp. 7-8) models Fo with the Dohmen & Chakraborty (2007) law from a step, rim and core held fixed, by MCMC. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
     "source_conditions": {
       "T_C": 1168,
       "P_MPa": 42,
@@ -5316,7 +5316,7 @@
       "distance_unit": "um"
     },
     "setup": null,
-    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The workbook names no diffusion law and the article is not in the local source set, so no model preset is attached. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
+    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The paper (Nature Commun. 15:9451, Methods pp. 7-8) models Fo with the Dohmen & Chakraborty (2007) law from a step, rim and core held fixed, by MCMC. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
     "source_conditions": {
       "T_C": 1182,
       "P_MPa": 42,
@@ -5359,7 +5359,7 @@
       "distance_unit": "um"
     },
     "setup": null,
-    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The workbook names no diffusion law and the article is not in the local source set, so no model preset is attached. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
+    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The paper (Nature Commun. 15:9451, Methods pp. 7-8) models Fo with the Dohmen & Chakraborty (2007) law from a step, rim and core held fixed, by MCMC. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
     "source_conditions": {
       "T_C": 1175,
       "P_MPa": 42,
@@ -5402,7 +5402,7 @@
       "distance_unit": "um"
     },
     "setup": null,
-    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The workbook names no diffusion law and the article is not in the local source set, so no model preset is attached. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
+    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The paper (Nature Commun. 15:9451, Methods pp. 7-8) models Fo with the Dohmen & Chakraborty (2007) law from a step, rim and core held fixed, by MCMC. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
     "source_conditions": {
       "T_C": 1175,
       "P_MPa": 42,
@@ -5445,7 +5445,7 @@
       "distance_unit": "um"
     },
     "setup": null,
-    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The workbook names no diffusion law and the article is not in the local source set, so no model preset is attached. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
+    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The paper (Nature Commun. 15:9451, Methods pp. 7-8) models Fo with the Dohmen & Chakraborty (2007) law from a step, rim and core held fixed, by MCMC. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
     "source_conditions": {
       "T_C": 1172,
       "P_MPa": 42,
@@ -5488,7 +5488,7 @@
       "distance_unit": "um"
     },
     "setup": null,
-    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The workbook names no diffusion law and the article is not in the local source set, so no model preset is attached. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
+    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The paper (Nature Commun. 15:9451, Methods pp. 7-8) models Fo with the Dohmen & Chakraborty (2007) law from a step, rim and core held fixed, by MCMC. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
     "source_conditions": {
       "T_C": 1168,
       "P_MPa": 42,
@@ -5531,7 +5531,7 @@
       "distance_unit": "um"
     },
     "setup": null,
-    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The workbook names no diffusion law and the article is not in the local source set, so no model preset is attached. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
+    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The paper (Nature Commun. 15:9451, Methods pp. 7-8) models Fo with the Dohmen & Chakraborty (2007) law from a step, rim and core held fixed, by MCMC. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
     "source_conditions": {
       "T_C": 1179,
       "P_MPa": 42,
@@ -5574,7 +5574,7 @@
       "distance_unit": "um"
     },
     "setup": null,
-    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The workbook names no diffusion law and the article is not in the local source set, so no model preset is attached. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
+    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The paper (Nature Commun. 15:9451, Methods pp. 7-8) models Fo with the Dohmen & Chakraborty (2007) law from a step, rim and core held fixed, by MCMC. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
     "source_conditions": {
       "T_C": 1172,
       "P_MPa": 42,
@@ -5617,7 +5617,7 @@
       "distance_unit": "um"
     },
     "setup": null,
-    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The workbook names no diffusion law and the article is not in the local source set, so no model preset is attached. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
+    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The paper (Nature Commun. 15:9451, Methods pp. 7-8) models Fo with the Dohmen & Chakraborty (2007) law from a step, rim and core held fixed, by MCMC. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
     "source_conditions": {
       "T_C": 1164,
       "P_MPa": 42,
@@ -5660,7 +5660,7 @@
       "distance_unit": "um"
     },
     "setup": null,
-    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The workbook names no diffusion law and the article is not in the local source set, so no model preset is attached. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
+    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The paper (Nature Commun. 15:9451, Methods pp. 7-8) models Fo with the Dohmen & Chakraborty (2007) law from a step, rim and core held fixed, by MCMC. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
     "source_conditions": {
       "T_C": 1168,
       "P_MPa": 42,
@@ -5703,7 +5703,7 @@
       "distance_unit": "um"
     },
     "setup": null,
-    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The workbook names no diffusion law and the article is not in the local source set, so no model preset is attached. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
+    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The paper (Nature Commun. 15:9451, Methods pp. 7-8) models Fo with the Dohmen & Chakraborty (2007) law from a step, rim and core held fixed, by MCMC. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
     "source_conditions": {
       "T_C": 1172,
       "P_MPa": 42,
@@ -5746,7 +5746,7 @@
       "distance_unit": "um"
     },
     "setup": null,
-    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The workbook names no diffusion law and the article is not in the local source set, so no model preset is attached. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
+    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The paper (Nature Commun. 15:9451, Methods pp. 7-8) models Fo with the Dohmen & Chakraborty (2007) law from a step, rim and core held fixed, by MCMC. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
     "source_conditions": {
       "T_C": 1172,
       "P_MPa": 42,
@@ -5789,7 +5789,7 @@
       "distance_unit": "um"
     },
     "setup": null,
-    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The workbook names no diffusion law and the article is not in the local source set, so no model preset is attached. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
+    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The paper (Nature Commun. 15:9451, Methods pp. 7-8) models Fo with the Dohmen & Chakraborty (2007) law from a step, rim and core held fixed, by MCMC. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
     "source_conditions": {
       "T_C": 1175,
       "P_MPa": 42,
@@ -5832,7 +5832,7 @@
       "distance_unit": "um"
     },
     "setup": null,
-    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The workbook names no diffusion law and the article is not in the local source set, so no model preset is attached. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
+    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The paper (Nature Commun. 15:9451, Methods pp. 7-8) models Fo with the Dohmen & Chakraborty (2007) law from a step, rim and core held fixed, by MCMC. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
     "source_conditions": {
       "T_C": 1175,
       "P_MPa": 42,
@@ -5875,7 +5875,7 @@
       "distance_unit": "um"
     },
     "setup": null,
-    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The workbook names no diffusion law and the article is not in the local source set, so no model preset is attached. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
+    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The paper (Nature Commun. 15:9451, Methods pp. 7-8) models Fo with the Dohmen & Chakraborty (2007) law from a step, rim and core held fixed, by MCMC. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
     "source_conditions": {
       "T_C": 1189,
       "P_MPa": 42,
@@ -5918,7 +5918,7 @@
       "distance_unit": "um"
     },
     "setup": null,
-    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The workbook names no diffusion law and the article is not in the local source set, so no model preset is attached. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
+    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The paper (Nature Commun. 15:9451, Methods pp. 7-8) models Fo with the Dohmen & Chakraborty (2007) law from a step, rim and core held fixed, by MCMC. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
     "source_conditions": {
       "T_C": 1172,
       "P_MPa": 42,
@@ -5961,7 +5961,7 @@
       "distance_unit": "um"
     },
     "setup": null,
-    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The workbook names no diffusion law and the article is not in the local source set, so no model preset is attached. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
+    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The paper (Nature Commun. 15:9451, Methods pp. 7-8) models Fo with the Dohmen & Chakraborty (2007) law from a step, rim and core held fixed, by MCMC. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
     "source_conditions": {
       "T_C": 1179,
       "P_MPa": 42,
@@ -6004,7 +6004,7 @@
       "distance_unit": "um"
     },
     "setup": null,
-    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The workbook names no diffusion law and the article is not in the local source set, so no model preset is attached. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
+    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The paper (Nature Commun. 15:9451, Methods pp. 7-8) models Fo with the Dohmen & Chakraborty (2007) law from a step, rim and core held fixed, by MCMC. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
     "source_conditions": {
       "T_C": 1168,
       "P_MPa": 42,
@@ -6047,7 +6047,7 @@
       "distance_unit": "um"
     },
     "setup": null,
-    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The workbook names no diffusion law and the article is not in the local source set, so no model preset is attached. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
+    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The paper (Nature Commun. 15:9451, Methods pp. 7-8) models Fo with the Dohmen & Chakraborty (2007) law from a step, rim and core held fixed, by MCMC. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
     "source_conditions": {
       "T_C": 1168,
       "P_MPa": 42,
@@ -6090,7 +6090,7 @@
       "distance_unit": "um"
     },
     "setup": null,
-    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The workbook names no diffusion law and the article is not in the local source set, so no model preset is attached. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
+    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The paper (Nature Commun. 15:9451, Methods pp. 7-8) models Fo with the Dohmen & Chakraborty (2007) law from a step, rim and core held fixed, by MCMC. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
     "source_conditions": {
       "T_C": 1168,
       "P_MPa": 42,
@@ -6133,7 +6133,7 @@
       "distance_unit": "um"
     },
     "setup": null,
-    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The workbook names no diffusion law and the article is not in the local source set, so no model preset is attached. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
+    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The paper (Nature Commun. 15:9451, Methods pp. 7-8) models Fo with the Dohmen & Chakraborty (2007) law from a step, rim and core held fixed, by MCMC. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
     "source_conditions": {
       "T_C": 1175,
       "P_MPa": 42,
@@ -6176,7 +6176,7 @@
       "distance_unit": "um"
     },
     "setup": null,
-    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The workbook names no diffusion law and the article is not in the local source set, so no model preset is attached. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
+    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The paper (Nature Commun. 15:9451, Methods pp. 7-8) models Fo with the Dohmen & Chakraborty (2007) law from a step, rim and core held fixed, by MCMC. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
     "source_conditions": {
       "T_C": 1172,
       "P_MPa": 42,
@@ -6219,7 +6219,7 @@
       "distance_unit": "um"
     },
     "setup": null,
-    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The workbook names no diffusion law and the article is not in the local source set, so no model preset is attached. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
+    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The paper (Nature Commun. 15:9451, Methods pp. 7-8) models Fo with the Dohmen & Chakraborty (2007) law from a step, rim and core held fixed, by MCMC. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
     "source_conditions": {
       "T_C": 1175,
       "P_MPa": 42,
@@ -6262,7 +6262,7 @@
       "distance_unit": "um"
     },
     "setup": null,
-    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The workbook names no diffusion law and the article is not in the local source set, so no model preset is attached. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
+    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The paper (Nature Commun. 15:9451, Methods pp. 7-8) models Fo with the Dohmen & Chakraborty (2007) law from a step, rim and core held fixed, by MCMC. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
     "source_conditions": {
       "T_C": 1193,
       "P_MPa": 42,
@@ -6305,7 +6305,7 @@
       "distance_unit": "um"
     },
     "setup": null,
-    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The workbook names no diffusion law and the article is not in the local source set, so no model preset is attached. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
+    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The paper (Nature Commun. 15:9451, Methods pp. 7-8) models Fo with the Dohmen & Chakraborty (2007) law from a step, rim and core held fixed, by MCMC. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
     "source_conditions": {
       "T_C": 1189,
       "P_MPa": 42,
@@ -6348,7 +6348,7 @@
       "distance_unit": "um"
     },
     "setup": null,
-    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The workbook names no diffusion law and the article is not in the local source set, so no model preset is attached. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
+    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The paper (Nature Commun. 15:9451, Methods pp. 7-8) models Fo with the Dohmen & Chakraborty (2007) law from a step, rim and core held fixed, by MCMC. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
     "source_conditions": {
       "T_C": 1157,
       "P_MPa": 42,
@@ -6391,7 +6391,7 @@
       "distance_unit": "um"
     },
     "setup": null,
-    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The workbook names no diffusion law and the article is not in the local source set, so no model preset is attached. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
+    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The paper (Nature Commun. 15:9451, Methods pp. 7-8) models Fo with the Dohmen & Chakraborty (2007) law from a step, rim and core held fixed, by MCMC. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
     "source_conditions": {
       "T_C": 1172,
       "P_MPa": 42,
@@ -6434,7 +6434,7 @@
       "distance_unit": "um"
     },
     "setup": null,
-    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The workbook names no diffusion law and the article is not in the local source set, so no model preset is attached. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
+    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The paper (Nature Commun. 15:9451, Methods pp. 7-8) models Fo with the Dohmen & Chakraborty (2007) law from a step, rim and core held fixed, by MCMC. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
     "source_conditions": {
       "T_C": 1168,
       "P_MPa": 42,
@@ -6477,7 +6477,7 @@
       "distance_unit": "um"
     },
     "setup": null,
-    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The workbook names no diffusion law and the article is not in the local source set, so no model preset is attached. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
+    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The paper (Nature Commun. 15:9451, Methods pp. 7-8) models Fo with the Dohmen & Chakraborty (2007) law from a step, rim and core held fixed, by MCMC. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
     "source_conditions": {
       "T_C": 1172,
       "P_MPa": 42,
@@ -6520,7 +6520,7 @@
       "distance_unit": "um"
     },
     "setup": null,
-    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The workbook names no diffusion law and the article is not in the local source set, so no model preset is attached. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
+    "notes": "Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as source values. The paper (Nature Commun. 15:9451, Methods pp. 7-8) models Fo with the Dohmen & Chakraborty (2007) law from a step, rim and core held fixed, by MCMC. Valid = 0 marks points the workbook flags. The Dist column carries no unit (micrometres by its 10-unit spacing).",
     "source_conditions": {
       "T_C": 1176,
       "P_MPa": 42,

@@ -117,6 +117,16 @@ SIGMA_LOGD_BASIS = {
         "the activation energy as 2.23 +/- 0.04 eV at 3 mol% Ti, and beta = 13.3 +/- 4.8"),
     "mt_FeTi_aragon1984": (
         "assumed: 0.5 log units. Van Orman & Crispin (2010) Table 11 gives no uncertainty"),
+    "melt_H2O_behrens2004_dacite": (
+        "published: 0.06 log units, the standard error with which eq. 7 reproduces the dacite data "
+        "(Behrens et al. 2004, p. 5147)"),
+    "melt_H2O_behrens2004_andesite": (
+        "published: 0.08 log units, the standard error with which eq. 8 reproduces the andesite data "
+        "(Behrens et al. 2004, p. 5147)"),
+    "melt_H2O_behrens2004_sio2": (
+        "published: 0.12 log units, the standard error with which eq. 10 reproduces the 69 data at 1 wt% "
+        "H2Ot (Behrens et al. 2004, p. 5148). It does not include the uncertainty of the proportionality "
+        "to C_H2Ot"),
 }
 for _sp in ("Ti", "Fe", "Mn", "Co", "Cr", "Al"):
     SIGMA_LOGD_BASIS[f"mt_{_sp}_vanorman_crispin2010"] = _VOC12

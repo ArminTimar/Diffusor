@@ -46,9 +46,19 @@ def test_kfeldspar_uncertainties_come_from_chamberlain():
         assert key in REFERENCES
 
 
-def test_only_grocolas_entries_carry_a_covariance():
+def test_only_published_covariances_are_carried():
+    # Grocolas et al. (2025), Mutch et al. (2019) Supplementary Tables 2-3 and Mutch et al. (2021)
+    # Supporting Information Tables S2, S3 and S6
     with_cov = sorted(c.key for c in list_coefficients() if c.covariance is not None)
-    assert with_cov == ["plag_Ba_grocolas2025", "plag_Sr_grocolas2025"]
+    assert with_cov == sorted(
+        ["ol_FeMg_mutch2019_global", "ol_FeMg_mutch2019_tamed", "ol_Mn_mutch2019",
+         "ol_Mn_mutch2019_asio2", "ol_Ni_mutch2019", "ol_Ni_mutch2019_asio2",
+         "ol_FeMg_mutch2021_global", "ol_FeMg_mutch2021_tamed", "ol_Mn_mutch2021", "ol_Ni_mutch2021",
+         "ol_FeMg_mutch2021_global_v2", "ol_FeMg_mutch2021_tamed_v2", "ol_Mn_mutch2021_v2", "ol_Ni_mutch2021_v2",
+         "plag_Mg_mutch2021_f13", "plag_Mg_mutch2021_vo14", "plag_Mg_mutch2021_vof",
+         "plag_Sr_mutch2021_combined", "plag_Sr_mutch2021_cw", "plag_Sr_mutch2021_gc",
+         "plag_Ba_mutch2021", "plag_K_mutch2021",
+         "plag_Ba_grocolas2025", "plag_Sr_grocolas2025"])
 
 
 # --- example conditions ------------------------------------------------------------

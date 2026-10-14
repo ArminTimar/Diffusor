@@ -8,9 +8,10 @@ Reads the downloaded supplementary workbooks (openpyxl), like extract.py.
   scaled by D(T)/D(T -/+ 30 K), with the Table 1 laws (p. 5): Sr D0 8.4 m2/s,
   450 kJ/mol; Ba 0.29 m2/s, 455 kJ/mol; Ti 7e-8 m2/s, 273 kJ/mol.
 * Petrone et al. (2018), Table S4: t = (sqrt(4Dt))^2 / (4 D(T)) with
-  D = 9.5e-5 m2/s exp(-406 kJ/mol / RT), the Dimanov & Sautter (2000) values as
-  printed in Supplementary Material 1 (p. 13), for rows fitted with the
-  semi-infinite erf (no finite-reservoir width h).
+  D = D0 exp(-406 kJ/mol / RT), for rows fitted with the semi-infinite erf (no
+  finite-reservoir width h). Supplementary Material 1 (p. 13) prints D0 =
+  9.5e-5 m2/s; the D values that NIDIS prints (Petrone et al. 2016) follow from
+  9.55e-5 m2/s, the value of Diffusor's cpx_FeMg_dimanov_sautter2000. Both are run.
 
 These check the arithmetic between columns, not a refit of profiles: neither
 supplement tabulates the measured traverses.
@@ -67,14 +68,17 @@ def petrone2018():
                 finite += 1
                 continue
             w = r[iw]*1e-6
-            t = w**2/(4*D(9.5e-5, 406e3, r[iT]+273.15))/YEAR
+            t = w**2/(4*D(9.55e-5, 406e3, r[iT]+273.15))/YEAR
+            t_printed_d0 = w**2/(4*D(9.5e-5, 406e3, r[iT]+273.15))/YEAR
             checked += 1
             rows.append(dict(row=i, crystal=str(r[2]), block=b, T_C=r[iT], sqrt4Dt_um=r[iw],
-                             printed_years=r[itime], recomputed_years=t, ratio=t/r[itime]))
+                             printed_years=r[itime], recomputed_years=t, ratio=t/r[itime],
+                             ratio_with_printed_D0=t_printed_d0/r[itime]))
     ratios = np.array([v['ratio'] for v in rows])
     within = [v for v in rows if abs(v['ratio']-1) <= .05 or abs(v['recomputed_years']-v['printed_years']) <= .01]
-    return dict(rows_checked=checked, finite_reservoir_rows_skipped=finite,
+    return dict(rows_checked=checked, finite_reservoir_rows_skipped=finite, D0_m2s=9.55e-5,
                 within_5_percent_or_rounding=len(within), median_ratio=float(np.median(ratios)),
+                median_ratio_with_printed_D0=float(np.median([v['ratio_with_printed_D0'] for v in rows])),
                 outside=[v for v in rows if v not in within])
 
 

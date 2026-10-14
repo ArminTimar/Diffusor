@@ -210,6 +210,8 @@ def coefficient_latex(c) -> str:
     """LaTeX (mathtext subset) for one registered law."""
     if c.derived_from:
         return _binary(c)
+    if getattr(c.func, "latex", None) is not None:      # laws of diffusor.coefficients.study_laws
+        return c.func.latex(c)
     q = c.func.__qualname__ if c.func is not None else ""
     if q.startswith("_oeser_axis"):
         return _oeser_axis(c)

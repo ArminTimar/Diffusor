@@ -444,6 +444,40 @@ def test_a_concentration_profile_never_becomes_the_host_composition(app):
     w.close()
 
 
+def test_melt_water_profile_is_its_own_composition_and_fits(app, tmp_path):
+    """Melt H2O (Behrens et al. 2004): the wt% profile is the variable D depends on, so it goes to the
+    law node by node, the composition box takes wt%, and a synthetic 120 s couple is recovered."""
+    from PySide6.QtCore import Qt
+    from diffusor.fitting import fit_time
+    from diffusor.fitting.model import DiffusionModel
+    from diffusor.solvers.initial import InitialCondition
+    cond = Conditions(T_K=1608.15, P_Pa=1e9, X={"H2Ot": 1.0})
+    truth = DiffusionModel(coefficient=get("melt_H2O_behrens2004_dacite"), conditions=cond,
+                           initial=InitialCondition("step", {"x0": 0.0, "C_left": 4.0, "C_right": 0.2}),
+                           comp_key="H2Ot", composition_dependent=True, n_nodes=801)
+    x = np.linspace(-600, 600, 81)
+    C = truth.profile(120.0, x) + np.random.default_rng(1).normal(0, 0.03, x.size)
+    f = tmp_path / "water.csv"
+    rows = [f"{a:.3f},{b:.4f},0.03" for a, b in zip(x, C)]
+    f.write_text("\n".join(["Distance_um,H2O_wt,H2O_err"] + rows))
+    w = _window(app)
+    w._use_table(read_table(f), ProfileSpec("Distance_um", "H2O_wt", None, "H2O_err", mode="A"), f, None,
+                 (None, False))
+    _choose(w, "melt", "H2O")
+    w.sp_T.setValue(1335.0)
+    w.sp_P.setValue(1000.0)
+    keys = [w.lst_coef.item(i).data(Qt.UserRole) for i in range(w.lst_coef.count())]
+    w.lst_coef.setCurrentRow(keys.index("melt_H2O_behrens2004_dacite"))
+    app.processEvents()
+    assert w.sp_xcomp.maximum() == 100.0 and w.sp_xcomp.value() == pytest.approx(np.mean(C), rel=0.01)
+    w._guess_initial(from_button=True)
+    m = w._model("melt_H2O_behrens2004_dacite")
+    assert m.comp_key == "H2Ot" and not m.can_use_analytical()[0]
+    r = fit_time(m, w.profile.x, w.profile.C, w.profile.sigma, w._free_parameters())
+    assert r.t_seconds == pytest.approx(120.0, rel=0.05)
+    w.close()
+
+
 def test_the_profile_mean_is_taken_back_when_the_species_changes(app):
     w = _window(app)
     _choose(w, "opx", "Fe-Mg")

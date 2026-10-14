@@ -4,6 +4,67 @@ What changed between releases, newest first. The text under a version heading
 is what goes into the GitHub release, so it is written for someone deciding
 whether to update. Commit messages hold the details.
 
+## 0.5.0 (14 October 2026)
+
+### Added
+
+- **59 olivine examples from Lynn et al. (2024), Mauna Loa 2022.** With the
+  paper's law, the conditions and EBSD angles of each crystal's sheet, and a step
+  whose position and plateaus are fitted, 58 of the 59 times lie inside the
+  published 95 % intervals (median 1.07 times the published median). The paper's
+  values are MCMC posterior medians; Diffusor fits at fixed conditions. The
+  validation report compares all 59.
+- Example files can mark rows to leave out of the fit (a column such as `Valid`),
+  start the model domain at a crystal rim before the first kept analysis, and
+  start the step from a study's own rim and core values.
+- **Diffusion laws as published studies used them.** 27 new registry entries
+  reproduce the form in which a study applied a law, so its timescales can be
+  recomputed with that law: the olivine regressions of Mutch et al. (2019) with
+  their covariance matrices, the Mn, Ni and Ca laws of the DIPRA code (Girona &
+  Costa 2013), the olivine laws printed by Costa & Chakraborty (2004) and Mourey
+  et al. (2023), the orthopyroxene forms of Sato et al. (2022) and Ban et al.
+  (2026), Winslow et al. (2026) and Krimer & Costa (2017), the clinopyroxene form
+  of Ban et al. (2026), the plagioclase Sr law of Druitt et al. (2012), and the
+  titanomagnetite laws of Araya et al. (2024), Morgado et al. (2019) and Tomiya
+  et al. (2013). Each is cited to the study, states how it differs from the
+  calibration it names, and is never recommended. The laws were read from 48
+  studies; the ones that use a calibration exactly as printed point to the
+  existing entry.
+- Two calibrations that studies used are new entries: Fe-Mg interdiffusion in
+  diopside of Dimanov & Wiedenbeck (2006), and Li in plagioclase of Giletti &
+  Shanahan (1997).
+- **The DFENS regressions of Mutch et al. (2021)**, from the paper's supporting
+  information and data set S6, with their covariance matrices: olivine Fe-Mg
+  (global and TaMED), Ni and Mn in version 1 (the regressions DFENS used, with
+  Ni at a [001] anisotropy of 10.7) and version 2 (without the P/T term), and the
+  plagioclase regressions for Mg (Faak et al. 2013 data, Van Orman et al. 2014
+  data, and both), Sr (two data sets and both), Ba and K. K in plagioclase is a
+  new species. The Mg partitioning slope of the study, A<sub>Mg</sub> = -34.099
+  kJ/mol, is a third choice of activity set.
+- **Water in silicate melt.** A melt phase with H₂O as its species and the three
+  laws of Behrens, Zhang & Xu (2004): dacite (eq. 7), andesite (eq. 8), and
+  rhyolite to andesite with an SiO₂ term (eq. 10). D is proportional to the
+  water content (their eq. 4), so the measured wt% profile is passed to the law
+  node by node. Eq. 7 gives the 36 µm²/s the paper prints for dacite at 1608 K.
+- Ti in quartz of Jollands et al. (2020), two to three orders of magnitude slower
+  than Cherniak et al. (2007), and Ca-(Fe,Mg) interdiffusion in garnet of
+  Vielzeuf et al. (2007), which reproduces the D values of their Table 5.
+
+### Changed
+
+- The Petrone et al. (2018) check uses D0 = 9.55e-5 m²/s, the value that
+  reproduces the D values NIDIS prints; 63 of 71 times now recompute within 5 %
+  (median ratio 1.0005). The 9.5e-5 m²/s printed in their supplement gives 1.006.
+
+### Fixed
+
+- The Mutch et al. (2021) reference listed the wrong co-authors. It now names
+  Mutch, Maclennan, Shorttle, Rudge and Neave, as on the paper.
+- A fit with free plateau values failed when a plateau held at a crystal rim
+  started outside the range of the measured points (for example when the
+  outermost analysis is rejected). The search bounds now include the starting
+  value.
+
 ## 0.4.1 (8 October 2026)
 
 ### Added

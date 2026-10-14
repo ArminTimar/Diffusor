@@ -16,8 +16,10 @@
   "petrone2018": {
     "rows_checked": 71,
     "finite_reservoir_rows_skipped": 19,
-    "within_5_percent_or_rounding": 62,
-    "median_ratio": 1.00576815971687,
+    "D0_m2s": 9.55e-05,
+    "within_5_percent_or_rounding": 63,
+    "median_ratio": 1.0005023578335355,
+    "median_ratio_with_printed_D0": 1.00576815971687,
     "outside": [
       {
         "row": 14,
@@ -26,8 +28,9 @@
         "T_C": 1080,
         "sqrt4Dt_um": 2.701,
         "printed_years": 2.2,
-        "recomputed_years": 2.860030889073874,
-        "ratio": 1.3000140404881244
+        "recomputed_years": 2.845056905361446,
+        "ratio": 1.2932076842552025,
+        "ratio_with_printed_D0": 1.3000140404881244
       },
       {
         "row": 26,
@@ -36,8 +39,9 @@
         "T_C": 1145,
         "sqrt4Dt_um": 1.237,
         "printed_years": 0.05,
-        "recomputed_years": 0.11474539191383959,
-        "ratio": 2.294907838276792
+        "recomputed_years": 0.11414463069963102,
+        "ratio": 2.2828926139926202,
+        "ratio_with_printed_D0": 2.294907838276792
       },
       {
         "row": 26,
@@ -46,8 +50,9 @@
         "T_C": 1140,
         "sqrt4Dt_um": 1.036,
         "printed_years": 1.26,
-        "recomputed_years": 0.09091281763397217,
-        "ratio": 0.07215302986823188
+        "recomputed_years": 0.09043683429557442,
+        "ratio": 0.07177526531394796,
+        "ratio_with_printed_D0": 0.07215302986823188
       },
       {
         "row": 33,
@@ -56,8 +61,9 @@
         "T_C": 1150,
         "sqrt4Dt_um": 1.52534617759846,
         "printed_years": 0.2,
-        "recomputed_years": 0.15459474133736265,
-        "ratio": 0.7729737066868132
+        "recomputed_years": 0.15378534478585815,
+        "ratio": 0.7689267239292907,
+        "ratio_with_printed_D0": 0.7729737066868132
       },
       {
         "row": 36,
@@ -66,8 +72,9 @@
         "T_C": 1145,
         "sqrt4Dt_um": 1.198,
         "printed_years": 0.27,
-        "recomputed_years": 0.10762408953279683,
-        "ratio": 0.39860773901035856
+        "recomputed_years": 0.10706061262424817,
+        "ratio": 0.3965207874972154,
+        "ratio_with_printed_D0": 0.39860773901035856
       },
       {
         "row": 50,
@@ -76,8 +83,9 @@
         "T_C": 1165,
         "sqrt4Dt_um": 3.628,
         "printed_years": 0.74,
-        "recomputed_years": 0.6114633271009959,
-        "ratio": 0.8263017933797242
+        "recomputed_years": 0.6082619484250744,
+        "ratio": 0.8219756059798303,
+        "ratio_with_printed_D0": 0.8263017933797242
       },
       {
         "row": 51,
@@ -86,8 +94,9 @@
         "T_C": 1150,
         "sqrt4Dt_um": 2.51,
         "printed_years": 0.29,
-        "recomputed_years": 0.41860587936631055,
-        "ratio": 1.443468549539002
+        "recomputed_years": 0.41641422554763874,
+        "ratio": 1.4359111225780647,
+        "ratio_with_printed_D0": 1.443468549539002
       },
       {
         "row": 51,
@@ -96,18 +105,9 @@
         "T_C": 1045,
         "sqrt4Dt_um": 2.269,
         "printed_years": 6.03,
-        "recomputed_years": 5.2616840318892635,
-        "ratio": 0.8725844165653837
-      },
-      {
-        "row": 55,
-        "crystal": "CPX 108",
-        "block": 3,
-        "T_C": 1045,
-        "sqrt4Dt_um": 0.5657,
-        "printed_years": 0.31,
-        "recomputed_years": 0.3270605257429014,
-        "ratio": 1.0550339540093594
+        "recomputed_years": 5.23413594795267,
+        "ratio": 0.868015911766612,
+        "ratio_with_printed_D0": 0.8725844165653837
       }
     ]
   }

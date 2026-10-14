@@ -180,11 +180,10 @@ def emit_table(study, sample, path, sheet, points, *, mineral, species, value_co
 
 
 def extract_lynn_mauna_loa():
-    """Lynn et al. Mauna Loa 2022 workbook: olivine traverses with the workbook's own conditions.
+    """Lynn et al. (2024, Nature Commun. 15:9451) Mauna Loa 2022 workbook: olivine traverses.
 
-    The workbook names no diffusion law and the article is not in the local source set,
-    so no model setup is attached: T, P, fO2, angles and the S6 timescale are kept as
-    source values only.
+    T, P, fO2 and angles of each sheet and the S6 timescale are kept as source values.
+    The model (Methods pp. 7-8) is set up by check_lynn_ml.py and datasets.py.
     """
     p = SOURCE/'lynn_2024_data/3447-1_Lynn_ML2022_SupplementaryData1_Revision1.xlsx'
     if not p.exists():
@@ -218,10 +217,10 @@ def extract_lynn_mauna_loa():
                    spec=dict(distance_column='Distance_um', column_a='Fo_mol', mode='A',
                              distance_unit='um'),
                    notes='Workbook T, P, log fO2 and EBSD angles and the S6 timescale are kept as '
-                         'source values. The workbook names no diffusion law and the article is not '
-                         'in the local source set, so no model preset is attached. Valid = 0 marks '
-                         'points the workbook flags. The Dist column carries no unit (micrometres '
-                         'by its 10-unit spacing).',
+                         'source values. The paper (Nature Commun. 15:9451, Methods pp. 7-8) models '
+                         'Fo with the Dohmen & Chakraborty (2007) law from a step, rim and core held '
+                         'fixed, by MCMC. Valid = 0 marks points the workbook flags. The Dist column '
+                         'carries no unit (micrometres by its 10-unit spacing).',
                    extra=dict(source_conditions=conditions, source_timescale=times.get(sheet)))
 
 

@@ -14,18 +14,27 @@ recalculated at each sampled temperature, and the Arrhenius parameters are
 sampled from a published covariance where one exists, so correlated inputs are
 not sampled as if they were independent.
 
-The program contains 113 published diffusion laws for 14 minerals: olivine,
+The program contains 161 published diffusion laws for 14 minerals (olivine,
 orthopyroxene, clinopyroxene, plagioclase, K-feldspar, magnetite, garnet,
-quartz, rutile, titanite, apatite, zircon, monazite and xenotime. Each entry
+quartz, rutile, titanite, apatite, zircon, monazite and xenotime) and for water
+in silicate melt. Each entry
 states whether it is a tracer, an interdiffusion (exchange), a chemical
 (trace-element) or an effective coefficient. Each entry stores the
 citation, the equation as printed in the source with its equation number, the
 calibration ranges in temperature, pressure, oxygen fugacity and composition,
 the published parameter uncertainties, and the table, page or figure from
-which the values were transcribed. 112 of the 113 entries have been compared
+which the values were transcribed. 160 of the 161 entries have been compared
 with the rendered pages of their primary publications; the Fe-Ti law of Aragon
 et al. (1984) is taken from Table 11 of Van Orman & Crispin (2010) and is marked
-as not checked against the original paper. Each equation is shown typeset on
+as not checked against the original paper. 43 entries are laws in the form in
+which a published study applied them: its own regressions (Mutch et al. 2019,
+and the olivine and plagioclase regressions of the DFENS code, Mutch et al. 2021),
+the laws of the DIPRA code (Girona & Costa 2013), or a calibration with another
+composition term, anisotropy factor or reference value (for example Mourey et
+al. 2023, Sato et al. 2022, Winslow et al. 2026, Morgado et al. 2019). Each is
+cited to the study, names the calibration it was taken from and how it differs,
+and is never recommended. They allow published timescales to be recomputed with
+the law their authors used, including forms that later calibrations replace. Each equation is shown typeset on
 the coefficient page and exported as LaTeX source with the results. A run outside the calibration range of the selected
 law produces a warning, and every export contains a methods paragraph that
 names the diffusion law, solver, boundary conditions and uncertainty model of
@@ -34,10 +43,11 @@ published values are listed under [Verification](#verification).
 
 The **File > Published validation library** browser includes 492 measured
 profiles from twelve studies of olivine, sanidine, orthopyroxene,
-clinopyroxene and titanomagnetite. The Lynn (2024) single-event examples also
-load the published conditions, orientations and tabulated initial states, and
-the Iovine et al. (2017) examples the published law, temperature and initial
-step. Data-only
+clinopyroxene and titanomagnetite. The Lynn (2024) Kilauea single-event examples
+also load the published conditions, orientations and tabulated initial states,
+the Lynn (2024) Mauna Loa examples the conditions, orientations and step model
+of the paper, and the Iovine et al. (2017) examples the published law,
+temperature and initial step. Data-only
 entries identify the setup that still needs to be supplied. The
 [validation report](examples/validation/report.md) compares published times,
 reconstructed fits and alternative diffusion laws, and explains which checks
@@ -326,9 +336,10 @@ a search field, and saves the list as BibTeX.
 One example per mineral is bundled and listed on the Data step with its
 provenance. The list is grouped by mineral, then by study, then by example; it
 starts closed, and a study with many profiles takes one row until it is opened.
-Three studies supply published profiles from their supplementary tables: one
+Four studies supply published profiles from their supplementary tables: one
 orthopyroxene traverse from Ostorero et al. (2022), 18 olivine traverses from
-Lynn et al. (2024) and 20 sanidine Ba traverses from Iovine et al. (2017). The others were generated with Diffusor's forward model at a set time and given
+Lynn et al. (2024, Kilauea), 59 olivine traverses from Lynn et al. (2024, Mauna
+Loa) and 20 sanidine Ba traverses from Iovine et al. (2017). The others were generated with Diffusor's forward model at a set time and given
 Gaussian noise; they are marked as synthetic in the catalogue, in the
 interface and in every exported methods paragraph. The conditions of each
 example are taken from a published study, and a value that the chosen law does
@@ -338,6 +349,7 @@ not use is labelled as a placeholder.
 | --- | --- | --- | --- | --- |
 | Orthopyroxene Fe-Mg, Kizimen 2010 | published | crystal K9_L10C4, Supplementary Data 2 of Ostorero et al. (2022) | 2.32 yr (+7.16/−1.75), published | 2.5 yr |
 | Olivine Fe-Mg, Kilauea 2020, 18 crystals | published | Lynn et al. (2024), EarthChem doi:10.60520/IEDA/113087 | 14 to 521 d (± 30 %), published | 0.75 to 1.06 times the published time, all 18 within ± 30 % |
+| Olivine Fe-Mg, Mauna Loa 2022, 59 crystals | published | Lynn et al. (2024, Nature Commun.), Supplementary Data 1 | 1.1 to 232 d, posterior medians with 95 % intervals | 0.81 to 1.34 times the published median, 58 of 59 inside the 95 % interval |
 | Sanidine Ba, Agnano-Monte Spina, 20 greyscale and X-ray traverses | published | Iovine et al. (2017), Electronic Supplementary Material 1 to 3 | 1 to 151 yr at 930 °C, published (Tables 1 and 2) | 0.90 to 1.28 times the published time |
 | Orthopyroxene Fe-Mg | synthetic | Dias et al. (2025), 950 °C, NNO+1, arc andesite conditions | 1.5 yr | 1.41 yr |
 | Clinopyroxene Fe-Mg | synthetic | Mueller et al. (2013), 1100 °C, conditions after Petrone et al. (2016, 2018) | 45 d | 42 d |
@@ -436,8 +448,12 @@ elements the flux includes the anorthite activity term of Costa et al. (2003),
 in Table 1 of Dohmen, Faak & Blundy (2017), chosen on the Model step: Dohmen &
 Blundy (2014), using their 900 or 1200 °C column, whichever is nearer the run
 temperature, or Bindeman et al. (1998), the set used by Costa et al. (2003) and
-Druitt et al. (2012). The two differ in sign for Mg. A/RT is evaluated at the
-temperature of each time step, and every export states the set.
+Druitt et al. (2012). The two differ in sign for Mg. A third choice is the
+A<sub>Mg</sub> of Mutch et al. (2021), -34.099 kJ/mol, used by DFENS for Mg.
+A/RT is evaluated at the temperature of each time step, and every export
+states the set. For water in melt the profile itself is the variable D depends
+on: the laws of Behrens et al. (2004) are proportional to the water content in
+wt%, so D is evaluated node by node from C<sub>H2O</sub>.
 Anisotropy is handled with the direction-cosine relation of Costa &
 Chakraborty (2004) and the axial ratios published for each mineral. A linear
 cooling path replaces D t by the time integral of D(T(t)) (Crank 1975,
@@ -458,15 +474,18 @@ other. Three correlations are treated explicitly.
    positively correlated through the regression that produced them, and
    sampling them independently overestimates the spread of D at the working
    temperature. Where a source gives the correlation, the parameters are
-   sampled jointly. Only the Sr and Ba laws of Grocolas et al. (2025) provide
-   this: the authors treat log D<sub>0</sub> and Q as perfectly correlated in
-   their own Monte Carlo, and Diffusor uses the same assumption. For 68 other
-   laws log D is sampled at the working temperature with a stated scatter. For
-   7 of them the scatter is published or derived from a statement in the source;
-   for the other 61 it is Diffusor's assumption, because the source gives only
-   errors of D<sub>0</sub> and Q without their covariance. The coefficient page
-   and the methods paragraph state which applies. Laws with neither a covariance
-   nor a scatter are held fixed by default (43 laws). Independent sampling of
+   sampled jointly. The Sr and Ba laws of Grocolas et al. (2025) provide this:
+   the authors treat log D<sub>0</sub> and Q as perfectly correlated in their own
+   Monte Carlo, and Diffusor uses the same assumption. The six olivine
+   regressions of Mutch et al. (2019) and the eight olivine and eight
+   plagioclase regressions of Mutch et al. (2021) are sampled from their
+   published covariance matrices. For 74 other laws log D is sampled at the working
+   temperature with a stated scatter. For 11 of them the scatter is published or
+   derived from a statement in the source; for the other 63 it is Diffusor's
+   assumption, because the source gives only errors of D<sub>0</sub> and Q
+   without their covariance. The coefficient page and the methods paragraph
+   state which applies. Laws with neither a covariance nor a scatter are held
+   fixed by default (63 laws). Independent sampling of
    D<sub>0</sub> and Q is never the default and is available only to reproduce
    results obtained that way.
 3. Composition enters both the diffusion coefficient and the fitted profile,
@@ -491,20 +510,21 @@ number of cores.
 
 | mineral | entries | species |
 | --- | --- | --- |
-| Olivine | 10 | Fe-Mg, Fe and Mg tracers, Ca, Be, P, Ni |
-| Orthopyroxene | 12 | Fe-Mg, Mg, Lu, Ce, Eu |
-| Clinopyroxene | 3 | Fe-Mg, Ca-Mg |
-| Plagioclase | 11 | Mg, Sr, Ba, Li, NaSi-CaAl |
+| Olivine | 29 | Fe-Mg, Fe and Mg tracers, Ca, Be, P, Ni, Mn |
+| Orthopyroxene | 16 | Fe-Mg, Mg, Lu, Ce, Eu |
+| Clinopyroxene | 6 | Fe-Mg, Ca-Mg |
+| Plagioclase | 22 | Mg, Sr, Ba, Li, K, NaSi-CaAl |
 | K-feldspar | 7 | Sr, Ba, Ti, Na-K |
-| Magnetite | 42 | Ti, Fe, Fe-Ti and 21 trace elements |
-| Garnet | 3 | Fe-Mg, Fe and Mg tracers (multicomponent sets listed above) |
-| Quartz | 1 | Ti |
+| Magnetite | 48 | Ti, Fe, Fe-Ti and 21 trace elements |
+| Garnet | 4 | Fe-Mg, Fe and Mg tracers, Ca-(Fe,Mg) (multicomponent sets listed above) |
+| Quartz | 2 | Ti (Cherniak et al. 2007; Jollands et al. 2020) |
 | Rutile | 3 | Zr, Hf |
 | Titanite | 2 | Sr, Zr |
 | Apatite | 8 | Sr, Pb, rare earth elements |
 | Zircon | 6 | Ti, Pb, rare earth elements |
 | Monazite | 1 | Pb |
 | Xenotime | 4 | Pb, rare earth elements |
+| Silicate melt | 3 | H<sub>2</sub>O (Behrens et al. 2004: dacite, andesite, and rhyolite to andesite with an SiO<sub>2</sub> term) |
 
 The recommended law for each mineral and species, where one is designated:
 
@@ -584,7 +604,7 @@ with Sievwright et al. (2020) within half a log unit for Ti, Mn and Co.
 
 ## Verification
 
-The test suite contains 489 tests and runs on Windows, macOS and Linux
+The test suite contains 515 tests and runs on Windows, macOS and Linux
 with Python 3.10 and 3.13 on every change to the repository (see the badge at
 the top). It does not access the network. The tests cover the following.
 
@@ -631,14 +651,15 @@ may remain. Please report any you find.
 | Olivine Fo ages from the fitted widths and Dt products of Tables SM4-A, SM5-A and SM6-A (Gordeychik et al. 2018) | 32 ages | relative difference below 4e-16 |
 | Opx Fe-Mg perpendicular to c at 966 °C, NNO, after Dohmen et al. (2016) (Araya et al. 2024, section 5.2) | log D = −19.78 | −19.782 (a axis) |
 | Olivine 3311_2_ol6, Fo only, interface position fitted (Mourey et al. 2023) | 395 d (+149/−106) | 406 d, with equation 3 of the paper read in bar |
+| Olivine Fe-Mg, 59 Mauna Loa 2022 profiles, the paper's law, sheet conditions and angles, step position and plateaus fitted (Lynn et al. 2024, Nature Commun.) | MCMC medians, 1.1 to 232 d | 58 of 59 inside the published 95 % interval, median ratio 1.07 |
 | Sanidine Ba, 23 greyscale and X-ray traverses at 930 °C, Cherniak (2002) law, sharp step with free plateaus (Iovine et al. 2017, Tables 1 and 2) | 1 to 151 yr | 0.90 to 1.28 times the published time, 18 of 23 equal after rounding to whole years |
 | Sr, Ba and Ti times at T ± 30 °C (Chamberlain et al. 2014, Electronic Appendix 7), from the Table 1 laws | 222 rows | relative difference below 1e-4 |
-| Cpx Fe-Mg times from √(4Dt) and T with the printed Dimanov & Sautter (2000) values (Petrone et al. 2018, Table S4, semi-infinite rows) | 71 times | 62 within 5 % or rounding |
+| Cpx Fe-Mg times from √(4Dt) and T with the Dimanov & Sautter (2000) law, D0 = 9.55e-5 m²/s (Petrone et al. 2018, Table S4, semi-infinite rows) | 71 times | 63 within 5 % or rounding, median ratio 1.0005 |
 | Garnet D matrix at X<sub>Fe</sub> 0.61, X<sub>Mn</sub> 0.20, X<sub>Mg</sub> 0.18, X<sub>Ca</sub> 0.01 (Chakraborty & Ganguly 1992, eq. 5) | nine printed elements | within 0.45 %, with tracer coefficients chosen to reproduce them (see below) |
 | Olivine D<sub>Fe-Mg</sub> from the Fe and Mg tracer fits, 1100 to 1250 °C, a, b and c (Oeser et al. 2026, eq. 6 and Table 4) | the paper's own D<sub>Fe-Mg</sub> fit | within 0.2 log units (largest 0.18) |
 | Garnet Mn tracer at 510 °C, 2 GPa, eclogite garnet (Chen & Chu 2024) | about 1e-24 m²/s (an order of magnitude, not a fitted value) | 2.2e-24 m²/s |
 
-The Kizimen, Kilauea, Gordeychik, Araya, Mourey, Iovine, Chamberlain and
+The Kizimen, Kilauea, Mauna Loa, Gordeychik, Araya, Mourey, Iovine, Chamberlain and
 Petrone rows come from the published-study validation in
 [examples/validation/report.md](examples/validation/report.md), which also
 lists what each downloaded supplement does not contain. Two reconstructions of

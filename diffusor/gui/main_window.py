@@ -9,7 +9,7 @@ from __future__ import annotations
 import json
 import os
 import traceback
-from dataclasses import asdict, fields
+from dataclasses import asdict, fields, replace
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
@@ -61,7 +61,10 @@ DATA, MINERAL, COEFFICIENT, CONDITIONS, MODEL, UNCERTAINTY, RESULTS = range(len(
 # For these species the profile is the mineral's own composition variable (X_Fe, X_An,
 # ...). For every other species it is a concentration (TiO2 wt%, Sr ppm) that says
 # nothing about the host composition the law needs.
-EXCHANGE_SPECIES = ("Fe-Mg", "Fe-Ti", "NaSi-CaAl", "Na-K")
+# species whose profile is the composition variable the law depends on (melt H2O: D grows with C_H2Ot)
+EXCHANGE_SPECIES = ("Fe-Mg", "Fe-Ti", "NaSi-CaAl", "Na-K", "H2O")
+# composition variables given in wt% rather than as a mole fraction
+WT_PERCENT_VARIABLES = ("H2Ot",)
 
 # how many of the user's own profile files the Data step remembers
 RECENT_MAX = 10
@@ -1691,9 +1694,12 @@ class MainWindow(QMainWindow):
                               "does not enter the model.")
         ol_exchange = coef is not None and coef.mineral == "olivine" and coef.species == "Fe-Mg"
         self.cmb_ol_coordinate.setVisible(ol_exchange)
+        wt_percent = coef is not None and any(k in WT_PERCENT_VARIABLES for k in coef.requires)
+        self.sp_xcomp.setMaximum(100.0 if wt_percent else 1.0)
         if needed and coef:
             self.lbl_comp.setText("Host composition required by this law: " + ", ".join(coef.requires) +
-                                 ". Use mole fractions. Trace-element concentration is a separate variable.")
+                                  (". Give it in wt%; the profile itself is this variable." if wt_percent else
+                                   ". Use mole fractions. Trace-element concentration is a separate variable."))
 
     def _update_unused_note(self):
         keys = self._checked_keys() if self.lst_coef.count() else []
@@ -1941,9 +1947,15 @@ class MainWindow(QMainWindow):
             return
         kept = self._fit_profile()
         ic = guess_step_from_data(kept.x, kept.C)
-        self.sp_x0.setValue(ic.params["x0"])
-        self.sp_cl.setValue(ic.params["C_left"])
-        self.sp_cr.setValue(ic.params["C_right"])
+        start = dict(ic.params)
+        if not from_button and self.dataset is not None:
+            # an example may start from the study's own rim and core values, which can lie
+            # beyond the measured points (a rim at x = 0 before the first kept analysis)
+            start.update(self.dataset.settings.get("initial_step", {}))
+            ic = replace(ic, params=start)
+        self.sp_x0.setValue(start["x0"])
+        self.sp_cl.setValue(start["C_left"])
+        self.sp_cr.setValue(start["C_right"])
         self._log("initial profile: " + ic.describe())
         self._sync_composition(replace_explicit=from_button, report=True)
 
@@ -1955,7 +1967,8 @@ class MainWindow(QMainWindow):
         variable; olivine Fe-Mg goes through the chosen coordinate (X_Fe, X_Fo or
         Fo mol%). A TiO2 wt% or ppm profile is a concentration, and its mean put
         into x_Ti or X_An would be nonsense (5 wt% TiO2 became x_Ti = 1, and D 250
-        times too large). Values outside 0-1 are refused for the same reason.
+        times too large). Values outside 0-1 are refused for the same reason
+        (0-100 for melt water, whose variable is C_H2Ot in wt%).
         """
         if self.profile is None or self.an_values is not None:
             return None
@@ -1967,7 +1980,8 @@ class MainWindow(QMainWindow):
         if mineral.key == "olivine" and species == "Fe-Mg":
             scale, offset = self.cmb_ol_coordinate.currentData()
         X = offset + scale * np.asarray(self._fit_profile().C, dtype=float)
-        if not (np.all(np.isfinite(X)) and 0.0 <= X.min() and X.max() <= 1.0):
+        top = 100.0 if mineral.composition_variable.key in WT_PERCENT_VARIABLES else 1.0
+        if not (np.all(np.isfinite(X)) and 0.0 <= X.min() and X.max() <= top):
             return None
         return X
 
@@ -2078,7 +2092,7 @@ class MainWindow(QMainWindow):
         bcr = self._boundary(self.cmb_bcr, c_right)
         hist = (ThermalHistory.linear(cond.T_K, self.sp_Tend.value() + 273.15, 1.0)
                 if self.chk_cooling.isChecked() else None)
-        exchange = species in ("Fe-Mg", "Fe-Ti", "NaSi-CaAl", "Na-K")
+        exchange = species in EXCHANGE_SPECIES
         comp_key = mineral.composition_variable.key if self.chk_comp_dep.isChecked() and exchange else None
         comp_scale, comp_offset = 1.0, 0.0
         if mineral.key == "olivine" and species == "Fe-Mg":
@@ -2095,7 +2109,11 @@ class MainWindow(QMainWindow):
         n_nodes = self.sp_nodes.value()
         x_grid = None
         if self.profile is not None:
-            x_grid = np.linspace(float(self.profile.x.min()), float(self.profile.x.max()), n_nodes)
+            lo = float(self.profile.x.min())
+            if self.dataset is not None and "domain_start_um" in self.dataset.settings:
+                # the crystal rim lies before the first analysis that was kept
+                lo = min(lo, float(self.dataset.settings["domain_start_um"]))
+            x_grid = np.linspace(lo, float(self.profile.x.max()), n_nodes)
             if A_kJ and self.an_values is not None:
                 an_grid = np.interp(x_grid, self.profile.x, self.an_values)
         return DiffusionModel(

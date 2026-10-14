@@ -320,65 +320,65 @@ These are measurements. Only entries marked **preset** have a bundled model setu
 | ruth2018 / 8LM-331A-D7 | olivine | 132 | data only | [profile](profiles/ruth2018_8lm_331a_d7.csv) |
 | ruth2018 / 8LM-331A-A26 | olivine | 117 | data only | [profile](profiles/ruth2018_8lm_331a_a26.csv) |
 | ruth2018 / br2-1 | olivine | 135 | data only | [profile](profiles/ruth2018_br2_1.csv) |
-| lynn_ml2022 / ORI-1_ol1 | olivine | 49 | data only | [profile](profiles/lynn_ml2022_ori_1_ol1.csv) |
-| lynn_ml2022 / ORI-1_ol3 | olivine | 43 | data only | [profile](profiles/lynn_ml2022_ori_1_ol3.csv) |
-| lynn_ml2022 / ORI-1_ol4 | olivine | 42 | data only | [profile](profiles/lynn_ml2022_ori_1_ol4.csv) |
-| lynn_ml2022 / ORI-1_ol5 | olivine | 31 | data only | [profile](profiles/lynn_ml2022_ori_1_ol5.csv) |
-| lynn_ml2022 / ORI-1_ol6 | olivine | 37 | data only | [profile](profiles/lynn_ml2022_ori_1_ol6.csv) |
-| lynn_ml2022 / ORI-1_ol7 | olivine | 41 | data only | [profile](profiles/lynn_ml2022_ori_1_ol7.csv) |
-| lynn_ml2022 / ORI-1_ol8 | olivine | 36 | data only | [profile](profiles/lynn_ml2022_ori_1_ol8.csv) |
-| lynn_ml2022 / ORI-1_ol9 | olivine | 47 | data only | [profile](profiles/lynn_ml2022_ori_1_ol9.csv) |
-| lynn_ml2022 / ORI-1_ol11 | olivine | 28 | data only | [profile](profiles/lynn_ml2022_ori_1_ol11.csv) |
-| lynn_ml2022 / ORI-1_ol14 | olivine | 40 | data only | [profile](profiles/lynn_ml2022_ori_1_ol14.csv) |
-| lynn_ml2022 / ORI-1_ol16 | olivine | 32 | data only | [profile](profiles/lynn_ml2022_ori_1_ol16.csv) |
-| lynn_ml2022 / ORI-1_ol18 | olivine | 32 | data only | [profile](profiles/lynn_ml2022_ori_1_ol18.csv) |
-| lynn_ml2022 / ORI-2_ol1 | olivine | 29 | data only | [profile](profiles/lynn_ml2022_ori_2_ol1.csv) |
-| lynn_ml2022 / ORI-2_ol2 | olivine | 24 | data only | [profile](profiles/lynn_ml2022_ori_2_ol2.csv) |
-| lynn_ml2022 / ORI-2_ol3 | olivine | 27 | data only | [profile](profiles/lynn_ml2022_ori_2_ol3.csv) |
-| lynn_ml2022 / ORI-2_ol4 | olivine | 26 | data only | [profile](profiles/lynn_ml2022_ori_2_ol4.csv) |
-| lynn_ml2022 / ORI-2_ol5 | olivine | 26 | data only | [profile](profiles/lynn_ml2022_ori_2_ol5.csv) |
-| lynn_ml2022 / ORI-2_ol6 | olivine | 31 | data only | [profile](profiles/lynn_ml2022_ori_2_ol6.csv) |
-| lynn_ml2022 / ORI-2_ol7 | olivine | 27 | data only | [profile](profiles/lynn_ml2022_ori_2_ol7.csv) |
-| lynn_ml2022 / ORI-2_ol8 | olivine | 18 | data only | [profile](profiles/lynn_ml2022_ori_2_ol8.csv) |
-| lynn_ml2022 / ORI-2_ol9 | olivine | 30 | data only | [profile](profiles/lynn_ml2022_ori_2_ol9.csv) |
-| lynn_ml2022 / ORI-2_ol10 | olivine | 26 | data only | [profile](profiles/lynn_ml2022_ori_2_ol10.csv) |
-| lynn_ml2022 / ORI-2_ol11 | olivine | 21 | data only | [profile](profiles/lynn_ml2022_ori_2_ol11.csv) |
-| lynn_ml2022 / ORI-2_ol12 | olivine | 31 | data only | [profile](profiles/lynn_ml2022_ori_2_ol12.csv) |
-| lynn_ml2022 / ORI-3_ol1 | olivine | 24 | data only | [profile](profiles/lynn_ml2022_ori_3_ol1.csv) |
-| lynn_ml2022 / ORI-3_ol2 | olivine | 28 | data only | [profile](profiles/lynn_ml2022_ori_3_ol2.csv) |
-| lynn_ml2022 / ORI-3_ol3 | olivine | 25 | data only | [profile](profiles/lynn_ml2022_ori_3_ol3.csv) |
-| lynn_ml2022 / ORI-3_ol4 | olivine | 22 | data only | [profile](profiles/lynn_ml2022_ori_3_ol4.csv) |
-| lynn_ml2022 / ORI-3_ol5 | olivine | 27 | data only | [profile](profiles/lynn_ml2022_ori_3_ol5.csv) |
-| lynn_ml2022 / ORI-3_ol6 | olivine | 25 | data only | [profile](profiles/lynn_ml2022_ori_3_ol6.csv) |
-| lynn_ml2022 / ORI-3_ol7 | olivine | 27 | data only | [profile](profiles/lynn_ml2022_ori_3_ol7.csv) |
-| lynn_ml2022 / ORI-3_ol8 | olivine | 26 | data only | [profile](profiles/lynn_ml2022_ori_3_ol8.csv) |
-| lynn_ml2022 / ORI-3_ol10 | olivine | 23 | data only | [profile](profiles/lynn_ml2022_ori_3_ol10.csv) |
-| lynn_ml2022 / ORI-3_ol11 | olivine | 27 | data only | [profile](profiles/lynn_ml2022_ori_3_ol11.csv) |
-| lynn_ml2022 / ORI-3_ol12 | olivine | 25 | data only | [profile](profiles/lynn_ml2022_ori_3_ol12.csv) |
-| lynn_ml2022 / ORI-3_ol14 | olivine | 25 | data only | [profile](profiles/lynn_ml2022_ori_3_ol14.csv) |
-| lynn_ml2022 / ORI-3_ol16 | olivine | 28 | data only | [profile](profiles/lynn_ml2022_ori_3_ol16.csv) |
-| lynn_ml2022 / ORI-3_ol17 | olivine | 24 | data only | [profile](profiles/lynn_ml2022_ori_3_ol17.csv) |
-| lynn_ml2022 / ORI-4_ol1 | olivine | 37 | data only | [profile](profiles/lynn_ml2022_ori_4_ol1.csv) |
-| lynn_ml2022 / ORI-4_ol2 | olivine | 27 | data only | [profile](profiles/lynn_ml2022_ori_4_ol2.csv) |
-| lynn_ml2022 / ORI-4_ol3 | olivine | 23 | data only | [profile](profiles/lynn_ml2022_ori_4_ol3.csv) |
-| lynn_ml2022 / ORI-4_ol4 | olivine | 26 | data only | [profile](profiles/lynn_ml2022_ori_4_ol4.csv) |
-| lynn_ml2022 / ORI-4_ol5 | olivine | 23 | data only | [profile](profiles/lynn_ml2022_ori_4_ol5.csv) |
-| lynn_ml2022 / ORI-4_ol6 | olivine | 26 | data only | [profile](profiles/lynn_ml2022_ori_4_ol6.csv) |
-| lynn_ml2022 / ORI-4_ol7 | olivine | 23 | data only | [profile](profiles/lynn_ml2022_ori_4_ol7.csv) |
-| lynn_ml2022 / ORI-4_ol8 | olivine | 24 | data only | [profile](profiles/lynn_ml2022_ori_4_ol8.csv) |
-| lynn_ml2022 / ORI-4_ol9 | olivine | 20 | data only | [profile](profiles/lynn_ml2022_ori_4_ol9.csv) |
-| lynn_ml2022 / ORI-4_ol10 | olivine | 26 | data only | [profile](profiles/lynn_ml2022_ori_4_ol10.csv) |
-| lynn_ml2022 / ORI-4_ol11 | olivine | 28 | data only | [profile](profiles/lynn_ml2022_ori_4_ol11.csv) |
-| lynn_ml2022 / ORI-4_ol12 | olivine | 25 | data only | [profile](profiles/lynn_ml2022_ori_4_ol12.csv) |
-| lynn_ml2022 / ORI-4_ol13 | olivine | 27 | data only | [profile](profiles/lynn_ml2022_ori_4_ol13.csv) |
-| lynn_ml2022 / ORI-4_ol15 | olivine | 29 | data only | [profile](profiles/lynn_ml2022_ori_4_ol15.csv) |
-| lynn_ml2022 / ORI-4_ol16 | olivine | 24 | data only | [profile](profiles/lynn_ml2022_ori_4_ol16.csv) |
-| lynn_ml2022 / ORI-4_ol17 | olivine | 23 | data only | [profile](profiles/lynn_ml2022_ori_4_ol17.csv) |
-| lynn_ml2022 / ORI-4_ol18 | olivine | 24 | data only | [profile](profiles/lynn_ml2022_ori_4_ol18.csv) |
-| lynn_ml2022 / ORI-4_ol19 | olivine | 28 | data only | [profile](profiles/lynn_ml2022_ori_4_ol19.csv) |
-| lynn_ml2022 / ORI-4_ol20 | olivine | 26 | data only | [profile](profiles/lynn_ml2022_ori_4_ol20.csv) |
-| lynn_ml2022 / ORI-4_ol21 | olivine | 26 | data only | [profile](profiles/lynn_ml2022_ori_4_ol21.csv) |
-| lynn_ml2022 / ORI-4_ol22 | olivine | 27 | data only | [profile](profiles/lynn_ml2022_ori_4_ol22.csv) |
+| lynn_ml2022 / ORI-1_ol1 | olivine | 49 | preset | [profile](profiles/lynn_ml2022_ori_1_ol1.csv) |
+| lynn_ml2022 / ORI-1_ol3 | olivine | 43 | preset | [profile](profiles/lynn_ml2022_ori_1_ol3.csv) |
+| lynn_ml2022 / ORI-1_ol4 | olivine | 42 | preset | [profile](profiles/lynn_ml2022_ori_1_ol4.csv) |
+| lynn_ml2022 / ORI-1_ol5 | olivine | 31 | preset | [profile](profiles/lynn_ml2022_ori_1_ol5.csv) |
+| lynn_ml2022 / ORI-1_ol6 | olivine | 37 | preset | [profile](profiles/lynn_ml2022_ori_1_ol6.csv) |
+| lynn_ml2022 / ORI-1_ol7 | olivine | 41 | preset | [profile](profiles/lynn_ml2022_ori_1_ol7.csv) |
+| lynn_ml2022 / ORI-1_ol8 | olivine | 36 | preset | [profile](profiles/lynn_ml2022_ori_1_ol8.csv) |
+| lynn_ml2022 / ORI-1_ol9 | olivine | 47 | preset | [profile](profiles/lynn_ml2022_ori_1_ol9.csv) |
+| lynn_ml2022 / ORI-1_ol11 | olivine | 28 | preset | [profile](profiles/lynn_ml2022_ori_1_ol11.csv) |
+| lynn_ml2022 / ORI-1_ol14 | olivine | 40 | preset | [profile](profiles/lynn_ml2022_ori_1_ol14.csv) |
+| lynn_ml2022 / ORI-1_ol16 | olivine | 32 | preset | [profile](profiles/lynn_ml2022_ori_1_ol16.csv) |
+| lynn_ml2022 / ORI-1_ol18 | olivine | 32 | preset | [profile](profiles/lynn_ml2022_ori_1_ol18.csv) |
+| lynn_ml2022 / ORI-2_ol1 | olivine | 29 | preset | [profile](profiles/lynn_ml2022_ori_2_ol1.csv) |
+| lynn_ml2022 / ORI-2_ol2 | olivine | 24 | preset | [profile](profiles/lynn_ml2022_ori_2_ol2.csv) |
+| lynn_ml2022 / ORI-2_ol3 | olivine | 27 | preset | [profile](profiles/lynn_ml2022_ori_2_ol3.csv) |
+| lynn_ml2022 / ORI-2_ol4 | olivine | 26 | preset | [profile](profiles/lynn_ml2022_ori_2_ol4.csv) |
+| lynn_ml2022 / ORI-2_ol5 | olivine | 26 | preset | [profile](profiles/lynn_ml2022_ori_2_ol5.csv) |
+| lynn_ml2022 / ORI-2_ol6 | olivine | 31 | preset | [profile](profiles/lynn_ml2022_ori_2_ol6.csv) |
+| lynn_ml2022 / ORI-2_ol7 | olivine | 27 | preset | [profile](profiles/lynn_ml2022_ori_2_ol7.csv) |
+| lynn_ml2022 / ORI-2_ol8 | olivine | 18 | preset | [profile](profiles/lynn_ml2022_ori_2_ol8.csv) |
+| lynn_ml2022 / ORI-2_ol9 | olivine | 30 | preset | [profile](profiles/lynn_ml2022_ori_2_ol9.csv) |
+| lynn_ml2022 / ORI-2_ol10 | olivine | 26 | preset | [profile](profiles/lynn_ml2022_ori_2_ol10.csv) |
+| lynn_ml2022 / ORI-2_ol11 | olivine | 21 | preset | [profile](profiles/lynn_ml2022_ori_2_ol11.csv) |
+| lynn_ml2022 / ORI-2_ol12 | olivine | 31 | preset | [profile](profiles/lynn_ml2022_ori_2_ol12.csv) |
+| lynn_ml2022 / ORI-3_ol1 | olivine | 24 | preset | [profile](profiles/lynn_ml2022_ori_3_ol1.csv) |
+| lynn_ml2022 / ORI-3_ol2 | olivine | 28 | preset | [profile](profiles/lynn_ml2022_ori_3_ol2.csv) |
+| lynn_ml2022 / ORI-3_ol3 | olivine | 25 | preset | [profile](profiles/lynn_ml2022_ori_3_ol3.csv) |
+| lynn_ml2022 / ORI-3_ol4 | olivine | 22 | preset | [profile](profiles/lynn_ml2022_ori_3_ol4.csv) |
+| lynn_ml2022 / ORI-3_ol5 | olivine | 27 | preset | [profile](profiles/lynn_ml2022_ori_3_ol5.csv) |
+| lynn_ml2022 / ORI-3_ol6 | olivine | 25 | preset | [profile](profiles/lynn_ml2022_ori_3_ol6.csv) |
+| lynn_ml2022 / ORI-3_ol7 | olivine | 27 | preset | [profile](profiles/lynn_ml2022_ori_3_ol7.csv) |
+| lynn_ml2022 / ORI-3_ol8 | olivine | 26 | preset | [profile](profiles/lynn_ml2022_ori_3_ol8.csv) |
+| lynn_ml2022 / ORI-3_ol10 | olivine | 23 | preset | [profile](profiles/lynn_ml2022_ori_3_ol10.csv) |
+| lynn_ml2022 / ORI-3_ol11 | olivine | 27 | preset | [profile](profiles/lynn_ml2022_ori_3_ol11.csv) |
+| lynn_ml2022 / ORI-3_ol12 | olivine | 25 | preset | [profile](profiles/lynn_ml2022_ori_3_ol12.csv) |
+| lynn_ml2022 / ORI-3_ol14 | olivine | 25 | preset | [profile](profiles/lynn_ml2022_ori_3_ol14.csv) |
+| lynn_ml2022 / ORI-3_ol16 | olivine | 28 | preset | [profile](profiles/lynn_ml2022_ori_3_ol16.csv) |
+| lynn_ml2022 / ORI-3_ol17 | olivine | 24 | preset | [profile](profiles/lynn_ml2022_ori_3_ol17.csv) |
+| lynn_ml2022 / ORI-4_ol1 | olivine | 37 | preset | [profile](profiles/lynn_ml2022_ori_4_ol1.csv) |
+| lynn_ml2022 / ORI-4_ol2 | olivine | 27 | preset | [profile](profiles/lynn_ml2022_ori_4_ol2.csv) |
+| lynn_ml2022 / ORI-4_ol3 | olivine | 23 | preset | [profile](profiles/lynn_ml2022_ori_4_ol3.csv) |
+| lynn_ml2022 / ORI-4_ol4 | olivine | 26 | preset | [profile](profiles/lynn_ml2022_ori_4_ol4.csv) |
+| lynn_ml2022 / ORI-4_ol5 | olivine | 23 | preset | [profile](profiles/lynn_ml2022_ori_4_ol5.csv) |
+| lynn_ml2022 / ORI-4_ol6 | olivine | 26 | preset | [profile](profiles/lynn_ml2022_ori_4_ol6.csv) |
+| lynn_ml2022 / ORI-4_ol7 | olivine | 23 | preset | [profile](profiles/lynn_ml2022_ori_4_ol7.csv) |
+| lynn_ml2022 / ORI-4_ol8 | olivine | 24 | preset | [profile](profiles/lynn_ml2022_ori_4_ol8.csv) |
+| lynn_ml2022 / ORI-4_ol9 | olivine | 20 | preset | [profile](profiles/lynn_ml2022_ori_4_ol9.csv) |
+| lynn_ml2022 / ORI-4_ol10 | olivine | 26 | preset | [profile](profiles/lynn_ml2022_ori_4_ol10.csv) |
+| lynn_ml2022 / ORI-4_ol11 | olivine | 28 | preset | [profile](profiles/lynn_ml2022_ori_4_ol11.csv) |
+| lynn_ml2022 / ORI-4_ol12 | olivine | 25 | preset | [profile](profiles/lynn_ml2022_ori_4_ol12.csv) |
+| lynn_ml2022 / ORI-4_ol13 | olivine | 27 | preset | [profile](profiles/lynn_ml2022_ori_4_ol13.csv) |
+| lynn_ml2022 / ORI-4_ol15 | olivine | 29 | preset | [profile](profiles/lynn_ml2022_ori_4_ol15.csv) |
+| lynn_ml2022 / ORI-4_ol16 | olivine | 24 | preset | [profile](profiles/lynn_ml2022_ori_4_ol16.csv) |
+| lynn_ml2022 / ORI-4_ol17 | olivine | 23 | preset | [profile](profiles/lynn_ml2022_ori_4_ol17.csv) |
+| lynn_ml2022 / ORI-4_ol18 | olivine | 24 | preset | [profile](profiles/lynn_ml2022_ori_4_ol18.csv) |
+| lynn_ml2022 / ORI-4_ol19 | olivine | 28 | preset | [profile](profiles/lynn_ml2022_ori_4_ol19.csv) |
+| lynn_ml2022 / ORI-4_ol20 | olivine | 26 | preset | [profile](profiles/lynn_ml2022_ori_4_ol20.csv) |
+| lynn_ml2022 / ORI-4_ol21 | olivine | 26 | preset | [profile](profiles/lynn_ml2022_ori_4_ol21.csv) |
+| lynn_ml2022 / ORI-4_ol22 | olivine | 27 | preset | [profile](profiles/lynn_ml2022_ori_4_ol22.csv) |
 | iovine2017 / A CX3 emp | kfeldspar | 42 | data only | [profile](profiles/iovine2017_a_cx3_emp.csv) |
 | iovine2017 / A CX4 emp L1 | kfeldspar | 37 | data only | [profile](profiles/iovine2017_a_cx4_emp_l1.csv) |
 | iovine2017 / A CX4 emp L2 | kfeldspar | 39 | data only | [profile](profiles/iovine2017_a_cx4_emp_l2.csv) |

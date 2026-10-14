@@ -263,3 +263,42 @@ COEFFICIENTS.append(interdiffusion_from_tracers(
         "less than a factor of 1.2 for most natural garnet compositions (abstract).",),
     notes="Computed from the two tracer laws for an ideal Fe-Mg binary of divalent ions.",
 ))
+
+
+# ---------------------------------------------------------------------------
+# Vielzeuf et al. (2007): Ca-(Fe, Mg) interdiffusion, ATEM profiles at 1.3 GPa (p. 166, Table 5)
+# D = D0 exp(-(Q_1bar + dV (P - 1)) / (R T)), P in bar, dV in J/bar/mol (the paper's eq. 3)
+# ---------------------------------------------------------------------------
+COEFFICIENTS.append(DiffusionCoefficient(
+    key="grt_Ca_vielzeuf2007", kind="interdiffusion",
+    mineral="garnet", species="Ca",
+    label="Garnet Ca-(Fe, Mg) interdiffusion, Vielzeuf et al. (2007)",
+    citation="vielzeuf2007", equation_number="eqs 2-3, p. 165-166, and Table 5 (p. 166)",
+    equation_text=("D = D0 exp(-(Q_1bar + dV (P - 1)) / (R T)) with D0 = 6.63e-14 m2/s, Q_1bar = 179,894 J/mol and "
+                   "dV = 0.6 J/bar/mol (Table 5, dV from Chakraborty & Ganguly 1992), P in bar. The fit at 1.3 GPa "
+                   "is Q = 188 +/- 48 kJ/mol, log D0 = -13.18 +/- 1.74 (1 sigma, p. 166)"),
+    func=_borinski,
+    params={"D0": Parameter("D0", 6.63e-14, 0.0, "m2/s", "1s", "pre-exponential factor (Table 5)"),
+            "Q": Parameter("Q", 179.894, 0.0, "kJ/mol", "1s", "activation energy at 1 bar (Table 5)"),
+            "dV": Parameter("dV", 0.6, 0.0, "J/bar/mol", "1s",
+                            "activation volume, taken equal to that of Mn (Chakraborty & Ganguly 1992)")},
+    T_range=Range(1323.15, 1523.15, "K (1050-1250 C)"),
+    P_range=Range(1.3e9, 1.3e9, "Pa (1.3 GPa, all experiments)"),
+    transported_variable="Ca (grossular) content, exchanged with Fe and Mg",
+    reference_state="almandine-pyrope garnet with 3-20 % grossular; fO2 at or below the graphite-O2 buffer",
+    verified=True,
+    verified_from=("Vielzeuf et al. (2007) CMP 154:153-170, eq. 2 and Table 4 (p. 165), the fit, eq. 3 and Table 5 "
+                   "(p. 166), read from the rendered pages on 13 October 2026"),
+    uncertainty_note=("The paper gives 1 sigma errors of Q (48 kJ/mol) and log D0 (1.74) at 1.3 GPa without their "
+                      "covariance; the coefficient is held fixed in the Monte Carlo."),
+    calibration_notes=(
+        "Thirteen ATEM profiles across seed/overgrowth interfaces at 1.3 GPa, 1050-1250 C, in graphite "
+        "capsules. The paper finds no major effect of garnet composition on D within the range studied "
+        "(abstract).",
+        "The fit at 1.3 GPa gives Q = 188 kJ/mol and log D0 = -13.18. Table 5 refers Q to 1 bar with the "
+        "activation volume of Mn, which the paper assumes for Ca, giving 179,894 J/mol at 1 bar and 185,894 "
+        "J/mol at 10 kbar. At 1.3 GPa the Table 5 form gives Q = 187.7 kJ/mol, and D within 3 % of the fit.",
+        "Ca in garnet relaxes in multicomponent exchange with Fe, Mg and Mn. This is the effective binary "
+        "Ca-(Fe, Mg) coefficient the paper retrieves with an analytical solution.",),
+    secondary_citations=("chakraborty_ganguly1992",),
+))

@@ -177,4 +177,45 @@ def test_published_timescale_tables_recompute_from_their_own_laws():
         assert result['chamberlain2014'][sheet]['rows']==rows
         assert result['chamberlain2014'][sheet]['max_relative_difference']<1e-4
     petrone=result['petrone2018']
-    assert petrone['rows_checked']==71 and petrone['within_5_percent_or_rounding']==62
+    assert petrone['rows_checked']==71 and petrone['within_5_percent_or_rounding']==63
+    assert abs(petrone['median_ratio']-1)<.001<abs(petrone['median_ratio_with_printed_D0']-1)
+
+
+def test_lynn_mauna_loa_reconstructions_lie_in_the_published_intervals():
+    """Lynn et al. (2024) Nature Commun. 15:9451: MCMC medians and 95% intervals of sheet S6."""
+    result=json.loads((ROOT/'lynn_ml_results.json').read_text(encoding='utf8'))
+    assert result['n']==59 and result['n_within_95']==58
+    outside=[r['sample'] for r in result['fits'] if not r['within_95']]
+    assert outside==['ORI-4_ol18']
+    ol18=next(r for r in result['fits'] if r['sample']=='ORI-4_ol18')
+    assert ol18['n_nodes']==801 and ol18['diffusor_days']==pytest.approx(0.912,abs=.002)
+
+
+def test_lynn_mauna_loa_preset_leaves_out_invalid_rows_and_starts_at_the_rim():
+    import os
+    os.environ.setdefault('QT_QPA_PLATFORM','offscreen')
+    from PySide6.QtWidgets import QApplication
+    from diffusor.gui.main_window import MainWindow
+    from diffusor.datasets import get
+    from diffusor.dataio import ProfileSpec,read_table
+    from diffusor.constants import SEC_PER_DAY
+    from diffusor.fitting import fit_time
+    app=QApplication.instance() or QApplication([])
+    window=MainWindow()
+    try:
+        d=get('lynn_ml2022_ori_1_ol1')
+        assert d.citation=='lynn2024maunaloa' and d.spec['keep_column']=='Valid'
+        assert window._use_table(read_table(d.path),ProfileSpec(**d.spec),d.path,d,(None,False))
+        p=window.profile
+        assert len(p.x)==48 and p.x.min()>19                      # the Valid = 0 rim analysis is left out
+        model=window._model(d.settings['coefficient'])
+        assert model.x_grid[0]==0 and model.initial.params['C_left']==79.9
+        r=fit_time(model,p.x,p.C,p.sigma,window._free_parameters())
+        saved=next(v for v in json.loads((ROOT/'lynn_ml_results.json').read_text(encoding='utf8'))['fits']
+                   if v['key']==d.key)
+        assert r.t_seconds/SEC_PER_DAY==pytest.approx(saved['diffusor_days'],rel=.01)
+        lo,hi=saved['published_95_days']
+        assert lo<=r.t_seconds/SEC_PER_DAY<=hi
+    finally:
+        window.close()
+        app.processEvents()

@@ -4,10 +4,18 @@ What changed between releases, newest first. The text under a version heading
 is what goes into the GitHub release, so it is written for someone deciding
 whether to update. Commit messages hold the details.
 
-## Unreleased
+## 0.6.0 (23 October 2026)
 
 ### Added
 
+- **Installers for Windows, macOS and Linux.** Each release now carries a setup
+  wizard for Windows, a disk image for macOS (Apple silicon and Intel), an
+  AppImage and a `.deb` package for Linux. They contain Diffusor with its own
+  Python and libraries, so no Python, terminal or internet connection is needed
+  to install or start it. On Windows the wizard installs for the current user
+  without administrator rights and adds Diffusor to the Start Menu; installing
+  a newer version replaces the older one. The `Start Diffusor` scripts remain
+  for running from the source code.
 - **Crystal setups (File > Save crystal setup, Open crystal setup).** A `.diffusor`
   file holds one crystal's data table, column mapping, points cut from the fit,
   every setting and its current result. Opening it restores all steps and fits

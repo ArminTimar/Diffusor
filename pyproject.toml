@@ -24,6 +24,8 @@ dependencies = [
 dev = ["pytest>=7", "pypdf>=3"]
 images = ["tifffile>=2023.1"]
 validation = ["xlrd>=2.0"]
+# packaging/build.py: the installers for Windows, macOS and Linux
+build = ["pyinstaller>=6.10"]
 
 # a GUI script: the launcher opens the window without a console
 [project.gui-scripts]

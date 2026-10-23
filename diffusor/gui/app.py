@@ -48,10 +48,12 @@ def _taskbar_icon(window) -> None:
             icon = user32.LoadImageW(None, str(ICON_WIN), IMAGE_ICON, w, h, LR_LOADFROMFILE)
             if icon:
                 user32.SendMessageW(hwnd, WM_SETICON, which, icon)
+        # the installed program is an executable of its own; a checkout runs as a module
+        frozen = getattr(sys, "frozen", False)
         _set_window_properties(hwnd, {
             5: APP_ID,                                                  # AppUserModel.ID
-            2: f'"{sys.executable}" -m diffusor',                       # RelaunchCommand
-            3: f"{ICON_WIN},0",                                         # RelaunchIconResource
+            2: f'"{sys.executable}"' + ("" if frozen else " -m diffusor"),  # RelaunchCommand
+            3: f"{sys.executable if frozen else ICON_WIN},0",           # RelaunchIconResource
             4: "Diffusor"})                                             # RelaunchDisplayName
     except Exception:
         pass
@@ -140,6 +142,7 @@ def main(argv=None, splash: bool = True) -> int:
     _own_taskbar_entry()
     app = QApplication(argv if argv is not None else sys.argv)
     app.setApplicationName("Diffusor")
+    app.setDesktopFileName("diffusor")      # Linux: ties the window to diffusor.desktop
     app.setWindowIcon(QIcon(str(ICON)))
 
     if not splash:

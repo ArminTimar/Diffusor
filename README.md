@@ -54,55 +54,98 @@ reconstructed fits and alternative diffusion laws, and explains which checks
 are exact age calculations, approximate profile reconstructions or coefficient
 comparisons. Extracted measurements retain their source rows and workbook hashes.
 
-## Installation on Windows
+## Installation
 
-1. Install Python 3.10 or newer from [python.org](https://www.python.org/downloads/).
-   Tick *Add python.exe to PATH* in the installer.
-2. On this page, click **Code > Download ZIP**, then right-click the ZIP and
-   choose **Extract All**. Diffusor does not run from inside the ZIP.
-3. In the extracted folder, double-click **Start Diffusor.bat**. If Windows
-   warns that the file came from the internet, choose **More info > Run
-   anyway**.
+The installers contain Diffusor together with its own copy of Python and of
+every library it uses. No Python installation, terminal or internet connection
+is needed to install or run it, and no other software on the computer is
+changed. Download the file for your system from the **Assets** list of the
+[latest release](https://github.com/ArminTimar/Diffusor/releases/latest):
 
-The first start creates a separate Python environment in a `.venv` folder
-inside the Diffusor folder and downloads the required libraries into it, so no
-other Python installation on the computer is changed. This takes a few minutes
-and needs an internet connection. Later starts open the application directly.
-The first start also places a **Diffusor** shortcut with the application icon in the
-Start Menu, so Windows search finds it, and another
-next to the batch file; either can be pinned to the taskbar or copied to the desktop. If the
-folder is moved, start once with **Start Diffusor.bat** to recreate both
-shortcut. If the environment is damaged, delete the `.venv` folder and run
-**Start Diffusor.bat** again.
+| System | File |
+| ------ | ---- |
+| Windows 10 and 11 (64-bit) | `Diffusor-<version>-Windows-Setup.exe` |
+| macOS, Apple silicon (M1 and later) | `Diffusor-<version>-macOS-AppleSilicon.dmg` |
+| macOS, Intel processor | `Diffusor-<version>-macOS-Intel.dmg` |
+| Linux, any distribution (x86-64) | `Diffusor-<version>-Linux-x86_64.AppImage` |
+| Ubuntu, Debian, Linux Mint | `diffusor_<version>_amd64.deb` |
 
-## Installation on macOS and Linux
+The **Apple menu > About This Mac** window shows which processor a Mac has:
+*Chip: Apple M…* for Apple silicon, *Processor: … Intel …* for Intel.
 
-1. Install Python 3.10 or newer with the macOS installer from
-   [python.org](https://www.python.org/downloads/). The `python3` supplied
-   with macOS is too old.
-2. On this page, click **Code > Download ZIP** and unpack it.
-3. In the Diffusor folder, double-click **Start Diffusor.command**. It opens in
-   Terminal.
+### Windows
 
-macOS blocks unsigned files downloaded from the internet, so the first attempt
-may report that the file cannot be opened or that Apple could not verify it.
-It has to be allowed once:
+1. Double-click the downloaded `Setup.exe`.
+2. The setup wizard asks for the licence, the folder and whether to put a
+   shortcut on the desktop. By default it installs for the current user only,
+   into `%LOCALAPPDATA%\Programs\Diffusor`, and does not need administrator
+   rights. The first page also offers an installation for all users, which
+   does.
+3. Start Diffusor from the Start Menu, or from the last page of the wizard.
+
+The installer is not yet signed with a code-signing certificate, so Windows
+SmartScreen shows *Windows protected your PC* the first time: click **More
+info**, then **Run anyway**. On computers where Smart App Control is switched
+on, Windows does not run unsigned programs at all.
+
+Diffusor is removed under **Settings > Apps > Installed apps**.
+
+### macOS
+
+1. Double-click the downloaded `.dmg` file. A window opens with the Diffusor
+   icon and the Applications folder.
+2. Drag **Diffusor** onto **Applications**.
+3. Start Diffusor from Launchpad or the Applications folder. To keep it in the
+   Dock, right-click its icon while it runs and choose **Options > Keep in
+   Dock**.
+
+The application is not yet notarised by Apple, so macOS refuses the first start
+with a message that Apple could not verify it. It has to be allowed once:
 
 * macOS 15 (Sequoia) and later: click **Done**, open **System Settings >
-  Privacy & Security**, find the message about *Start Diffusor.command*, click
-  **Open Anyway** and confirm.
-* Earlier versions: right-click (or Control-click) the file, choose **Open**,
-  then **Open** again.
-* Any version: in Terminal, type `bash ` (with a trailing space), drag
-  **Start Diffusor.command** into the window and press Return.
+  Privacy & Security**, find the message about *Diffusor*, click **Open
+  Anyway** and confirm.
+* Earlier versions: right-click (or Control-click) Diffusor in Applications,
+  choose **Open**, then **Open** again.
 
-The first start sets up the `.venv` environment as on Windows. Later starts
-open the application directly, and the Terminal window can be closed once the
-application is running. To keep Diffusor in the Dock, right-click its icon
-while it runs and choose **Options > Keep in Dock**.
+Diffusor is removed by dragging it from Applications to the Bin.
 
-On Linux, run `./Start\ Diffusor.command` from a terminal in the Diffusor
-folder.
+### Linux
+
+* **AppImage** (any distribution): right-click the downloaded file, choose
+  **Properties > Permissions** and tick *Allow executing file as program*,
+  then double-click it. The AppImage is the program itself; it can be kept in
+  any folder.
+* **.deb** (Ubuntu, Debian, Linux Mint): double-click the file. The software
+  centre installs it after asking for the user's password, and Diffusor then
+  appears among the applications.
+
+## Updates
+
+At start-up, at most once a day, Diffusor asks `api.github.com` for the newest
+release. Nothing else is sent, and nothing happens if the computer is offline.
+When a newer version exists, a bar under the title offers **Download**, which
+opens the release page in the browser, and **Later**, which hides the bar until
+the next check. Diffusor does not download or replace any files itself. To
+update, download the new installer and install it as described above: on
+Windows the setup wizard replaces the installed version, on macOS the new
+Diffusor is dragged onto Applications and replaces the old one, and on Linux
+the new AppImage or `.deb` takes the place of the old one. Settings and the
+list of recent files are kept. The automatic check is switched off under
+**Help > Check for updates at startup**, and **Help > Check for updates...**
+runs it manually.
+
+## Running from the source code
+
+This is for development, or for systems without an installer. It needs Python
+3.10 or newer from [python.org](https://www.python.org/downloads/). Download the
+source with **Code > Download ZIP** and unpack it, then double-click
+**Start Diffusor.bat** (Windows) or **Start Diffusor.command** (macOS; on Linux,
+run `./Start\ Diffusor.command` in a terminal). The first start creates a
+separate Python environment in a `.venv` folder inside the Diffusor folder and
+downloads the required libraries into it, which takes a few minutes and needs
+an internet connection. Later starts open the application directly. If the
+environment is damaged, delete the `.venv` folder and start again.
 
 ## Installation as a Python package
 
@@ -117,17 +160,43 @@ BigTIFF and compressed TIFF files that Pillow cannot open; the image extractor
 works without it. The installation also creates a `diffusor` launcher
 (`Scripts\diffusor.exe` on Windows) that opens the window without a console.
 
-## Updates
+## Building the installers
 
-At start-up, at most once a day, Diffusor asks `api.github.com` for the newest
-release. Nothing else is sent, and nothing happens if the computer is offline.
-When a newer version exists, a bar under the title offers **Download**, which
-opens the release page in the browser, and **Later**, which hides the bar until
-the next check. Diffusor does not download or replace any files itself. To
-update, extract the new ZIP into a new folder and start it as described above;
-the first start sets up the environment again. The automatic check is switched
-off under **Help > Check for updates at startup**, and **Help > Check for
-updates...** runs it manually.
+```bash
+python -m pip install -e .[build,images]
+python packaging/build.py
+```
+
+`packaging/build.py` makes the installer for the system it runs on, in `dist/`.
+PyInstaller first collects Python, the libraries and Diffusor into one folder
+(recipe in `packaging/diffusor.spec`); the bundled program is then started with
+`--self-check`, which builds the window off screen and runs a Monte Carlo fit on
+two worker processes; finally the installer is made: Inno Setup 6 on Windows
+(`packaging/windows/diffusor.iss`), a disk image on macOS, and an AppImage and
+a `.deb` package on Linux (`appimagetool` and `dpkg-deb`). When a release is
+published, the `installers` workflow runs these steps on Windows, macOS (Apple
+silicon and Intel) and Ubuntu 22.04 and attaches the five files to the release.
+
+## Code signing policy
+
+The Windows installer is to be signed through the free code-signing programme
+of the [SignPath Foundation](https://signpath.org) for open-source projects. The
+application is pending; until it is accepted the installer is unsigned.
+
+* **Signed files.** `Diffusor.exe` and the setup program
+  `Diffusor-<version>-Windows-Setup.exe`, built by the `installers` workflow
+  from the source code in this repository. The libraries in the installation
+  (Python, Qt, numpy, scipy and the others) are included as their authors
+  publish them and are not signed again.
+* **Roles.** Committer and reviewer: [Armin Timar](https://github.com/ArminTimar).
+  Every release is approved for signing by
+  [Armin Timar](https://github.com/ArminTimar).
+* **Privacy.** Diffusor sends one request on its own: at start-up, at most once
+  a day, it asks `api.github.com` for the version number of the newest release
+  (see [Updates](#updates)). The request carries Diffusor's own version number
+  and no data about the user, the computer or the files opened. The check is switched off under **Help > Check for updates at
+  startup**. Diffusor transfers nothing else to other networked systems unless
+  the user requests it.
 
 ## Workflow
 

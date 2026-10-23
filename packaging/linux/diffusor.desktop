@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Diffusor
+GenericName=Diffusion chronometry
+Comment=Diffusion modelling of mineral zoning profiles with literature diffusion coefficients
+Exec=diffusor
+Icon=diffusor
+Terminal=false
+Categories=Education;Science;Geology;

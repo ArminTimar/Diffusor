@@ -64,7 +64,12 @@ class GreyscaleCalibration:
             return np.full(g.shape, self.rmse)
         powers = np.vstack([g ** (self.degree - i) for i in range(self.degree + 1)])
         var = np.einsum("ij,ik,jk->k", self.covariance, powers, powers)
-        return np.sqrt(np.maximum(var, 0.0) + self.rmse ** 2)
+        # the residual variance with the degrees of freedom of the fit, n - (degree + 1),
+        # which is how numpy.polyfit scales the covariance above. The RMSE divides by
+        # n and would understate this term (by a factor of 3 for three anchors on a line).
+        dof = self.grey_anchors.size - (self.degree + 1)
+        s2 = float(np.sum(np.asarray(self.residuals, dtype=float) ** 2)) / dof
+        return np.sqrt(np.maximum(var, 0.0) + s2)
 
     def describe(self) -> str:
         terms = []

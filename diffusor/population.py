@@ -236,7 +236,9 @@ def load_table(path, default_unit: str = "d", group: str = "") -> List[Timescale
     if path.suffix.lower() in (".xlsx", ".xlsm", ".xls"):
         df = pd.read_excel(path)
     else:
-        df = pd.read_csv(path, sep=None, engine="python")
+        from .dataio.profiles import read_text_table
+        # share=1: a label column such as "12, 13, 14b" must stay text
+        df = read_text_table(path, share=1.0)
     cols: Dict[str, Tuple[str, Optional[str]]] = {}
     for c in df.columns:
         base, unit = _split_unit(c)

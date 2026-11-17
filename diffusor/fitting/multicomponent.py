@@ -236,7 +236,11 @@ def fit_multicomponent_time(model: MulticomponentModel, x, data: Mapping[str, Se
         def fun(v):
             r, _ = _residuals(model, 10.0 ** v[0], x, data, sig, fitted, {"x0": v[1]})
             return r
-        sol = least_squares(fun, [logt, x0], bounds=([np.log10(t_min), x.min()], [np.log10(t_max), x.max()]),
+        # the bounds include the starting position, which may lie outside the points
+        # (a rim before the first analysis); a start outside them is refused outright
+        sol = least_squares(fun, [logt, x0],
+                            bounds=([np.log10(t_min), min(float(x.min()), x0 - 1e-9)],
+                                    [np.log10(t_max), max(float(x.max()), x0 + 1e-9)]),
                             xtol=1e-8, ftol=1e-8, max_nfev=200)
         logt, free = float(sol.x[0]), {"x0": float(sol.x[1])}
     t = 10.0 ** logt

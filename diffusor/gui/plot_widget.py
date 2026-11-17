@@ -548,7 +548,18 @@ class ProfilePlot(QWidget):
     def _redraw_mc_panels(self):
         mc = self._mc
         n = len(mc["t"])
-        year = 365.25 * 86400.0
+        # the axis is in the unit the median reads most naturally in (days for a
+        # profile of a few days), as the headline is; years gave an axis of 1e-3
+        unit, name = "yr", "years"
+        if n:
+            from ..population import TIME_UNITS, UNIT_NAMES
+            median = float(np.median(mc["t"]))
+            unit = next((u for u in ("Myr", "kyr", "yr", "d", "h", "min")
+                         if median >= TIME_UNITS[u]), "s")
+            name = UNIT_NAMES[unit]
+            year = TIME_UNITS[unit]
+        else:
+            year = 365.25 * 86400.0
         t_yr = np.asarray(mc["t"], float) / year
 
         ax = mc["ax_t"]
@@ -566,7 +577,7 @@ class ProfilePlot(QWidget):
             ax.set_title("median " + human_time(p50 * year) + ", 68% "
                          + human_time(p16 * year) + " to " + human_time(p84 * year),
                          fontsize=9.5, color=theme.TEXT, loc="left")
-        ax.set_xlabel("time (years)")
+        ax.set_xlabel(f"time ({name})")
         ax.set_ylabel("draws")
 
         T = np.asarray(mc["T"], float)

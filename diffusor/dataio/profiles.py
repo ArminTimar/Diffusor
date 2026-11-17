@@ -12,6 +12,7 @@ so it can be written into the exported methods block.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+import io
 from pathlib import Path
 import re
 from typing import Dict, List, Optional, Sequence
@@ -170,14 +171,95 @@ class Profile:
         return p
 
 
+def _decode(raw: bytes) -> str:
+    """The text of a table file, whatever a spreadsheet program saved it as.
+
+    UTF-8 with or without a byte-order mark, UTF-16 with one (Excel's "Unicode
+    text"), and otherwise the system's own code page, which is what Excel's plain
+    "CSV" writes: a header such as ``Distance (µm)`` is then not valid UTF-8.
+    """
+    if raw.startswith((b"\xff\xfe", b"\xfe\xff")):
+        return raw.decode("utf-16")
+    try:
+        return raw.decode("utf-8-sig")
+    except UnicodeDecodeError:
+        pass
+    import locale
+    for encoding in (locale.getpreferredencoding(False), "cp1252"):
+        try:
+            return raw.decode(encoding)
+        except (UnicodeDecodeError, LookupError):
+            continue
+    return raw.decode("latin-1")
+
+
+# a number written with a decimal comma: 0,25  -1,5e-3  ,5
+_COMMA_NUMBER = r"[-+]?(\d+,\d*|,\d+)([eE][-+]?\d+)?"
+
+
+def _text_numbers(df: pd.DataFrame, share: float = 0.8) -> pd.DataFrame:
+    """Read text columns that hold numbers as numbers.
+
+    Two cases make a column of numbers arrive as text. A spreadsheet set to a
+    European locale writes a decimal comma (``0,25``). And a microprobe table
+    often has a few cells such as ``b.d.``, ``n.d.`` or ``<0.01`` among the
+    numbers. A column is converted when at least four in five of its filled
+    cells, and at least three, are numbers; the other cells become missing
+    values, so their rows are skipped like blank ones. Columns of names or
+    comments stay text.
+    """
+    for c in df.columns:
+        col = df[c]
+        if pd.api.types.is_numeric_dtype(col) or pd.api.types.is_bool_dtype(col):
+            continue
+        filled = col.notna()
+        if not filled.any():
+            continue
+        text = col.where(filled, "").astype(str).str.strip()
+        numbers = pd.to_numeric(text, errors="coerce")
+        comma = text.str.fullmatch(_COMMA_NUMBER)
+        numbers = numbers.where(~comma, pd.to_numeric(
+            text.where(comma, "").str.replace(",", ".", regex=False), errors="coerce"))
+        numbers = numbers.where(filled)
+        good = int(numbers.notna().sum())
+        n = int(filled.sum())
+        if good == n or (good >= 3 and good >= share * n):
+            df[c] = numbers.astype(float)
+    return df
+
+
+def read_text_table(path, tab_separated: bool = False, share: float = 0.8) -> pd.DataFrame:
+    """A CSV, TSV or text table, in any of the encodings and number styles of :func:`read_table`.
+
+    ``share`` is the fraction of a text column's cells that must be numbers for it to
+    be read as numbers; 1 converts only columns that are numbers throughout.
+    """
+    text = _decode(Path(path).read_bytes())
+    header = next((line for line in text.splitlines() if line.strip()), "")
+    # the header decides the separator: a decimal comma in the numbers below it
+    # must not be taken for one
+    if tab_separated or "\t" in header:
+        sep = "\t"
+    elif ";" in header:
+        sep = ";"
+    else:
+        sep = None
+    return _text_numbers(pd.read_csv(io.StringIO(text), sep=sep, engine="python"), share)
+
+
 def read_table(path) -> pd.DataFrame:
+    """A profile table from CSV, TSV, text or Excel.
+
+    Text files may be UTF-8, UTF-16 or the system code page, separated by commas,
+    semicolons, tabs or spaces, with a decimal point or a decimal comma. A column
+    of numbers with a few text cells (``b.d.``) is read as numbers, see
+    :func:`_text_numbers`.
+    """
     p = Path(path)
     suf = p.suffix.lower()
     if suf in (".xlsx", ".xlsm", ".xls"):
-        return pd.read_excel(p)
-    if suf in (".tsv", ".tab"):
-        return pd.read_csv(p, sep="\t")
-    return pd.read_csv(p, sep=None, engine="python")
+        return _text_numbers(pd.read_excel(p))
+    return read_text_table(p, tab_separated=suf in (".tsv", ".tab"))
 
 
 DISTANCE_WORDS = ("distance", "dist", "position", "pos", "x", "depth", "micron", "microns")
@@ -326,9 +408,15 @@ def build_profile(df: pd.DataFrame, spec: ProfileSpec, source: str = "") -> Prof
             sigma = sa
     if sigma is not None:
         bad = ~np.isfinite(sigma) | (sigma <= 0)
-        if np.any(bad):
-            good = sigma[~bad]
-            fill = float(np.median(good)) if good.size else float(np.std(C)) or 1e-6
+        if np.all(bad):
+            # nothing to take a median of. Inventing a value (the spread of the whole
+            # profile was used before) would give the Monte Carlo a measurement noise
+            # as large as the zoning itself, so the profile has no uncertainties.
+            sigma = None
+            notes.append("the uncertainty column holds no positive number, so the points "
+                         "are weighted equally and no measurement noise is sampled")
+        elif np.any(bad):
+            fill = float(np.median(sigma[~bad]))
             sigma = np.where(bad, fill, sigma)
             notes.append(f"{int(bad.sum())} non-positive or missing uncertainties replaced by "
                          f"the median ({fill:.3g})")

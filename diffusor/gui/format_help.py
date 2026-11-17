@@ -25,8 +25,12 @@ RULES = [
     ("Anything else",
      "Extra columns are ignored. Keep an anorthite column for plagioclase, it can drive "
      "the equilibrium initial profile."),
+    ("Separators and decimals",
+     "Commas, semicolons, tabs or spaces between the fields, with a decimal point or a "
+     "decimal comma. A CSV saved by Excel in any language loads as it is."),
     ("Blank cells",
-     "Rows with missing values are skipped and the log says how many."),
+     "Rows with missing values are skipped and the log says how many. A text cell such "
+     "as b.d. among the numbers of a column counts as missing."),
 ]
 
 GREYSCALE = (

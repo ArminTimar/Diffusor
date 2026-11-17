@@ -170,8 +170,13 @@ def fit_time(model: DiffusionModel, x_data, C_data, sigma=None,
     c_pad = 0.5 * (c_hi - c_lo) + 1e-12
     for nme in names:
         if nme == "x0":
-            p0.append(float(model.initial.params.get("x0", np.mean(x_data))))
-            lo.append(float(x_data.min())); hi.append(float(x_data.max()))
+            start = float(model.initial.params.get("x0", np.mean(x_data)))
+            p0.append(start)
+            # a step at a crystal rim can lie before the first analysis that was kept,
+            # so the bounds include the starting value, as they do for the plateaus;
+            # a start outside its bounds would stop the refinement before it began
+            lo.append(min(float(x_data.min()), start - 1e-9))
+            hi.append(max(float(x_data.max()), start + 1e-9))
         elif nme in ("C_left", "C_right"):
             start = float(model.initial.params.get(nme, c_lo if nme == "C_left" else c_hi))
             p0.append(start)
@@ -181,7 +186,7 @@ def fit_time(model: DiffusionModel, x_data, C_data, sigma=None,
             lo.append(min(c_lo - c_pad, start - 1e-9)); hi.append(max(c_hi + c_pad, start + 1e-9))
         elif nme == "beam_sigma":
             p0.append(max(model.beam_sigma_um, 0.5))
-            lo.append(0.0); hi.append(max(0.1 * span, 1.0))
+            lo.append(0.0); hi.append(max(0.1 * span, 1.0, p0[-1] + 1e-9))
 
     def unpack(v):
         t = 10.0 ** v[0]
@@ -196,6 +201,7 @@ def fit_time(model: DiffusionModel, x_data, C_data, sigma=None,
             return np.full(x_data.size, 1e6)
         return residuals(C_data, Cm, sigma)
 
+    refinement_failed = ""
     try:
         sol = least_squares(fun, np.array(p0), bounds=(np.array(lo), np.array(hi)),
                             xtol=1e-10, ftol=1e-10, max_nfev=400)
@@ -204,6 +210,12 @@ def fit_time(model: DiffusionModel, x_data, C_data, sigma=None,
     except Exception as exc:                      # pragma: no cover - defensive
         t_best, free_best = t0, {}
         success, message = False, f"refinement failed ({exc}). Using the scan minimum."
+        # the scan has about five points per decade, so its minimum can be a quarter
+        # of a decade from the best time: the result must not pass for a refined one
+        refinement_failed = (
+            f"The refinement of the fit did not run ({exc}). The time is the best point of "
+            "the coarse scan, which can be up to a factor of about 1.6 from the best-fit "
+            "time, and no other parameter was fitted. Check the starting values.")
 
     m_final = _apply_free(model, free_best)
     C_model = m_final.profile(t_best, x_data, overrides)
@@ -216,6 +228,8 @@ def fit_time(model: DiffusionModel, x_data, C_data, sigma=None,
         t_bounds_scan=(float(ts[0]), float(ts[-1])), success=success, message=message,
         warnings=m_final.warnings(t_best),
         route=("analytical (Crank 1975) -- " + why) if ok else ("numerical Crank-Nicolson -- " + why))
+    if refinement_failed:
+        res.warnings.insert(0, refinement_failed)
     if stats.dof_warning():
         res.warnings.append(stats.dof_warning())
     if t_best <= 1.05 * t_min or t_best >= 0.95 * t_max:

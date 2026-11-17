@@ -17,6 +17,8 @@ dependencies = [
     "matplotlib>=3.7",
     "Pillow>=9.0",
     "openpyxl>=3.1",
+    # old-format .xls tables, which the file dialogs offer and many microprobes export
+    "xlrd>=2.0",
     "PySide6>=6.5",
 ]
 

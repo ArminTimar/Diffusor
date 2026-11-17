@@ -147,9 +147,11 @@ def solve_multicomponent(x: np.ndarray, C0: np.ndarray,
     while t < t_total * (1 - 1e-12):
         if step >= max_steps:
             raise RuntimeError("max_steps reached before the requested duration")
-        D = matrices(flat.reshape(N, n).T, float(history.T(t)))
         dt = min(dt_step * dt_growth, dt_cap, t_total - t)
         dt_step = dt
+        # temperature at the middle of the step, as in solvers.numerical: along a
+        # cooling path the start of the step overestimates the summed D dt
+        D = matrices(flat.reshape(N, n).T, float(history.T(t + 0.5 * dt)))
         # A = I - theta dt L in banded storage; rows of fixed nodes stay identity rows
         Lflat = np.zeros(size)
         ab = np.zeros((2 * bw + 1, size))

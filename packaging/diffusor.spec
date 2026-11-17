@@ -39,7 +39,8 @@ a = Analysis(
     [str(ROOT / "packaging" / "diffusor_app.py")],
     pathex=[str(ROOT)],
     datas=datas,
-    hiddenimports=["matplotlib.backends.backend_qtagg"],
+    # xlrd: pandas imports it by name only when an .xls table is opened
+    hiddenimports=["matplotlib.backends.backend_qtagg", "xlrd"],
     excludes=["tkinter", "_tkinter", "PyQt5", "PyQt6", "PySide2", "IPython", "pytest",
               "matplotlib.backends.backend_tkagg"],
     noarchive=False,

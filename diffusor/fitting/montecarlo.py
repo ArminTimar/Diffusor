@@ -210,9 +210,32 @@ def _draw_data(x_data, C_data, sigma, budget: UncertaintyBudget,
     C = np.asarray(C_data, dtype=float)
     if "measurement_noise" in active and sigma is not None:
         C = C + rng.normal(0.0, np.asarray(sigma, dtype=float))
+    scale = 1.0
     if "distance_scale" in active:
-        x = x * float(rng.normal(1.0, budget.sigma_distance_scale))
-    return x, C
+        scale = float(rng.normal(1.0, budget.sigma_distance_scale))
+        x = x * scale
+    return x, C, scale
+
+
+def _scale_lengths(model: DiffusionModel, scale: float) -> None:
+    """Stretch every position of the model by ``scale``, in place (on a copy).
+
+    A distance-scale error stretches the whole traverse, and the step position,
+    the tabulated initial profile and the grid are positions on that traverse.
+    Left where they were, a fixed step would no longer sit on the stretched data
+    and the misfit, not the scale, would set the spread of the times. The beam
+    width is a property of the instrument and is not stretched.
+    """
+    model.initial = copy.deepcopy(model.initial)
+    p = model.initial.params
+    for k in ("x0", "rim_start", "smooth"):
+        if k in p:
+            p[k] = float(p[k]) * scale
+    for k in ("edges", "x_table", "x_an_x"):
+        if k in p:
+            p[k] = np.asarray(p[k], dtype=float) * scale
+    if model.x_grid is not None:
+        model.x_grid = np.asarray(model.x_grid, dtype=float) * scale
 
 
 @dataclass
@@ -230,13 +253,14 @@ class _Draw:
     overrides: dict
     x: np.ndarray
     C: np.ndarray
+    x_scale: float = 1.0            # the sampled distance-scale factor already applied to x
 
 
 def _sample_draw(i: int, model: DiffusionModel, budget: UncertaintyBudget,
                  rng: np.random.Generator, x_data, C_data, sigma,
                  only_source: Optional[str], active: Sequence[str]) -> _Draw:
     cond, delta = _draw_conditions(model, budget, rng, only_source)
-    xd, Cd = _draw_data(x_data, C_data, sigma, budget, rng, only_source)
+    xd, Cd, x_scale = _draw_data(x_data, C_data, sigma, budget, rng, only_source)
     overrides = {}
     if ("diffusion_coefficient" in active
             and (only_source is None or only_source == "diffusion_coefficient")):
@@ -260,7 +284,7 @@ def _sample_draw(i: int, model: DiffusionModel, budget: UncertaintyBudget,
         # uncertainty is on where the path sits, its shape is kept
         dT = cond.T_K - model.conditions.T_K
         history = ThermalHistory(history.times.copy(), history.temps_K + dT, history.label)
-    return _Draw(i, cond, fo2_buffer, history, initial, overrides, xd, Cd)
+    return _Draw(i, cond, fo2_buffer, history, initial, overrides, xd, Cd, x_scale)
 
 
 def _evaluate(model: DiffusionModel, d: _Draw, sigma, free_parameters, t_min, t_max,
@@ -272,13 +296,15 @@ def _evaluate(model: DiffusionModel, d: _Draw, sigma, free_parameters, t_min, t_
         if d.initial is not None:
             m.initial = d.initial
             follow_plateaus(m, model.initial.params, d.initial.params)
+        if d.x_scale != 1.0:
+            _scale_lengths(m, d.x_scale)
         if refit:
             r = fit_time(m, d.x, d.C, sigma, free_parameters, t_min, t_max,
                          overrides=d.overrides, t_guess=t_guess)
             t, prof = r.t_seconds, r.C_model
         else:
             t = t_guess
-            prof = m.profile(t, x_data, d.overrides)
+            prof = m.profile(t, d.x, d.overrides)
         if not np.isfinite(t) or t <= 0:
             return None
         try:
@@ -331,6 +357,21 @@ def _portable(model: DiffusionModel):
     return model, None
 
 
+def _default_budget(model: DiffusionModel) -> UncertaintyBudget:
+    """The budget of a run that was given none.
+
+    Nothing was said about fO2, so the model's own stays: its buffer and offset if
+    it has one, else its absolute value. The plain defaults would replace it by
+    NNO+0.
+    """
+    budget = UncertaintyBudget()
+    if model.fo2_buffer is not None:
+        budget.buffer, budget.delta_buffer = model.fo2_buffer[0], float(model.fo2_buffer[1])
+    else:
+        budget.fo2_mode = "absolute"
+    return budget
+
+
 def default_workers() -> int:
     """All cores but one, so the computer stays usable while a run goes on."""
     return max(1, (os.cpu_count() or 2) - 1)
@@ -361,7 +402,7 @@ def run(model: DiffusionModel, x_data, C_data, sigma=None, *,
     The draws are sampled here either way, so the result for a given seed does
     not depend on the number of workers.
     """
-    budget = budget or UncertaintyBudget()
+    budget = budget or _default_budget(model)
     if (model.coefficient.fixed_temperature_K is not None and budget.sigma_T_K > 0
             and only_source in (None, "temperature")):
         raise ValueError("This coefficient has measurements at one temperature only. "
@@ -488,7 +529,7 @@ def contributions(model: DiffusionModel, x_data, C_data, sigma=None, *,
     not add up to the total in quadrature when the sources interact; it is
     meant for ranking which measurement to improve first.
     """
-    budget = budget or UncertaintyBudget()
+    budget = budget or _default_budget(model)
     out: Dict[str, float] = {}
     for src in budget.active_sources():
         r = run(model, x_data, C_data, sigma, budget=budget, n_draws=n_draws, seed=seed,

@@ -169,7 +169,7 @@ class ImageCalibrationDialog(QDialog):
         for r in range(self.tbl.rowCount()):
             items = [self.tbl.item(r, k) for k in (0, 1)]
             try:
-                gv, cv = (float(it.text()) for it in items)
+                gv, cv = (float(it.text().strip().replace(",", ".")) for it in items)
             except (AttributeError, ValueError):
                 continue
             g.append(gv)
@@ -189,7 +189,8 @@ class ImageCalibrationDialog(QDialog):
             return
         try:
             df = read_table(path)
-            numeric = [str(c) for c in df.columns if np.issubdtype(df[c].dtype, np.number)]
+            from pandas.api.types import is_numeric_dtype
+            numeric = [str(c) for c in df.columns if is_numeric_dtype(df[c])]
             if len(numeric) < 2:
                 raise ValueError("the table needs a distance and a composition column")
             dist, ok = QInputDialog.getItem(self, "Distance column",

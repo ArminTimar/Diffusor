@@ -4,6 +4,69 @@ What changed between releases, newest first. The text under a version heading
 is what goes into the GitHub release, so it is written for someone deciding
 whether to update. Commit messages hold the details.
 
+## 0.6.1 (17 November 2026)
+
+A round of fixes found by auditing the whole program. No new features. Results
+along a cooling path with the numerical solver, and Monte Carlo runs with a
+distance-scale error, change slightly (see below); everything else keeps its
+numbers.
+
+### Fixed
+
+- **A table with a text column could not be loaded with pandas 3.** A sample
+  name or comment column made the column dialog fail with "Cannot interpret
+  StringDtype as a data type", in the main window, the batch window and the
+  microprobe traverse of the image calibration.
+- **CSV files as Excel writes them outside English locales.** Semicolon-separated
+  files with decimal commas loaded as text and stopped with "the table has no
+  numeric columns". Files in the Windows code page (a header such as
+  `Distance (µm)` saved as plain CSV) and UTF-16 "Unicode text" files stopped
+  with a decoding error, and a byte-order mark ended up in the first column
+  name. All of these now load.
+- **Columns with a few text cells.** One `b.d.`, `n.d.` or `<0.01` among the
+  numbers made the whole column text, and it was missing from the column dialog.
+  A column that is at least four fifths numbers is now read as numbers, and the
+  rows with the text cells are skipped like blank ones.
+- **A step position outside the measured range, with "Fit the step position"
+  ticked,** stopped the refinement before it started. The reported time was then
+  the best point of the coarse scan, up to a factor of about 1.6 off, without a
+  warning. The step may now start outside the data, and a refinement that cannot
+  run is reported.
+- **An uncertainty column without any positive number** gave every point the
+  standard deviation of the whole profile as its uncertainty, and the Monte Carlo
+  sampled that as measurement noise. An image profile loaded with a two-point
+  calibration and no uncertainty ended up this way. Such a profile now has no
+  uncertainties.
+- **Garnet and isotope studies along a cooling path** had the same 1 to 3 per
+  cent bias as the main solver, and "fit the interface" failed when the interface
+  started outside the measured points. Both are fixed.
+- **Greyscale calibration with anchor points:** the scatter of the anchors about
+  the fitted line entered the uncertainty divided by the number of anchors
+  instead of the degrees of freedom, which understated it for few anchors (a
+  third of the variance for three anchors on a line).
+- Tab-separated element maps with decimal commas are read, anchor values typed
+  with a decimal comma are accepted, and the time axis of the live Monte Carlo
+  view uses the unit of the result instead of always years.
+- **`.xls` tables** are offered by the file dialogs but needed a library that was
+  not installed. `xlrd` is now a dependency and part of the installers.
+- **Monte Carlo, distance scale.** With the step position held fixed, a sampled
+  distance scale stretched the data but left the step, the tabulated initial
+  profile and the grid where they were, so the spread of the times came from the
+  misfit and was about 2.6 times too wide for a 3 per cent scale error. The model
+  positions are now stretched with the data.
+- **Cooling paths in the numerical solver** took the temperature at the start of
+  each time step, which made the diffusion integral 1 to 3 per cent too large.
+  The temperature is now taken at the middle of the step (below 0.3 per cent).
+  Fitted times along a cooling path with the numerical solver grow by that much.
+- **Export no longer overwrites the previous crystal.** The exported files are
+  named after the profile (`ol7_diffusor_results.json`) instead of always
+  `diffusor_run_...`, so several crystals can be exported into one folder.
+- A table with fewer than three usable rows is refused with a message and leaves
+  the profile loaded before it in place. A decimal comma in the fit-window boxes
+  of the column dialog is accepted.
+- `run_montecarlo` called from a script without a budget kept NNO+0 as the fO2
+  instead of the model's own.
+
 ## 0.6.0 (23 October 2026)
 
 ### Added

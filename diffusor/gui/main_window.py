@@ -6,6 +6,7 @@ and change it. Pages never scroll. Only lists and reading panes do.
 """
 from __future__ import annotations
 
+import html
 import json
 import os
 import traceback
@@ -15,6 +16,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
 import numpy as np
+from pandas.api.types import is_numeric_dtype
 from PySide6.QtCore import QLocale, QSettings, Qt, QTimer, QUrl, Slot
 from PySide6.QtGui import QAction, QDesktopServices, QFont, QGuiApplication
 from PySide6.QtWidgets import (QApplication, QCheckBox, QComboBox, QDialog, QDialogButtonBox,
@@ -178,7 +180,8 @@ class ColumnDialog(QDialog):
         self.df = df
         self.setWindowTitle("Check the columns")
         cols = [str(c) for c in df.columns]
-        numeric = [str(c) for c in df.columns if np.issubdtype(df[c].dtype, np.number)]
+        # pandas' own test: numpy's issubdtype raises on the string dtype of pandas 3
+        numeric = [str(c) for c in df.columns if is_numeric_dtype(df[c])]
         root = QVBoxLayout(self)
         root.setContentsMargins(20, 16, 20, 16)
         root.setSpacing(10)
@@ -296,8 +299,12 @@ class ColumnDialog(QDialog):
 
     def spec(self) -> ProfileSpec:
         def num(edit):
-            t = edit.text().strip()
-            return float(t) if t else None
+            # a decimal comma is accepted; anything that is not a number means no limit
+            t = edit.text().strip().replace(",", ".")
+            try:
+                return float(t) if t else None
+            except ValueError:
+                return None
         return ProfileSpec(
             distance_column=self.dist.currentText(), column_a=self.a.currentText(),
             column_b=self._none(self.b.currentText()),
@@ -1467,7 +1474,17 @@ class MainWindow(QMainWindow):
     def _use_table(self, df, spec, path: Path, dataset: Optional[ds.ExampleDataset],
                    an) -> bool:
         try:
-            self.profile = build_profile(df, spec, source=str(path))
+            # checked before anything is replaced, so a table that cannot be used
+            # leaves the profile that was loaded before it in place
+            built = build_profile(df, spec, source=str(path))
+            if len(built) < 3:
+                QMessageBox.warning(
+                    self, "Could not load the file",
+                    f"Only {len(built)} rows of {path.name} have a number in both the distance "
+                    "and the composition column. A profile needs at least three. Check the "
+                    "columns chosen and the fit window.")
+                return False
+            self.profile = built
             self.dataset = dataset
             self.an_values = None
             self._an_column, self._an_percent = None, True
@@ -2400,7 +2417,7 @@ class MainWindow(QMainWindow):
     def _show_warnings(self, warnings):
         serious = [w for w in warnings
                    if "SUPERSEDED" in w or "NOT verified" in w or "semi-infinite" in w
-                   or "resolution limit" in w]
+                   or "resolution limit" in w or "refinement of the fit" in w]
         if serious:
             QMessageBox.warning(self, "Check before using the result", "\n\n".join(serious))
 
@@ -2586,9 +2603,13 @@ class MainWindow(QMainWindow):
         d = QFileDialog.getExistingDirectory(self, "Export into folder", self.output_dir())
         if not d:
             return
+        # named after the profile, so a second crystal exported into the same folder
+        # does not overwrite the first
+        source = self.profile.source if self.profile is not None else ""
+        basename = f"{Path(source).stem}_diffusor" if source and Path(source).stem else "diffusor_run"
         try:
             written = save_results(d, self.fit_result, self.mc_result, self._fit_profile(),
-                                   figure=self.plot.figure, include=include)
+                                   figure=self.plot.figure, basename=basename, include=include)
             self._log("exported\n" + "\n".join(f"{k}: {v}" for k, v in written.items()))
             QMessageBox.information(self, "Exported", "Written:\n" + "\n".join(written.values()))
         except Exception:
@@ -2669,7 +2690,10 @@ class MainWindow(QMainWindow):
             self._update_release = info
             self.lbl_update.setText(f"Diffusor {info.version} is available. "
                                     f"This is {__version__}.")
-            self.lbl_update.setToolTip(info.notes[:800])
+            # the notes come from the network: shown as plain text, never as markup
+            self.lbl_update.setToolTip(
+                "<p style='white-space:pre-wrap'>" + html.escape(info.notes[:800]) + "</p>"
+                if info.notes else "")
             self.update_banner.setVisible(True)
             self._log(f"update available: {info.version}")
             if manual:

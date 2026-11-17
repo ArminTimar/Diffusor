@@ -278,6 +278,9 @@ def load_text_grid(p) -> LoadedImage:
             continue
         if ";" in line:
             toks = [t.strip().replace(",", ".") for t in line.split(";")]
+        elif "\t" in line:
+            # tabs separate the values, so a comma can only be a decimal comma
+            toks = [t.strip().replace(",", ".") for t in line.split("\t") if t.strip()]
         else:
             toks = [t for t in re.split(r"[,	 ]+", line) if t]
         vals = []

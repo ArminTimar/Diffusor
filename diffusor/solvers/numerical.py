@@ -214,21 +214,31 @@ def solve_1d(x: np.ndarray, C0: np.ndarray, D_func: Callable[[np.ndarray, float]
     while t < t_total * (1 - 1e-12):
         if step >= max_steps:
             raise RuntimeError("max_steps reached before the requested duration; no partial solution returned")
-        T_now = float(history.T(t))
+        if theta_time >= 0.5:
+            # The implicit step does not depend on D, so it is known first and the
+            # temperature is taken at the middle of the step. Along a cooling path
+            # that makes the sum of D dt second-order accurate; the temperature at
+            # the start of each step overestimates it by one to three percent.
+            dt = min(dt_step * growth, dt_cap)
+            dt_step = dt
+            dt = min(dt, t_total - t)
+            if next_snap_idx < len(snaps):
+                dt = min(dt, snaps[next_snap_idx] - t)
+            T_now = float(history.T(t + 0.5 * dt))
+        else:
+            T_now = float(history.T(t))
         D_nodes = np.asarray(D_func(C, T_now), dtype=float)
         if D_nodes.size == 1:
             D_nodes = np.full(n, float(D_nodes.item()))
         if D_nodes.shape != (n,) or not np.all(np.isfinite(D_nodes)) or np.any(D_nodes < 0):
             raise ValueError("D must be finite, nonnegative and scalar or match the grid")
-        Dmax = float(D_nodes.max())
         if theta_time < 0.5:
+            Dmax = float(D_nodes.max())
             dt = courant * dx ** 2 / Dmax if Dmax > 0 else dt_nominal
-        else:
-            dt = min(dt_step * growth, dt_cap)
-        dt_step = dt
-        dt = min(dt, t_total - t)
-        if next_snap_idx < len(snaps):
-            dt = min(dt, snaps[next_snap_idx] - t)
+            dt_step = dt
+            dt = min(dt, t_total - t)
+            if next_snap_idx < len(snaps):
+                dt = min(dt, snaps[next_snap_idx] - t)
         lower, diag, upper = _operator(x, D_nodes, m, an_profile, float(theta_of_T(T_now)))
         lower, diag, upper = _apply_bc_rows(lower, diag, upper, x, D_nodes, m, bc_left, bc_right)
         if theta_time < 0.5:

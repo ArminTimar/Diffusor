@@ -26,7 +26,8 @@ jobs:
       matrix:
         include:
           - { name: Windows, os: windows-latest }
-          - { name: macOS Apple Silicon, os: macos-14 }
+          # GitHub retired the macos-14 image in November 2026
+          - { name: macOS Apple Silicon, os: macos-15 }
           - { name: macOS Intel, os: macos-15-intel }
           # the oldest supported Ubuntu, so the AppImage runs on older systems too
           - { name: Linux, os: ubuntu-22.04 }

@@ -323,7 +323,7 @@ def test_kizimen_fit_lands_inside_ostorero_uncertainty(app):
     r = fit_time(model, w.profile.x, w.profile.C, w.profile.sigma, w._free_parameters())
     years = r.t_seconds / SEC_PER_YEAR
     assert 2.32 - 1.75 < years < 2.32 + 7.16, years
-    # the README and the example text quote 2.5 years, and 12 years with the Dias et al. (2025) law
+    # manual/VERIFICATION.md and the example text quote 2.5 years, and 12 years with the Dias et al. (2025) law
     assert years == pytest.approx(2.5, abs=0.15), years
     dias = fit_time(w._model("opx_FeMg_dias2025"), w.profile.x, w.profile.C, w.profile.sigma,
                     w._free_parameters())

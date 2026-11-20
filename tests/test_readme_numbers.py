@@ -1,9 +1,10 @@
-"""Numbers that the README quotes in its verification table and registry counts.
+"""Numbers that the documentation quotes in its verification table and registry counts.
 
-The README states what Diffusor gives next to the published value. If a law changes, these
-tests fail and the README table has to be recomputed from the code, not copied from an older
-run. The published values are those printed in the sources; Diffusor's values are asserted
-at the precision the README prints.
+manual/VERIFICATION.md states what Diffusor gives next to the published value, and
+manual/METHODS.md and the README give the registry counts. If a law changes, these tests fail
+and the tables have to be recomputed from the code, not copied from an older run. The
+published values are those printed in the sources. Diffusor's values are asserted at the
+precision the documentation prints.
 """
 import collections
 

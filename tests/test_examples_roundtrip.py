@@ -65,7 +65,7 @@ def test_opx_example_recovers_1_5_years():
     r, prof = _fit("opx_femg_step.csv", spec, "opx_FeMg_dias2025", cond, comp_key="XFe")
     assert 0.65 < r.t_seconds / (1.5 * SEC_PER_YEAR) < 1.5
     assert r.stats.r_squared > 0.97
-    assert r.t_seconds / SEC_PER_YEAR == pytest.approx(1.41, abs=0.03)       # README example table
+    assert r.t_seconds / SEC_PER_YEAR == pytest.approx(1.41, abs=0.03)       # manual/VERIFICATION.md table
 
 
 def test_cpx_example_recovers_45_days():
@@ -75,7 +75,7 @@ def test_cpx_example_recovers_45_days():
     r, _ = _fit("cpx_femg_step.csv", spec, "cpx_FeMg_muller2013", cond)
     assert 0.7 < r.t_seconds / (45 * SEC_PER_DAY) < 1.4
     assert r.stats.r_squared > 0.97
-    assert r.t_seconds / SEC_PER_DAY == pytest.approx(42.0, abs=1.0)         # README example table
+    assert r.t_seconds / SEC_PER_DAY == pytest.approx(42.0, abs=1.0)         # manual/VERIFICATION.md table
 
 
 def test_plag_example_recovers_20_years():
@@ -106,8 +106,8 @@ def test_magnetite_example_recovers_8_days():
     spec = ProfileSpec("Distance_um", "TiO2_wt", None, "TiO2_err", mode="A")
     r, _ = _fit("magnetite_ti.csv", spec, "mt_Ti_vanorman_crispin2010", cond, free=FREE_PLATEAUS)
     assert 0.75 < r.t_seconds / (8 * SEC_PER_DAY) < 1.33
-    assert r.t_seconds / SEC_PER_DAY == pytest.approx(7.4, abs=0.1)          # README example table
-    # plateaus held at the outer points: the README quotes 5.5 d
+    assert r.t_seconds / SEC_PER_DAY == pytest.approx(7.4, abs=0.1)          # manual/VERIFICATION.md table
+    # plateaus held at the outer points: manual/VERIFICATION.md quotes 5.5 d
     r, _ = _fit("magnetite_ti.csv", spec, "mt_Ti_vanorman_crispin2010", cond)
     assert r.t_seconds / SEC_PER_DAY == pytest.approx(5.5, abs=0.1)
 
@@ -153,7 +153,7 @@ def test_olivine_example_recovers_120_days():
         bc_right=dirichlet(ic.params["C_right"]), comp_key="XFe", n_nodes=301)
     r = fit_time(model, prof.x, xfe, prof.sigma / 100.0, free_parameters=("t", "x0"))
     assert 0.75 < r.t_seconds / (120 * SEC_PER_DAY) < 1.3
-    assert r.t_seconds / SEC_PER_DAY == pytest.approx(116.0, abs=2.0)        # README example table
+    assert r.t_seconds / SEC_PER_DAY == pytest.approx(116.0, abs=2.0)        # manual/VERIFICATION.md table
 
 
 def test_greyscale_example_calibrates_and_fits():
@@ -173,7 +173,7 @@ def test_greyscale_example_calibrates_and_fits():
                            bc_right=dirichlet(ic.params["C_right"]), n_nodes=301)
     r = fit_time(model, x, C, sigma, free_parameters=("t", "x0"))
     assert 0.85 < r.t_seconds / (3.0 * SEC_PER_YEAR) < 1.15
-    assert r.t_seconds / SEC_PER_YEAR == pytest.approx(3.0, abs=0.05)        # README example table
+    assert r.t_seconds / SEC_PER_YEAR == pytest.approx(3.0, abs=0.05)        # manual/VERIFICATION.md table
 
 
 def test_comparing_two_coefficients_gives_different_times():

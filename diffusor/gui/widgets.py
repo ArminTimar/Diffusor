@@ -7,7 +7,8 @@ from PySide6.QtCore import QEvent, QObject, QSize, Qt, QTimer
 from PySide6.QtGui import QGuiApplication, QPainter, QPixmap
 from PySide6.QtWidgets import (QAbstractScrollArea, QAbstractSpinBox, QApplication, QComboBox,
                                QFrame, QHBoxLayout, QLabel, QPushButton, QScrollArea,
-                               QSizePolicy, QVBoxLayout, QWidget)
+                               QSizePolicy, QStyledItemDelegate, QStyleOptionViewItem,
+                               QVBoxLayout, QWidget)
 
 from . import theme
 
@@ -389,3 +390,33 @@ def collapsible(title: str, content: QWidget, expanded: bool = False) -> QWidget
     _set(expanded)
     box.toggle_button = btn
     return box
+
+
+class WrappingItemDelegate(QStyledItemDelegate):
+    """Rows of a list that grow to fit their wrapped text.
+
+    Qt measures a word-wrapped row against the full row width, but a checkable row
+    draws its text beside the check box, so a name that only just fits is measured
+    as one line and drawn cut off with "...". This measures against the narrower
+    width the text really gets.
+    """
+    # the check box, the gap after it, the item padding and border of the stylesheet
+    RESERVED = 64
+
+    def sizeHint(self, option, index):
+        base = super().sizeHint(option, index)
+        view = self.parent()
+        if view is None:
+            return base
+        opt = QStyleOptionViewItem(option)
+        self.initStyleOption(opt, index)
+        width = max(view.viewport().width() - self.RESERVED, 80)
+        fm = opt.fontMetrics
+        lines = 0
+        parts = (opt.text or "").splitlines() or [""]
+        for part in parts:
+            r = fm.boundingRect(0, 0, width, 100000, int(Qt.TextWordWrap), part)
+            lines += max(1, round(r.height() / max(fm.lineSpacing(), 1)))
+        shown = len(parts)      # what the base size allowed for
+        extra = (lines - shown) * fm.lineSpacing()
+        return QSize(base.width(), base.height() + max(0, extra))

@@ -18,6 +18,7 @@ from PySide6.QtWidgets import QVBoxLayout, QWidget
 from ..dataio.vector import VECTOR_SUFFIXES, save_vector
 from ..thermo.units import human_time
 from . import theme
+from .graph_editor import apply_overrides, legend_entries, new_overrides
 
 # The toolbar's own buttons are checkable (pan, zoom) and the cut tool is too. The
 # checked one is filled and outlined, so the mode in use is always visible.
@@ -77,6 +78,34 @@ def _tool_icon(kind: str, size: QSize, ratio: float) -> QIcon:
     return QIcon(pm)
 
 
+# Plainer tooltips than matplotlib's for the buttons that stay.
+TOOL_TIPS = {
+    "home": "Reset the view",
+    "back": "Previous view",
+    "forward": "Next view",
+    "pan": "Pan: drag to move the graph, right-drag to stretch an axis",
+    "zoom": "Zoom: drag a rectangle around the part to enlarge",
+    "edit_parameters": "Edit the graph: axes, curves, legend and text",
+    "save_figure": "Save the figure as PNG, SVG, PDF or another format",
+}
+
+
+def _toolitems(editor: bool) -> list:
+    """Matplotlib's buttons, without its subplot sliders (the layout is automatic)
+    and with Diffusor's graph editor in place of its figure options, or none."""
+    items = []
+    for text, tip, image, callback in NavigationToolbar2QT.toolitems:
+        if callback == "configure_subplots" or (callback == "edit_parameters" and not editor):
+            continue
+        if text is None:
+            if items and items[-1][0] is not None:
+                items.append((None, None, None, None))
+            continue
+        name = "Edit graph" if callback == "edit_parameters" else text
+        items.append((name, TOOL_TIPS.get(callback, tip), image, callback))
+    return items
+
+
 class SaveToolbar(NavigationToolbar2QT):
     """Matplotlib's toolbar, whose save dialog opens in the data's own folder.
 
@@ -84,6 +113,7 @@ class SaveToolbar(NavigationToolbar2QT):
     with wherever the last figure went, and proposes a name taken from the
     window title. Set ``start_dir`` and ``default_name`` when data are loaded.
     """
+    toolitems = _toolitems(editor=False)
 
     def __init__(self, canvas, parent=None):
         super().__init__(canvas, parent)
@@ -115,8 +145,28 @@ class SaveToolbar(NavigationToolbar2QT):
             fig.__dict__.pop("savefig", None)
 
 
-CUT_HINT = ("Cut points: drag a box around the points to leave out of the fit, "
-            "Shift+drag to bring them back, click one point to toggle it.")
+class GraphToolbar(SaveToolbar):
+    """The toolbar of the results plot, with the graph editor button."""
+    toolitems = _toolitems(editor=True)
+
+    def __init__(self, canvas, parent=None, on_edit=None):
+        self._on_edit = on_edit
+        super().__init__(canvas, parent)
+
+    def edit_parameters(self):
+        if self._on_edit is not None:
+            self._on_edit()
+
+
+# the one-line form goes in the toolbar's message area, the long form in the tooltip
+CUT_HINT = ("Cut points: drag a box to leave points out of the fit, Shift+drag to bring "
+            "them back, click a point to toggle it.")
+CUT_TIP = ("<b>Cut points</b>{count}<br>"
+           "Drag a box around points to leave them out of the fit.<br>"
+           "Shift+drag a box to bring points back.<br>"
+           "Click a single point to toggle it.<br>"
+           "Cut points stay in the file and show as crosses.")
+DISTANCE_LABEL = "distance (µm)"
 CLICK_PIXELS = 5            # a press and release closer than this is a click, not a box
 PICK_PIXELS = 12            # how near a click must land to a point to pick it
 
@@ -124,8 +174,11 @@ PICK_PIXELS = 12            # how near a click must land to a point to pick it
 def _legend(ax, fontsize: float = 9):
     """A legend on a white, outlined box.
 
-    Without a frame the legend's sample dot looks like one more measured point."""
-    leg = ax.legend(fontsize=fontsize, loc="best", frameon=True, fancybox=False,
+    Without a frame the legend's sample dot looks like one more measured point. The
+    measured points come first, then the fit, then the rest."""
+    entries = legend_entries(ax)
+    leg = ax.legend([h for h, _ in entries], [t for _, t in entries],
+                    fontsize=fontsize, loc="best", frameon=True, fancybox=False,
                     framealpha=0.95, facecolor=theme.SURFACE, edgecolor=theme.BORDER_STRONG,
                     borderpad=0.6)
     leg.get_frame().set_linewidth(0.9)
@@ -167,17 +220,23 @@ def keep_labels_in_view(canvas) -> None:
 class ProfilePlot(QWidget):
     # the new exclusion mask (one flag per point) after points were cut or restored
     points_cut = Signal(object)
+    # a new drawing replaced the curves (a fit, a comparison, another view)
+    redrawn = Signal()
 
     def __init__(self, parent=None):
         super().__init__(parent)
         self._pts = None           # (x, C, excluded) of every loaded point, for cutting
         self._drag = None          # (pixel x, pixel y, data x, data y) of a box being drawn
         self._band = None
+        # what the user changed in the graph editor, laid over every new drawing
+        self.overrides = new_overrides()
+        self._replay = None        # draws the current view again from scratch
+        self._editor = None
         self.figure = Figure(figsize=(7, 5.5), layout="constrained",
                              facecolor=theme.SURFACE)
         self.canvas = FigureCanvasQTAgg(self.figure)
         keep_labels_in_view(self.canvas)
-        self.toolbar = SaveToolbar(self.canvas, self)
+        self.toolbar = GraphToolbar(self.canvas, self, on_edit=self.open_editor)
         self.setStyleSheet(f"background:{theme.SURFACE};")
         lay = QVBoxLayout(self)
         lay.setContentsMargins(0, 0, 0, 0)
@@ -187,7 +246,7 @@ class ProfilePlot(QWidget):
         icon_size = self.toolbar.iconSize()
         self.act_cut = QAction(_tool_icon("cut", icon_size, ratio), "Cut points", self)
         self.act_cut.setCheckable(True)
-        self.act_cut.setToolTip(CUT_HINT)
+        self.act_cut.setToolTip(CUT_TIP.format(count=""))
         self.act_cut.toggled.connect(self._cut_toggled)
         self.act_restore = QAction(_tool_icon("restore", icon_size, ratio), "Restore all", self)
         self.act_restore.setToolTip("Put every cut point back into the fit")
@@ -219,12 +278,52 @@ class ProfilePlot(QWidget):
         gs = self.figure.add_gridspec(4, 1)
         self.ax = self.figure.add_subplot(gs[0:3, 0])
         self.ax_res = self.figure.add_subplot(gs[3, 0], sharex=self.ax)
+        # the graph editor and its saved changes find the panels by these names
+        self.ax.set_gid("profile")
+        self.ax_res.set_gid("residual")
+        # the distance scale is read off the residual panel under it
+        self.ax.tick_params(labelbottom=False)
         self.ax.set_ylabel("composition")
         self.ax_res.set_ylabel("residual")
-        self.ax_res.set_xlabel("distance (um)")
+        self.ax_res.set_xlabel(DISTANCE_LABEL)
         theme.apply_plot_style(self.figure, [self.ax, self.ax_res])
-        self.ax_res.axhline(0.0, color=theme.BORDER_STRONG, lw=0.8)
+        self.ax_res.axhline(0.0, color=theme.BORDER_STRONG, lw=0.8, gid="Zero line")
         self.canvas.draw_idle()
+
+    def _finish(self, replay=None):
+        """End a new drawing: the user's changes over it, then draw."""
+        self._replay = replay
+        apply_overrides(self.figure, self.overrides)
+        self.canvas.draw_idle()
+        self.redrawn.emit()
+
+    def restyle(self):
+        """Apply the graph editor's changes to the drawing on screen."""
+        apply_overrides(self.figure, self.overrides)
+        self.canvas.draw_idle()
+
+    def reset_overrides(self):
+        """Forget every change made in the graph editor and draw the view afresh."""
+        self.overrides = new_overrides()
+        if self._replay is not None:
+            self._replay()
+        else:
+            self.canvas.draw_idle()
+
+    def forget_limits(self):
+        """Axis ranges typed for one profile mean nothing for the next."""
+        for a in self.overrides["axes"].values():
+            a.pop("xlim", None)
+            a.pop("ylim", None)
+
+    def open_editor(self):
+        from .graph_editor import GraphEditor
+        if self._editor is None:
+            self._editor = GraphEditor(self, self.window())
+        self._editor.rebuild()
+        self._editor.show()
+        self._editor.raise_()
+        self._editor.activateWindow()
 
     # ------------------------------------------------------------------
     def clear(self):
@@ -236,14 +335,17 @@ class ProfilePlot(QWidget):
         self.ax.set_ylabel(y_label)
         _legend(self.ax, 9)
         theme.apply_plot_style(self.figure, [self.ax, self.ax_res])
-        self.canvas.draw_idle()
+        self._finish(lambda: self.show_data(x, C, sigma, label, y_label))
 
     def _plot_data(self, x, C, sigma=None, label="measured"):
         if sigma is not None:
-            self.ax.errorbar(x, C, yerr=sigma, fmt="o", ms=4, color=theme.PLOT_DATA,
-                             ecolor=theme.PLOT_DATA_ERR, elinewidth=1, capsize=2, label=label, zorder=3)
+            c = self.ax.errorbar(x, C, yerr=sigma, fmt="o", ms=4, color=theme.PLOT_DATA,
+                                 ecolor=theme.PLOT_DATA_ERR, elinewidth=1, capsize=2,
+                                 label=label, zorder=3)
+            c.lines[0].set_gid("Measured points")
         else:
-            self.ax.plot(x, C, "o", ms=4.5, color=theme.PLOT_DATA, label=label, zorder=3)
+            self.ax.plot(x, C, "o", ms=4.5, color=theme.PLOT_DATA, label=label, zorder=3,
+                         gid="Measured points")
         self._plot_cut()
 
     def _plot_cut(self):
@@ -252,7 +354,7 @@ class ProfilePlot(QWidget):
             return
         x, C, cut = self._pts
         self.ax.plot(x[cut], C[cut], "x", ms=6.5, mew=1.5, color=theme.TEXT_FAINT,
-                     label="cut from the fit", zorder=2)
+                     label="cut from the fit", zorder=2, gid="Cut points")
 
     # ------------------------------------------------------------------ cutting points
     def set_points(self, x, C, excluded=None):
@@ -262,7 +364,8 @@ class ProfilePlot(QWidget):
         self._pts = (x, np.asarray(C, dtype=float), cut)
         n = int(cut.sum())
         self.act_restore.setEnabled(n > 0)
-        self.act_cut.setToolTip(f"{n} point{'s' if n != 1 else ''} cut. {CUT_HINT}" if n else CUT_HINT)
+        self.act_cut.setToolTip(CUT_TIP.format(
+            count=f" ({n} point{'s' if n != 1 else ''} cut now)" if n else ""))
 
     def _nav_mode(self) -> str:
         return str(getattr(self.toolbar.mode, "value", self.toolbar.mode))
@@ -359,7 +462,7 @@ class ProfilePlot(QWidget):
                 xf = np.linspace(x.min(), x.max(), 600)
                 C0 = fit_result.model.initial.evaluate(xf)
                 self.ax.plot(xf, C0, "--", color=theme.PLOT_INITIAL, lw=1.3,
-                             label="initial condition", zorder=2)
+                             label="initial profile", zorder=2, gid="Initial profile")
             except Exception:
                 pass
 
@@ -372,7 +475,8 @@ class ProfilePlot(QWidget):
         if mc_result is not None:
             label += (f"\n68% of t: {human_time(mc_result.p16)} to "
                       f"{human_time(mc_result.p84)}")
-        self.ax.plot(xf, Cf, "-", color=theme.PLOT_MODEL, lw=2.2, label=label, zorder=4)
+        self.ax.plot(xf, Cf, "-", color=theme.PLOT_MODEL, lw=2.2, label=label, zorder=4,
+                     gid="Best fit")
 
         self.ax.set_ylabel(y_label)
         _legend(self.ax, 9)
@@ -381,15 +485,16 @@ class ProfilePlot(QWidget):
 
         res = C - fit_result.C_model
         if sig is not None:
-            self.ax_res.errorbar(x, res, yerr=sig, fmt="o", ms=3.2, color=theme.PLOT_DATA,
-                                 ecolor=theme.PLOT_DATA_ERR, elinewidth=0.8, capsize=1.5)
+            c = self.ax_res.errorbar(x, res, yerr=sig, fmt="o", ms=3.2, color=theme.PLOT_DATA,
+                                     ecolor=theme.PLOT_DATA_ERR, elinewidth=0.8, capsize=1.5)
+            c.lines[0].set_gid("Residuals")
         else:
-            self.ax_res.plot(x, res, "o", ms=3.2, color=theme.PLOT_DATA)
-        self.ax_res.axhline(0.0, color=theme.PLOT_MODEL, lw=1)
-        self.ax_res.set_xlabel("distance (um)")
+            self.ax_res.plot(x, res, "o", ms=3.2, color=theme.PLOT_DATA, gid="Residuals")
+        self.ax_res.axhline(0.0, color=theme.PLOT_MODEL, lw=1, gid="Zero line")
+        self.ax_res.set_xlabel(DISTANCE_LABEL)
         self.ax_res.set_ylabel("residual")
         theme.apply_plot_style(self.figure, [self.ax, self.ax_res])
-        self.canvas.draw_idle()
+        self._finish(lambda: self.show_fit(fit_result, mc_result, y_label, initial, title))
 
     def _plot_draw_envelope(self, mc_result):
         xp = mc_result.x_profiles
@@ -397,21 +502,22 @@ class ProfilePlot(QWidget):
             return
         order = np.argsort(np.asarray(xp, dtype=float))
         xs = np.asarray(xp, dtype=float)[order]
-        for q_lo, q_hi, alpha, label in ((16, 84, 0.30, "68% of the re-fitted draws"),
-                                         (2.5, 97.5, 0.15, "95% of the re-fitted draws")):
+        for q_lo, q_hi, alpha, label, gid in (
+                (16, 84, 0.30, "68% of the re-fitted draws", "68% band"),
+                (2.5, 97.5, 0.15, "95% of the re-fitted draws", "95% band")):
             env = mc_result.envelope(q_lo, q_hi)
             if env is None:
                 return
             lo, hi = env[0][order], env[1][order]
             self.ax.fill_between(xs, lo, hi, color=theme.PLOT_BAND, alpha=alpha, lw=0,
-                                 label=label, zorder=1)
+                                 label=label, zorder=1, gid=gid)
 
     def show_comparison(self, results: Dict[str, object], y_label="composition"):
         """Overlay the fits from several diffusion coefficients."""
         self._make_axes()
         first = next((r for r in results.values() if not isinstance(r, Exception)), None)
         if first is None:
-            self.canvas.draw_idle()
+            self._finish()
             return
         x, C, sig = first.x_data, first.C_data, first.sigma
         self._plot_data(x, C, sig)
@@ -425,27 +531,29 @@ class ProfilePlot(QWidget):
             except Exception:
                 continue
             self.ax.plot(xf, Cf, "-", lw=1.8, color=colors[i % len(colors)],
-                         label=f"{key}: {human_time(r.t_seconds)}")
-            self.ax_res.plot(x, C - r.C_model, "o", ms=3, color=colors[i % len(colors)])
+                         label=f"{key}: {human_time(r.t_seconds)}", gid=str(key))
+            self.ax_res.plot(x, C - r.C_model, "o", ms=3, color=colors[i % len(colors)],
+                             gid=f"Residuals, {key}")
         self.ax.set_ylabel(y_label)
         _legend(self.ax, 8)
-        self.ax_res.axhline(0.0, color=theme.BORDER_STRONG, lw=1)
-        self.ax_res.set_xlabel("distance (um)")
+        self.ax_res.set_xlabel(DISTANCE_LABEL)
         self.ax_res.set_ylabel("residual")
         theme.apply_plot_style(self.figure, [self.ax, self.ax_res])
-        self.canvas.draw_idle()
+        self._finish(lambda: self.show_comparison(results, y_label))
 
     def show_histogram(self, mc_result):
         """Histogram of the Monte Carlo times on a log axis."""
         self._make_axes()
         self.figure.clear()
         ax = self.figure.add_subplot(111)
+        ax.set_gid("histogram")
         t = mc_result.times
         ax.hist(np.log10(t), bins=40, color=theme.PLOT_DATA, alpha=0.85)
         for q, c, lbl in ((mc_result.median, theme.PLOT_MODEL, "median"),
-                          (mc_result.p16, theme.ACCENT, "16th / 84th"),
+                          (mc_result.p16, theme.ACCENT, "16th and 84th percentiles"),
                           (mc_result.p84, theme.ACCENT, None)):
-            ax.axvline(np.log10(q), color=c, lw=1.6, ls="--", label=lbl)
+            ax.axvline(np.log10(q), color=c, lw=1.6, ls="--", label=lbl,
+                       gid="Median" if lbl == "median" else "16th and 84th percentiles")
         ax.set_xlabel("log10 t (s)")
         ax.set_ylabel("draws")
         ax.set_title(f"Monte Carlo, {mc_result.n_draws} draws "
@@ -455,7 +563,7 @@ class ProfilePlot(QWidget):
         theme.apply_plot_style(self.figure, [ax])
         self.ax = ax
         self.ax_res = None
-        self.canvas.draw_idle()
+        self._finish(lambda: self.show_histogram(mc_result))
 
     # ------------------------------------------------------------------ live Monte Carlo
     def start_monte_carlo(self, x, C, sigma, y_label: str, n_total: int, sampled,
@@ -483,16 +591,24 @@ class ProfilePlot(QWidget):
         }
         self._mc["order"] = np.argsort(self._mc["x"])
         ax = self.ax
+        for a, gid in ((ax, "profile"), (self._mc["ax_t"], "mc_time"), (self._mc["ax_T"], "mc_T"),
+                       (self._mc["ax_f"], "mc_f"), (self._mc["ax_D"], "mc_D")):
+            a.set_gid(gid)
+        self._replay = None
         self._plot_data(x, C, sigma, label="measured")
         ax.set_ylabel(y_label)
-        ax.set_xlabel("distance (um)")
-        ax.plot([], [], "-", color=theme.PLOT_MODEL, alpha=0.5, lw=1, label="fit to each draw")
+        ax.set_xlabel(DISTANCE_LABEL)
+        # empty stand-ins carry the legend entries; the draws share their names, so the
+        # graph editor restyles a stand-in and its draws together
+        ax.plot([], [], "-", color=theme.PLOT_MODEL, alpha=0.5, lw=1, label="fit to each draw",
+                gid="Fits to the draws")
         if "measurement_noise" in self._mc["sampled"]:
             ax.plot([], [], "o", color=theme.PLOT_DATA_ERR, alpha=0.6, ms=3,
-                    label="data as drawn with its noise")
+                    label="data as drawn with its noise", gid="Data as drawn")
         _legend(ax, 8.5)
         self._redraw_mc_panels()
         self.canvas.draw_idle()
+        self.redrawn.emit()
 
     def add_monte_carlo_draws(self, draws, max_curves: int = 250):
         """Add a batch of draws (dicts from ``montecarlo.run(on_draw=...)``)."""
@@ -516,10 +632,12 @@ class ProfilePlot(QWidget):
         if segments:
             # one collection per batch draws far faster than a line per draw
             self.ax.add_collection(LineCollection(segments, colors=theme.PLOT_MODEL,
-                                                  alpha=0.07, linewidths=1.0, zorder=1))
+                                                  alpha=0.07, linewidths=1.0, zorder=1,
+                                                  gid="Fits to the draws"))
         if xs:
             self.ax.plot(np.concatenate(xs), np.concatenate(ys), "o", ms=2.2,
-                         color=theme.PLOT_DATA_ERR, alpha=0.10, zorder=2, mew=0)
+                         color=theme.PLOT_DATA_ERR, alpha=0.10, zorder=2, mew=0,
+                         gid="Data as drawn")
         self._redraw_mc_panels()
         self.canvas.draw_idle()
 
@@ -530,11 +648,12 @@ class ProfilePlot(QWidget):
         if best_curve is not None:
             xf, Cf = best_curve
             self.ax.plot(xf, Cf, "-", color=theme.PLOT_MODEL, lw=2.2, zorder=4,
-                         label="best fit: " + human_time(res.t_best))
+                         label="best fit: " + human_time(res.t_best), gid="Best fit")
             _legend(self.ax, 8.5)
         mc["result"] = res
         self._redraw_mc_panels()
         self.canvas.draw_idle()
+        self.redrawn.emit()
 
     def _panel_note(self, ax, text):
         ax.cla()
@@ -613,6 +732,7 @@ class ProfilePlot(QWidget):
                           fontsize=10.5, color=theme.TEXT, loc="left")
         theme.apply_plot_style(self.figure, [self.ax, mc["ax_t"]]
                                + [a for a in (mc["ax_T"], mc["ax_f"], mc["ax_D"]) if a.get_xticks().size])
+        apply_overrides(self.figure, self.overrides)
 
 
 class DataPreview(QWidget):
@@ -647,7 +767,7 @@ class DataPreview(QWidget):
             ax.plot(x, C, "o", ms=3.5, color=theme.PLOT_DATA)
         if cut is not None and len(cut[0]):
             ax.plot(cut[0], cut[1], "x", ms=6, mew=1.4, color=theme.TEXT_FAINT)
-        ax.set_xlabel("distance (um)")
+        ax.set_xlabel(DISTANCE_LABEL)
         ax.set_ylabel(y_label)
         if title:
             ax.set_title(title, fontsize=10, color=theme.TEXT, loc="left")

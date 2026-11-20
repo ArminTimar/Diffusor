@@ -24,7 +24,7 @@ from pathlib import Path
 from typing import List, Optional
 
 import numpy as np
-from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg, NavigationToolbar2QT
+from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
 from matplotlib.patches import Polygon
 from PySide6.QtCore import Qt, QTimer
@@ -124,7 +124,7 @@ class LegendPickerDialog(QDialog):
                          "toolbar to zoom on a small legend.", "Sub"))
         self.fig = Figure(figsize=(7, 4), layout="constrained", facecolor=theme.SURFACE)
         self.canvas = FigureCanvasQTAgg(self.fig)
-        self.toolbar = NavigationToolbar2QT(self.canvas, self)
+        self.toolbar = SaveToolbar(self.canvas, self)
         v.addWidget(self.toolbar)
         v.addWidget(self.canvas, 1)
         self.ax = self.fig.add_subplot(111)
@@ -889,7 +889,7 @@ class ImageExtractorDialog(QDialog):
         ax.plot(x, clean["Mean"], "-", color=theme.ACCENT, lw=1.6, label="cleaned mean")
         b = ex.settings.length_before_px * (ex.settings.pixel_size_um or 1.0)
         ax.axvline(b, color=theme.BORDER_STRONG, ls="--", lw=1)
-        ax.set_xlabel("distance (um)" if um is not None else "distance (px)")
+        ax.set_xlabel("distance (µm)" if um is not None else "distance (px)")
         ax.set_ylabel(ex.value_label)
         ax.legend(fontsize=8, frameon=False, loc="best")
         theme.apply_plot_style(self.pfig, [ax])

@@ -53,7 +53,7 @@ from .export_dialog import ExportDialog
 from .plot_widget import DataPreview, ProfilePlot
 from .widgets import (EquationView, FitScrollArea, WrapLabel, callout, card, collapsible,
                       divider, field, ghost_button, install_no_wheel, note, page_columns, pair,
-                      primary_button, row, scrollable)
+                      primary_button, row, scrollable, WrappingItemDelegate)
 from .workers import CompareWorker, FitWorker, MonteCarloWorker, UpdateWorker, start
 
 # The coefficient comes straight after the mineral because it decides what the later
@@ -710,6 +710,7 @@ class MainWindow(QMainWindow):
         self.cmb_mineral.currentIndexChanged.connect(self._on_mineral_changed)
         self.cmb_species = QComboBox()
         self.cmb_species.currentIndexChanged.connect(self._refresh_coefficients)
+        self.cmb_species.currentIndexChanged.connect(self._update_species_note)
         body.addWidget(pair(field("Mineral", self.cmb_mineral),
                             field("Diffusing species", self.cmb_species)))
         self.lbl_mineral_note = note("", "Hint")
@@ -779,7 +780,8 @@ class MainWindow(QMainWindow):
         x, xbody = card("Composition")
         self.sp_xcomp = _spin(0, 1, 0.15, 4, 0.01)
         self.sp_xcomp.valueChanged.connect(self._on_xcomp_changed)
-        xbody.addWidget(field("Representative value", self.sp_xcomp))
+        self._xcomp_field = field("Representative host composition", self.sp_xcomp)
+        xbody.addWidget(self._xcomp_field)
         self.chk_comp_dep = QCheckBox("D follows the composition along the profile")
         self.chk_comp_dep.setChecked(True)
         self.chk_comp_dep.toggled.connect(self._update_solver_note)
@@ -802,7 +804,8 @@ class MainWindow(QMainWindow):
     def _page_model(self) -> QWidget:
         g, gbody = card("Geometry")
         self.cmb_geom = QComboBox()
-        self.cmb_geom.addItems(["plane", "cylinder", "sphere"])
+        for key in ("plane", "cylinder", "sphere"):
+            self.cmb_geom.addItem(key.capitalize(), key)
         self.cmb_geom.currentIndexChanged.connect(self._update_geometry_note)
         gbody.addWidget(self.cmb_geom)
         self.lbl_geom = note("", "Hint")
@@ -863,7 +866,7 @@ class MainWindow(QMainWindow):
         self.cmb_solver.currentIndexChanged.connect(self._update_solver_note)
         self.sp_nodes = QSpinBox(); self.sp_nodes.setRange(51, 4001); self.sp_nodes.setValue(301)
         self.sp_nodes.setLocale(number_locale())
-        nbody.addWidget(pair(field("Solver", self.cmb_solver), field("Grid nodes", self.sp_nodes)))
+        nbody.addWidget(pair(field("Method", self.cmb_solver), field("Grid nodes", self.sp_nodes)))
         box = callout("Info")
         self.lbl_solver = box.label
         nbody.addWidget(box)
@@ -877,6 +880,13 @@ class MainWindow(QMainWindow):
         body.addWidget(note("Tick one to fit. Tick several to compare them.", "Hint"))
         self.lst_coef = QListWidget()
         self.lst_coef.setMouseTracking(True)
+        # long names wrap onto a second line instead of scrolling the list sideways
+        self.lst_coef.setWordWrap(True)
+        self.lst_coef.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.lst_coef.setTextElideMode(Qt.ElideNone)
+        self.lst_coef.setResizeMode(QListWidget.Adjust)
+        self.lst_coef.setUniformItemSizes(False)
+        self.lst_coef.setItemDelegate(WrappingItemDelegate(self.lst_coef))
         self.lst_coef.currentItemChanged.connect(self._coefficient_selected)
         self.lst_coef.itemChanged.connect(lambda _it: self._on_coefficients_ticked())
         body.addWidget(self.lst_coef, 1)
@@ -926,7 +936,7 @@ class MainWindow(QMainWindow):
                              f"Draws are fitted in parallel on this many of the {cores} cores. "
                              "The seed gives the same answer on any number. Short runs use one."))
 
-        s, sbody = card("Sample")
+        s, sbody = card("Sources of uncertainty to sample")
         self.chk_mc_T = QCheckBox("Temperature"); self.chk_mc_T.setChecked(True)
         self.chk_mc_f = QCheckBox("Oxygen fugacity"); self.chk_mc_f.setChecked(True)
         self.chk_mc_P = QCheckBox("Pressure"); self.chk_mc_P.setChecked(True)
@@ -957,7 +967,8 @@ class MainWindow(QMainWindow):
         if hasattr(self, "lst_coef"):
             keys = self._checked_keys()
             coef = get_coefficient(keys[0]) if keys else None
-        name = coef.label.split(",", 1)[1].strip() if coef and "," in coef.label else "this law"
+        name = (richtext.label(coef.label.split(",", 1)[1].strip())
+                if coef and "," in coef.label else "this law")
         texts = {
             "covariance": ("Draws D0 and Q together so a high D0 comes with a high Q. Only "
                            "Grocolas et al. (2025) Sr and Ba in plagioclase provide this. The "
@@ -1073,9 +1084,11 @@ class MainWindow(QMainWindow):
 
     # ---------------------------------------------------------------- summary
     def _summary_line(self, key: str, value: str):
-        k = QLabel(key); k.setObjectName("SummaryKey")
+        if key:
+            # an empty key would still take a line's height above the value
+            k = QLabel(key); k.setObjectName("SummaryKey")
+            self.summary_layout.addWidget(k)
         val = WrapLabel(value); val.setObjectName("SummaryVal")
-        self.summary_layout.addWidget(k)
         self.summary_layout.addWidget(val)
         self.summary_layout.addSpacing(6)
 
@@ -1122,8 +1135,8 @@ class MainWindow(QMainWindow):
                         f"{human_time(self.mc_result.p2_5)} to "
                         f"{human_time(self.mc_result.p97_5)}</span>")
             txt += (f"<br><span style='color:{theme.TEXT_FAINT};font-size:11px'>"
-                    f"reduced chi2 {self.fit_result.stats.reduced_chi2:.2f} &middot; "
-                    f"R2 {self.fit_result.stats.r_squared:.4f}</span>")
+                    f"reduced χ² {self.fit_result.stats.reduced_chi2:.2f} &middot; "
+                    f"R² {self.fit_result.stats.r_squared:.4f}</span>")
             if self._stale:
                 txt += (f"<br><span style='color:{theme.WARN};font-size:11.5px'>"
                         "A setting changed after this was computed. Run Fit again.</span>")
@@ -1163,13 +1176,13 @@ class MainWindow(QMainWindow):
                 flag = "  [unverified]"
             if c.superseded_by or c.superseded_note:
                 flag += "  [superseded]"
-            self._summary_line("", c.label + flag)
+            self._summary_line("", richtext.label(c.label) + flag)
 
         self._summary_head("Conditions", CONDITIONS)
-        self._summary_line("temperature", f"{self.sp_T.value():.0f} °C ± {self.sp_T_sig.value():.0f}")
+        self._summary_line("temperature", f"{self.sp_T.value():.0f} ± {self.sp_T_sig.value():.0f} °C")
         if self.chk_cooling.isChecked():
             self._summary_line("cooling", f"linear to {self.sp_Tend.value():.0f} °C")
-        self._summary_line("pressure", f"{self.sp_P.value():.0f} MPa ± {self.sp_P_sig.value():.0f}")
+        self._summary_line("pressure", f"{self.sp_P.value():.0f} ± {self.sp_P_sig.value():.0f} MPa")
         if self.cmb_fo2_mode.currentIndex() == 0:
             self._summary_line("oxygen fugacity",
                                f"{self.cmb_buffer.currentText()} {self.sp_dbuf.value():+.2f} "
@@ -1185,7 +1198,7 @@ class MainWindow(QMainWindow):
                                   and self._model(keys[0]).comp_key else ""))
 
         self._summary_head("Model", MODEL)
-        self._summary_line("geometry", self.cmb_geom.currentText())
+        self._summary_line("geometry", self.cmb_geom.currentData())
         if self._table_ic():
             self._summary_line("initial profile", "published tabulated profile, linearly interpolated")
         elif self._equilibrium_ic():
@@ -1226,6 +1239,10 @@ class MainWindow(QMainWindow):
             self._update_solver_note()
         if index == UNCERTAINTY:
             self._on_dmode_changed()
+        if index == COEFFICIENT:
+            # the list was filled while hidden, so its rows were measured for another width;
+            # laid out again once shown, long names wrap instead of ending in "..."
+            QTimer.singleShot(0, self.lst_coef, self.lst_coef.doItemsLayout)
         if index == RESULTS:
             self.btn_next.setVisible(False)
             self.lbl_footer.setText("Click edit in the summary to change a setting.")
@@ -1233,7 +1250,7 @@ class MainWindow(QMainWindow):
         else:
             self.btn_next.setVisible(True)
             self.btn_next.setText("Review and fit" if index == RESULTS - 1 else "Continue")
-            self.lbl_footer.setText(f"Step {index + 1} of {RESULTS}")
+            self.lbl_footer.setText(f"Step {index + 1} of {len(STEPS)}")
         self.btn_next.setEnabled(self.profile is not None or index == DATA)
         if self.isVisible():
             # the window as context drops the call if the window is deleted first
@@ -1517,6 +1534,7 @@ class MainWindow(QMainWindow):
             self._guess_initial()
             self.preview.show_data(p.x, p.C, p.sigma, y_label=self._y_label())
             self.plot.set_points(p.x, p.C, None)
+            self.plot.forget_limits()       # axis ranges typed for the last profile
             self.plot.show_data(p.x, p.C, p.sigma, y_label=self._y_label())
             self.fit_result = self.mc_result = self.compare_results = None
             self._mc_draws = []
@@ -1559,7 +1577,7 @@ class MainWindow(QMainWindow):
                 widget.setValue(value)
         self.chk_cooling.setChecked(False)
         self.sp_nodes.setValue(s.get("n_nodes", 301))
-        self.cmb_geom.setCurrentText(s.get("geometry", "plane"))
+        self.cmb_geom.setCurrentIndex(max(0, self.cmb_geom.findData(s.get("geometry", "plane"))))
         for cmb, key in ((self.cmb_bcl, "bc_left"), (self.cmb_bcr, "bc_right")):
             i = cmb.findData(s.get(key, "far"))
             cmb.setCurrentIndex(i if i >= 0 else 0)
@@ -1612,7 +1630,7 @@ class MainWindow(QMainWindow):
         self._show_prefill(MODEL, head + f"{s.get('geometry', 'plane')} geometry, "
                            f"{self.cmb_ic.currentText().lower()}, {ends}{fitted}.")
         if want:
-            self._show_prefill(COEFFICIENT, head + get_coefficient(want).label + ".")
+            self._show_prefill(COEFFICIENT, head + richtext.label(get_coefficient(want).label) + ".")
 
     def _show_prefill(self, step: int, text: str):
         lab = self._prefill.get(step)
@@ -1636,11 +1654,21 @@ class MainWindow(QMainWindow):
         self.lbl_axis.setText("Treated as isotropic, so the direction does not matter."
                               if mineral.isotropic else "")
         self.lbl_axis.setVisible(mineral.isotropic)
-        cv = mineral.composition_variable
-        self.lbl_mineral_note.setText(f"Modelled as {cv.label} = {cv.definition}." if cv else "")
+        self._update_species_note()
         self._refresh_coefficients()
         self._refresh_ic_options()
         self._update_fo2_label()
+
+    def _update_species_note(self, *_):
+        """Say what the profile of the chosen species is, under the two boxes."""
+        mineral = get_mineral(self.cmb_mineral.currentData())
+        key = self.cmb_species.currentText()
+        if key not in mineral.species:
+            self.lbl_mineral_note.setText("")
+            return
+        self.lbl_mineral_note.setText(richtext.species_note(mineral, mineral.species[key]))
+        self.lbl_mineral_note.setToolTip(mineral.composition_variable.definition
+                                         if mineral.composition_variable.key != "none" else "")
 
     def _on_axis_changed(self):
         self._angle_row.setVisible(self.cmb_axis.currentIndex() == 4)
@@ -1658,9 +1686,10 @@ class MainWindow(QMainWindow):
                 tags.append("unverified")
             if c.superseded_by or c.superseded_note:
                 tags.append("superseded")
-            label = c.label + (("\n" + "  ·  ".join(tags)) if tags else "")
+            label = richtext.label(c.label) + (("\n" + "  ·  ".join(tags)) if tags else "")
             it = QListWidgetItem(label)
             it.setData(Qt.UserRole, c.key)
+            it.setToolTip(richtext.label(c.label))
             it.setFlags(it.flags() | Qt.ItemIsUserCheckable)
             it.setCheckState(Qt.Checked if c.recommended else Qt.Unchecked)
             if c.superseded_by or c.superseded_note:
@@ -1686,7 +1715,7 @@ class MainWindow(QMainWindow):
         if item is None:
             return
         c = get_coefficient(item.data(Qt.UserRole))
-        self.lbl_coef_name.setText(c.label)
+        self.lbl_coef_name.setText(richtext.label(c.label))
         from ..coefficients.latex import coefficient_latex
         self.lbl_coef_eq.set_latex(coefficient_latex(c))
         self.lbl_coef_eq.setToolTip(c.equation_text)
@@ -1696,13 +1725,12 @@ class MainWindow(QMainWindow):
         elif c.superseded_note:
             parts.append("Superseded. See the details.")
         if not c.verified:
-            parts.append("Not checked against the original paper. See the details.")
-        if parts:
-            self.lbl_coef.setText(f"<span style='color:{theme.WARN}'>{' '.join(parts)}</span>")
-        else:
-            self.lbl_coef.setText("Checked against the original paper.")
-        self.lbl_coef_range.setText(f"Calibrated for {c.T_range}."
-                                    if c.T_range.lo is not None else "")
+            parts.append("Unverified: the numbers of this law have not been compared with "
+                         "the paper yet. See the details.")
+        self.lbl_coef.setText(f"<span style='color:{theme.WARN}'>{' '.join(parts)}</span>"
+                              if parts else "")
+        self.lbl_coef.setVisible(bool(parts))
+        self.lbl_coef_range.setText(richtext.calibration_line(c.T_range))
 
     def _update_composition_note(self):
         """Grey out the composition box for a law that does not use it."""
@@ -1718,10 +1746,20 @@ class MainWindow(QMainWindow):
         self.cmb_ol_coordinate.setVisible(ol_exchange)
         wt_percent = coef is not None and any(k in WT_PERCENT_VARIABLES for k in coef.requires)
         self.sp_xcomp.setMaximum(100.0 if wt_percent else 1.0)
+        names = ", ".join(coef.requires) if coef is not None and coef.requires else ""
+        self._xcomp_field.findChild(QLabel).setText(
+            f"Representative {names}" if names else "Representative host composition")
         if needed and coef:
-            self.lbl_comp.setText("Host composition required by this law: " + ", ".join(coef.requires) +
-                                  (". Give it in wt%; the profile itself is this variable." if wt_percent else
-                                   ". Use mole fractions. Trace-element concentration is a separate variable."))
+            if wt_percent:
+                text = f"The law depends on {names}, in wt%. The profile is this variable itself."
+            else:
+                text = f"The law depends on {names}, as a mole fraction."
+                mineral = MINERALS.get(coef.mineral)
+                sp = mineral.species.get(coef.species) if mineral is not None else None
+                if sp is not None and not sp.profile_is_host:
+                    text += (" This is the host crystal's composition, not the "
+                             f"{coef.species} content being modelled.")
+            self.lbl_comp.setText(text)
 
     def _update_unused_note(self):
         keys = self._checked_keys() if self.lst_coef.count() else []
@@ -1803,7 +1841,7 @@ class MainWindow(QMainWindow):
         self._update_solver_note()
 
     def _update_geometry_note(self):
-        self.lbl_geom.setText(Geometry(self.cmb_geom.currentText()).describe())
+        self.lbl_geom.setText(Geometry(self.cmb_geom.currentData()).describe())
         self._update_solver_note()
 
     # --- boundaries and solver ------------------------------------------------------
@@ -1906,10 +1944,11 @@ class MainWindow(QMainWindow):
             P = self.sp_P.value() * 1e6
             if self.cmb_fo2_mode.currentIndex() == 0:
                 lf = log_fo2_from_delta(self.cmb_buffer.currentText(), self.sp_dbuf.value(), T, P)
-                txt = f"log fO2 = {lf:.2f} bar ({lf + 5:.2f} Pa), buffer from Frost (1991)"
+                txt = (f"log fO2 = {lf:.2f} with fO2 in bar ({lf + 5:.2f} in Pa). "
+                       "Buffer from Frost (1991).")
             else:
                 lf = self.sp_dbuf.value()
-                txt = f"log fO2 = {lf:.2f} bar ({lf + 5:.2f} Pa)"
+                txt = f"log fO2 = {lf:.2f} with fO2 in bar ({lf + 5:.2f} in Pa)."
             self.lbl_fo2.setText(txt)
             self._update_condition_inputs()
         except Exception as exc:
@@ -2076,7 +2115,7 @@ class MainWindow(QMainWindow):
             "x_composition": self.sp_xcomp.value(), "x_composition_source": self._xcomp_source,
             "composition_dependent": self.chk_comp_dep.isChecked(),
             "olivine_coordinate": max(0, self.cmb_ol_coordinate.currentIndex()),
-            "geometry": self.cmb_geom.currentText(),
+            "geometry": self.cmb_geom.currentData(),
             "bc_left": self.cmb_bcl.currentData(), "bc_right": self.cmb_bcr.currentData(),
             "initial_condition": self.cmb_ic.currentData() or "step",
             "activity_set": self.cmb_activity.currentData() or DEFAULT_ACTIVITY_SET,
@@ -2145,7 +2184,7 @@ class MainWindow(QMainWindow):
         self.sp_dbuf_sig.setValue(s["sigma_fo2"])
         self.chk_comp_dep.setChecked(bool(s["composition_dependent"]))
         self.cmb_ol_coordinate.setCurrentIndex(int(s["olivine_coordinate"]))
-        self.cmb_geom.setCurrentText(s["geometry"])
+        self.cmb_geom.setCurrentIndex(max(0, self.cmb_geom.findData(s["geometry"])))
         for cmb, key in ((self.cmb_bcl, "bc_left"), (self.cmb_bcr, "bc_right")):
             i = cmb.findData(s[key])
             cmb.setCurrentIndex(i if i >= 0 else 0)
@@ -2470,7 +2509,7 @@ class MainWindow(QMainWindow):
         if it is None:
             return
         c = get_coefficient(it.data(Qt.UserRole))
-        richtext.show(self, c.label, richtext.coefficient_html(c), 860, 700)
+        richtext.show(self, richtext.label(c.label), richtext.coefficient_html(c), 860, 700)
 
     def show_multicomponent_study(self):
         from .multicomponent_study import MulticomponentStudyDialog

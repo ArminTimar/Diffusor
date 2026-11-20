@@ -22,14 +22,14 @@ from .base import CompositionVariable, Mineral, Species
 X_FE = CompositionVariable(
     "XFe", "X_Fe", "Fe/(Fe+Mg) molar, all Fe as FeO (Deer, Howie & Zussman 2013 use "
     "Fe* = Fe2+ + Fe3+, p. x. Binary X_Fe = Fe/(Fe+Mg) for orthopyroxene, p. 104)",
-    default_mode="A/(A+B)", citation="deer2013")
+    default_mode="A/(A+B)", citation="deer2013", short="Fe/(Fe+Mg), molar, all Fe as FeO")
 # Appendix 3 (DHZ 2013, p. 488) gives the olivine end-member percentages as
 # Fo = 100 Mg/(Mg + Fe*) with Fe* = Fe2+ + Fe3+ (Mn may be added to Fe*, giving a
 # slightly lower Fo); p. 7 defines forsterite as Fo100-50 by the 50 per cent rule.
 X_FO = CompositionVariable(
     "XFo", "X_Fo", "Mg/(Mg+Fe) molar (forsterite fraction, total Fe, DHZ 2013, "
     "Appendix 3, p. 488)",
-    default_mode="B/(A+B)", citation="deer2013")
+    default_mode="B/(A+B)", citation="deer2013", short="Mg/(Mg+Fe), molar")
 # Deer, Howie & Zussman (2013, Appendix 3, p. 489) give An = 100 Ca/(Ca+Na) for a
 # plagioclase feldspar (binary) and An = 100 Ca/(Ca+Na+K) for a ternary feldspar.  p. 292
 # says most plagioclases are ternary (An-Ab-Or), with Or usually at low concentration.
@@ -38,16 +38,16 @@ X_FO = CompositionVariable(
 X_AN = CompositionVariable(
     "XAn", "X_An", "Ca/(Ca+Na+K) molar (anorthite fraction, ternary-feldspar form "
     "equal to Ca/(Ca+Na) without K, DHZ 2013, Appendix 3, p. 489)",
-    default_mode="A/(A+B)", citation="deer2013")
+    default_mode="A/(A+B)", citation="deer2013", short="Ca/(Ca+Na+K), molar")
 # For ternary feldspar Appendix 3 (p. 489) gives Or = 100 K/(Ca+Na+K); for alkali
 # feldspar 100 K/(Na+K).
 X_OR = CompositionVariable(
     "XOr", "X_Or", "K/(K+Na+Ca) molar (orthoclase fraction, ternary-feldspar form "
     "equal to K/(Na+K) without Ca, DHZ 2013, Appendix 3, p. 489)",
-    default_mode="A", citation="deer2013")
+    default_mode="A", citation="deer2013", short="K/(K+Na+Ca), molar")
 X_TI = CompositionVariable(
     "xTi", "x_Ti", "Ti per cation site in (Ti_x Fe_(1-x))3 O4, x_Ti = X_Usp/3",
-    default_mode="A", citation="vanorman_crispin2010")
+    default_mode="A", citation="vanorman_crispin2010", short="Ti per cation site, X_Usp/3")
 
 # --- minerals --------------------------------------------------------------------
 OLIVINE = Mineral(
@@ -56,7 +56,7 @@ OLIVINE = Mineral(
     composition_variable=X_FO,
     species={
         "Fe-Mg": Species("Fe-Mg", "Fe-Mg interdiffusion", "interdiffusion",
-                         "modelled as forsterite content X_Fo or X_Fe"),
+                         "modelled as forsterite content X_Fo or X_Fe", profile_is_host=True),
         "Ni": Species("Ni", "Ni", "tracer"),
         "Mn": Species("Mn", "Mn", "tracer"),
         "Ca": Species("Ca", "Ca", "tracer"),
@@ -78,7 +78,7 @@ ORTHOPYROXENE = Mineral(
     axes=("a", "b", "c"),
     composition_variable=X_FE,
     species={
-        "Fe-Mg": Species("Fe-Mg", "Fe-Mg interdiffusion", "interdiffusion"),
+        "Fe-Mg": Species("Fe-Mg", "Fe-Mg interdiffusion", "interdiffusion", profile_is_host=True),
         "Mg": Species("Mg", "Mg self-diffusion", "tracer"),
         "Lu": Species("Lu", "Lu", "trace", "rare earth element, Dias et al. (2025)"),
         "Ce": Species("Ce", "Ce", "trace", "rare earth element, Dias et al. (2025)"),
@@ -95,7 +95,7 @@ CLINOPYROXENE = Mineral(
     axes=("a", "b", "c"),
     composition_variable=X_FE,
     species={
-        "Fe-Mg": Species("Fe-Mg", "Fe-Mg interdiffusion", "interdiffusion"),
+        "Fe-Mg": Species("Fe-Mg", "Fe-Mg interdiffusion", "interdiffusion", profile_is_host=True),
         "Ca-Mg": Species("Ca-Mg", "Ca-(Mg,Fe) interdiffusion", "interdiffusion"),
     },
     notes=("Formula of the diopside-hedenbergite series: DHZ 2013, p. 95. Monoclinic, space "
@@ -117,7 +117,8 @@ PLAGIOCLASE = Mineral(
         "Li": Species("Li", "Li", "trace"),
         "K": Species("K", "K", "trace", "depends on An content"),
         "NaSi-CaAl": Species("NaSi-CaAl", "coupled NaSi-CaAl interdiffusion", "interdiffusion",
-                             "the anorthite profile itself, normally treated as frozen"),
+                             "the anorthite profile itself, normally treated as frozen",
+                             profile_is_host=True),
     },
     isotropic=True,
     notes=("Formula (NaAlSi3O8-CaAl2Si2O8 with minor KAlSi3O8) and triclinic system: DHZ 2013, "
@@ -141,7 +142,7 @@ KFELDSPAR = Mineral(
         "Ba": Species("Ba", "Ba", "trace", "Cherniak (2002), sanidine Or61"),
         "Ti": Species("Ti", "Ti", "trace", "Cherniak & Watson (2020)"),
         "Na-K": Species("Na-K", "Na-K interdiffusion", "interdiffusion",
-                        "the orthoclase fraction itself, Schaffer et al. (2014)"),
+                        "the orthoclase fraction itself, Schaffer et al. (2014)", profile_is_host=True),
     },
     isotropic=True,
     notes=("Formula (K,Na)AlSi3O8 with minor CaAl2Si2O8: DHZ 2013, p. 253. High sanidine is "
@@ -160,7 +161,7 @@ MAGNETITE = Mineral(
     system="cubic", axes=("a",),
     composition_variable=X_TI,
     species={
-        "Fe-Ti": Species("Fe-Ti", "Fe-Ti interdiffusion", "interdiffusion"),
+        "Fe-Ti": Species("Fe-Ti", "Fe-Ti interdiffusion", "interdiffusion", profile_is_host=True),
         "Ti": Species("Ti", "Ti", "tracer"),
         "Fe": Species("Fe", "Fe", "tracer"),
         "Mg": Species("Mg", "Mg", "tracer", "taken as equal to Fe by Tomiya et al. (2013)"),
@@ -187,7 +188,7 @@ GARNET = Mineral(
     composition_variable=X_FE,
     species={
         "Fe-Mg": Species("Fe-Mg", "Fe-Mg interdiffusion (binary)", "interdiffusion",
-                         "almandine-pyrope garnet with little Mn and Ca"),
+                         "almandine-pyrope garnet with little Mn and Ca", profile_is_host=True),
         "Fe": Species("Fe", "Fe tracer", "tracer"),
         "Mg": Species("Mg", "Mg tracer", "tracer"),
         "Ca": Species("Ca", "Ca-(Fe,Mg) interdiffusion", "interdiffusion",
@@ -206,13 +207,14 @@ GARNET = Mineral(
 # Water in silicate melt: the composition variable is the diffusing quantity itself, in wt%.
 H2O_T = CompositionVariable(
     "H2Ot", "C_H2Ot", "total dissolved water (H2O molecules plus OH groups), wt% (Behrens et al. 2004)",
-    default_mode="A", citation="behrens2004")
+    default_mode="A", citation="behrens2004", short="total dissolved water, wt%")
 MELT = Mineral(
     key="melt", name="Silicate melt (glass)", formula="-", system="amorphous (isotropic)",
     axes=("a", "b", "c"),
     composition_variable=H2O_T,
     species={"H2O": Species("H2O", "H2Ot, total water", "interdiffusion",
-                            "effective binary interdiffusion of water with the rest of the melt")},
+                            "effective binary interdiffusion of water with the rest of the melt",
+                            profile_is_host=True)},
     isotropic=True,
     notes=("A melt or glass is isotropic, so the axes a, b and c are Diffusor's convention only. Behrens et al. "
            "(2004) treat bulk water diffusion as effective binary interdiffusion between H2O and the rest of the "
@@ -236,7 +238,8 @@ _DHZ_PAGE = {
     "zircon": "DHZ 2013, p. 12 (Zr[SiO4], tetragonal, I41/amd)",
     "monazite": "DHZ 2013, p. 478 ((Ce,La,Th)PO4, monoclinic, P21/n)",
 }
-TRACE = CompositionVariable("none", "concentration", "measured trace-element concentration", default_mode="A")
+TRACE = CompositionVariable("none", "concentration", "measured trace-element concentration", default_mode="A",
+                            short="measured trace-element concentration")
 for _key, _name, _formula, _system, _species in (
         ("quartz", "Quartz", "SiO2", "trigonal (alpha-quartz, beta-quartz is hexagonal)", ("Ti",)),
         ("rutile", "Rutile", "TiO2", "tetragonal", ("Zr", "Hf")),

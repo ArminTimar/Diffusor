@@ -204,7 +204,7 @@ def test_a_new_file_starts_with_every_point_in_the_fit(app):
     mask[1] = True
     w._on_points_cut(mask)
     assert w.profile.n_excluded == 1
-    assert "1 point cut." in w.plot.act_cut.toolTip()
+    assert "1 point cut now" in w.plot.act_cut.toolTip()
     _open_example(w, app, "opx_shinmoedake")
-    assert w.profile.n_excluded == 0 and " cut. " not in w.plot.act_cut.toolTip()
+    assert w.profile.n_excluded == 0 and "cut now" not in w.plot.act_cut.toolTip()
     w.close()

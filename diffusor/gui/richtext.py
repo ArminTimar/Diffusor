@@ -186,7 +186,8 @@ def coefficient_html(c) -> str:
     badges = []
     if c.recommended:
         badges.append(("recommended", "ok"))
-    badges.append(("verified", "accent") if c.verified else ("unverified", "warn"))
+    if not c.verified:
+        badges.append(("unverified", "warn"))
     if c.superseded_by or c.superseded_note:
         badges.append(("superseded", "danger"))
     d = Doc(c.label, esc(f"{c.species} in {c.mineral}. Source: {cite(c.citation)}"), badges)
@@ -250,9 +251,9 @@ def coefficient_html(c) -> str:
         d.p("Independent Arrhenius laws for each principal direction; projected diffusivity varies with temperature.")
     if c.allowed_axes:
         d.p("Supported directions: " + esc(", ".join(c.allowed_axes)) + ". No unmeasured tensor components are inferred.")
-    d.h("Verification")
-    d.p(("Checked against " if c.verified else "Not yet checked against the original paper. ")
-        + esc(c.verified_from or "") + ("." if c.verified_from and not c.verified_from.endswith(".") else ""))
+    if not c.verified:
+        d.box("Unverified: the numbers of this law have not been compared with the paper yet.",
+              "warn")
     if c.notes:
         d.h("Notes")
         d.p(esc(c.notes))
@@ -332,6 +333,69 @@ def unused_condition_names(coef) -> list:
     except Exception:
         return []
     return missing
+
+
+def label(text: str) -> str:
+    """A coefficient label for the interface: the registry's ' -- ' as an en dash."""
+    return str(text).replace(" -- ", " – ")
+
+
+def calibration_line(r) -> str:
+    """The temperature range of a law in °C, then the registry's note on it, if it says more.
+
+    The registry keeps ranges in K with a note such as "(800-1200 C)"; a note that only
+    repeats the range is left out."""
+    if r.lo is None and r.hi is None:
+        return ""
+    unit = str(r.unit or "")
+    if not unit.startswith("K"):
+        return f"Calibrated for {esc(str(r))}."
+    lo = "" if r.lo is None else f"{r.lo - 273.15:.0f}"
+    hi = "" if r.hi is None else f"{r.hi - 273.15:.0f}"
+    span = f"{lo}–{hi} °C" if lo and hi else (f"above {lo} °C" if lo else f"below {hi} °C")
+    text = f"Calibrated for {span}."
+    note = unit[1:].strip()
+    if note.startswith("(") and note.endswith(")"):
+        note = note[1:-1].strip()
+    # "900-1100 C, the interval Section 4.3 gives" says the range again first
+    for same in (f"{lo}-{hi} C", f"{lo}-{hi} °C"):
+        if note.startswith(same):
+            note = note[len(same):].lstrip(" ,;:")
+    if note:
+        note = note[0].upper() + note[1:]
+        text += f"<br><span style='color:{theme.TEXT_FAINT}'>{esc(note)}"
+        text += "</span>" if note.endswith(".") else ".</span>"
+    return text
+
+
+_KIND_WORDS = {"tracer": "tracer diffusion", "trace": "trace-element diffusion"}
+
+
+def species_note(mineral, species) -> str:
+    """What the profile of a species is, for the line under the Mineral step's boxes.
+
+    The profile of an exchange such as Fe-Mg is the mineral's composition variable
+    itself. For a trace or tracer element it is that element's content, and the
+    composition variable matters only to a law with a composition term."""
+    cv = mineral.composition_variable
+    short = cv.short or cv.definition
+    head = species.label
+    if species.kind in _KIND_WORDS and species.label == species.key:
+        head = f"{species.key}, {_KIND_WORDS[species.kind]}"
+    head = head[0].upper() + head[1:]
+    if species.profile_is_host:
+        body = f"The profile is {cv.label} = {short}."
+    elif cv.key == "none":
+        body = f"The profile is the measured {species.key} concentration."
+    else:
+        element = species.key.split("-")[0]
+        body = (f"The profile is the measured {element} content. A law with a host-composition "
+                f"term uses {cv.label} = {short}.")
+    extra = species.note.strip()
+    if extra:
+        extra = extra[0].upper() + extra[1:] + ("" if extra.endswith(".") else ".")
+        body += " " + extra
+    return f"{head}. {body}"
 
 
 def unused_conditions(coef, settings=None) -> str:

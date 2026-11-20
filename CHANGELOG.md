@@ -4,6 +4,44 @@ What changed between releases, newest first. The text under a version heading
 is what goes into the GitHub release, so it is written for someone deciding
 whether to update. Commit messages hold the details.
 
+## 0.7.0 (20 November 2026)
+
+A new graph editor and a round of interface fixes. No result changes.
+
+### Changed
+
+- **A new graph editor.** The Edit graph button above the results plot opens one
+  page with everything on it: title, legend, text size and grid; every axis with
+  its label, range and scale; every curve with its legend text, colour, opacity,
+  line, width and marker. Changes show at once and are kept when the graph is
+  drawn again after a fit. It replaces matplotlib's own dialog, which asked for
+  one panel at a time and showed one curve at a time. The subplot sliders, which
+  did nothing useful, are gone from the toolbar.
+- The Cut points tooltip runs over several lines instead of one long one.
+- The upper panel of the results plot no longer repeats the distance numbers of
+  the residual panel under it, the legend lists the measured points first, and
+  the distance axis reads "distance (µm)".
+- The Coefficient step no longer says "Checked against the original paper" for
+  each law. Laws that have not been compared with their paper are still marked
+  unverified.
+- Long coefficient names wrap onto a second line instead of ending in "..." or
+  scrolling the list sideways, " -- " in a name shows as a dash, and the
+  calibration range is given in °C.
+- Clearer wording: the Composition box is named after the variable the law needs
+  (for example "Representative XFe"), the fO2 line says which unit each value is
+  in, the uncertainty sources card says what it is for, geometry names are
+  capitalised, and the results summary reads "950 ± 20 °C", "reduced χ²" and "R²".
+
+### Fixed
+
+- **The note under the Mineral step's boxes ignored the diffusing species.** It
+  described the mineral's composition variable whatever species was chosen, so
+  Ni in olivine was "modelled as X_Fo". It now says what the profile of the chosen
+  species is: the composition variable itself for an exchange such as Fe-Mg, or
+  the measured element for a trace or tracer element.
+- The footer said "Step 1 of 6" while the header shows seven steps.
+- An empty line above the coefficient name in the results summary.
+
 ## 0.6.1 (17 November 2026)
 
 A round of fixes found by auditing the whole program. No new features. Results

@@ -28,6 +28,7 @@ class CompositionVariable:
     definition: str               # e.g. 'Fe/(Fe+Mg) molar'
     default_mode: str = "A/(A+B)"  # composition_variable() mode
     citation: str = "deer2013"
+    short: str = ""               # the definition without its sources, for the interface
 
     def __str__(self) -> str:
         return f"{self.label} = {self.definition}"
@@ -40,6 +41,9 @@ class Species:
     label: str
     kind: str = "interdiffusion"  # 'interdiffusion' | 'tracer' | 'trace'
     note: str = ""
+    # True when the measured profile is the mineral's composition variable itself
+    # (Fe-Mg as X_Fe, NaSi-CaAl as X_An); False for a trace or tracer element
+    profile_is_host: bool = False
 
 
 @dataclass(frozen=True)

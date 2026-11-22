@@ -47,7 +47,7 @@
 
   {% if page.hero %}
   <section class="hero">
-    <svg class="hero-curves" viewBox="0 0 1200 400" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <svg class="hero-curves" viewBox="0 0 1200 400" preserveAspectRatio="none" aria-hidden="true">
       <path d="M0 330H540C600 330 600 70 660 70H1200"/>
       <path d="M0 330H460C600 330 600 70 740 70H1200"/>
       <path d="M0 330H360C600 330 600 70 840 70H1200"/>
@@ -103,7 +103,7 @@
         </ul>
       </div>
     </div>
-    <p class="footer-base">{{ site.author }} · Kyushu University · MIT licence</p>
+    <p class="footer-base"><a href="{{ site.url }}/">{{ site.author }}</a> · Kyushu University · MIT licence</p>
   </footer>
 
   <script src="{{ '/assets/js/site.js' | relative_url }}?v={{ site.time | date: '%s' }}" defer></script>

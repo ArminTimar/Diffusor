@@ -192,14 +192,16 @@ a { color: var(--text); }
     var(--bg-soft);
 }
 
+/* a family of relaxing step profiles, stretched across the full width and
+   faded out in the middle so they never run behind the text */
 .hero-curves {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   pointer-events: none;
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 35%, #000 70%, transparent 100%);
-  mask-image: linear-gradient(to bottom, transparent 0%, #000 35%, #000 70%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 42% 75% at 50% 50%, transparent 55%, #000 100%);
+  mask-image: radial-gradient(ellipse 42% 75% at 50% 50%, transparent 55%, #000 100%);
 }
 
 .hero-curves path {
@@ -213,7 +215,7 @@ a { color: var(--text); }
   position: relative;
   max-width: 880px;
   margin: 0 auto;
-  padding: 104px var(--gutter) 88px;
+  padding: 40px var(--gutter) 44px;
   text-align: center;
 }
 
@@ -221,7 +223,7 @@ a { color: var(--text); }
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  margin: 0 0 28px;
+  margin: 0 0 18px;
   padding: 5px 14px;
   border: 1px solid var(--line);
   border-radius: 999px;
@@ -240,18 +242,18 @@ a { color: var(--text); }
 
 .hero-title {
   margin: 0;
-  font-size: clamp(56px, 11vw, 112px);
-  line-height: 0.95;
+  font-size: clamp(48px, 7vw, 76px);
+  line-height: 1;
   font-weight: 700;
-  letter-spacing: -0.055em;
+  letter-spacing: -0.05em;
   color: var(--text);
 }
 
 .lead {
-  max-width: 640px;
-  margin: 28px auto 0;
-  font-size: clamp(17px, 2.2vw, 19px);
-  line-height: 1.6;
+  max-width: 660px;
+  margin: 16px auto 0;
+  font-size: clamp(16px, 2vw, 18px);
+  line-height: 1.55;
   color: var(--muted);
 }
 
@@ -260,7 +262,7 @@ a { color: var(--text); }
   flex-wrap: wrap;
   justify-content: center;
   gap: 12px;
-  margin-top: 40px;
+  margin-top: 24px;
 }
 
 .btn {
@@ -291,7 +293,7 @@ a { color: var(--text); }
   flex-wrap: wrap;
   justify-content: center;
   gap: 12px 40px;
-  margin: 56px 0 0;
+  margin: 28px 0 0;
 }
 .facts div { text-align: center; }
 .facts dt {
@@ -600,8 +602,8 @@ div.highlighter-rouge:hover .copy-btn, .copy-btn:focus { opacity: 1; }
   }
   .mainnav::-webkit-scrollbar { display: none; }
   .mainnav a { padding: 6px 10px; }
-  .hero-inner { padding: 64px var(--gutter) 56px; }
-  .facts { gap: 16px 28px; margin-top: 40px; }
+  .hero-inner { padding: 32px var(--gutter) 36px; }
+  .facts { gap: 16px 28px; margin-top: 24px; }
   .page { padding-top: 40px; padding-bottom: 64px; }
   .prose h2 { margin-top: 48px; padding-top: 24px; font-size: 23px; }
   .prose h2 .anchor { top: 24px; }

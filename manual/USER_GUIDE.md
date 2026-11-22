@@ -137,9 +137,10 @@ application is pending, and until it is accepted the installer is unsigned.
   switched off under **Help > Check for updates at startup**. Diffusor transfers
   nothing else to other networked systems unless the user requests it.
 
-## The six steps
+## The steps
 
-The main window leads through six steps and then opens a results view.
+The main window leads through six steps to a seventh, the results view. The
+numbered steps in the header can be clicked to move between them.
 
 **Data.** Load a profile file or one of the bundled examples. Diffusor proposes
 the distance column, its unit and the composition columns from the column
@@ -152,11 +153,15 @@ The spatial resolution of the analysis is set here as well: selecting an
 instrument fills in a beam width together with the published convention it is
 based on. Loading an example also fills in the following steps.
 
-**Mineral.** Phase, diffusing species and orientation of the traverse.
+**Mineral.** Phase, diffusing species and orientation of the traverse. The line
+under the two boxes says what the profile of the chosen species is: the mineral's
+composition variable itself for an exchange such as Fe-Mg in orthopyroxene
+(X<sub>Fe</sub>), or the measured content of a trace or tracer element.
 
 **Coefficient.** All diffusion laws in the registry for the chosen mineral and
 species, marked as recommended or superseded. Several laws can be selected and
-fitted side by side. The law is chosen before the conditions because it
+fitted side by side. The selected law is shown with its equation and its
+calibration range in °C. The law is chosen before the conditions because it
 determines which of them enter the calculation.
 
 **Conditions.** Temperature with an optional linear cooling path, pressure and
@@ -180,6 +185,16 @@ profile of each draw, the perturbed data when measurement noise is sampled,
 the histogram of fitted times with the running median and 68 % interval, and
 the sampled temperature, oxygen fugacity and log D. The methods text, the
 details of the diffusion coefficient and the log are under the **View** menu.
+
+**Edit graph** in the toolbar above the plot opens one page with everything
+that can be changed: the title, the legend and its position, the text size and
+grid lines; every axis with its label, range (automatic or typed) and linear or
+logarithmic scale; and every curve with its legend text, colour, opacity, line
+style, width, marker and marker size. Changes show on the plot at once and are
+kept when the plot is drawn again after the next fit. Typed axis ranges are
+dropped when another profile is loaded, and *Reset all* returns to the plot as
+Diffusor draws it. Figures for publication are saved with the toolbar's save
+button or **File > Export figure for Inkscape or CorelDRAW**.
 
 ## Input data
 
@@ -212,12 +227,22 @@ remains visible as a grey cross. At least three points must stay.
 
 **File > Extract profile from image** reads profiles from back-scattered
 electron images and element maps, following the `greyvalues.m` script of NIDIS
-(Petrone et al. 2016). The user draws a guideline along the zone boundary.
-Values are read along lines perpendicular to it, one line per pixel of
-guideline and by default 50 px to either side, and averaged at each position.
-As in NIDIS, the first value of each line lies to the right of the guideline as
-seen from its first point. The guideline may have any number of vertices, so
-curved boundaries can be followed.
+(Petrone et al. 2016). With the **Boundary** tool the user draws a straight
+line along the zone boundary: one click where it starts and one where it ends.
+After the first click a dashed line follows the mouse; a further click starts a
+new line and a right-click removes it. Values are read along lines
+perpendicular to it, one line per pixel of boundary line and by default 50 px
+to either side, and averaged at each position. As in NIDIS, the first value of
+each line lies to the right of the boundary line as seen from its first point
+(*Start on the left* reverses this). For a curved boundary, draw the line along
+the stretch being profiled. A bent guideline of several points saved in a
+workbook by an earlier version is still read with *Reuse settings from a
+workbook*.
+
+A line under the drawing tools says what the next click does and, when no
+profile appears, why: a second end still to click, a colour legend not yet set,
+or an error. Choosing a drawing tool switches off the toolbar's pan and zoom,
+which otherwise take the mouse clicks.
 
 * Formats: TIFF (8, 16 and 32 bit, floating point, multi-page stacks as
   channels), PNG, JPEG, BMP, GIF, WebP, ENVI `.hdr` with its data file, NumPy
@@ -235,7 +260,9 @@ curved boundaries can be followed.
   without a value.
 * Filtering: lower and upper value limits for cracks, holes and bright
   inclusions, with optional growth of the rejected areas by a few pixels,
-  polygons drawn around inclusions or lamellae, outlier rejection across the
+  polygons drawn around inclusions or lamellae (*Exclude area*: click the
+  corners, then the first corner again, or right-click, to close the area),
+  outlier rejection across the
   lines at each position (median ± k MAD by default, or mean ± 1 SD as in
   NIDIS), and rejection of lines with too many excluded values. Rejected values
   are marked on the image, and the averaged profile is recalculated as settings
@@ -271,7 +298,8 @@ law, geometry and boundary conditions, and each requires measurement
 uncertainties, because the misfits of profiles in different units are weighted
 by those uncertainties. Only the duration is a free parameter. The individual
 residuals should be inspected before the profiles are interpreted as recording
-a single event. The export contains a study workbook and a full report for each
+a single event. *Fit shared duration* becomes available once two profiles have
+been added. The export contains a study workbook and a full report for each
 profile.
 
 ## Crystal setups and batches

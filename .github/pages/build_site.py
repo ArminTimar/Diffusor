@@ -138,6 +138,8 @@ def main(out):
         shutil.rmtree(out)
     out.mkdir(parents=True)
     shutil.copy2(HERE / "_config.yml", out / "_config.yml")
+    # the theme links /favicon.ico on every page; use the program's icon
+    shutil.copy2(ROOT / "diffusor/gui/icons/diffusor.ico", out / "favicon.ico")
     for source, site_path in PAGES.items():
         text = (ROOT / source).read_text(encoding="utf-8")
         title, description = title_and_description(text)

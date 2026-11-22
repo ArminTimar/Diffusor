@@ -14,7 +14,7 @@ authors:
     email: timar.armin@gmail.com
     affiliation: "Department of Earth and Planetary Sciences, Kyushu University"
 repository-code: "https://github.com/ArminTimar/Diffusor"
-url: "https://github.com/ArminTimar/Diffusor"
+url: "https://armintimar.github.io/Diffusor/"
 license: MIT
 abstract: >-
   A desktop application and Python library for diffusion chronometry. It

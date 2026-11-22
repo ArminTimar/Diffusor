@@ -1,0 +1,25 @@
+# Jekyll settings for the GitHub Pages site. build_site.py copies this file
+# into the staged folder; .github/workflows/pages.yml builds and deploys it.
+title: Diffusor
+description: >-
+  Diffusion chronometry of zoned crystals: fits diffusion times to measured
+  profiles with published diffusion laws and Monte Carlo uncertainties.
+url: https://armintimar.github.io
+baseurl: /Diffusor
+theme: jekyll-theme-cayman
+show_downloads: false
+lang: en
+
+author: Armin Timar
+social:
+  name: Armin Timar
+  links:
+    - https://github.com/ArminTimar
+
+plugins:
+  - jekyll-seo-tag
+  - jekyll-sitemap
+
+# Search Console: paste the content value of Google's "HTML tag" here, e.g.
+# webmaster_verifications:
+#   google: abc123...

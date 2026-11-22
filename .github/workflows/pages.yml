@@ -1,0 +1,60 @@
+# Builds the documentation website (https://armintimar.github.io/Diffusor/)
+# from the README, the manual, the changelog and the validation report, and
+# publishes it with GitHub Pages. .github/pages/build_site.py stages the pages
+# and fixes their links; Jekyll turns them into HTML with a sitemap.
+name: pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - README.md
+      - CHANGELOG.md
+      - "manual/**"
+      - "examples/validation/report.md"
+      - "examples/validation/*.png"
+      - ".github/pages/**"
+      - ".github/workflows/pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Stage the pages
+        run: python .github/pages/build_site.py _pages_src
+
+      - uses: actions/configure-pages@v5
+
+      - name: Build with Jekyll
+        uses: actions/jekyll-build-pages@v1
+        with:
+          source: ./_pages_src
+          destination: ./_site
+
+      - uses: actions/upload-pages-artifact@v3
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-24.04
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

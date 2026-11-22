@@ -4,6 +4,32 @@ What changed between releases, newest first. The text under a version heading
 is what goes into the GitHub release, so it is written for someone deciding
 whether to update. Commit messages hold the details.
 
+## Unreleased
+
+### Changed
+
+- Fits on the numerical solver and Monte Carlo runs are about ten times faster.
+  The time scan now passes every trial time in one run of the solver instead of
+  starting again from zero for each, and each solver step does less repeated
+  work. Fitted times are unchanged (to 1 part in 10 million on the examples).
+  Each Monte Carlo draw also refines its time less finely than the best fit
+  does: a draw's time moves by at most 0.2 per cent, far inside the spread of
+  the draws, and the median and interval are unchanged. A 500-draw run of the
+  Kizimen orthopyroxene example takes about 1.5 minutes instead of about 17.
+- The graph editor opens beside the plot, in place of the summary column, so
+  the graph stays in view while it is edited. Done brings the summary back.
+- The profile plot and the exported figures have no residual panel, in line
+  with how diffusion-chronometry studies present a fitted profile. The misfit
+  is still given as reduced χ², R² and RMSE, and the exported table keeps the
+  residual of every point.
+
+### Fixed
+
+- Methods did nothing, and Details did nothing after a fit without a Monte
+  Carlo: the methods page failed on a line left over from the example sources.
+- During a Monte Carlo run, Details shows the statistics of the draws finished
+  so far and Methods shows the run's best fit.
+
 ## 0.7.1 (22 November 2026)
 
 Fixes to the image extractor and the study windows: a simpler boundary tool,

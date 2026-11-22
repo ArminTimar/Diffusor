@@ -183,14 +183,19 @@ settings. Each group in the summary links back to the step where it is set.
 During a Monte Carlo run the plot is updated after every draw: the fitted
 profile of each draw, the perturbed data when measurement noise is sampled,
 the histogram of fitted times with the running median and 68 % interval, and
-the sampled temperature, oxygen fugacity and log D. The methods text, the
-details of the diffusion coefficient and the log are under the **View** menu.
+the sampled temperature, oxygen fugacity and log D. While the run goes on,
+**Details** shows the statistics of the draws finished so far and **Methods**
+the methods text for the best fit, which the run makes first. The methods text,
+the details of the diffusion coefficient and the log are also under the
+**View** menu.
 
-**Edit graph** in the toolbar above the plot opens one page with everything
-that can be changed: the title, the legend and its position, the text size and
-grid lines; every axis with its label, range (automatic or typed) and linear or
-logarithmic scale; and every curve with its legend text, colour, opacity, line
-style, width, marker and marker size. Changes show on the plot at once and are
+**Edit graph** in the toolbar above the plot opens a column on the left of the
+plot, in place of the summary, with everything that can be changed: the title,
+the legend and its position, the text size and grid lines; every axis with its
+label, range (automatic or typed) and linear or logarithmic scale; and every
+curve with its legend text, colour, opacity, line style, width, marker and
+marker size. *Done*, or the toolbar button again, closes it and brings the
+summary back. Changes show on the plot at once and are
 kept when the plot is drawn again after the next fit. Typed axis ranges are
 dropped when another profile is loaded, and *Reset all* returns to the plot as
 Diffusor draws it. Figures for publication are saved with the toolbar's save
@@ -296,9 +301,9 @@ window and fits one common duration to all of them, for example several
 elements across the same zone boundary. Each profile keeps its own diffusion
 law, geometry and boundary conditions, and each requires measurement
 uncertainties, because the misfits of profiles in different units are weighted
-by those uncertainties. Only the duration is a free parameter. The individual
-residuals should be inspected before the profiles are interpreted as recording
-a single event. *Fit shared duration* becomes available once two profiles have
+by those uncertainties. Only the duration is a free parameter. Check that the
+model follows each profile (the export lists the standardised residuals of
+each) before the profiles are interpreted as recording a single event. *Fit shared duration* becomes available once two profiles have
 been added. The export contains a study workbook and a full report for each
 profile.
 

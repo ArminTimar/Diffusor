@@ -13,7 +13,7 @@ from matplotlib.figure import Figure
 from matplotlib.patches import Rectangle
 from PySide6.QtCore import QPointF, QRectF, QSize, Qt, Signal
 from PySide6.QtGui import QAction, QColor, QIcon, QPainter, QPen, QPixmap
-from PySide6.QtWidgets import QVBoxLayout, QWidget
+from PySide6.QtWidgets import QHBoxLayout, QVBoxLayout, QWidget
 
 from ..dataio.vector import VECTOR_SUFFIXES, save_vector
 from ..thermo.units import human_time
@@ -222,6 +222,8 @@ class ProfilePlot(QWidget):
     points_cut = Signal(object)
     # a new drawing replaced the curves (a fit, a comparison, another view)
     redrawn = Signal()
+    # the graph editor opened (True) or closed (False) beside the plot
+    editing = Signal(bool)
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -237,11 +239,20 @@ class ProfilePlot(QWidget):
         self.canvas = FigureCanvasQTAgg(self.figure)
         keep_labels_in_view(self.canvas)
         self.toolbar = GraphToolbar(self.canvas, self, on_edit=self.open_editor)
-        self.setStyleSheet(f"background:{theme.SURFACE};")
-        lay = QVBoxLayout(self)
+        # the editor opens in a column on the left, the graph keeps the rest
+        self._row = QHBoxLayout(self)
+        self._row.setContentsMargins(0, 0, 0, 0)
+        self._row.setSpacing(0)
+        column = QWidget()
+        # on the graph's column only: set on the whole widget it would reach the
+        # editor's buttons and fields too
+        column.setStyleSheet(f"background:{theme.SURFACE};")
+        lay = QVBoxLayout(column)
         lay.setContentsMargins(0, 0, 0, 0)
+        lay.setSpacing(0)
         lay.addWidget(self.toolbar)
         lay.addWidget(self.canvas)
+        self._row.addWidget(column, 1)
         ratio = float(self.devicePixelRatioF())
         icon_size = self.toolbar.iconSize()
         self.act_cut = QAction(_tool_icon("cut", icon_size, ratio), "Cut points", self)
@@ -268,26 +279,21 @@ class ProfilePlot(QWidget):
         self.canvas.mpl_connect("motion_notify_event", self._cut_motion)
         self.canvas.mpl_connect("button_release_event", self._cut_release)
         self.ax = None
-        self.ax_res = None
         self._make_axes()
 
     def _make_axes(self):
+        """One panel: the profile. Published diffusion-chronometry figures show the
+        measured points with the model and no residual panel; the misfit is given
+        as numbers (chi2, RMSE) in Details and the exports."""
         self._mc = None            # leaving the Monte Carlo view detaches its live panels
         self._drag = self._band = None
         self.figure.clear()
-        gs = self.figure.add_gridspec(4, 1)
-        self.ax = self.figure.add_subplot(gs[0:3, 0])
-        self.ax_res = self.figure.add_subplot(gs[3, 0], sharex=self.ax)
-        # the graph editor and its saved changes find the panels by these names
+        self.ax = self.figure.add_subplot(111)
+        # the graph editor and its saved changes find the panel by this name
         self.ax.set_gid("profile")
-        self.ax_res.set_gid("residual")
-        # the distance scale is read off the residual panel under it
-        self.ax.tick_params(labelbottom=False)
         self.ax.set_ylabel("composition")
-        self.ax_res.set_ylabel("residual")
-        self.ax_res.set_xlabel(DISTANCE_LABEL)
-        theme.apply_plot_style(self.figure, [self.ax, self.ax_res])
-        self.ax_res.axhline(0.0, color=theme.BORDER_STRONG, lw=0.8, gid="Zero line")
+        self.ax.set_xlabel(DISTANCE_LABEL)
+        theme.apply_plot_style(self.figure, [self.ax])
         self.canvas.draw_idle()
 
     def _finish(self, replay=None):
@@ -317,13 +323,33 @@ class ProfilePlot(QWidget):
             a.pop("ylim", None)
 
     def open_editor(self):
+        """Open the graph editor beside the plot, or close it if it is open."""
         from .graph_editor import GraphEditor
+        if self.editor_open():
+            self.close_editor()
+            return
         if self._editor is None:
-            self._editor = GraphEditor(self, self.window())
+            self._editor = GraphEditor(self, self)
+            self._editor.done.connect(self.close_editor)
+            line = QWidget()
+            line.setFixedWidth(1)
+            line.setStyleSheet(f"background:{theme.BORDER};")
+            self._editor_line = line
+            self._row.insertWidget(0, line)
+            self._row.insertWidget(0, self._editor)
         self._editor.rebuild()
         self._editor.show()
-        self._editor.raise_()
-        self._editor.activateWindow()
+        self._editor_line.show()
+        self.editing.emit(True)
+
+    def close_editor(self):
+        if self.editor_open():
+            self._editor.hide()
+            self._editor_line.hide()
+            self.editing.emit(False)
+
+    def editor_open(self) -> bool:
+        return self._editor is not None and not self._editor.isHidden()
 
     # ------------------------------------------------------------------
     def clear(self):
@@ -334,7 +360,7 @@ class ProfilePlot(QWidget):
         self._plot_data(x, C, sigma, label)
         self.ax.set_ylabel(y_label)
         _legend(self.ax, 9)
-        theme.apply_plot_style(self.figure, [self.ax, self.ax_res])
+        theme.apply_plot_style(self.figure, [self.ax])
         self._finish(lambda: self.show_data(x, C, sigma, label, y_label))
 
     def _plot_data(self, x, C, sigma=None, label="measured"):
@@ -385,7 +411,8 @@ class ProfilePlot(QWidget):
 
     def _cut_active(self) -> bool:
         return (self.act_cut.isChecked() and not self._nav_mode() and self._mc is None
-                and self.ax_res is not None and self._pts is not None)
+                and self.ax is not None and self.ax.get_gid() == "profile"
+                and self._pts is not None)
 
     def _drop_band(self):
         self._drag = None
@@ -442,7 +469,7 @@ class ProfilePlot(QWidget):
 
     def show_fit(self, fit_result, mc_result=None, y_label="composition",
                  initial=True, title: str = ""):
-        """Measured points, initial condition, best fit, Monte Carlo envelope, residuals."""
+        """Measured points, initial condition, best fit and Monte Carlo envelope."""
         self._make_axes()
         x, C, sig = fit_result.x_data, fit_result.C_data, fit_result.sigma
         self._plot_data(x, C, sig)
@@ -482,18 +509,7 @@ class ProfilePlot(QWidget):
         _legend(self.ax, 9)
         if title:
             self.ax.set_title(title, fontsize=11, color=theme.TEXT, pad=10)
-
-        res = C - fit_result.C_model
-        if sig is not None:
-            c = self.ax_res.errorbar(x, res, yerr=sig, fmt="o", ms=3.2, color=theme.PLOT_DATA,
-                                     ecolor=theme.PLOT_DATA_ERR, elinewidth=0.8, capsize=1.5)
-            c.lines[0].set_gid("Residuals")
-        else:
-            self.ax_res.plot(x, res, "o", ms=3.2, color=theme.PLOT_DATA, gid="Residuals")
-        self.ax_res.axhline(0.0, color=theme.PLOT_MODEL, lw=1, gid="Zero line")
-        self.ax_res.set_xlabel(DISTANCE_LABEL)
-        self.ax_res.set_ylabel("residual")
-        theme.apply_plot_style(self.figure, [self.ax, self.ax_res])
+        theme.apply_plot_style(self.figure, [self.ax])
         self._finish(lambda: self.show_fit(fit_result, mc_result, y_label, initial, title))
 
     def _plot_draw_envelope(self, mc_result):
@@ -532,13 +548,9 @@ class ProfilePlot(QWidget):
                 continue
             self.ax.plot(xf, Cf, "-", lw=1.8, color=colors[i % len(colors)],
                          label=f"{key}: {human_time(r.t_seconds)}", gid=str(key))
-            self.ax_res.plot(x, C - r.C_model, "o", ms=3, color=colors[i % len(colors)],
-                             gid=f"Residuals, {key}")
         self.ax.set_ylabel(y_label)
         _legend(self.ax, 8)
-        self.ax_res.set_xlabel(DISTANCE_LABEL)
-        self.ax_res.set_ylabel("residual")
-        theme.apply_plot_style(self.figure, [self.ax, self.ax_res])
+        theme.apply_plot_style(self.figure, [self.ax])
         self._finish(lambda: self.show_comparison(results, y_label))
 
     def show_histogram(self, mc_result):
@@ -562,7 +574,6 @@ class ProfilePlot(QWidget):
         _legend(ax, 9)
         theme.apply_plot_style(self.figure, [ax])
         self.ax = ax
-        self.ax_res = None
         self._finish(lambda: self.show_histogram(mc_result))
 
     # ------------------------------------------------------------------ live Monte Carlo
@@ -577,7 +588,6 @@ class ProfilePlot(QWidget):
         gs = self.figure.add_gridspec(3, 3, width_ratios=[1.0, 1.0, 0.95],
                                       height_ratios=[1.0, 1.0, 1.05])
         self.ax = self.figure.add_subplot(gs[0:2, 0:2])
-        self.ax_res = None
         self._mc = {
             "x": np.asarray(x, float), "C": np.asarray(C, float),
             "sigma": None if sigma is None else np.asarray(sigma, float),

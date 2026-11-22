@@ -84,6 +84,7 @@ class MonteCarloWorker(QObject):
     progress = Signal(int, int)
     stage = Signal(str)
     draws = Signal(object)
+    base = Signal(object)           # the best fit to the data as measured, before the draws
 
     BATCH_SECONDS = 1.0
 
@@ -126,7 +127,7 @@ class MonteCarloWorker(QObject):
             res = run_montecarlo(model, x, C, sigma, budget=budget, n_draws=n_draws,
                                  seed=seed, free_parameters=free, t_min=t_min, t_max=t_max,
                                  progress=self._cb, on_draw=self._on_draw,
-                                 workers=self.workers)
+                                 workers=self.workers, on_base=self.base.emit)
             self._flush()
             if self.do_contributions and not self._abort:
                 self.stage.emit("variance contributions")

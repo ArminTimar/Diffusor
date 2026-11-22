@@ -1,4 +1,5 @@
-"""The graph editor: every axis and curve of the plot on one page, applied as typed.
+"""The graph editor: every axis and curve of the plot in one column beside the
+graph, applied as typed.
 
 It replaces matplotlib's own figure-options dialog, which asks first for one set
 of axes, then shows the axes and the curves on separate tabs, one curve at a time.
@@ -21,22 +22,21 @@ from matplotlib.container import BarContainer, ErrorbarContainer
 from matplotlib.lines import Line2D
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QColor, QDoubleValidator
-from PySide6.QtWidgets import (QCheckBox, QColorDialog, QComboBox, QDialog, QDoubleSpinBox,
-                               QFrame, QGridLayout, QHBoxLayout, QLabel, QLineEdit,
+from PySide6.QtWidgets import (QCheckBox, QColorDialog, QComboBox, QDoubleSpinBox,
+                               QFrame, QHBoxLayout, QLabel, QLineEdit,
                                QPushButton, QScrollArea, QVBoxLayout, QWidget)
 
 from . import theme
 
 # names shown for the axes Diffusor draws, by the gid each one is given
 PANEL_NAMES = {
-    "profile": "Profile", "residual": "Residuals", "histogram": "Monte Carlo",
+    "profile": "Profile", "histogram": "Monte Carlo",
     "mc_time": "Time histogram", "mc_T": "Temperature", "mc_f": "Oxygen fugacity",
     "mc_D": "Diffusion coefficient",
 }
 # what the user sees for one axis of one panel; anything missing is "<panel>, x" or "y"
 AXIS_NAMES = {
-    ("profile", "x"): "Distance", ("residual", "x"): "Distance",
-    ("profile", "y"): "Composition", ("residual", "y"): "Residual",
+    ("profile", "x"): "Distance", ("profile", "y"): "Composition",
     ("histogram", "x"): "Time", ("histogram", "y"): "Draws",
     ("mc_time", "x"): "Time", ("mc_time", "y"): "Draws",
 }
@@ -469,48 +469,55 @@ COMPACT = (
     "QLineEdit, QDoubleSpinBox, QSpinBox, QComboBox { padding: 2px 7px; min-height: 17px; }")
 
 
-class GraphEditor(QDialog):
-    """Axes, curves, legend and text of the plot on one page. Changes apply at once."""
+class GraphEditor(QWidget):
+    """Axes, curves, legend and text of the plot, in a column beside the graph.
+
+    The column sits next to the plot, so every change shows on the graph as it is
+    made. Changes apply at once; ``done`` is emitted when the user closes it."""
+    done = Signal()
+    WIDTH = 400
 
     def __init__(self, plot, parent=None):
         super().__init__(parent)
         self.plot = plot
-        self.setWindowTitle("Edit graph")
+        self.setObjectName("Page")
         self.setStyleSheet(COMPACT)
+        self.setFixedWidth(self.WIDTH)
         root = QVBoxLayout(self)
-        root.setContentsMargins(14, 12, 14, 10)
+        root.setContentsMargins(12, 10, 8, 10)
         root.setSpacing(8)
+        top = QHBoxLayout()
+        title = QLabel("Edit graph")
+        title.setObjectName("H2")
+        top.addWidget(title)
+        top.addStretch(1)
+        reset = QPushButton("Reset all")
+        reset.setToolTip("Undo every change made here and draw the graph as Diffusor made it")
+        reset.clicked.connect(self._reset)
+        top.addWidget(reset)
+        close = QPushButton("Done")
+        close.setObjectName("Primary")
+        close.setToolTip("Close the editor. The changes stay on the graph.")
+        close.clicked.connect(self.done.emit)
+        top.addWidget(close)
+        root.addLayout(top)
         self.body = QWidget()
         self.body.setObjectName("Page")
         self.body_layout = QVBoxLayout(self.body)
-        self.body_layout.setContentsMargins(0, 0, 4, 0)
+        self.body_layout.setContentsMargins(0, 0, 6, 0)
         self.body_layout.setSpacing(10)
         area = QScrollArea()
         area.setWidget(self.body)
         area.setWidgetResizable(True)
         area.setFrameShape(QFrame.NoFrame)
-        area.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         root.addWidget(area, 1)
-        hint = QLabel("Changes show on the graph at once. They are kept when the graph is "
-                      "drawn again after a fit. Axis ranges reset when another profile is loaded.")
+        hint = QLabel("Changes show on the graph at once and are kept when it is drawn "
+                      "again after a fit. Axis ranges reset when another profile is loaded.")
         hint.setObjectName("Hint")
         hint.setWordWrap(True)
         root.addWidget(hint)
-        bar = QHBoxLayout()
-        reset = QPushButton("Reset all")
-        reset.setToolTip("Undo every change made here and draw the graph as Diffusor made it")
-        reset.clicked.connect(self._reset)
-        bar.addWidget(reset)
-        bar.addStretch(1)
-        close = QPushButton("Close")
-        close.setObjectName("Primary")
-        close.setDefault(True)
-        close.clicked.connect(self.close)
-        bar.addWidget(close)
-        root.addLayout(bar)
         self.rebuild()
-        from .widgets import fit_to_screen
-        fit_to_screen(self, 980, 640)
         # a new fit draws new curves; the open editor follows
         plot.redrawn.connect(self._plot_redrawn)
 
@@ -520,7 +527,7 @@ class GraphEditor(QDialog):
 
     # ---------------------------------------------------------------- building
     def rebuild(self):
-        """Read the plot as it is now and lay out a row for each axis and curve."""
+        """Read the plot as it is now and lay out a block for each axis and curve."""
         while self.body_layout.count():
             w = self.body_layout.takeAt(0).widget()
             if w is not None:
@@ -542,44 +549,48 @@ class GraphEditor(QDialog):
     def _text_section(self, axes) -> QWidget:
         frame, v = _section("Graph")
         fig_ov = self.plot.overrides["figure"]
-        grid = QGridLayout()
-        grid.setHorizontalSpacing(12)
-        grid.setVerticalSpacing(4)
         title = QLineEdit(_title_of(axes[0]).get_text())
         title.setPlaceholderText("No title")
         title.editingFinished.connect(lambda: self._set_figure("title", title.text()))
-        legend = QCheckBox("Show")
+        v.addWidget(_head("Title"))
+        v.addWidget(title)
+        legend = QCheckBox("Legend")
         legend.setToolTip("Show or hide the legend")
         legend.setChecked(fig_ov.get("legend", any(getattr(a, "_diffusor_legend", False)
                                                     for a in axes)))
         place = _combo(LEGEND_PLACES, fig_ov.get("legend_loc", "best"))
+        place.setToolTip("Where the legend goes")
         place.setEnabled(legend.isChecked())
         legend.toggled.connect(lambda on: (place.setEnabled(on),
                                            self._set_figure("legend", bool(on))))
         place.currentIndexChanged.connect(
             lambda _i: self._set_figure("legend_loc", place.currentData()))
+        row = QHBoxLayout()
+        row.addWidget(legend)
+        row.addWidget(place, 1)
+        v.addLayout(row)
         size = _small_spin(6, 24, fig_ov.get("text_size", BASE_TEXT_SIZE), 0.5)
+        size.setPrefix("text ")
+        size.setSuffix(" pt")
+        size.setFixedWidth(110)
         size.setToolTip("Axis labels at this size, tick numbers and legend one point smaller")
         size.valueChanged.connect(lambda val: self._set_figure("text_size", float(val)))
         grid_on = QCheckBox("Grid lines")
         grid_on.setChecked(fig_ov.get("grid", True))
         grid_on.toggled.connect(lambda on: self._set_figure("grid", bool(on)))
-        for col, (text, w) in enumerate((("Title", title), ("Legend", legend), ("", place),
-                                         ("Text size (pt)", size), ("", grid_on))):
-            grid.addWidget(_head(text), 0, col)
-            grid.addWidget(w, 1, col)
-        grid.setColumnStretch(0, 1)
-        v.addLayout(grid)
+        row = QHBoxLayout()
+        row.addWidget(size)
+        row.addSpacing(12)
+        row.addWidget(grid_on)
+        row.addStretch(1)
+        v.addLayout(row)
         return frame
 
     def _axes_section(self, fig) -> QWidget:
         frame, v = _section("Axes")
-        grid = QGridLayout()
-        grid.setHorizontalSpacing(10)
-        grid.setVerticalSpacing(6)
-        for col, text in enumerate(("", "Label", "From", "To", "", "Scale")):
-            grid.addWidget(_head(text), 0, col)
-        for r, (ax, which, name) in enumerate(axis_rows(fig), start=1):
+        for n, (ax, which, name) in enumerate(axis_rows(fig)):
+            if n:
+                v.addSpacing(4)
             gid = ax.get_gid()
             a = self.plot.overrides["axes"].get(gid, {})
             axis = ax.xaxis if which == "x" else ax.yaxis
@@ -587,20 +598,28 @@ class GraphEditor(QDialog):
             fixed = bool(a.get(f"{which}lim"))
             lab = QLabel(name)
             lab.setStyleSheet("font-weight:600;")
+            scale = _combo([("Linear", "linear"), ("Logarithmic", "log")],
+                           ax.get_xscale() if which == "x" else ax.get_yscale())
+            scale.setToolTip("Axis scale")
+            head = QHBoxLayout()
+            head.addWidget(lab, 1)
+            head.addWidget(scale)
+            v.addLayout(head)
             text = QLineEdit(axis.get_label().get_text())
             text.setPlaceholderText("No label")
+            text.setToolTip("Axis label")
             text.editingFinished.connect(
                 lambda g=gid, w=which, t=text: self._set_axes(g, f"{w}label", t.text()))
+            v.addWidget(text)
             e_lo, e_hi = QLineEdit(_fmt(lo)), QLineEdit(_fmt(hi))
-            for e in (e_lo, e_hi):
+            for e, tip in ((e_lo, "From"), (e_hi, "To")):
                 e.setValidator(QDoubleValidator())
-                e.setFixedWidth(96)
+                e.setMinimumWidth(70)
+                e.setToolTip(tip)
                 e.setEnabled(fixed)
             auto = QCheckBox("Automatic")
             auto.setToolTip("Let the range follow the data. Untick to type your own.")
             auto.setChecked(not fixed)
-            scale = _combo([("Linear", "linear"), ("Logarithmic", "log")],
-                           ax.get_xscale() if which == "x" else ax.get_yscale())
 
             def set_range(g=gid, w=which, a_lo=e_lo, a_hi=e_hi, chk=auto):
                 if chk.isChecked():
@@ -620,23 +639,20 @@ class GraphEditor(QDialog):
             auto.toggled.connect(toggle_auto)
             scale.currentIndexChanged.connect(
                 lambda _i, g=gid, w=which, s=scale: self._set_axes(g, f"{w}scale", s.currentData()))
-            for col, w in enumerate((lab, text, e_lo, e_hi, auto, scale)):
-                grid.addWidget(w, r, col)
-        grid.setColumnStretch(1, 1)
-        v.addLayout(grid)
+            rng = QHBoxLayout()
+            rng.addWidget(e_lo, 1)
+            to = QLabel("to")
+            to.setObjectName("Hint")
+            rng.addWidget(to)
+            rng.addWidget(e_hi, 1)
+            rng.addWidget(auto)
+            v.addLayout(rng)
         return frame
 
     def _curves_section(self, axes) -> QWidget:
         frame, v = _section("Curves")
-        grid = QGridLayout()
-        grid.setHorizontalSpacing(10)
-        grid.setVerticalSpacing(6)
-        heads = ("Show", "Curve", "Legend text", "Colour", "Opacity", "Line", "Width",
-                 "Marker", "Size")
-        for col, text in enumerate(heads):
-            grid.addWidget(_head(text), 0, col)
-        r = 1
         several = sum(1 for ax in axes if curves(ax)) > 1
+        count = 0
         for ax in axes:
             found = curves(ax)
             if not found:
@@ -644,20 +660,23 @@ class GraphEditor(QDialog):
             if several:
                 sub = QLabel(PANEL_NAMES.get(ax.get_gid(), ax.get_gid()).upper())
                 sub.setObjectName("SummaryHead")
-                grid.addWidget(sub, r, 0, 1, len(heads))
-                r += 1
+                v.addWidget(sub)
             for c in found:
-                self._curve_row(grid, r, c)
-                r += 1
-        if r == 1:
+                if count:
+                    line = QFrame()
+                    line.setObjectName("Divider")
+                    line.setFixedHeight(1)
+                    v.addWidget(line)
+                self._curve_block(v, c)
+                count += 1
+        if not count:
             lab = QLabel("No curves in this view.")
             lab.setObjectName("Hint")
-            grid.addWidget(lab, 1, 0, 1, len(heads))
-        grid.setColumnStretch(2, 1)
-        v.addLayout(grid)
+            v.addWidget(lab)
         return frame
 
-    def _curve_row(self, grid: QGridLayout, r: int, c: Curve):
+    def _curve_block(self, v: QVBoxLayout, c: Curve):
+        """One curve: shown or not, name and colour; legend text; line; marker."""
         kind = c.kind()
         ident = c.ident
         show = QCheckBox()
@@ -666,24 +685,46 @@ class GraphEditor(QDialog):
         show.toggled.connect(lambda on: self._set_curve(ident, "visible", bool(on)))
         name = QLabel(c.key)
         name.setToolTip(c.key)
-        name.setMaximumWidth(170)
-        legend = QLineEdit(c.legend_text())
-        legend.setPlaceholderText("not in the legend")
-        legend.editingFinished.connect(lambda: self._set_curve(ident, "label", legend.text()))
+        name.setStyleSheet("font-weight:600;")
+        name.setMinimumWidth(10)
         color = ColorButton(c.color())
         color.picked.connect(lambda col: self._set_curve(ident, "color", col))
         opacity = _small_spin(0.0, 1.0, c.alpha(), 0.05, 2)
+        opacity.setPrefix("opacity ")
+        opacity.setFixedWidth(124)
+        opacity.setToolTip("0 is invisible, 1 is solid")
         opacity.valueChanged.connect(lambda val: self._set_curve(ident, "alpha", float(val)))
+        head = QHBoxLayout()
+        head.addWidget(show)
+        head.addWidget(name, 1)
+        head.addWidget(opacity)
+        head.addWidget(color)
+        v.addLayout(head)
+
+        legend = QLineEdit(c.legend_text())
+        legend.setPlaceholderText("not in the legend")
+        legend.setToolTip("Legend text")
+        legend.editingFinished.connect(lambda: self._set_curve(ident, "label", legend.text()))
+        v.addWidget(legend)
+
         ln = c.line()
         style = _combo(LINESTYLES, ln.get_linestyle() if ln is not None else "-")
+        style.setToolTip("Line style")
         style.currentIndexChanged.connect(
             lambda _i: self._set_curve(ident, "linestyle", style.currentData()))
         width = _small_spin(0.0, 12.0, c.linewidth(), 0.5)
+        width.setPrefix("width ")
+        width.setFixedWidth(100)
+        width.setToolTip("Line width (pt)")
         width.valueChanged.connect(lambda val: self._set_curve(ident, "linewidth", float(val)))
         marker = _combo(MARKERS, str(ln.get_marker()) if ln is not None else "None")
+        marker.setToolTip("Marker")
         marker.currentIndexChanged.connect(
             lambda _i: self._set_curve(ident, "marker", marker.currentData()))
         size = _small_spin(0.0, 30.0, float(ln.get_markersize()) if ln is not None else 0.0, 0.5)
+        size.setPrefix("size ")
+        size.setFixedWidth(100)
+        size.setToolTip("Marker size (pt)")
         size.valueChanged.connect(lambda val: self._set_curve(ident, "markersize", float(val)))
         style.setEnabled(kind == "line")
         marker.setEnabled(kind == "line")
@@ -692,8 +733,14 @@ class GraphEditor(QDialog):
         if kind == "fill":
             for w in (style, width, marker, size):
                 w.setToolTip("A filled area has a colour and an opacity only")
-        for col, w in enumerate((show, name, legend, color, opacity, style, width, marker, size)):
-            grid.addWidget(w, r, col, Qt.AlignVCenter)
+        row = QHBoxLayout()
+        row.addWidget(style, 1)
+        row.addWidget(width)
+        v.addLayout(row)
+        row = QHBoxLayout()
+        row.addWidget(marker, 1)
+        row.addWidget(size)
+        v.addLayout(row)
 
     # ---------------------------------------------------------------- changes
     def _changed(self):

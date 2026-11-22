@@ -105,9 +105,13 @@ class DiffusionModel:
         return suggest_grid(x_data, self.n_nodes)
 
     # -- diffusivity --------------------------------------------------------
-    def _D_um2s(self, C_nodes, T_K: float, overrides=None):
-        """D in um^2/s at the given nodal compositions."""
-        cond = self.conditions_at(T_K)
+    def _D_um2s(self, C_nodes, T_K: float, overrides=None, cond=None):
+        """D in um^2/s at the given nodal compositions.
+
+        ``cond`` is ``conditions_at(T_K)``, passed in by a solver that asks at the
+        same temperature at every step."""
+        if cond is None:
+            cond = self.conditions_at(T_K)
         if self.composition_dependent and self.comp_key:
             X = dict(cond.X)
             X[self.comp_key] = self._composition(C_nodes)
@@ -185,20 +189,57 @@ class DiffusionModel:
 
         return effective_Dt(D_of_T, hist, t_seconds)
 
-    def _profile_numerical(self, t_seconds: float, x_out, overrides=None) -> np.ndarray:
+    def profiles(self, times, x_out, overrides=None) -> List[np.ndarray]:
+        """Predicted profiles at several times.
+
+        At constant temperature the numerical route runs once, to the latest time,
+        and keeps the profile at each of the others on the way; a solve per time
+        would start again from t = 0 every time. The time steps then follow the
+        longest run, so the profiles agree with ``profile`` to the accuracy of the
+        scheme, not to the last digit: this is for scanning, and a fit refines its
+        result with ``profile``. Along a cooling path the path ends at each time,
+        so every time is its own run.
+        """
+        times = [float(t) for t in times]
+        if (self.history is not None or self.can_use_analytical()[0]
+                or len(times) < 2 or min(times) <= 0):
+            return [self.profile(t, x_out, overrides) for t in times]
         x = self.grid(x_out)
+        res = self._solve(x, max(times), overrides, snapshots=times)
+        out = []
+        for t in times:
+            C = res.snapshots.get(t)
+            if C is None:
+                C = res.C_final
+            if self.beam_sigma_um > 0:
+                C = gaussian_convolve(x, C, self.beam_sigma_um)
+            out.append(np.interp(np.asarray(x_out, dtype=float), x, C))
+        return out
+
+    def _solve(self, x, t_seconds: float, overrides=None, snapshots=None):
         C0 = self.initial.evaluate(x)
         hist = (self.history.shifted_to_end(t_seconds) if self.history is not None
                 else ThermalHistory.isothermal(self.conditions.T_K, t_seconds))
+        known = {}
 
         def D_func(C, T_K):
-            return self._D_um2s(C, T_K, overrides)
+            # the conditions at a temperature are built once, not at every step
+            cond = known.get(T_K)
+            if cond is None:
+                if len(known) > 64:
+                    known.clear()
+                cond = known[T_K] = self.conditions_at(T_K)
+            return self._D_um2s(C, T_K, overrides, cond)
 
-        res = solve_1d(x, C0, D_func, t_seconds, m=self.geometry.m,
-                       bc_left=self.bc_left, bc_right=self.bc_right,
-                       history=hist, theta_time=0.5,
-                       an_profile=self.an_profile, theta_activity=self._theta())
-        C = res.C_final
+        return solve_1d(x, C0, D_func, t_seconds, m=self.geometry.m,
+                        bc_left=self.bc_left, bc_right=self.bc_right,
+                        history=hist, theta_time=0.5,
+                        an_profile=self.an_profile, theta_activity=self._theta(),
+                        snapshot_times=snapshots)
+
+    def _profile_numerical(self, t_seconds: float, x_out, overrides=None) -> np.ndarray:
+        x = self.grid(x_out)
+        C = self._solve(x, t_seconds, overrides).C_final
         if self.beam_sigma_um > 0:
             C = gaussian_convolve(x, C, self.beam_sigma_um)
         return np.interp(np.asarray(x_out, dtype=float), x, C)

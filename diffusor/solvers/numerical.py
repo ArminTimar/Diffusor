@@ -42,7 +42,7 @@ from dataclasses import dataclass, field
 from typing import Callable, Dict, List, Optional, Sequence
 
 import numpy as np
-from scipy.linalg import solve_banded
+from scipy.linalg.lapack import dgtsv as _gtsv
 
 from .boundary import BoundaryCondition, zero_flux
 from .history import ThermalHistory
@@ -71,13 +71,20 @@ def _cell_volumes(x, m):
     return np.diff(edges**(m+1))/(m+1)
 
 
-def _operator(x, D_nodes, m, an_profile=None, theta_act=0.0):
-    """Conservative face-flux divergence, including closed boundary cells."""
-    n = x.size
+def _geometry(x, m):
+    """The parts of the operator that depend on the grid only: cell volumes and
+    face areas over dx. They are the same at every time step."""
     dx = x[1]-x[0]
-    volumes = _cell_volumes(x, m)
-    face_area = (.5*(x[:-1]+x[1:]))**m
-    conductance = .5*(D_nodes[:-1]+D_nodes[1:])*face_area/dx
+    return _cell_volumes(x, m), (.5*(x[:-1]+x[1:]))**m/dx
+
+
+def _operator(x, D_nodes, m, an_profile=None, theta_act=0.0, geometry=None):
+    """Conservative face-flux divergence, including closed boundary cells.
+
+    ``geometry`` is ``_geometry(x, m)``, passed in by a caller that steps many times."""
+    n = x.size
+    volumes, face_over_dx = geometry if geometry is not None else _geometry(x, m)
+    conductance = .5*(D_nodes[:-1]+D_nodes[1:])*face_over_dx
     # F = D*dC/dx - theta*D*C*dAn/dx, with centred face concentration.
     drift = np.zeros(n-1) if an_profile is None else .5*theta_act*np.diff(an_profile)
     left = conductance*(1+drift)
@@ -209,7 +216,7 @@ def solve_1d(x: np.ndarray, C0: np.ndarray, D_func: Callable[[np.ndarray, float]
     t = 0.0
     step = 0
     dt_step = dt_start
-    ab = np.zeros((3, n))
+    geometry = _geometry(x, m)
     next_snap_idx = 0
     while t < t_total * (1 - 1e-12):
         if step >= max_steps:
@@ -239,7 +246,8 @@ def solve_1d(x: np.ndarray, C0: np.ndarray, D_func: Callable[[np.ndarray, float]
             dt = min(dt, t_total - t)
             if next_snap_idx < len(snaps):
                 dt = min(dt, snaps[next_snap_idx] - t)
-        lower, diag, upper = _operator(x, D_nodes, m, an_profile, float(theta_of_T(T_now)))
+        lower, diag, upper = _operator(x, D_nodes, m, an_profile, float(theta_of_T(T_now)),
+                                       geometry)
         lower, diag, upper = _apply_bc_rows(lower, diag, upper, x, D_nodes, m, bc_left, bc_right)
         if theta_time < 0.5:
             # The radial centre and drift can have a larger exit rate than
@@ -252,21 +260,26 @@ def solve_1d(x: np.ndarray, C0: np.ndarray, D_func: Callable[[np.ndarray, float]
         LC[:-1] += upper[:-1] * C[1:]
         LC[1:] += lower[1:] * C[:-1]
         rhs = C + (1.0 - theta_time) * dt * LC
-        # implicit part matrix (I - theta dt L) in banded form
-        ab[0, 1:] = -theta_time * dt * upper[:-1]
-        ab[1, :] = 1.0 - theta_time * dt * diag
-        ab[2, :-1] = -theta_time * dt * lower[1:]
+        # implicit part matrix (I - theta dt L), as its three diagonals
+        sub = -theta_time * dt * lower[1:]
+        mid = 1.0 - theta_time * dt * diag
+        sup = -theta_time * dt * upper[:-1]
         t_new = t + dt
         if bc_left.kind == "dirichlet":
             rhs[0] = bc_left.value_at(t_new)
-            ab[1, 0] = 1.0
-            ab[0, 1] = 0.0
+            mid[0] = 1.0
+            sup[0] = 0.0
         if bc_right.kind == "dirichlet":
             rhs[-1] = bc_right.value_at(t_new)
-            ab[1, -1] = 1.0
-            ab[2, -2] = 0.0
+            mid[-1] = 1.0
+            sub[-1] = 0.0
         if theta_time > 0:
-            C = solve_banded((1, 1), ab, rhs)
+            # LAPACK's tridiagonal solver (Gaussian elimination with partial
+            # pivoting), called directly: the general banded solver checks and
+            # copies its input at every step, which cost more than the solve
+            _, _, _, C, info = _gtsv(sub, mid, sup, rhs, 1, 1, 1, 1)
+            if info != 0:
+                raise np.linalg.LinAlgError("singular matrix in the diffusion step")
         else:
             C = rhs
         t = t_new

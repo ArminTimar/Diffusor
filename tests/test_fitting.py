@@ -47,6 +47,19 @@ def test_fit_recovers_a_known_time_with_composition_dependent_D():
     assert r.t_seconds == pytest.approx(t_true, rel=0.05)
 
 
+def test_one_run_through_all_scan_times_matches_separate_runs():
+    """The time scan solves once and keeps the profile at each scanned time. Its time
+    steps follow the longest run, so it matches separate runs to the accuracy of
+    the scheme, which is ample for locating the minimum the fit then refines."""
+    m = make_model(comp_dependent=True)
+    x = np.linspace(-30, 30, 41)
+    ts = np.logspace(4, 9, 12)
+    together = m.profiles(ts, x)
+    span = 0.30 - 0.18
+    for t, C in zip(ts, together):
+        assert np.max(np.abs(C - m.profile(t, x))) < 0.02 * span
+
+
 def test_fit_recovers_a_known_time_through_noise():
     rng = np.random.default_rng(3)
     m = make_model(comp_dependent=False)

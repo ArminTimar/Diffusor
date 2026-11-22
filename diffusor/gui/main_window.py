@@ -1028,6 +1028,9 @@ class MainWindow(QMainWindow):
         side.setStyleSheet(f"QScrollArea {{ background:{theme.SURFACE}; "
                            f"border-right:1px solid {theme.BORDER}; }}")
         split.addWidget(side)
+        # the graph editor takes this column's place, so the graph keeps its width
+        self.results_side = side
+        self.plot.editing.connect(self._graph_editing)
 
         right = QWidget(); right.setObjectName("Page")
         rv = QVBoxLayout(right)
@@ -1073,6 +1076,12 @@ class MainWindow(QMainWindow):
         split.setSizes([300, 1140])
         v.addWidget(split)
         return w
+
+    @Slot(bool)
+    def _graph_editing(self, on: bool):
+        self.results_side.setVisible(not on)
+        if on and self.step != RESULTS:
+            self._go(RESULTS)
 
     @staticmethod
     def _vline() -> QFrame:
@@ -2379,9 +2388,12 @@ class MainWindow(QMainWindow):
         w.progress.connect(self._mc_progress)
         w.stage.connect(self._mc_stage)
         w.draws.connect(self._mc_draws_arrived)
+        w.base.connect(self._mc_base)
         w.finished.connect(self._mc_done)
         w.failed.connect(self._work_failed)
         if self._launch(w, n):
+            self.mc_result = None
+            self._mc_run = dict(budget=budget, seed=self.sp_seed.value(), n=n)
             active = budget.active_sources()
             fixed = {}
             if "temperature" not in active:
@@ -2407,6 +2419,16 @@ class MainWindow(QMainWindow):
         self._mc_draws.extend(batch)
         if self._mc_meta is not None and getattr(self.plot, "_mc", None) is not None:
             self.plot.add_monte_carlo_draws(batch)
+
+    @Slot(object)
+    def _mc_base(self, fit):
+        # the run's own best fit, which _mc_done keeps too; Methods can show it now
+        self.fit_result = fit
+        self._stale = False
+        self._rebuild_summary()
+
+    def _mc_running(self) -> bool:
+        return any(isinstance(w, MonteCarloWorker) and t.isRunning() for t, w in self._jobs)
 
     @Slot(int, int)
     def _mc_progress(self, i, total):
@@ -2482,6 +2504,22 @@ class MainWindow(QMainWindow):
             self.plot.finish_monte_carlo(self.mc_result, self._best_curve(self.mc_result))
 
     def show_run_details(self):
+        if self._mc_running():
+            run = getattr(self, "_mc_run", None)
+            if not self._mc_draws or run is None:
+                QMessageBox.information(
+                    self, "Monte Carlo running",
+                    "The Monte Carlo is fitting the data as measured before its first draws. "
+                    "Its numbers appear here as soon as draws come in.")
+                return
+            from ..fitting.montecarlo import MonteCarloResult
+            so_far = MonteCarloResult(
+                times=np.array([d["t"] for d in self._mc_draws]),
+                t_best=(self.fit_result.t_seconds if self.fit_result is not None else float("nan")),
+                n_draws=len(self._mc_draws), n_failed=0, seed=run["seed"], budget=run["budget"])
+            richtext.show(self, "Monte Carlo so far",
+                          richtext.mc_html(so_far, running_total=run["n"]), 760, 620, modal=False)
+            return
         if self.mc_result is not None:
             richtext.show(self, "Monte Carlo result", richtext.mc_html(self.mc_result), 760, 620,
                           modal=False)
@@ -2495,11 +2533,14 @@ class MainWindow(QMainWindow):
 
     def show_methods(self):
         if self.fit_result is None:
-            QMessageBox.information(self, "Nothing yet", "Run a fit first.")
+            QMessageBox.information(
+                self, "Nothing yet",
+                "The Monte Carlo is still making its first fit. Try again in a moment."
+                if self._mc_running() else "Run a fit first.")
             return
         richtext.show(self, "Methods and references",
                       richtext.methods_html(self.fit_result, self.mc_result, self._fit_profile()),
-                      900, 720)
+                      900, 720, modal=False)
 
     def show_log(self):
         richtext.show(self, "Log", richtext.log_html(self._log_entries), 860, 560)

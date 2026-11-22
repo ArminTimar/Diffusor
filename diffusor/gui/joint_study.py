@@ -153,7 +153,7 @@ class JointStudyDialog(QDialog):
         self.scroll.setWidget(canvas)
         self.export.setEnabled(True)
         self.status.setText(f"Shared duration: {human_time(result.t_seconds)} · χ²/dof = {result.reduced_chi2:.3g}. "
-                            "Inspect each residual panel. This result holds conditions and coefficients fixed.")
+                            "Check that the model follows each profile. This result holds conditions and coefficients fixed.")
 
     @Slot(str)
     def _failed(self, message):

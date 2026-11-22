@@ -58,6 +58,12 @@ from .model import DiffusionModel
 # expected run time below which the draws stay in this process (starting workers
 # costs about a second each)
 PARALLEL_THRESHOLD_S = 6.0
+# refinement tolerance of a draw's fit (the best fit keeps 1e-10). Against 1e-10, 40
+# draws of three numerical examples moved by at most 1.7e-3 of their time (opx
+# Kizimen; olivine Laki 8e-5, Lynn olivine 2e-6), while the spread of the draws is
+# 0.2 to 1 log10 units; median and sigma of log10 t agreed to the digits reported.
+# It saves 20 to 37 per cent of the run time.
+DRAW_TOL = 1e-6
 BLAS_THREAD_VARIABLES = ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS")
 
 SOURCES = ("temperature", "fo2", "pressure", "diffusion_coefficient",
@@ -300,7 +306,7 @@ def _evaluate(model: DiffusionModel, d: _Draw, sigma, free_parameters, t_min, t_
             _scale_lengths(m, d.x_scale)
         if refit:
             r = fit_time(m, d.x, d.C, sigma, free_parameters, t_min, t_max,
-                         overrides=d.overrides, t_guess=t_guess)
+                         overrides=d.overrides, t_guess=t_guess, tol=DRAW_TOL)
             t, prof = r.t_seconds, r.C_model
         else:
             t = t_guess
@@ -387,7 +393,8 @@ def run(model: DiffusionModel, x_data, C_data, sigma=None, *,
         only_source: Optional[str] = None,
         on_draw: Optional[Callable[[dict], None]] = None,
         workers: Optional[int] = 1,
-        parallel_threshold_s: float = PARALLEL_THRESHOLD_S) -> MonteCarloResult:
+        parallel_threshold_s: float = PARALLEL_THRESHOLD_S,
+        on_base: Optional[Callable[[object], None]] = None) -> MonteCarloResult:
     """Run the Monte Carlo, re-fitting the time for every draw.
 
     ``progress(i, n)`` may return True to abort.  ``only_source`` restricts the
@@ -395,6 +402,8 @@ def run(model: DiffusionModel, x_data, C_data, sigma=None, *,
     computed.  ``on_draw(info)`` receives every successful draw: the fitted time,
     the sampled temperature, fO2 and log10 D, the perturbed data and the fitted
     profile. The interface uses it to draw the Monte Carlo while it runs.
+    ``on_base(fit)`` receives the best fit to the unperturbed data as soon as it
+    is made, before the first draw.
 
     ``workers`` above 1 fits the draws in that many processes (None or 0: all
     cores but one). A run expected to take less than ``parallel_threshold_s``
@@ -413,6 +422,8 @@ def run(model: DiffusionModel, x_data, C_data, sigma=None, *,
 
     started = time.perf_counter()
     base = fit_time(model, x_data, C_data, sigma, free_parameters, t_min, t_max)
+    if on_base is not None:
+        on_base(base)
     # a draw is seeded from the best fit and scans a narrower range: about 2.5x faster
     per_draw = (time.perf_counter() - started) / 2.5
     active = budget.active_sources()

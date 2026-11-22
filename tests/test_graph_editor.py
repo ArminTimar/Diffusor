@@ -65,15 +65,49 @@ def test_the_editor_lists_every_axis_once_and_every_curve(app):
     plot = ProfilePlot()
     plot.show_fit(_fit())
     rows = [name for _ax, _w, name in axis_rows(plot.figure)]
-    # the profile and residual panels share the distance axis, listed once
-    assert rows == ["Distance", "Composition", "Residual"]
+    # one panel: no published diffusion-chronometry figure has a residual panel
+    assert rows == ["Distance", "Composition"]
+    assert len(plot.figure.axes) == 1
     keys = {c.key for ax in plot.figure.axes for c in curves(ax)}
-    assert {"Measured points", "Best fit", "Initial profile", "Residuals", "Zero line"} <= keys
+    assert {"Measured points", "Best fit", "Initial profile"} <= keys
+    assert not any("Residual" in k for k in keys)
     editor = GraphEditor(plot)
     editor.rebuild()
     editor.close()
     editor.deleteLater()
     plot.deleteLater()
+
+
+def test_the_editor_opens_beside_the_graph_and_hides_the_summary(app):
+    """It was a separate window that covered the graph on a laptop screen."""
+    from PySide6.QtCore import Qt
+    from PySide6.QtWidgets import QTreeWidgetItemIterator
+    w = _window(app)
+    it = QTreeWidgetItemIterator(w.lst_examples)
+    while it.value():
+        if it.value().data(0, Qt.UserRole) == "sanidine_ba":
+            w.lst_examples.setCurrentItem(it.value())
+        it += 1
+    w.load_example()
+    w._go(6)
+    w.plot.show_fit(_fit())
+    app.processEvents()
+    assert w.results_side.isVisible()
+    w.plot.open_editor()
+    app.processEvents()
+    ed = w.plot._editor
+    assert ed.isVisible() and not w.results_side.isVisible()
+    assert ed.window() is w                              # in the window, not a dialog
+    # the graph keeps most of the width
+    assert w.plot.canvas.width() > 1.5 * ed.width(), (w.plot.canvas.width(), ed.width())
+    ed.done.emit()
+    app.processEvents()
+    assert not ed.isVisible() and w.results_side.isVisible()
+    w.plot.open_editor()                 # the toolbar button opens and closes it
+    w.plot.open_editor()
+    app.processEvents()
+    assert not w.plot.editor_open() and w.results_side.isVisible()
+    w.close()
 
 
 def test_changes_apply_at_once_and_survive_a_new_fit(app):
@@ -85,8 +119,8 @@ def test_changes_apply_at_once_and_survive_a_new_fit(app):
     plot.overrides["curves"]["profile/Best fit"] = {"color": "#1f77b4", "linewidth": 3.5,
                                                    "label": "my fit"}
     plot.overrides["curves"]["profile/Initial profile"] = {"visible": False}
-    plot.overrides["axes"]["residual"] = {"xlabel": "distance from the rim (µm)",
-                                          "xlim": (2.0, 20.0)}
+    plot.overrides["axes"]["profile"] = {"xlabel": "distance from the rim (µm)",
+                                         "xlim": (2.0, 20.0)}
     plot.overrides["figure"]["title"] = "Crystal 4"
     plot.restyle()
 
@@ -94,8 +128,8 @@ def test_changes_apply_at_once_and_survive_a_new_fit(app):
         fit = _curve(plot, "profile/Best fit").first
         assert to_hex(fit.get_color()) == "#1f77b4" and fit.get_linewidth() == 3.5
         assert not _curve(plot, "profile/Initial profile").visible()
-        assert plot.ax_res.get_xlabel() == "distance from the rim (µm)"
-        assert plot.ax.get_xlim() == pytest.approx((2.0, 20.0))     # shared with the residuals
+        assert plot.ax.get_xlabel() == "distance from the rim (µm)"
+        assert plot.ax.get_xlim() == pytest.approx((2.0, 20.0))
         assert plot.ax.get_title() == "Crystal 4"
         legend = [t.get_text() for t in plot.ax.get_legend().get_texts()]
         assert "my fit" in legend and "initial profile" not in legend, legend
@@ -118,8 +152,7 @@ def test_the_legend_lists_the_data_first(app):
     plot.show_fit(_fit())
     texts = [t.get_text() for t in plot.ax.get_legend().get_texts()]
     assert texts[0] == "measured" and texts[1].startswith("fit:"), texts
-    # the upper panel shares the distance axis, whose numbers are on the residual panel
-    assert not any(t.get_visible() and t.get_text() for t in plot.ax.get_xticklabels())
+    assert plot.ax.get_xlabel() == "distance (µm)"
     plot.deleteLater()
 
 
@@ -130,6 +163,24 @@ def _window(app):
     w.show()
     app.processEvents()
     return w
+
+
+def test_methods_and_details_open_for_a_fit(app):
+    """Methods raised a NameError (a line meant for the example sources), so neither
+    Methods nor Details opened anything after a fit."""
+    from diffusor.gui import richtext
+    r = _fit()
+    html = richtext.methods_html(r, None, None)
+    assert "Methods and references" in html and "Temperature" in html
+
+
+def test_details_shows_the_monte_carlo_so_far(app):
+    from diffusor.fitting.montecarlo import MonteCarloResult, UncertaintyBudget
+    from diffusor.gui import richtext
+    so_far = MonteCarloResult(times=np.array([1e6, 2e6, 3e6]), t_best=float("nan"), n_draws=3,
+                              n_failed=0, seed=1, budget=UncertaintyBudget(sigma_T_K=10))
+    html = richtext.mc_html(so_far, running_total=500)
+    assert "3 of 500 draws" in html and "still running" in html and "not yet known" in html
 
 
 def test_the_mineral_note_follows_the_species(app):

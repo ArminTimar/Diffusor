@@ -122,6 +122,15 @@ def scan_time(model: DiffusionModel, x_data, C_data, sigma=None,
         n = int(np.clip(6 * (np.log10(t_max) - np.log10(t_min)), 60, 150))
     ts = np.logspace(np.log10(t_min), np.log10(t_max), n)
     chi = np.empty(n)
+    try:
+        # one run that passes every scanned time, where the model allows it
+        m = _apply_free(model, free or {})
+        for i, Cm in enumerate(m.profiles(ts, x_data, overrides)):
+            chi[i] = float(np.sum(residuals(C_data, Cm, sigma) ** 2))
+        chi[~np.isfinite(chi)] = np.inf
+        return float(ts[int(np.argmin(chi))]), ts, chi
+    except Exception:
+        pass                    # one time at a time, so a failing time costs only itself
     for i, t in enumerate(ts):
         try:
             Cm = predict(model, float(t), x_data, free, overrides)
@@ -135,7 +144,8 @@ def fit_time(model: DiffusionModel, x_data, C_data, sigma=None,
              free_parameters: Sequence[str] = ("t",),
              t_min: float = T_MIN_DEFAULT, t_max: float = T_MAX_DEFAULT,
              overrides=None, verbose: bool = False,
-             t_guess: Optional[float] = None, scan_points: int = 60) -> FitResult:
+             t_guess: Optional[float] = None, scan_points: int = 60,
+             tol: float = 1e-10) -> FitResult:
     """Fit the diffusion time, optionally with nuisance parameters.
 
     ``t_guess`` skips the wide logarithmic scan and searches only two decades
@@ -143,6 +153,10 @@ def fit_time(model: DiffusionModel, x_data, C_data, sigma=None,
     which cuts the number of forward solves per draw by roughly five times
     without changing the answer, because each draw perturbs the conditions only
     slightly.
+
+    ``tol`` is the ``xtol`` and ``ftol`` of the refinement. Monte Carlo draws
+    pass a looser one (``montecarlo.DRAW_TOL``): a draw's time needs no more
+    precision than a small fraction of the spread of the draws.
     """
     x_data = np.asarray(x_data, dtype=float)
     C_data = np.asarray(C_data, dtype=float)
@@ -204,7 +218,7 @@ def fit_time(model: DiffusionModel, x_data, C_data, sigma=None,
     refinement_failed = ""
     try:
         sol = least_squares(fun, np.array(p0), bounds=(np.array(lo), np.array(hi)),
-                            xtol=1e-10, ftol=1e-10, max_nfev=400)
+                            xtol=tol, ftol=tol, max_nfev=400)
         t_best, free_best = unpack(sol.x)
         success, message = bool(sol.success), str(sol.message)
     except Exception as exc:                      # pragma: no cover - defensive

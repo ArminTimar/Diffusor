@@ -18,13 +18,15 @@ def _style(ax):
     ax.set_axisbelow(True)
 
 
-def _profile(ax, residual_ax, fit, mc=None, name=None):
+def _profile(ax, fit, mc=None, name=None):
+    """Measured points, model and initial state. No residual panel: published
+    diffusion-chronometry figures show the profile with its model only, and the
+    misfit is reported as a number (RMSE in the footer, chi2 in the report)."""
     order = np.argsort(fit.x_data)
     x, y = fit.x_data[order], fit.C_data[order]
     model = fit.C_model[order]
     sigma = None if fit.sigma is None else np.broadcast_to(fit.sigma, y.shape)[order]
     _style(ax)
-    _style(residual_ax)
     if mc is not None and mc.profiles is not None:
         lo, hi = mc.envelope()
         ix = np.argsort(mc.x_profiles)
@@ -46,23 +48,14 @@ def _profile(ax, residual_ax, fit, mc=None, name=None):
     # outlined, so the legend's sample dot is not taken for a measured point
     ax.legend(loc="best", frameon=True, fancybox=False, framealpha=.95, facecolor="white",
               edgecolor="#ccd7d9", fontsize=8)
-    if sigma is None:
-        r, label = y-model, "Residual"
-    else:
-        r, label = (y-model)/sigma, "Residual / σ"
-        residual_ax.axhspan(-2, 2, color="#edf5f5", zorder=0)
-    residual_ax.axhline(0, color=MUTED, linewidth=.8)
-    residual_ax.plot(x, r, "o", color=GOLD, markersize=3.6)
-    residual_ax.set_ylabel(label, color=INK)
-    residual_ax.set_xlabel("Distance (µm)", color=INK)
-    ax.tick_params(labelbottom=False)
+    ax.set_xlabel("Distance (µm)", color=INK)
 
 
 def report_figure(fit, mc=None):
-    """Measured data, model, initial state, residuals and uncertainty summary."""
-    fig = Figure(figsize=(10, 8), facecolor="#fafcfb", layout="constrained")
+    """Measured data, model, initial state and uncertainty summary."""
+    fig = Figure(figsize=(10, 7), facecolor="#fafcfb", layout="constrained")
     FigureCanvasAgg(fig)
-    grid = fig.add_gridspec(4, 1, height_ratios=(.5, 3.4, 1.1, .55))
+    grid = fig.add_gridspec(3, 1, height_ratios=(.5, 4.2, .55))
     head = fig.add_subplot(grid[0]); head.axis("off")
     head.text(0, .8, "DIFFUSOR  /  PROFILE STUDY", color=TEAL, fontsize=11, weight="bold")
     summary = f"Best-fit duration  {human_time(fit.t_seconds)}"
@@ -70,9 +63,8 @@ def report_figure(fit, mc=None):
         summary += f"    |    MC median {human_time(mc.median)} · 68% {human_time(mc.p16)}–{human_time(mc.p84)}"
     head.text(0, .12, summary, fontsize=11, color=INK)
     ax = fig.add_subplot(grid[1])
-    residual = fig.add_subplot(grid[2], sharex=ax)
-    _profile(ax, residual, fit, mc)
-    foot = fig.add_subplot(grid[3]); foot.axis("off")
+    _profile(ax, fit, mc)
+    foot = fig.add_subplot(grid[2]); foot.axis("off")
     c = fit.model.coefficient
     foot.text(0, .8, f"{reference(c.citation).short()}  |  {c.key}", fontsize=8, color=MUTED)
     history = fit.model.history
@@ -87,15 +79,13 @@ def report_figure(fit, mc=None):
 def joint_figure(result):
     """One pair of axes per clock, with an explicit shared-duration caption."""
     n = len(result.profiles)
-    fig = Figure(figsize=(10, 2.9*n+1.1), facecolor="#fafcfb", layout="constrained")
+    fig = Figure(figsize=(10, 2.5*n+1.1), facecolor="#fafcfb", layout="constrained")
     FigureCanvasAgg(fig)
     fig.suptitle(f"DIFFUSOR  /  SHARED DURATION\n{human_time(result.t_seconds)} · "
                  f"χ² / dof = {result.reduced_chi2:.3g}", x=.06, ha="left", color=INK, fontsize=14)
-    grid = fig.add_gridspec(2*n, 1, height_ratios=[3, 1]*n)
+    grid = fig.add_gridspec(n, 1)
     for i, (name, fit) in enumerate(zip(result.names, result.profiles)):
-        ax = fig.add_subplot(grid[2*i])
-        residual = fig.add_subplot(grid[2*i+1], sharex=ax)
-        _profile(ax, residual, fit, name=name)
+        _profile(fig.add_subplot(grid[i]), fit, name=name)
     return fig
 
 

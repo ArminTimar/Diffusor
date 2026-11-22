@@ -496,10 +496,20 @@ def log_html(entries: Sequence[Tuple[datetime, str, str]]) -> str:
 
 
 # ------------------------------------------------------------------ results
-def mc_html(res, coefficient=None) -> str:
-    d = Doc("Monte Carlo result", f"{res.n_draws} draws, seed {res.seed}")
+def mc_html(res, coefficient=None, running_total: Optional[int] = None) -> str:
+    """The Monte Carlo numbers. ``running_total`` marks a run still going, with
+    ``res`` holding the draws finished so far out of that many."""
+    if running_total is not None:
+        d = Doc("Monte Carlo so far",
+                f"{res.n_draws} of {running_total} draws, seed {res.seed}, still running")
+        d.box("The run is still going. These numbers change as more draws come in; "
+              "open Details again for the latest.", "accent")
+    else:
+        d = Doc("Monte Carlo result", f"{res.n_draws} draws, seed {res.seed}")
+    best = (esc(human_time(res.t_best)) if np.isfinite(res.t_best) and res.t_best > 0
+            else "not yet known")
     d.h("Time")
-    d.kv([("Best fit", f"<b>{esc(human_time(res.t_best))}</b>"),
+    d.kv([("Best fit", f"<b>{best}</b>"),
           ("Median", f"<b>{esc(human_time(res.median))}</b>"),
           ("68% interval", esc(f"{human_time(res.p16)} to {human_time(res.p84)}")),
           ("95% interval", esc(f"{human_time(res.p2_5)} to {human_time(res.p97_5)}")),
@@ -585,9 +595,6 @@ def methods_html(fit_result, mc_result=None, profile=None) -> str:
         d.ul(esc(n) for n in profile.notes)
 
     d.h("Conditions")
-    res = s.get("resolution", "No correction")
-    if "beam_width_um" in s:
-        res += f", {s['beam_width_um']:g} um"
     rows = [("Temperature", f"{cond.T_K - 273.15:.1f} °C ({cond.T_K:.2f} K)"),
             ("Pressure", f"{cond.P_Pa / 1e6:.1f} MPa")]
     if cond.log_fo2_bar is not None:

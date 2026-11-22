@@ -20,6 +20,7 @@
   --radius: 10px;
   --content: 760px;
   --gutter: 24px;
+  --topbar-h: 61px; /* 60px bar + 1px border; the phone layout sets its own */
   color-scheme: light;
 }
 
@@ -183,9 +184,16 @@ a { color: var(--text); }
 
 /* ---------- hero ---------- */
 
+/* the header fills the first screen below the top bar, with its content
+   centred vertically; the page itself starts only after scrolling */
 .hero {
   position: relative;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: calc(100vh - var(--topbar-h));
+  min-height: calc(100svh - var(--topbar-h));
   border-bottom: 1px solid var(--line);
   background:
     radial-gradient(ellipse 70% 60% at 50% 0%, var(--bg) 30%, transparent 100%),
@@ -213,6 +221,7 @@ a { color: var(--text); }
 
 .hero-inner {
   position: relative;
+  width: 100%;
   max-width: 880px;
   margin: 0 auto;
   padding: 40px var(--gutter) 44px;
@@ -567,7 +576,7 @@ div.highlighter-rouge:hover .copy-btn, .copy-btn:focus { opacity: 1; }
 }
 
 @media (max-width: 820px) {
-  :root { --gutter: 16px; }
+  :root { --gutter: 16px; --topbar-h: 97px; }
   html { scroll-padding-top: 120px; }
   .topbar-inner { height: auto; flex-wrap: wrap; gap: 0; padding-top: 10px; }
   .brand { height: 36px; }

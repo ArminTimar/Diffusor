@@ -188,7 +188,8 @@ a { color: var(--text); }
    centred vertically; the page itself starts only after scrolling */
 .hero {
   position: relative;
-  overflow: hidden;
+  /* not overflow: hidden, which would cut off the download list where it drops
+     below the header; the curves are sized to the box and need no clipping */
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -275,6 +276,100 @@ a { color: var(--text); }
   color: var(--text);
 }
 .btn-ghost:hover { border-color: var(--text); }
+
+/* ---------- download list under the Download button ---------- */
+
+.dl-toggle { gap: 8px; }
+.dl-toggle .chev {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 0.2s;
+}
+.dl-toggle[aria-expanded="true"] .chev { transform: rotate(180deg); }
+
+/* drops down over the page below, so opening it moves nothing: the header centres
+   its content vertically, and a list taking up room pushed the button away from
+   under the pointer */
+.cta { position: relative; }
+.downloads {
+  position: absolute;
+  top: calc(100% + 12px);
+  left: 50%;
+  z-index: 20;
+  width: min(560px, calc(100vw - 2 * var(--gutter)));
+  transform: translateX(-50%);
+  padding: 6px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--bg);
+  box-shadow: var(--shadow);
+  text-align: left;
+}
+.downloads[hidden] { display: none; }
+
+.dl-list { margin: 0; padding: 0; list-style: none; }
+.dl-list li + li { border-top: 1px solid var(--line); }
+.dl-list a {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas: "name size" "detail size";
+  align-items: center;
+  gap: 1px 16px;
+  padding: 10px 14px;
+  border-radius: 9px;
+  color: var(--text);
+  text-decoration: none;
+  transition: background-color 0.15s;
+}
+.dl-list a:hover, .dl-list a:focus-visible { background: var(--surface); }
+.dl-list a:focus-visible { outline: 2px solid var(--text); outline-offset: -2px; }
+
+.dl-name { grid-area: name; font-size: 15px; font-weight: 600; }
+.dl-detail { grid-area: detail; font-size: 13px; color: var(--muted); }
+.dl-size {
+  grid-area: size;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font: 500 12.5px/1 var(--mono);
+  color: var(--muted);
+}
+/* a download arrow after the size, drawn with CSS so the markup stays plain */
+.dl-size::after {
+  content: "";
+  width: 16px;
+  height: 16px;
+  background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M8 2.5v8M4.5 7.5 8 11l3.5-3.5M3 13.5h10'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M8 2.5v8M4.5 7.5 8 11l3.5-3.5M3 13.5h10'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+.dl-list a:hover .dl-size { color: var(--text); }
+
+.dl-yours {
+  display: none;
+  margin-left: 8px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--invert-bg);
+  color: var(--invert-text);
+  font-size: 11px;
+  font-weight: 500;
+  vertical-align: 2px;
+}
+.is-yours .dl-yours { display: inline-block; }
+
+.dl-note {
+  margin: 6px 14px 8px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+.dl-note a { color: var(--text-2); }
 
 .facts {
   display: flex;

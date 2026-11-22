@@ -1,5 +1,6 @@
-// Diffusor documentation site: theme switch, heading anchors, the
-// "On this page" list, scrollable tables and copy buttons on code blocks.
+// Diffusor documentation site: theme switch, the download list, heading
+// anchors, the "On this page" list, scrollable tables and copy buttons on code
+// blocks.
 (function () {
   "use strict";
 
@@ -16,6 +17,78 @@
       root.dataset.theme = next;
       try { localStorage.setItem("diffusor-theme", next); } catch (e) {}
     });
+  }
+
+  // ----- the Download button opens the list of installers instead of GitHub
+  var dlToggle = document.querySelector(".dl-toggle");
+  var dlPanel = document.getElementById("downloads");
+  if (dlToggle && dlPanel) setUpDownloads(dlToggle, dlPanel);
+
+  function setUpDownloads(button, panel) {
+    // the visitor's system, to tag its row; two Mac or two Linux files are both tagged
+    var ua = navigator.userAgent || "";
+    var platform = (navigator.userAgentData && navigator.userAgentData.platform) ||
+      navigator.platform || "";
+    var os = /Win/i.test(platform) || /Windows/i.test(ua) ? "windows"
+      : /Mac/i.test(platform) && !/iPhone|iPad/i.test(ua) ? "mac"
+      : /Linux|X11/i.test(platform) && !/Android/i.test(ua) ? "linux" : "";
+    panel.querySelectorAll("li[data-os]").forEach(function (li) {
+      if (li.dataset.os === os) li.classList.add("is-yours");
+    });
+
+    var loaded = false;
+    function open(show) {
+      panel.hidden = !show;
+      button.setAttribute("aria-expanded", String(show));
+      if (show && !loaded) { loaded = true; latestRelease(); }
+      if (show) {
+        // on a short screen the list runs below the fold; scroll just enough to show it
+        var calm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        panel.scrollIntoView({ block: "nearest", behavior: calm ? "auto" : "smooth" });
+      }
+    }
+    button.addEventListener("click", function (ev) {
+      ev.preventDefault();
+      open(panel.hidden);
+    });
+    document.addEventListener("keydown", function (ev) {
+      if (ev.key === "Escape" && !panel.hidden) { open(false); button.focus(); }
+    });
+    document.addEventListener("click", function (ev) {
+      if (!panel.hidden && !panel.contains(ev.target) && !button.contains(ev.target)) open(false);
+    });
+    // the "How to open it" link jumps to the install notes further down the page
+    panel.querySelectorAll('a[href^="#"]').forEach(function (a) {
+      a.addEventListener("click", function () { open(false); });
+    });
+
+    // The links in the page point at the version the site was built with. The
+    // latest release is asked for when the list first opens, so the links and
+    // sizes follow a release made after the site was built. If GitHub does not
+    // answer, the built links stay.
+    function latestRelease() {
+      var repo = panel.dataset.repo;
+      if (!repo || !window.fetch) return;
+      fetch("https://api.github.com/repos/" + repo + "/releases/latest",
+            { headers: { Accept: "application/vnd.github+json" } })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (release) {
+          if (!release || !release.assets) return;
+          panel.querySelectorAll("a[data-suffix]").forEach(function (a) {
+            var asset = release.assets.filter(function (x) {
+              return x.name.slice(-a.dataset.suffix.length) === a.dataset.suffix;
+            })[0];
+            if (!asset) return;
+            a.href = asset.browser_download_url;
+            var size = a.querySelector(".dl-size");
+            if (size) size.textContent = Math.round(asset.size / 1048576) + " MB";
+          });
+          var label = button.querySelector(".dl-label");
+          var tag = String(release.tag_name || "").replace(/^v/, "");
+          if (label && tag) label.textContent = "Download v" + tag;
+        })
+        .catch(function () {});
+    }
   }
 
   if (!prose) return;

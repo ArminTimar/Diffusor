@@ -27,6 +27,7 @@ plugins:
   - jekyll-seo-tag
   - jekyll-sitemap
 
-# Search Console: paste the content value of Google's "HTML tag" here, e.g.
-# webmaster_verifications:
-#   google: abc123...
+# Google Search Console ownership check (the "HTML tag" method); jekyll-seo-tag
+# writes it into every page as <meta name="google-site-verification">
+webmaster_verifications:
+  google: BPAjPFZVYYkjWFw3X6fAAFDuw4x_tSfaMm8FgiPWrwk

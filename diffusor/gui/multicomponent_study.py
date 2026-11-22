@@ -84,6 +84,16 @@ def _ends(x, y, frac=0.15):
     return float(np.median(y[:n])), float(np.median(y[-n:]))
 
 
+def _family_text(label: str) -> str:
+    """A garnet tracer family without the words its tab and row already say:
+    "Garnet Fe, Mg, Mn, Ca tracer laws, Carlson (2006)" -> "Fe, Mg, Mn, Ca, Carlson (2006)"."""
+    t = label[len("Garnet "):] if label.startswith("Garnet ") else label
+    t = t.replace(" tracer laws,", ",")
+    if t.startswith("tracer laws, "):
+        t = t[len("tracer laws, "):]
+    return t[:1].upper() + t[1:]
+
+
 class MulticomponentStudyDialog(QDialog):
     def __init__(self, owner):
         super().__init__(owner)
@@ -121,7 +131,7 @@ class MulticomponentStudyDialog(QDialog):
     def _garnet_tab(self):
         w = QWidget()
         outer = QHBoxLayout(w)
-        left = self._settings_column(outer)
+        left, foot = self._settings_column(outer)
         info = QLabel("Load a table with the distance and one column per cation (Fe, Mg, Mn, Ca as "
                       "apfu, mole fractions or end-member fractions). Each row is normalised to "
                       "Fe + Mg + Mn + Ca = 1. The four components are modelled together with the "
@@ -161,9 +171,13 @@ class MulticomponentStudyDialog(QDialog):
         self.g_family.setSizeAdjustPolicy(QComboBox.AdjustToMinimumContentsLengthWithIcon)
         self.g_family.setMinimumContentsLength(8)
         for f in families_for("garnet"):
-            self.g_family.addItem(f.label, f.key)
+            self.g_family.addItem(_family_text(f.label), f.key)
+            self.g_family.setItemData(self.g_family.count() - 1, f.label, Qt.ToolTipRole)
         self.g_family.currentIndexChanged.connect(self._garnet_family_changed)
-        mf.addRow("Tracer laws", self.g_family)
+        # a row of its own, the full width of the card: beside its label the names were
+        # cut off ("... Carlson (2")
+        mf.addRow(QLabel("Tracer laws"))
+        mf.addRow(self.g_family)
         self.g_T = _spin(300, 1600, 750, 1, 5, " °C")
         self.g_Tend = _spin(300, 1600, 650, 1, 5, " °C")
         self.g_cool = QCheckBox("cool linearly to")
@@ -211,13 +225,14 @@ class MulticomponentStudyDialog(QDialog):
         left.addWidget(cond)
         btns = QHBoxLayout()
         self.g_run = QPushButton("Fit duration")
+        self.g_run.setObjectName("Primary")
         self.g_run.clicked.connect(self.run_garnet)
         self.g_export = QPushButton("Export…")
         self.g_export.setEnabled(False)
         self.g_export.clicked.connect(self.export_garnet)
         btns.addWidget(self.g_run)
         btns.addWidget(self.g_export)
-        left.addLayout(btns)
+        foot.addLayout(btns)        # under the scrolling column, always in view
         left.addStretch(1)
 
         right = QVBoxLayout()
@@ -365,7 +380,7 @@ class MulticomponentStudyDialog(QDialog):
     def _isotope_tab(self):
         w = QWidget()
         outer = QHBoxLayout(w)
-        left = self._settings_column(outer)
+        left, foot = self._settings_column(outer)
         info = QLabel("Set up the concentration profile, coefficient, conditions and initial state in "
                       "the main window, then read them here and choose the delta-value columns of the "
                       "same table. Li and other dilute elements: each isotope diffuses with "
@@ -420,13 +435,14 @@ class MulticomponentStudyDialog(QDialog):
         left.addWidget(opts)
         btns = QHBoxLayout()
         self.i_run = QPushButton("Fit duration")
+        self.i_run.setObjectName("Primary")
         self.i_run.clicked.connect(self.run_isotopes)
         self.i_export = QPushButton("Export…")
         self.i_export.setEnabled(False)
         self.i_export.clicked.connect(self.export_isotopes)
         btns.addWidget(self.i_run)
         btns.addWidget(self.i_export)
-        left.addLayout(btns)
+        foot.addLayout(btns)        # under the scrolling column, always in view
         left.addStretch(1)
         right = QVBoxLayout()
         outer.addLayout(right, 1)
@@ -589,7 +605,11 @@ class MulticomponentStudyDialog(QDialog):
     # ================================================================ shared
     @staticmethod
     def _settings_column(outer):
-        """A fixed-width, scrollable settings column, so the plots get the rest of the width."""
+        """A fixed-width, scrollable settings column, so the plots get the rest of the width.
+
+        Returns the column and a footer under it that does not scroll, for the buttons
+        that run the fit: at the end of the column they were out of view on a laptop
+        screen, so the window seemed to have no way to start."""
         holder = QWidget()
         column = QVBoxLayout(holder)
         column.setContentsMargins(0, 0, 6, 0)
@@ -597,9 +617,15 @@ class MulticomponentStudyDialog(QDialog):
         area.setWidgetResizable(True)
         area.setWidget(holder)
         area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        area.setFixedWidth(500)
-        outer.addWidget(area, 0)
-        return column
+        side = QWidget()
+        side.setFixedWidth(500)
+        sv = QVBoxLayout(side)
+        sv.setContentsMargins(0, 0, 0, 0)
+        sv.addWidget(area, 1)
+        foot = QVBoxLayout()
+        sv.addLayout(foot)
+        outer.addWidget(side, 0)
+        return column, foot
 
     def _launch(self, job, done):
         if self.thread is not None and self.thread.isRunning():

@@ -406,3 +406,132 @@ def test_image_windows_fit_the_screen(app):
         # small screens: the content scrolls rather than pushing the buttons off screen
         assert dlg.minimumSizeHint().height() < 450
         dlg.close()
+
+
+def test_a_long_file_name_does_not_widen_the_settings_panel(app, tmp_path):
+    """One long unbroken name once set the panel's width and cut off its right edge."""
+    from PIL import Image
+    from diffusor.gui.image_extractor import ImageExtractorDialog
+    img, _ = _edge()
+    name = "Shinmoedake_2011_sample_SM11-03_opx_crystal_07_MgKa_map_1024x768_area2.png"
+    Image.fromarray(np.clip(img, 0, 255).astype(np.uint8)).save(tmp_path / name)
+    dlg = ImageExtractorDialog()
+    dlg.resize(1250, 620)
+    dlg.show()
+    dlg.open_image(str(tmp_path / name))
+    app.processEvents()
+    from diffusor.gui.widgets import FitWidthScrollArea
+    area = dlg.findChild(FitWidthScrollArea)
+    panel = area.widget()
+    assert panel.isAncestorOf(dlg.lbl_file)
+    assert panel.width() <= area.viewport().width(), (panel.width(), area.viewport().width())
+    assert "​" in dlg.lbl_file.text()          # the name may wrap after _ - and .
+    dlg.close()
+
+
+def test_a_click_taken_by_pan_says_so_and_a_draw_tool_ends_pan(app, tmp_path):
+    from types import SimpleNamespace
+    from PIL import Image
+    from diffusor.gui.image_extractor import ImageExtractorDialog
+    img, _ = _edge()
+    Image.fromarray(np.clip(img, 0, 255).astype(np.uint8)).save(tmp_path / "bse.png")
+    dlg = ImageExtractorDialog()
+    dlg.open_image(str(tmp_path / "bse.png"))
+    dlg.toolbar.pan()
+    dlg._on_click(SimpleNamespace(inaxes=dlg.ax, xdata=50.0, ydata=50.0, button=1,
+                                  dblclick=False))
+    assert dlg.guideline == []
+    assert "Pan is switched on" in dlg.lbl_status.text()
+    dlg.tool_buttons["boundary"].click()
+    assert not dlg._nav_mode()
+    for x, y in (START, END):
+        dlg._on_click(SimpleNamespace(inaxes=dlg.ax, xdata=x, ydata=y, button=1, dblclick=False))
+    dlg.recompute()
+    assert dlg.extraction is not None
+    assert "profiles read across the line" in dlg.lbl_status.text()
+    dlg.close()
+
+
+def test_a_colour_map_without_a_legend_says_why_nothing_is_drawn(app, tmp_path):
+    from PIL import Image
+    from diffusor.gui.image_extractor import ImageExtractorDialog
+    _, rgb = _rainbow_map()
+    Image.fromarray((rgb * 255).round().astype(np.uint8)).save(tmp_path / "mg.png")
+    dlg = ImageExtractorDialog()
+    dlg.open_image(str(tmp_path / "mg.png"))
+    dlg.cmb_mode.setCurrentIndex(dlg.cmb_mode.findData("colour_scale"))
+    dlg.guideline = [START, END]
+    dlg.recompute()
+    assert dlg.extraction is None
+    assert "colour legend is not set" in dlg.lbl_status.text()
+    dlg.close()
+
+
+def test_the_boundary_is_one_straight_line_of_two_clicks(app, tmp_path):
+    """Click where the line starts and where it ends; a third click starts a new line."""
+    from types import SimpleNamespace
+    from PIL import Image
+    from diffusor.gui.image_extractor import ImageExtractorDialog
+    img, _ = _edge()
+    Image.fromarray(np.clip(img, 0, 255).astype(np.uint8)).save(tmp_path / "bse.png")
+    dlg = ImageExtractorDialog()
+    dlg.open_image(str(tmp_path / "bse.png"))
+
+    def click(x, y, button=1):
+        dlg._on_click(SimpleNamespace(inaxes=dlg.ax, xdata=x, ydata=y, button=button,
+                                      dblclick=False))
+    assert "starts" in dlg.lbl_status.text()
+    click(*START)
+    assert "ends" in dlg.lbl_status.text()
+    # a dashed line follows the mouse to show where the line will go
+    dlg._on_motion(SimpleNamespace(inaxes=dlg.ax, xdata=200.0, ydata=100.0))
+    assert dlg._rubber is not None and list(dlg._rubber.get_xdata()) == [START[0], 200.0]
+    click(*END)
+    assert dlg._rubber is None
+    dlg.recompute()
+    assert dlg.guideline == [START, END] and dlg.extraction is not None
+    assert "profiles read across the line" in dlg.lbl_status.text()
+    click(100.0, 100.0)                     # a new line
+    assert dlg.guideline == [(100.0, 100.0)]
+    click(0, 0, button=3)                   # right-click removes it
+    assert dlg.guideline == []
+    dlg.close()
+
+
+def test_an_exclusion_area_closes_on_its_first_corner(app, tmp_path):
+    """Before, only a right-click closed an area, and nothing on screen said so."""
+    from types import SimpleNamespace
+    from PIL import Image
+    from diffusor.gui.image_extractor import ImageExtractorDialog
+    img, _ = _edge()
+    Image.fromarray(np.clip(img, 0, 255).astype(np.uint8)).save(tmp_path / "bse.png")
+    dlg = ImageExtractorDialog()
+    dlg.open_image(str(tmp_path / "bse.png"))
+    dlg._set_tool("exclude")
+    corners = [(100.0, 100.0), (160.0, 100.0), (160.0, 160.0)]
+
+    def click(x, y):
+        px, py = dlg.ax.transData.transform((x, y))
+        dlg._on_click(SimpleNamespace(inaxes=dlg.ax, xdata=x, ydata=y, x=px, y=py,
+                                      button=1, dblclick=False))
+    for c in corners:
+        click(*c)
+    assert "Click the first corner again" in dlg.lbl_status.text()
+    click(101.0, 100.5)                       # on the first corner
+    assert dlg.exclusions == [corners] and dlg.current_poly == []
+    dlg.close()
+
+
+def test_the_scale_bar_asks_for_its_second_end(app, tmp_path):
+    from types import SimpleNamespace
+    from PIL import Image
+    from diffusor.gui.image_extractor import ImageExtractorDialog
+    img, _ = _edge()
+    Image.fromarray(np.clip(img, 0, 255).astype(np.uint8)).save(tmp_path / "bse.png")
+    dlg = ImageExtractorDialog()
+    dlg.open_image(str(tmp_path / "bse.png"))
+    dlg._set_tool("scale")
+    dlg._on_click(SimpleNamespace(inaxes=dlg.ax, xdata=10.0, ydata=10.0, x=0, y=0, button=1,
+                                  dblclick=False))
+    assert "other end of the scale bar" in dlg.lbl_status.text()
+    dlg.close()

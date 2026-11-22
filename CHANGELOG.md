@@ -4,6 +4,50 @@ What changed between releases, newest first. The text under a version heading
 is what goes into the GitHub release, so it is written for someone deciding
 whether to update. Commit messages hold the details.
 
+## 0.7.1 (22 November 2026)
+
+Fixes to the image extractor and the study windows: a simpler boundary tool,
+nothing cut off, and every half-finished drawing says what the next click does.
+No result changes.
+
+### Changed
+
+- **The boundary in the image extractor is one straight line.** Click where it
+  starts, then where it ends, and the profiles appear; a dashed line follows the
+  mouse after the first click. A further click starts a new line and
+  right-click removes it. Before, every click added another point to a bent
+  line, and nothing said how to finish it.
+- **Exclude areas close on their first corner.** Click the corners, then the
+  first corner again (right-click and double-click still work). The scale bar,
+  legend and exclusion tools also show a dashed line to the mouse while half
+  drawn, and the status line says what the next click does.
+- **Multicomponent and isotope study:** Fit duration and Export sit under the
+  settings, always in view. They were at the end of the scrolling column, out of
+  sight on a laptop screen.
+- **Shared-duration study:** Fit is available once two profiles are added, and
+  the window says so instead of failing on the click.
+- **Published validation library:** studies are listed by name ("Iovine et al.
+  (2017)") rather than by internal key, a double-click loads a profile, and the
+  labels say what loading does ("settings included" or "measurements only").
+
+### Fixed
+
+- **The image extractor's settings panel was cut off on the right** when the
+  image had a long file name: the name could not wrap, so it set the width of
+  the whole panel. Names now wrap, and the panel never grows past its width.
+- **Drawing a boundary could silently do nothing.** While the toolbar's pan or
+  zoom was on, clicks on the image moved the view and no point was added, with
+  no message; and in colour-scale mode without a legend no profile could be
+  read, with the reason only at the bottom of the panel. Choosing a Draw tool
+  now switches pan and zoom off, a click taken by them says so, and a status
+  line under the Draw tools says what is still missing or what went wrong.
+- The empty profile preview no longer shows blank axes from 0 to 1.
+- **Text cut off in three drop-downs.** The image extractor's outlier method
+  read "Median +/- k M" (it now has its own line, with k under it), the garnet
+  tracer laws in the multicomponent study ran off the end of their box (they now
+  have a full-width row and drop the words the row already says, with the full
+  name as a tooltip), and the graph editor's "No marker" lost its last letter.
+
 ## 0.7.0 (20 November 2026)
 
 A new graph editor and a round of interface fixes. No result changes.

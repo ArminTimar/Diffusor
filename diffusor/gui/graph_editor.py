@@ -440,6 +440,9 @@ def _combo(items, current) -> QComboBox:
         cmb.addItem(text, data)
     i = cmb.findData(current)
     cmb.setCurrentIndex(i if i >= 0 else 0)
+    # never narrower than the longest entry: the grid squeezed "No marker" to "No marke"
+    cmb.setSizeAdjustPolicy(QComboBox.AdjustToContents)
+    cmb.setMinimumWidth(cmb.sizeHint().width())
     return cmb
 
 

@@ -59,7 +59,8 @@ class JointStudyDialog(QDialog):
         for button in (self.add, self.remove, self.fit, self.stop, self.export):
             buttons.addWidget(button)
         layout.addLayout(buttons)
-        self.status = QLabel("No profiles added.")
+        self.fit.setObjectName("Primary")
+        self.status = QLabel(self.EMPTY)
         self.status.setWordWrap(True)
         layout.addWidget(self.status)
         self.scroll = QScrollArea()
@@ -70,11 +71,29 @@ class JointStudyDialog(QDialog):
         self.fit.clicked.connect(self.run_fit)
         self.stop.clicked.connect(self.abort)
         self.export.clicked.connect(self.export_study)
+        self.list.currentRowChanged.connect(lambda _row: self._update_buttons())
+        self._update_buttons()
+
+    EMPTY = ("No profiles yet. Set up the first profile in the main window, then press "
+             "Add current profile. A shared duration needs two or more.")
+
+    def _update_buttons(self):
+        """Fit only with two profiles or more, Remove only with one selected."""
+        running = self.thread is not None and self.thread.isRunning()
+        self.add.setEnabled(not running)
+        self.fit.setEnabled(not running and len(self.profiles) >= 2)
+        self.fit.setToolTip("" if len(self.profiles) >= 2 else "Add at least two profiles first")
+        self.remove.setEnabled(not running and self.list.currentRow() >= 0)
 
     def _invalidate(self):
         self.result = None
         self.export.setEnabled(False)
-        self.status.setText(f"{len(self.profiles)} profiles in this study. Fit to update results.")
+        n = len(self.profiles)
+        self.status.setText(self.EMPTY if n == 0 else
+                            "1 profile in this study. Add at least one more to fit a shared "
+                            "duration." if n == 1 else
+                            f"{n} profiles in this study. Press Fit shared duration.")
+        self._update_buttons()
         old = self.scroll.takeWidget()
         if old is not None:
             old.deleteLater()
@@ -123,9 +142,8 @@ class JointStudyDialog(QDialog):
 
     @Slot()
     def _idle(self):
-        for b in (self.add, self.remove, self.fit):
-            b.setEnabled(True)
         self.stop.setEnabled(False)
+        self._update_buttons()
 
     @Slot(object)
     def _done(self, result):

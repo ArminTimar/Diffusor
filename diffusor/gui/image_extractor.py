@@ -9,8 +9,10 @@ fraction of a second, so what is saved is always what is shown.
 Mouse, with the matching tool selected (the plot toolbar's pan and zoom tools
 take the mouse while they are on):
 
-* Boundary: click to add guideline points, right-click to remove the last. The
-  lines start on the right of the guideline, looking from its first point.
+* Boundary: a straight line, one click at each end; a dashed line follows the
+  mouse after the first. A further click starts a new line, right-click removes
+  it. Profiles are read across the line. (A bent guideline of several points,
+  as NIDIS allows, still comes back from a saved workbook's settings.)
 * Scale bar: click both ends of the scale bar and type its length.
 * Legend: click the low-value end of the colour legend, then the high end.
   A legend saved as a separate image is opened and picked in its own window.
@@ -18,6 +20,7 @@ take the mouse while they are on):
 """
 from __future__ import annotations
 
+import html
 import io
 import traceback
 from pathlib import Path
@@ -43,17 +46,30 @@ from .widgets import (card, field, fit_to_screen, ghost_button, note, pair, prim
                       scrollable)
 
 TOOLS = {
-    "boundary": "Click along the zone boundary to add guideline points. Right-click removes "
-                "the last point. The lines start on the right of the guideline, looking from "
-                "its first point.",
+    "boundary": "Draw a straight line along the zone boundary: click where it starts, then "
+                "where it ends. The profiles are read across this line. Click again to draw "
+                "a new line; right-click removes it.",
     "scale": "Click both ends of the scale bar, then type its length.",
     "legend": "Click the low-value end of the colour legend, then the high-value end. Stay "
               "inside the coloured bar.",
-    "exclude": "Click around an inclusion, crack or lamella. Right-click closes the area.",
+    "exclude": "Click the corners of an area to leave out (an inclusion, crack or lamella). "
+               "Close it by clicking its first corner again, or by right-clicking.",
 }
 COLORMAPS = ["jet", "turbo", "rainbow", "nipy_spectral", "viridis", "plasma", "inferno",
              "magma", "cividis", "hot", "gray"]
 MAX_DRAWN_LINES = 40
+
+
+def _breakable(name: str) -> str:
+    """A file name as rich text that may wrap after _ - and . as well as at spaces.
+
+    A long name such as ``sample_SM11-03_opx_07_MgKa_map.tif`` is one word to Qt,
+    so it set the width of the whole settings panel and pushed its right edge out
+    of view."""
+    out = html.escape(name)
+    for ch in "_-.":
+        out = out.replace(ch, ch + "​")
+    return out
 MAX_REJECTED_DOTS = 20000
 
 
@@ -197,6 +213,7 @@ class ImageExtractorDialog(QDialog):
         self.legend_image_pts: Optional[List[tuple]] = None
         self.extraction = None
         self._overlay = []
+        self._rubber = None                    # dashed line to the mouse while drawing
         self._timer = QTimer(self)
         self._timer.setSingleShot(True)
         self._timer.setInterval(120)
@@ -210,8 +227,13 @@ class ImageExtractorDialog(QDialog):
         split.addWidget(self._preview_panel())
         split.setSizes([620, 240])
         outer.addWidget(split, 1)
-        side = scrollable(self._controls())
+        side = scrollable(self._controls(), fit_width=True)
         side.setFixedWidth(400)
+        # a long colour-map or channel name must not make the panel wider than its 400 px
+        # (the drop-downs that share a row with another control keep their full width)
+        for cmb in (self.cmb_mode, self.cmb_channel, self.cmb_legend):
+            cmb.setSizeAdjustPolicy(QComboBox.AdjustToMinimumContentsLengthWithIcon)
+            cmb.setMinimumContentsLength(8)
         outer.addWidget(side)
         self._set_tool("boundary")
         self._mode_widgets()
@@ -232,6 +254,7 @@ class ImageExtractorDialog(QDialog):
         self.ax.text(0.5, 0.5, "Open an image to begin", ha="center", va="center",
                      color=theme.TEXT_MUTED, transform=self.ax.transAxes)
         self.canvas.mpl_connect("button_press_event", self._on_click)
+        self.canvas.mpl_connect("motion_notify_event", self._on_motion)
         self.canvas.mpl_connect("key_press_event", self._on_key)
         return w
 
@@ -281,9 +304,13 @@ class ImageExtractorDialog(QDialog):
         b.addWidget(row(*btns[2:]))
         self.lbl_tool = note("", "Hint")
         b.addWidget(self.lbl_tool)
+        # what the drawing has produced, or why it has produced nothing: kept here, next
+        # to the tools, so the reason is in view and not at the bottom of the panel
+        self.lbl_status = note("Open an image to begin.", "Sub")
+        b.addWidget(self.lbl_status)
         undo = ghost_button("Undo point")
         undo.clicked.connect(self.undo_point)
-        clr = ghost_button("Clear boundary")
+        clr = ghost_button("Clear line")
         clr.clicked.connect(self.clear_boundary)
         clx = ghost_button("Clear areas")
         clx.clicked.connect(self.clear_exclusions)
@@ -379,7 +406,9 @@ class ImageExtractorDialog(QDialog):
         self.cmb_clip.setCurrentIndex(1)
         self.sp_k = _spin(0.5, 10.0, 3.0, 1, 0.5)
         self.cmb_clip.currentIndexChanged.connect(self._clip_changed)
-        b.addWidget(field("Outliers across the lines", row(self.cmb_clip, self.sp_k, spacing=6)))
+        # the method on its own line: beside the k box it was cut to "Median +/- k M"
+        b.addWidget(field("Outliers across the lines", self.cmb_clip))
+        b.addWidget(field("k (in MADs or SDs from the centre)", self.sp_k))
         self.chk_drop = QCheckBox("Drop whole lines with more rejected than")
         self.chk_drop.setChecked(True)
         self.sp_drop = _spin(1.0, 100.0, 50.0, 0, 5.0, " %")
@@ -446,8 +475,10 @@ class ImageExtractorDialog(QDialog):
             self.guideline, self.exclusions, self.legend_pts = [], [], None
         self.current_poly, self.clicks = [], []
         self.color_scale = None
-        self.lbl_file.setText(f"<b>{Path(image.source).name}</b><br>{image.describe()}"
-                              + "".join(f"<br>{n}" for n in image.notes))
+        self.lbl_file.setText(f"<b>{_breakable(Path(image.source).name)}</b>"
+                              f"<br>{html.escape(image.describe())}"
+                              + "".join(f"<br>{html.escape(n)}" for n in image.notes))
+        self.lbl_file.setToolTip(str(image.source))
         if image.pixel_size_um:
             self.sp_px.setValue(image.pixel_size_um)
             self.lbl_px.setText(f"From {image.pixel_size_source}. Check it against the scale "
@@ -475,6 +506,7 @@ class ImageExtractorDialog(QDialog):
         self.sp_low.setValue(lo)
         self.sp_high.setValue(hi)
         self._mode_changed()
+        self._update_status()
 
     def _mode(self) -> str:
         return self.cmb_mode.currentData() or "luminance"
@@ -603,6 +635,7 @@ class ImageExtractorDialog(QDialog):
         self._schedule()
 
     def _draw_image(self):
+        self._rubber = None                 # cleared with the figure
         self.fig.clear()
         self.ax = self.fig.add_subplot(111)
         self.ax.set_axis_off()
@@ -625,30 +658,56 @@ class ImageExtractorDialog(QDialog):
         self._draw_overlay()
 
     # ================================================================ mouse
+    def _nav_mode(self) -> str:
+        """The toolbar's pan or zoom mode, "" when neither is on."""
+        return str(getattr(self.toolbar.mode, "value", self.toolbar.mode) or "")
+
     def _set_tool(self, key: str):
         self.tool = key
         self.clicks = []
         for k, b in self.tool_buttons.items():
             b.setChecked(k == key)
         self.lbl_tool.setText(TOOLS[key])
+        # picking a drawing tool means drawing: pan and zoom would take the clicks
+        mode = self._nav_mode()
+        if mode == "pan/zoom":
+            self.toolbar.pan()
+        elif mode == "zoom rect":
+            self.toolbar.zoom()
+        if hasattr(self, "lbl_status"):
+            self._update_status()
 
     def _on_click(self, ev):
-        if self.image is None or ev.inaxes is not self.ax or self.toolbar.mode:
+        if self.image is None or ev.inaxes is not self.ax:
+            return
+        if self._nav_mode():
+            # the toolbar has the mouse; say so rather than ignoring the click silently
+            name = "Pan" if self._nav_mode() == "pan/zoom" else "Zoom"
+            self._show_status(f"{name} is switched on in the toolbar above the image, so "
+                              "clicks move the view instead of drawing. Click a Draw tool "
+                              f"(or the {name} button again) to draw.", warn=True)
             return
         if ev.xdata is None:
             return
         pt = (float(ev.xdata), float(ev.ydata))
         right = ev.button == 3
         if self.tool == "boundary":
+            # a straight line: one click for each end; a click after both ends starts anew
             if right:
-                self.undo_point()
+                self.clear_boundary()
                 return
             if ev.dblclick:
                 return
+            if len(self.guideline) >= 2:
+                self.guideline = []
+                self.extraction = None
             self.guideline.append(pt)
+            self._drop_rubber()
             self._schedule()
+            self._update_status()
         elif self.tool == "exclude":
-            if right or ev.dblclick:
+            # an area closes on a click on its first corner, a double-click or a right-click
+            if right or ev.dblclick or self._near_first_corner(ev):
                 if len(self.current_poly) >= 3:
                     self.exclusions.append(list(self.current_poly))
                 self.current_poly = []
@@ -656,6 +715,7 @@ class ImageExtractorDialog(QDialog):
             else:
                 self.current_poly.append(pt)
                 self._draw_overlay()
+            self._update_status()
         elif self.tool in ("scale", "legend") and not right:
             self.clicks.append(pt)
             if len(self.clicks) == 2:
@@ -669,6 +729,53 @@ class ImageExtractorDialog(QDialog):
                     self._legend_changed()
                     self._set_tool("boundary")
             self._draw_overlay()
+            self._update_status()
+
+    CLOSE_PIXELS = 10       # a click this near an area's first corner closes the area
+
+    def _near_first_corner(self, ev) -> bool:
+        if len(self.current_poly) < 3:
+            return False
+        fx, fy = self.ax.transData.transform(self.current_poly[0])
+        return float(np.hypot(ev.x - fx, ev.y - fy)) <= self.CLOSE_PIXELS
+
+    def _rubber_anchor(self):
+        """Where the dashed line to the mouse starts, or None when nothing is half drawn."""
+        if self.image is None or self._nav_mode():
+            return None
+        if self.tool == "boundary" and len(self.guideline) == 1:
+            return self.guideline[0]
+        if self.tool == "exclude" and self.current_poly:
+            return self.current_poly[-1]
+        if self.tool in ("scale", "legend") and len(self.clicks) == 1:
+            return self.clicks[0]
+        return None
+
+    def _on_motion(self, ev):
+        """While a line or area is half drawn, a dashed line follows the mouse."""
+        anchor = self._rubber_anchor()
+        if anchor is None or ev.inaxes is not self.ax or ev.xdata is None:
+            if self._rubber is not None:
+                self._drop_rubber()
+                self.canvas.draw_idle()
+            return
+        (x0, y0), x1, y1 = anchor, float(ev.xdata), float(ev.ydata)
+        color = theme.DANGER if self.tool == "exclude" else (
+            "#FF3B30" if self.tool in ("scale", "legend") else "#2FD1C5")
+        if self._rubber is None:
+            self._rubber, = self.ax.plot([x0, x1], [y0, y1], "--", color=color, lw=1.4,
+                                         scalex=False, scaley=False)
+        else:
+            self._rubber.set_data([x0, x1], [y0, y1])
+        self.canvas.draw_idle()
+
+    def _drop_rubber(self):
+        if self._rubber is not None:
+            try:
+                self._rubber.remove()
+            except (ValueError, NotImplementedError):
+                pass
+            self._rubber = None
 
     def _on_key(self, ev):
         if ev.key in ("backspace", "ctrl+z"):
@@ -773,16 +880,59 @@ class ImageExtractorDialog(QDialog):
 
     def recompute(self):
         self.extraction = None
+        self._error = None
         if self.image is not None and self.values is not None and len(self.guideline) >= 2:
             try:
                 self.extraction = extract_profiles(self.image, self.settings(), self.color_scale,
                                                    values=self.values)
             except Exception as exc:
-                self.lbl_result.setText(f"<span style='color:{theme.DANGER}'>{exc}</span>")
+                self._error = str(exc)
+                self.lbl_result.setText(f"<span style='color:{theme.DANGER}'>"
+                                        f"{html.escape(str(exc))}</span>")
         self._update_line_hint()
         self._draw_overlay()
         self._draw_preview()
         self._update_result()
+        self._update_status()
+
+    def _show_status(self, text: str, warn: bool = False):
+        self.lbl_status.setText(f"<span style='color:{theme.WARN}'>{text}</span>" if warn
+                                else text)
+
+    def _update_status(self):
+        """Say what the drawing has given, or what is still missing for a profile."""
+        n = len(self.guideline)
+        if self.image is None:
+            text, warn = "Open an image to begin.", False
+        elif self.tool == "exclude" and self.current_poly:
+            k = len(self.current_poly)
+            text, warn = (f"{k} corner{'s' if k != 1 else ''} so far. "
+                          + ("Keep clicking corners." if k < 3 else
+                             "Click the first corner again (or right-click) to close the area.")), False
+        elif self.tool in ("scale", "legend") and len(self.clicks) == 1:
+            what = "scale bar" if self.tool == "scale" else "legend (its high-value end)"
+            text, warn = f"Now click the other end of the {what}.", False
+        elif getattr(self, "_error", None):
+            text, warn = f"No profile: {html.escape(self._error)}", True
+        elif self.values is None:
+            warn = True
+            if self._mode() == "colour_scale":
+                text = ("No profile yet: the colour legend is not set, so the colours cannot be "
+                        "turned into values. Set it under Colour legend below, or choose "
+                        "another option under Values from.")
+            else:
+                text = "No profile: no values could be read from this image."
+        elif self.extraction is not None:
+            text, warn = (f"{self.extraction.n_lines} profiles read across the line. Their "
+                          "average is under the image. Click again to draw a new line."), False
+        elif self.tool != "boundary":
+            text, warn = ("To read profiles, choose Boundary and draw a line along the zone "
+                          "boundary."), False
+        elif n == 1:
+            text, warn = "Now click where the boundary line ends.", False
+        else:
+            text, warn = "Click where the boundary line starts.", False
+        self._show_status(text, warn)
 
     def _update_line_hint(self):
         px = self.sp_px.value()
@@ -816,6 +966,7 @@ class ImageExtractorDialog(QDialog):
 
     # ================================================================ drawing
     def _clear_overlay(self):
+        self._drop_rubber()
         for a in self._overlay:
             try:
                 a.remove()
@@ -877,7 +1028,7 @@ class ImageExtractorDialog(QDialog):
         if ex is None:
             ax.text(0.5, 0.5, "The averaged profile appears here", ha="center", va="center",
                     color=theme.TEXT_MUTED, transform=ax.transAxes)
-            theme.apply_plot_style(self.pfig, [ax])
+            ax.set_axis_off()       # empty 0 to 1 axes behind the message looked like data
             self.pcanvas.draw_idle()
             return
         um = ex.distance_um()

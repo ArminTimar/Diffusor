@@ -160,3 +160,57 @@ def test_the_footer_counts_all_seven_steps(app):
     w = _window(app)
     assert w.lbl_footer.text() == "Step 1 of 7"
     w.close()
+
+
+def test_the_multicomponent_fit_buttons_stay_in_view(app):
+    """They were at the end of a scrolling column, under the fold on a laptop screen."""
+    from PySide6.QtWidgets import QScrollArea
+    from diffusor.gui.multicomponent_study import MulticomponentStudyDialog
+    w = _window(app)
+    dlg = MulticomponentStudyDialog(w)
+    for button in (dlg.g_run, dlg.i_run):
+        assert not any(a.widget().isAncestorOf(button) for a in dlg.findChildren(QScrollArea)
+                       if a.widget() is not None)
+    dlg.close()
+    w.close()
+
+
+def test_the_joint_study_enables_fit_with_two_profiles_only(app):
+    from diffusor.gui.joint_study import JointStudyDialog
+    w = _window(app)
+    dlg = JointStudyDialog(w)
+    assert not dlg.fit.isEnabled() and not dlg.remove.isEnabled()
+    assert "two or more" in dlg.status.text()
+    dlg.close()
+    w.close()
+
+
+def test_the_validation_library_names_studies_and_loads_on_double_click(app):
+    from diffusor.gui.validation_library import ValidationLibraryDialog, study_name
+    from diffusor.validation import records
+    assert study_name("iovine2017") == "Iovine et al. (2017)"
+    assert study_name("sundermeyer2020_eifel") == "Sundermeyer 2020, Eifel"
+    dlg = ValidationLibraryDialog(records())
+    item = dlg.items.item(0)
+    assert not item.text().startswith(item.data(0x0100)["study"] + " ")    # no raw key
+    dlg.items.itemDoubleClicked.emit(item)
+    from PySide6.QtWidgets import QDialog
+    assert dlg.result() == QDialog.Accepted and dlg.selected is not None
+
+
+def test_long_drop_down_entries_are_not_cut_off(app):
+    """The outlier method next to the k box read "Median +/- k M"; the garnet tracer
+    laws ran off the end of their box; the editor's "No marker" lost its last letter."""
+    from PySide6.QtWidgets import QComboBox
+    from diffusor.gui.image_extractor import ImageExtractorDialog
+    from diffusor.gui.multicomponent_study import _family_text
+    from diffusor.gui.graph_editor import MARKERS, _combo
+    assert _family_text("Garnet Fe, Mg, Mn, Ca tracer laws, Carlson (2006)") == \
+        "Fe, Mg, Mn, Ca, Carlson (2006)"
+    assert _family_text("Garnet tracer laws, Carlson (2006) with the Mn law of Chen & Chu "
+                        "(2024)") == "Carlson (2006) with the Mn law of Chen & Chu (2024)"
+    dlg = ImageExtractorDialog()
+    assert dlg.cmb_clip.sizeAdjustPolicy() != QComboBox.AdjustToMinimumContentsLengthWithIcon
+    dlg.close()
+    cmb = _combo(MARKERS, "None")
+    assert cmb.minimumWidth() >= cmb.sizeHint().width() - 1

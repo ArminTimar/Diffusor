@@ -248,8 +248,22 @@ class FitScrollArea(QScrollArea):
         return QSize(120, 120)
 
 
-def scrollable(inner: QWidget) -> QScrollArea:
-    area = QScrollArea()
+class FitWidthScrollArea(QScrollArea):
+    """A vertical scroll area whose content is never wider than what is in view.
+
+    With the horizontal scroll bar off, content wider than the viewport is simply
+    cut off on the right. Capping the content at the viewport's width makes the
+    labels wrap instead."""
+
+    def resizeEvent(self, ev):
+        super().resizeEvent(ev)
+        w = self.widget()
+        if w is not None:
+            w.setMaximumWidth(self.viewport().width())
+
+
+def scrollable(inner: QWidget, fit_width: bool = False) -> QScrollArea:
+    area = FitWidthScrollArea() if fit_width else QScrollArea()
     area.setWidget(inner)
     area.setWidgetResizable(True)
     area.setFrameShape(QFrame.NoFrame)

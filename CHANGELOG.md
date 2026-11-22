@@ -4,7 +4,11 @@ What changed between releases, newest first. The text under a version heading
 is what goes into the GitHub release, so it is written for someone deciding
 whether to update. Commit messages hold the details.
 
-## Unreleased
+## 0.8.0 (22 November 2026)
+
+Fits and Monte Carlo runs about ten times faster, a graph editor that keeps the
+graph in view, and Methods and Details that work at any time, also during a
+Monte Carlo run. Fitted times are unchanged.
 
 ### Changed
 

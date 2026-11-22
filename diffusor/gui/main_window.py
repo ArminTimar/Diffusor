@@ -28,7 +28,7 @@ from PySide6.QtWidgets import (QApplication, QCheckBox, QComboBox, QDialog, QDia
 
 from .. import crystal_setup as cs
 from .. import datasets as ds
-from .. import updates
+from .. import updater, updates
 from ..coefficients import get as get_coefficient, list_coefficients
 from ..coefficients.plagioclase import (ACTIVITY_SETS, ACTIVITY_SPECIES, DEFAULT_ACTIVITY_SET,
                                          activity_A, activity_note)
@@ -54,7 +54,8 @@ from .plot_widget import DataPreview, ProfilePlot
 from .widgets import (EquationView, FitScrollArea, WrapLabel, callout, card, collapsible,
                       divider, field, ghost_button, install_no_wheel, note, page_columns, pair,
                       primary_button, row, scrollable, WrappingItemDelegate)
-from .workers import CompareWorker, FitWorker, MonteCarloWorker, UpdateWorker, start
+from .workers import (CompareWorker, DownloadWorker, FitWorker, MonteCarloWorker, UpdateWorker,
+                      start)
 
 # The coefficient comes straight after the mineral because it decides what the later
 # steps need: which host composition, whether pressure and fO2 enter at all, and
@@ -350,6 +351,11 @@ class MainWindow(QMainWindow):
         self._update_job = None         # the (thread, worker) of a running update check
         self._update_manual = False     # the user asked for it, so say the outcome
         self._update_release: Optional[updates.ReleaseInfo] = None
+        self._update_plan: Optional[updater.Plan] = None    # how this copy installs one
+        self._update_asset: Optional[updates.Asset] = None  # its installer, if attached yet
+        self._update_file: Optional[Path] = None            # the downloaded, checked installer
+        self._download_job = None       # the (thread, worker) of a running download
+        self._update_state = "offer"    # the banner's step: see _set_update_state
         self._log_entries: List[Tuple[datetime, str, str]] = []
         self._prefill: Dict[int, QLabel] = {}
         self._mc_draws: List[dict] = []
@@ -430,10 +436,14 @@ class MainWindow(QMainWindow):
         self.lbl_update.setAlignment(Qt.AlignVCenter | Qt.AlignLeft)
         h.addWidget(self.lbl_update, 1)
         self.btn_update_get = primary_button("Download")
-        self.btn_update_get.clicked.connect(self._open_update_page)
+        self.btn_update_get.clicked.connect(self._update_get_clicked)
         h.addWidget(self.btn_update_get, 0, Qt.AlignVCenter)
+        self.btn_update_notes = ghost_button("What's new")
+        self.btn_update_notes.setToolTip("Open the release page with the list of changes.")
+        self.btn_update_notes.clicked.connect(self._open_update_page)
+        h.addWidget(self.btn_update_notes, 0, Qt.AlignVCenter)
         self.btn_update_later = ghost_button("Later")
-        self.btn_update_later.clicked.connect(lambda: self.update_banner.setVisible(False))
+        self.btn_update_later.clicked.connect(self._update_later_clicked)
         h.addWidget(self.btn_update_later, 0, Qt.AlignVCenter)
         lay.addWidget(box)
         wrap.setVisible(False)
@@ -2288,6 +2298,9 @@ class MainWindow(QMainWindow):
         if self._update_job is not None:
             # a web request cannot be interrupted; it ends within its own timeout
             self._update_job[0].wait(int(updates.TIMEOUT_SECONDS * 1000) + 1000)
+        if self._download_job is not None and self._download_job[0].isRunning():
+            self._download_job[1].abort()       # stops at the next block it receives
+            self._download_job[0].wait(int(updater.TIMEOUT_SECONDS * 1000) + 1000)
         super().closeEvent(event)
 
     def _ready(self) -> bool:
@@ -2727,7 +2740,9 @@ class MainWindow(QMainWindow):
 
     # ================================================================ updates
     # The check asks GitHub for the newest release and, if it is newer than this
-    # one, shows the banner. It never downloads or changes anything itself.
+    # one, shows the banner. Nothing is downloaded until the user presses Install
+    # update; the installer then replaces this copy and starts the new one (see
+    # diffusor/updater.py). A copy that cannot update itself opens the release page.
     @staticmethod
     def _settings() -> QSettings:
         # DIFFUSOR_SETTINGS names an .ini file to use instead, which keeps the test
@@ -2739,6 +2754,8 @@ class MainWindow(QMainWindow):
 
     def startup_update_check(self):
         """Check quietly, if the user allows it and none succeeded in the last day."""
+        if updater.detect() is not None:
+            updater.remove_leftovers()      # the setup of the last update, if any
         s = self._settings()
         if not s.value("updates/check_at_startup", True, type=bool):
             return
@@ -2767,13 +2784,18 @@ class MainWindow(QMainWindow):
                                   datetime.now(timezone.utc).isoformat())
         manual, self._update_manual = self._update_manual, False
         if updates.is_newer(info.version, __version__):
+            if self._download_job is not None and self._download_job[0].isRunning():
+                return                  # already downloading it
             self._update_release = info
-            self.lbl_update.setText(f"Diffusor {info.version} is available. "
-                                    f"This is {__version__}.")
+            self._update_plan = updater.detect()
+            self._update_asset = (updater.pick_asset(info, self._update_plan)
+                                  if self._update_plan is not None else None)
+            self._update_file = None
             # the notes come from the network: shown as plain text, never as markup
             self.lbl_update.setToolTip(
                 "<p style='white-space:pre-wrap'>" + html.escape(info.notes[:800]) + "</p>"
                 if info.notes else "")
+            self._set_update_state("offer")
             self.update_banner.setVisible(True)
             self._log(f"update available: {info.version}")
             if manual:
@@ -2794,7 +2816,129 @@ class MainWindow(QMainWindow):
     def _open_update_page(self):
         if self._update_release is not None:
             QDesktopServices.openUrl(QUrl(self._update_release.url))
+        if self._update_asset is None:
+            self.update_banner.setVisible(False)    # the page is where the update is
+
+    def _set_update_state(self, state: str, text: str = ""):
+        """Show the banner's text and buttons for one step of an update.
+
+        offer        a newer release is known
+        downloading  its installer is being downloaded (Later becomes Cancel)
+        ready        the installer is downloaded and checked, waiting for a restart
+        handed       the .deb package was opened in the system's installer
+        """
+        from .. import __version__
+        info = self._update_release
+        installable = self._update_asset is not None
+        self._update_state = state
+        if state == "offer":
+            self.lbl_update.setText(text or f"Diffusor {info.version} is available. "
+                                            f"This is {__version__}.")
+            self.btn_update_get.setText("Install update" if installable else "Download")
+            self.btn_update_get.setToolTip(
+                "Download the update and install it over this copy. Diffusor asks "
+                "before it restarts." if installable else
+                "Open the release page, where the installers can be downloaded.")
+        elif state == "downloading":
+            self.lbl_update.setText(text or f"Downloading Diffusor {info.version}...")
+        elif state == "ready":
+            self.lbl_update.setText(
+                f"Diffusor {info.version} is downloaded. Diffusor closes to install it "
+                "and then starts again.")
+            self.btn_update_get.setText("Restart and install")
+            self.btn_update_get.setToolTip("")
+        elif state == "handed":
+            self.lbl_update.setText(
+                f"The Diffusor {info.version} package is open in the software installer. "
+                "Restart Diffusor once it has finished.")
+        self.btn_update_get.setVisible(state in ("offer", "ready"))
+        self.btn_update_notes.setVisible(installable and state != "downloading")
+        self.btn_update_later.setText({"downloading": "Cancel", "handed": "Close"}
+                                      .get(state, "Later"))
+
+    def _update_get_clicked(self):
+        if self._update_state == "ready":
+            self._install_update()
+        elif self._update_asset is None:
+            self._open_update_page()
+        else:
+            self._download_update()
+
+    def _update_later_clicked(self):
+        if self._download_job is not None and self._download_job[0].isRunning():
+            self._download_job[1].abort()
+            return                      # the worker reports back and resets the banner
         self.update_banner.setVisible(False)
+
+    def _download_update(self):
+        from .. import __version__
+        if self._download_job is not None and self._download_job[0].isRunning():
+            return
+        asset = self._update_asset
+        worker = DownloadWorker(asset, updater.download_folder(self._update_plan), __version__)
+        worker.progress.connect(self._update_progress)
+        worker.finished.connect(self._update_downloaded)
+        worker.failed.connect(self._update_download_failed)
+        self._download_job = (start(worker), worker)
+        self._set_update_state("downloading")
+        self._log(f"downloading {asset.name}")
+
+    @Slot(int, int)
+    def _update_progress(self, got: int, total: int):
+        self._set_update_state(
+            "downloading", f"Downloading Diffusor {self._update_release.version}: "
+                           f"{got / 1e6:.0f} of {total / 1e6:.0f} MB.")
+
+    @Slot(object)
+    def _update_downloaded(self, path):
+        self._update_file = Path(path)
+        self._log(f"downloaded and checked {self._update_file}")
+        if self._update_plan.restarts:
+            self._set_update_state("ready")
+        else:
+            self._install_update()
+
+    @Slot(str)
+    def _update_download_failed(self, message: str):
+        self._set_update_state("offer")
+        if message:
+            self._log(f"update download: {message}")
+            QMessageBox.information(self, "Install update", message)
+
+    def _install_update(self):
+        """Start the downloaded installer and, if it restarts Diffusor, quit."""
+        plan, path, info = self._update_plan, self._update_file, self._update_release
+        if plan is None or path is None or not path.is_file():
+            self._set_update_state("offer")
+            return
+        if plan.restarts:
+            for name in ("joint_study", "multicomponent_study", "batch_study"):
+                study = getattr(self, name, None)
+                if study is not None and study.thread is not None and study.thread.isRunning():
+                    QMessageBox.information(self, "Install update",
+                                            "A study is still running. Stop it or let it "
+                                            "finish, then install the update.")
+                    return
+            if self._running() and QMessageBox.question(
+                    self, "Install update",
+                    "A calculation is running. Stop it and install the update?",
+                    QMessageBox.Yes | QMessageBox.No, QMessageBox.No) != QMessageBox.Yes:
+                return
+        try:
+            updater.start_install(plan, path)
+        except OSError as exc:
+            self._log(f"installer did not start: {exc}")
+            QMessageBox.warning(
+                self, "Install update",
+                f"The installer could not be started ({exc}). It is saved as {path}. "
+                "Run it from there, or download the update from the release page.")
+            return
+        self._log(f"installing Diffusor {info.version}")
+        if not plan.restarts:
+            self._set_update_state("handed")
+            return
+        self.close()
+        QApplication.quit()
 
     def show_about(self):
         from .. import __version__

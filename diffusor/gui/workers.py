@@ -158,6 +158,35 @@ class UpdateWorker(QObject):
             self.failed.emit("The update check failed unexpectedly.")
 
 
+class DownloadWorker(QObject):
+    """Download a release's installer, reporting the bytes received so far."""
+    progress = Signal(int, int)     # bytes received, bytes expected
+    finished = Signal(object)       # pathlib.Path of the checked installer
+    failed = Signal(str)            # empty when the user cancelled
+
+    def __init__(self, asset, folder, current: str):
+        super().__init__()
+        self.asset, self.folder, self.current = asset, folder, current
+        self._abort = False
+
+    def abort(self):
+        self._abort = True
+
+    def run(self):
+        from .. import updater
+        try:
+            path = updater.download(self.asset, self.folder, f"Diffusor/{self.current}",
+                                    progress=self.progress.emit,
+                                    cancelled=lambda: self._abort)
+            self.finished.emit(path)
+        except updater.Cancelled:
+            self.failed.emit("")
+        except updates.UpdateError as exc:
+            self.failed.emit(str(exc))
+        except Exception:
+            self.failed.emit("The download failed unexpectedly.")
+
+
 def start(worker: QObject) -> QThread:
     """Move a worker onto a fresh thread and start it."""
     thread = QThread()

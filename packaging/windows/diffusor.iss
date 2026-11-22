@@ -70,3 +70,12 @@ Name: "{autodesktop}\Diffusor"; Filename: "{app}\Diffusor.exe"; AppUserModelID: 
 
 [Run]
 Filename: "{app}\Diffusor.exe"; Description: "{cm:LaunchProgram,Diffusor}"; Flags: nowait postinstall skipifsilent
+; the update installed from inside Diffusor (diffusor/updater.py) runs this setup
+; silently with /relaunch=1, and Diffusor starts again when it has finished
+Filename: "{app}\Diffusor.exe"; Flags: nowait runasoriginaluser; Check: RelaunchAfterUpdate
+
+[Code]
+function RelaunchAfterUpdate: Boolean;
+begin
+  Result := WizardSilent and (ExpandConstant('{param:relaunch|0}') = '1');
+end;

@@ -63,16 +63,39 @@ Diffusor is removed by dragging it from Applications to the Bin.
 
 At start-up, at most once a day, Diffusor asks `api.github.com` for the newest
 release. Nothing else is sent, and nothing happens if the computer is offline.
-When a newer version exists, a bar under the title offers **Download**, which
-opens the release page in the browser, and **Later**, which hides the bar until
-the next check. Diffusor does not download or replace any files itself. To
-update, download the new installer and install it as described above: on
-Windows the setup wizard replaces the installed version, on macOS the new
-Diffusor is dragged onto Applications and replaces the old one, and on Linux
-the new AppImage or `.deb` takes the place of the old one. Settings and the
-list of recent files are kept. The automatic check is switched off under
-**Help > Check for updates at startup**, and **Help > Check for updates...**
-runs it manually.
+When a newer version exists, a bar under the title offers **Install update**,
+**What's new**, which opens the release page in the browser, and **Later**,
+which hides the bar until the next check.
+
+**Install update** downloads the installer for this computer from the release
+page, showing how much has arrived, and checks that its size and SHA-256
+checksum match the ones GitHub lists for the release. A file that does not
+match is deleted. **Cancel** stops the download. When it is complete, the bar
+offers **Restart and install**: Diffusor closes, the new version is installed
+in place of the old one and Diffusor starts again. Nothing is installed before
+that button is pressed. Settings and the list of recent files are kept.
+
+* **Windows:** the setup runs without its wizard, into the same folder, and
+  asks no questions. An installation for all users asks for administrator
+  rights as usual.
+* **macOS:** the new Diffusor replaces the old one in its folder, normally
+  Applications.
+* **Linux AppImage:** the new AppImage is saved next to the old one, which is
+  then deleted. A shortcut to the old file has to be pointed at the new one.
+* **Linux .deb:** installing a package needs the user's password, so Diffusor
+  opens the downloaded package in the software centre and stays open; restart
+  it when the installation has finished.
+
+Where Diffusor cannot replace itself, the bar offers **Download** instead, which
+opens the release page: when it runs from the source code, when the installers
+of a new release have not been attached yet (this takes some minutes after a
+release), and on macOS when Diffusor is started from the Downloads folder or
+the disk image rather than from Applications. To update by hand, download the
+new installer and install it as described above. Versions up to 0.8.0 have no
+**Install update** button, so updating from one of them is done this way once.
+
+The automatic check is switched off under **Help > Check for updates at
+startup**, and **Help > Check for updates...** runs it manually.
 
 ## Running from the source code
 
@@ -134,8 +157,10 @@ application is pending, and until it is accepted the installer is unsigned.
   a day, it asks `api.github.com` for the version number of the newest release
   (see [Updates](#updates)). The request carries Diffusor's own version number
   and no data about the user, the computer or the files opened. The check is
-  switched off under **Help > Check for updates at startup**. Diffusor transfers
-  nothing else to other networked systems unless the user requests it.
+  switched off under **Help > Check for updates at startup**. **Install update**
+  downloads the installer from `github.com` with the same version number in the
+  request. Diffusor transfers nothing else to other networked systems unless the
+  user requests it.
 
 ## The steps
 

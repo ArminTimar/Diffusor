@@ -5,6 +5,9 @@ GitHub's public API for the newest published release, ``is_newer`` compares its
 tag with the running version, and ``due`` says whether the once-a-day startup
 check should run. Only the standard library is used, and a failure of any kind
 raises ``UpdateError`` with a sentence that can be shown as it is.
+
+The release record also lists the installers attached to the release
+(``ReleaseInfo.assets``); ``updater`` downloads and runs the one for this system.
 """
 from __future__ import annotations
 
@@ -20,6 +23,7 @@ from urllib.request import Request, urlopen
 REPO = "ArminTimar/Diffusor"
 API_URL = f"https://api.github.com/repos/{REPO}/releases/latest"
 RELEASES_URL = f"https://github.com/{REPO}/releases"
+DOWNLOAD_PREFIX = f"{RELEASES_URL}/download/"
 TIMEOUT_SECONDS = 6.0
 MAX_BYTES = 1_000_000           # a release description is a few kilobytes
 CHECK_EVERY = timedelta(hours=20)
@@ -30,11 +34,21 @@ class UpdateError(Exception):
 
 
 @dataclass(frozen=True)
+class Asset:
+    """A file attached to a release, such as an installer."""
+    name: str           # "Diffusor-0.8.1-Windows-Setup.exe"
+    url: str            # always under DOWNLOAD_PREFIX
+    size: int           # bytes
+    sha256: str = ""    # lower-case hex; empty when GitHub gave no digest
+
+
+@dataclass(frozen=True)
 class ReleaseInfo:
     version: str        # "0.2.0": the tag without its leading v
     tag: str            # "v0.2.0"
     url: str            # the release page, always on github.com/<REPO>
     notes: str          # the release description, may be empty
+    assets: Tuple[Asset, ...] = ()   # the installers attached so far
 
 
 def parse_version(text: str) -> Optional[Tuple[int, ...]]:
@@ -68,7 +82,32 @@ def release_from_json(data: dict) -> ReleaseInfo:
     if not url.startswith(f"https://github.com/{REPO}/releases/"):
         url = f"{RELEASES_URL}/tag/{quote(tag)}"
     return ReleaseInfo(version=tag.lstrip("vV"), tag=tag, url=url,
-                       notes=str(data.get("body") or "").strip())
+                       notes=str(data.get("body") or "").strip(),
+                       assets=assets_from_json(data.get("assets")))
+
+
+def assets_from_json(items) -> Tuple[Asset, ...]:
+    """The usable entries of a release's ``assets`` list; anything doubtful is left out.
+
+    A file is kept only if it is downloaded from this project's own releases, has a
+    plain file name and a size. GitHub's ``digest`` ("sha256:<hex>") is kept so the
+    download can be checked against it.
+    """
+    out = []
+    for item in items if isinstance(items, list) else ():
+        if not isinstance(item, dict):
+            continue
+        name = str(item.get("name") or "")
+        url = str(item.get("browser_download_url") or "")
+        size = item.get("size")
+        if (not name or "/" in name or "\\" in name or name.startswith(".")
+                or not url.startswith(DOWNLOAD_PREFIX) or not url.endswith("/" + quote(name))
+                or not isinstance(size, int) or isinstance(size, bool) or size <= 0):
+            continue
+        digest = str(item.get("digest") or "").lower()
+        sha = digest[7:] if re.fullmatch(r"sha256:[0-9a-f]{64}", digest) else ""
+        out.append(Asset(name=name, url=url, size=size, sha256=sha))
+    return tuple(out)
 
 
 def fetch_latest(current: str, timeout: float = TIMEOUT_SECONDS) -> ReleaseInfo:

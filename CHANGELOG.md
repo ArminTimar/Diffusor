@@ -4,6 +4,21 @@ What changed between releases, newest first. The text under a version heading
 is what goes into the GitHub release, so it is written for someone deciding
 whether to update. Commit messages hold the details.
 
+## Unreleased
+
+### Added
+
+- Updates install from inside Diffusor. When a newer version is found, the
+  bar offers Install update: Diffusor downloads the installer for this computer,
+  checks its size and SHA-256 checksum against the release, and after Restart
+  and install closes, installs the new version in place and starts again. No
+  setup wizard on Windows, no dragging to Applications on macOS, and the
+  AppImage replaces itself. The .deb package opens in the software centre,
+  because installing it needs the user's password. Where Diffusor cannot
+  replace itself, such as when it runs from the source code, the bar opens the
+  release page as before. Updating from 0.8.0 or earlier is still done by hand
+  once, since those versions do not have the button.
+
 ## 0.8.0 (22 November 2026)
 
 Fits and Monte Carlo runs about ten times faster, a graph editor that keeps the

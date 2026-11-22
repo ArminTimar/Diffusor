@@ -219,27 +219,6 @@ a { color: var(--text); }
   text-align: center;
 }
 
-.eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  margin: 0 0 18px;
-  padding: 5px 14px;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  background: var(--bg);
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--muted);
-}
-
-.eyebrow .dot {
-  width: 3px;
-  height: 3px;
-  border-radius: 50%;
-  background: var(--line-strong);
-}
-
 .hero-title {
   margin: 0;
   font-size: clamp(48px, 7vw, 76px);

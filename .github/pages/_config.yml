@@ -1,13 +1,14 @@
-# Jekyll settings for the GitHub Pages site. build_site.py copies this file
-# into the staged folder; .github/workflows/pages.yml builds and deploys it.
+# Jekyll settings for the GitHub Pages site. build_site.py copies this folder
+# (layout, styles, script) into the staged site; .github/workflows/pages.yml
+# builds and deploys it.
 title: Diffusor
 description: >-
   Diffusion chronometry of zoned crystals: fits diffusion times to measured
   profiles with published diffusion laws and Monte Carlo uncertainties.
 url: https://armintimar.github.io
 baseurl: /Diffusor
-theme: jekyll-theme-cayman
-show_downloads: false
+repository_url: https://github.com/ArminTimar/Diffusor
+doi: 10.5281/zenodo.23074989
 lang: en
 
 author: Armin Timar
@@ -15,6 +16,12 @@ social:
   name: Armin Timar
   links:
     - https://github.com/ArminTimar
+
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: default
 
 plugins:
   - jekyll-seo-tag

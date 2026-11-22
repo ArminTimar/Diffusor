@@ -13,6 +13,7 @@ on:
       - "manual/**"
       - "examples/validation/report.md"
       - "examples/validation/*.png"
+      - "diffusor/__init__.py"
       - ".github/pages/**"
       - ".github/workflows/pages.yml"
   workflow_dispatch:

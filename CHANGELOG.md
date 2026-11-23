@@ -4,7 +4,10 @@ What changed between releases, newest first. The text under a version heading
 is what goes into the GitHub release, so it is written for someone deciding
 whether to update. Commit messages hold the details.
 
-## Unreleased
+## 0.9.0 (23 November 2026)
+
+Updates install from inside Diffusor with one click and a restart. This is the
+last update that has to be installed by hand. No result changes.
 
 ### Added
 
